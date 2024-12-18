@@ -102,11 +102,9 @@ typedef enum {
 	E_PATH,
 	E_USERNAME,
 	E_PRINTCOMMAND,
-	E_GUESTACCOUNT,
 	E_READONLY,
 	E_WRITEOK,
 	E_NOSETDIR,
-	E_GUESTOK,
 	E_PRINTOK,
 	E_MAPSYSTEM,
 	E_MAPHIDDEN,
@@ -124,7 +122,6 @@ typedef enum {
  * This structure describes global (ie., server-wide) parameters.
  */
 typedef struct {
-	char *szGuestaccount;
 	char *szRootdir;
 	char *szHostsallow;
 	char *szHostsdeny;
@@ -156,7 +153,6 @@ typedef struct {
 	BOOL bUS_username;
 	BOOL bUS_read_only;
 	BOOL bUS_no_set_dir;
-	BOOL bUS_guest_ok;
 	BOOL bUS_map_system;
 	BOOL bUS_map_hidden;
 	BOOL bUS_create_mode;
@@ -176,7 +172,6 @@ typedef struct {
 	char *szHostsdeny;
 	BOOL bRead_only;
 	BOOL bNo_set_dir;
-	BOOL bGuest_ok;
 	BOOL bMap_system;
 	BOOL bMap_hidden;
 	int iCreate_mode;
@@ -211,14 +206,12 @@ static service DefaultService = {
     "",              /* szHostsdeny */
     True,            /* bRead_only */
     True,            /* bNo_set_dir */
-    False,           /* bGuest_ok */
     False,           /* bMap_system */
     False,           /* bMap_hidden */
     DEF_CREATE_MASK, /* iCreate_mode */
     {
         False,
         "",
-        True,
         True,
         True,
         True,
@@ -253,8 +246,6 @@ static parmmap aParmMaps[] = {
     {"write ok", E_WRITEOK, E_SERVICE},
     {"writable", E_WRITEOK, E_SERVICE},
     {"set directory", E_NOSETDIR, E_SERVICE},
-    {"guest ok", E_GUESTOK, E_SERVICE},
-    {"public", E_GUESTOK, E_SERVICE},
     {"print ok", E_PRINTOK, E_SERVICE},
     {"printable", E_PRINTOK, E_SERVICE},
     {"map system", E_MAPSYSTEM, E_SERVICE},
@@ -263,7 +254,6 @@ static parmmap aParmMaps[] = {
     {"allow hosts", E_HOSTSALLOW, E_BOTH},
     {"hosts deny", E_HOSTSDENY, E_BOTH},
     {"deny hosts", E_HOSTSDENY, E_BOTH},
-    {"guest account", E_GUESTACCOUNT, E_GLOBAL},
     {"create mask", E_CREATEMODE, E_BOTH},
     {"create mode", E_CREATEMODE, E_BOTH},
     {"root directory", E_ROOTDIR, E_GLOBAL},
@@ -340,7 +330,6 @@ Initialise the global parameter structure.
 ***************************************************************************/
 static void init_globals(void)
 {
-	string_init(&Globals.szGuestaccount, GUEST_ACCOUNT);
 	string_init(&Globals.szRootdir, "/");
 	string_init(&Globals.szHostsallow, "");
 	string_init(&Globals.szHostsdeny, "");
@@ -452,7 +441,6 @@ free the dynamically allocated parts of the globals structure.
 ***************************************************************************/
 static void free_globals(void)
 {
-	string_free(&Globals.szGuestaccount);
 	string_free(&Globals.szRootdir);
 	string_free(&Globals.szHostsallow);
 	string_free(&Globals.szHostsdeny);
@@ -517,9 +505,6 @@ static void copy_service(service *pserviceDest, service *pserviceSource,
 	if (bcopyall || pcopymapDest->bUS_no_set_dir)
 		pserviceDest->bNo_set_dir = pserviceSource->bNo_set_dir;
 
-	if (bcopyall || pcopymapDest->bUS_guest_ok)
-		pserviceDest->bGuest_ok = pserviceSource->bGuest_ok;
-
 	if (bcopyall || pcopymapDest->bUS_map_system)
 		pserviceDest->bMap_system = pserviceSource->bMap_system;
 
@@ -570,20 +555,6 @@ static BOOL finalise_service(int iService)
 {
 	Debug(3, "Finalising service %s\n", pServices[iService].szService);
 
-#if 0
-   /* The effect of the code here has been gained by having the */
-   /* function lp_username() return the service name in cases where */
-   /* the username is empty and service allows guest access. */
-
-
-   /* make the user name the service name if guest OK and no other */
-   /* username provided */
-   if (pServices[iService].szUsername[0] == '\0')
-      if (pServices[iService].bGuest_ok)
-         string_set(&pServices[iService].szUsername,
-                pServices[iService].szService);
-#endif
-
 	/* finally see if our new section is complete and correct */
 	return (service_ok(iService));
 }
@@ -610,10 +581,6 @@ static BOOL do_global_parameter(parmmap *pparmmap, char *pszParmValue)
 	case E_CREATEMODE:
 		sscanf(pszParmValue, "%o", &Globals.iCreate_mode);
 		DefaultService.iCreate_mode = Globals.iCreate_mode;
-		break;
-
-	case E_GUESTACCOUNT:
-		string_set(&Globals.szGuestaccount, pszParmValue);
 		break;
 
 	case E_ROOTDIR:
@@ -745,12 +712,6 @@ static BOOL do_service_parameter(parmmap *pparmmap, char *pszParmValue)
 		bRetval = set_boolean(&pServices[iServiceIndex].bNo_set_dir,
 		                      pszParmValue);
 		COPYMAPS(iServiceIndex).bUS_no_set_dir = False;
-		break;
-
-	case E_GUESTOK:
-		bRetval = set_boolean(&pServices[iServiceIndex].bGuest_ok,
-		                      pszParmValue);
-		COPYMAPS(iServiceIndex).bUS_guest_ok = False;
 		break;
 
 	case E_MAPSYSTEM:
@@ -928,7 +889,6 @@ static void dump_globals(void)
 {
 
 	printf("Global parameters:\n");
-	printf("\tGuest account: %s\n", Globals.szGuestaccount);
 	printf("\tRoot dir     : %s\n", Globals.szRootdir);
 	printf("\tHosts allowed: %s\n", Globals.szHostsallow);
 	printf("\tHosts denied : %s\n", Globals.szHostsdeny);
@@ -952,7 +912,6 @@ static void dump_a_service(service *pService)
 	printf("\tdont descend  : %s\n", pService->szDontdescend);
 	printf("\tread_only     : %s\n", BOOLSTR(pService->bRead_only));
 	printf("\tno_set_dir    : %s\n", BOOLSTR(pService->bNo_set_dir));
-	printf("\tguest_ok      : %s\n", BOOLSTR(pService->bGuest_ok));
 	printf("\tmap_system    : %s\n", BOOLSTR(pService->bMap_system));
 	printf("\tmap_hidden    : %s\n", BOOLSTR(pService->bMap_hidden));
 	printf("\tcreate_mode   : 0%o\n", pService->iCreate_mode);
@@ -986,8 +945,6 @@ static void dump_copy_map(copymap *pcopymap)
 		       BOOLSTR(pcopymap->bUS_read_only));
 		printf("\t\tno_set_dir  : %s\n",
 		       BOOLSTR(pcopymap->bUS_no_set_dir));
-		printf("\t\tguest_ok    : %s\n",
-		       BOOLSTR(pcopymap->bUS_guest_ok));
 		printf("\t\tmap_system  : %s\n",
 		       BOOLSTR(pcopymap->bUS_map_system));
 		printf("\t\tmap_hidden  : %s\n",
@@ -1003,15 +960,6 @@ Return TRUE if the passed service number is within range.
 BOOL lp_snum_ok(int iService)
 {
 	return (LP_SNUM_OK(iService) && pServices[iService].bAvailable);
-}
-
-/***************************************************************************
-Return a pointer to the guest user account name. It would be MOST unwise
-to treat the pointer as anything but read-only!
-***************************************************************************/
-char *lp_guestaccount(void)
-{
-	return (&(Globals.szGuestaccount[0]));
 }
 
 /***************************************************************************
@@ -1073,31 +1021,6 @@ char *lp_dontdescend(int iService)
 {
 	return (LP_SNUM_OK(iService) ? pServices[iService].szDontdescend
 	                             : NULL);
-}
-
-/***************************************************************************
-Return a pointer to the username of a specified service.
-
-If no username is specified in the service entry then if the service does NOT
-allow guest access, the service name is returned.
-
-It would be MOST unwise to treat the pointer as anything but read-only! NULL
-is returned only if the service number passed is invalid.
-***************************************************************************/
-char *lp_username(int iService)
-{
-	char *pszTemp;
-
-	pszTemp = NULL;
-	if (LP_SNUM_OK(iService)) {
-		pszTemp = pServices[iService].szUsername;
-		if (pszTemp[0] == '\0')
-			if (pServices[iService].bGuest_ok)
-				pszTemp = Globals.szGuestaccount;
-			else
-				pszTemp = pServices[iService].szService;
-	}
-	return (pszTemp);
 }
 
 /***************************************************************************
@@ -1177,16 +1100,6 @@ number is not valid the results should be treated as undefined, but in a
 BOOL lp_no_set_dir(int iService)
 {
 	return (LP_SNUM_OK(iService) ? pServices[iService].bNo_set_dir : True);
-}
-
-/***************************************************************************
-Return the bGuest_ok flag from a specified service. If the passed service
-number is not valid the results should be treated as undefined, but in a
-(probably) vain hope of avoiding catastrophe, we return FALSE here...
-***************************************************************************/
-BOOL lp_guest_ok(int iService)
-{
-	return (LP_SNUM_OK(iService) ? pServices[iService].bGuest_ok : False);
 }
 
 /***************************************************************************

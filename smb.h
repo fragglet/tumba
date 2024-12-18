@@ -28,10 +28,6 @@
 #define MAX_OPEN_FILES 50
 #endif
 
-#ifndef GUEST_ACCOUNT
-#define GUEST_ACCOUNT "pcuser"
-#endif
-
 #define BUFFER_SIZE 0xFFFF
 
 #ifndef EXTERN
@@ -223,7 +219,6 @@ typedef struct {
 typedef struct {
 	int uid;
 	char *name;
-	BOOL guest;
 } user_struct;
 
 /* these are useful macros for checking validity of handles */
@@ -236,14 +231,11 @@ typedef struct {
 #define SNUM(cnum) (Connections[cnum].service)
 
 /* access various service details */
-#define GUEST (lp_guestaccount())
 #define HOME(cnum) (lp_pathname(SNUM(cnum)))
 #define PATH(snum) (lp_pathname(snum))
-#define USER(snum) (lp_username(snum))
 #define SERVICE(snum) (lp_servicename(snum))
 #define CAN_WRITE(cnum) (OPEN_CNUM(cnum) && !lp_readonly(SNUM(cnum)))
 #define VALID_SNUM(snum) (lp_snum_ok(snum))
-#define GUEST_OK(snum) (VALID_SNUM(snum) && lp_guest_ok(snum))
 #define CAN_SETDIR(snum) (!lp_no_set_dir(snum))
 #define MAP_HIDDEN(cnum) (OPEN_CNUM(cnum) && lp_map_hidden(SNUM(cnum)))
 #define MAP_SYSTEM(cnum) (OPEN_CNUM(cnum) && lp_map_system(SNUM(cnum)))

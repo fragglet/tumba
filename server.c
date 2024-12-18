@@ -509,7 +509,7 @@ int valid_uid(int uid)
 register a uid/name pair as being valid and that a valid password
 has been given.
 ****************************************************************************/
-void register_uid(int uid, char *name, BOOL guest)
+void register_uid(int uid, char *name)
 {
 	if (valid_uid(uid) >= 0)
 		return;
@@ -526,7 +526,6 @@ void register_uid(int uid, char *name, BOOL guest)
 	}
 
 	validated_users[num_validated_users].uid = uid;
-	validated_users[num_validated_users].guest = guest;
 	validated_users[num_validated_users].name = strdup(name);
 
 	Debug(3, "uid %d registered to name %s\n", uid, name);
@@ -566,11 +565,9 @@ int make_connection(char *service, char *user, char *password, int vuid)
 	int cnum;
 	int snum;
 	struct passwd *pass = NULL;
-	BOOL guest = False;
 
 	if (vuid >= 0) {
 		strcpy(user, validated_users[vuid].name);
-		guest = validated_users[vuid].guest;
 	}
 
 	strlower(user);
@@ -583,15 +580,6 @@ int make_connection(char *service, char *user, char *password, int vuid)
 
 		return (-1);
 	}
-
-	if (guest && !GUEST_OK(snum)) {
-		Debug(1, "%s no guest access to service %s\n", timestring(),
-		      service);
-		return (-1);
-	}
-
-	if (*user == 0)
-		strcpy(user, USER(snum));
 
 	cnum = find_free_connection();
 	if (cnum < 0) {
@@ -609,16 +597,6 @@ int make_connection(char *service, char *user, char *password, int vuid)
 	if (pass == NULL) {
 		Debug(0, "%s couldn't find account %s\n", timestring(), user);
 		return (-1);
-	}
-
-	if (vuid < 0) {
-		if (!(GUEST_OK(snum) && (*password == 0))) {
-			if (!password_ok(user, password)) {
-				Debug(0, "%s invalid password for user %s\n",
-				      timestring(), user);
-				return -1;
-			}
-		}
 	}
 
 	if (!check_access(snum))
@@ -1167,7 +1145,6 @@ int reply_sesssetup_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	int smb_apasslen;
 	pstring smb_apasswd = "";
 	pstring smb_aname = "";
-	BOOL guest = False;
 
 	sess_uid = SVAL(inbuf, smb_uid);
 	smb_com2 = CVAL(inbuf, smb_vwv0);
@@ -1183,25 +1160,16 @@ int reply_sesssetup_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 
 	Debug(2, "sesssetupX:name=[%s]\n", smb_aname);
 
-	if (strequal(smb_aname, lp_guestaccount()) && (*smb_apasswd == 0))
-		guest = True;
-
-	/* now check if it's a valid username/password */
-	if (!guest && !password_ok(smb_aname, smb_apasswd))
-		return (ERROR(ERRSRV, ERRbadpw));
-
 	/* it's ok - setup a reply */
 	outsize = set_message(outbuf, 3, 0);
 
 	CVAL(outbuf, smb_vwv0) = smb_com2;
 	SSVAL(outbuf, smb_vwv1, (chain_size + outsize) - 4);
-
-	if (guest)
-		SSVAL(outbuf, smb_vwv2, 1);
+	SSVAL(outbuf, smb_vwv2, 1);
 
 	/* register the name and uid as being validated, so further connections
 	   to a uid can get through without a password, on the same VC */
-	register_uid(SVAL(inbuf, smb_uid), smb_aname, guest);
+	register_uid(SVAL(inbuf, smb_uid), smb_aname);
 
 	if (smb_com2 != 0xFF)
 		outsize +=

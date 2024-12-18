@@ -36,7 +36,6 @@ extern int lp_keepalive(void);
 extern int lp_deadtime(void);
 extern char *lp_servicename(int iService);
 extern char *lp_pathname(int iService);
-extern char *lp_username(int iService);
 extern char *lp_hostsallow(int iService);
 extern char *lp_hostsdeny(int iService);
 extern char *lp_dontdescend(int iService);
