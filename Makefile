@@ -122,7 +122,7 @@ LIBSM = -lcrypt
 CFLAGS = $(FLAGS1) $(FLAGS2) $(FLAGS3) $(FLAGS4) $(FLAGS5) $(FLAGSM)
 LIBS = $(LIBS1) $(LIBSM)
 
-all: smbserver smbclient nmbserver testparm testprns
+all: smbserver nmbserver testparm testprns
 
 INCLUDES = local.h includes.h smb.h loadparm.h params.h pcap.h
 
@@ -132,9 +132,6 @@ smbserver: server.o util.o loadparm.o params.o access.o pcap.o
 
 nmbserver: nameserv.o util.o
 	$(CC) $(CFLAGS) -o nmbserver nameserv.o util.o $(LIBS)
-
-smbclient: client.o util.o
-	$(CC) $(CFLAGS) -o smbclient client.o util.o $(LIBS)
 
 testparm: testparm.o util.o loadparm.o params.o access.o pcap.o
 	$(CC) $(CFLAGS) -o testparm testparm.o util.o loadparm.o params.o \
@@ -147,10 +144,9 @@ testprns: testprns.o loadparm.o params.o util.o pcap.o
 install: installman installbin
 
 installbin:
-	cp smbserver smbclient nmbserver testparm testprns $(INSTALLDIR)
+	cp smbserver nmbserver testparm testprns $(INSTALLDIR)
 	chmod $(INSTALLPERMS_S) $(INSTALLDIR)/smbserver
 	chmod $(INSTALLPERMS_S) $(INSTALLDIR)/nmbserver
-	chmod $(INSTALLPERMS_C) $(INSTALLDIR)/smbclient
 	chmod $(INSTALLPERMS_C) $(INSTALLDIR)/testparm
 	chmod $(INSTALLPERMS_C) $(INSTALLDIR)/testprns
 
@@ -158,7 +154,6 @@ installman:
 	cp *.1 $(MANDIR)/man1
 	cp *.5 $(MANDIR)/man5
 	cp *.8 $(MANDIR)/man8
-	chmod u=rw,go=r $(MANDIR)/man1/smbclient.1
 	chmod u=rw,go=r $(MANDIR)/man1/testparm.1
 	chmod u=rw,go=r $(MANDIR)/man1/testprns.1
 	chmod u=rw,go=r $(MANDIR)/man5/smb.conf.5
@@ -174,4 +169,4 @@ source:
 	$(CC) $(CFLAGS) -c $*.c
 
 clean:
-	rm -f *.o *~ *.tar smbserver smbclient nmbserver testparm testprns
+	rm -f *.o *~ *.tar smbserver nmbserver testparm testprns
