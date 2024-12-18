@@ -522,7 +522,7 @@ int find_service(char *service)
 
          Debug(3,"checking whether %s is a valid printer name...\n", service);
          pszTemp = PRINTCAP;
-         if ((pszTemp != NULL) && pcap_printername_ok(service, pszTemp))
+         if (pszTemp != NULL)
          {
             Debug(3,"%s is a valid printer name\n", service);
             Debug(3,"adding %s as a printer service\n", service);
