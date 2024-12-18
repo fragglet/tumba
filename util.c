@@ -235,7 +235,6 @@ void close_sockets(void )
   Client = 0;
 }
 
-#ifndef SYSV
 /****************************************************************************
 exchange real and effective uids 
 ****************************************************************************/
@@ -243,13 +242,8 @@ void exchange_uids(void )
 {
   if (geteuid() == 0 || getuid() == 0)
     {
-#ifdef HPUX
-      if (setresuid(geteuid(),getuid(),-1) ||
-	  setresgid(getegid(),getgid(),-1))
-#else
       if (setreuid (geteuid (), getuid ()) ||
 	  setregid (getegid (), getgid ()))
-#endif
 	{
 	  Debug(0,"Cannot exchange real/effective uid or gid!\n");
       	  close_sockets();
@@ -257,7 +251,6 @@ void exchange_uids(void )
 	}
     }
 }  
-#endif
 
 /****************************************************************************
   return the date and time as a string
@@ -267,11 +260,7 @@ char *timestring(void )
   static char TimeBuf[100];
   time_t t;
   t = time(NULL);
-#if (defined(sun386) || defined(NEXT))
-  strcpy(TimeBuf, asctime(LocalTime(&t)));
-#else
   strftime(TimeBuf,100,"%D %r",LocalTime(&t));
-#endif
   return(TimeBuf);
 }
 
@@ -1235,11 +1224,7 @@ int val;
 #ifdef O_NONBLOCK
 #define FLAG_TO_SET O_NONBLOCK
 #else
-#ifdef SYSV
-#define FLAG_TO_SET O_NDELAY
-#else /* BSD */
 #define FLAG_TO_SET FNDELAY
-#endif
 #endif
 
   if((val = fcntl(fd, F_GETFL, 0))==-1)
@@ -2030,16 +2015,12 @@ void become_daemon(void)
   setpgrp();
 #endif
 
-#if (defined(HPUX) || defined(ISC))
-  setsid();
-#else
   i = open("/dev/tty", O_RDWR);
   if (i >= 0) 
     {
       ioctl(i, (int) TIOCNOTTY, (char *)0);      
       close(i);
     }
-#endif
 #endif
 }
 
@@ -2056,11 +2037,7 @@ BOOL get_broadcast(struct in_addr *if_ipaddr, struct in_addr *if_bcast, struct i
   int i;
   
   /* Create a socket to the INET kernel. */
-#if (defined(sun386) || defined(ULTRIX))
-  if ((sock = socket(AF_INET, SOCK_DGRAM, 0 )) < 0)
-#else
   if ((sock = socket(AF_INET, SOCK_RAW, PF_INET )) < 0)
-#endif
     {
       Debug(0, "Unable to open socket to get broadcast address\n");
       return(False);
@@ -2445,15 +2422,6 @@ BOOL password_ok(char *user,char *password)
 
 
 
-#ifdef HPUX
-/****************************************************************************
-this is a version of setbuffer() for those machines that only have setvbuf
-****************************************************************************/
-void setbuffer(FILE *f,char *buf,int bufsize)
-{
-  setvbuf(f,buf,_IOFBF,bufsize);
-}
-#endif
 
 
 /****************************************************************************
@@ -2684,21 +2652,6 @@ BOOL sane_unix_date(time_t unixdate)
 
 
 
-#ifdef ISC
- /*******************************************************************
-ftruncate for ISC 
-********************************************************************/
-int ftruncate(int f,long l)
-{
-      struct  flock   fl;
-
-      fl.l_whence = 0;
-      fl.l_len = 0;
-      fl.l_start = l;
-      fl.l_type = F_WRLCK;
-      return fcntl(f, F_FREESP, &fl);
-}
-#endif
 
 
 /****************************************************************************

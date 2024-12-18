@@ -95,17 +95,13 @@ int dos_mode(int cnum,char *path,mode_t unixmode)
   int result = 0;
   
 
-#ifndef SYSV
   /* need to exchange because access() uses real uid, argggh */
   exchange_uids();
-#endif
 
   if (access(path,W_OK))
     result |= aRONLY;
 
-#ifndef SYSV
   exchange_uids();
-#endif
 
   if ((unixmode & S_IXUSR) != 0)
     result |= aARCH;
@@ -444,21 +440,13 @@ BOOL become_user(int cnum)
   
   if (initial_uid == 0)
     {
-#ifdef HPUX
-      if (setresgid(-1,Connections[cnum].gid,-1) != 0)
-#else
       if (setegid(Connections[cnum].gid) != 0)
-#endif
 	{
 	  Debug(0,"Couldn't set uid\n");
 	  return(False);
 	}
   
-#ifdef HPUX
-      if (setresuid(-1,Connections[cnum].uid,-1) != 0)
-#else  
       if (seteuid(Connections[cnum].uid) != 0)
-#endif
 	{
 	  Debug(0,"Couldn't set uid\n");
 	  return(False);
@@ -487,13 +475,8 @@ BOOL unbecome_user(void )
 
   if (initial_uid == 0)
     {
-#ifdef HPUX
-      setresuid(-1,getuid(),-1);
-      setresgid(-1,getgid(),-1);
-#else
       seteuid(getuid());
       setegid(getgid());
-#endif
     }
 
   if (chdir("/") != 0)
@@ -737,10 +720,6 @@ this prevents zombie child processes
 ****************************************************************************/
 int sig_cld()
 {
-#if (defined(SYSV) || defined(NEXT))
-  while (waitpid((pid_t)-1,(int *)NULL, WNOHANG) > 0);
-#else /* BSD */
-#endif
 
   /* Stop zombies */
   /* Stevens, Adv. Unix Prog. says that on system V you must call
@@ -752,13 +731,7 @@ int sig_cld()
   signal(SIGCLD, SIGNAL_CAST sig_cld);
 
 
-#if (!(defined(SYSV) || defined(NEXT)))
-#ifdef HPUX
-  while (wait3((int *)NULL, WNOHANG, (int *)NULL) > 0);
-#else
   while (wait3((int *)NULL, WNOHANG, (struct rusage *)NULL) > 0);
-#endif
-#endif
   return 0;
 }
 
@@ -1467,21 +1440,9 @@ int reply_setatr(char *inbuf,char *outbuf,int length,int bufsize)
 ****************************************************************************/
 void disk_free(char *path,int *bsize,int *dfree,int *dsize)
 {
-#ifdef SVR4
-  struct statvfs fs;
-#else
   struct statfs fs;
-#endif
 
-#if (defined(SOLARIS) || defined(ISC))
-  if (statfs(path,&fs,0,0) != 0)
-#else
-#ifdef SVR4
-    if (statvfs(path, &fs))
-#else
   if (statfs(path,&fs) != 0)
-#endif /* SVR4 */
-#endif /* SOLARIS */
     {
       *bsize = 0;
       *dfree = 0;
@@ -1489,16 +1450,8 @@ void disk_free(char *path,int *bsize,int *dfree,int *dsize)
     }
   else
     {
-#ifdef SVR4
-      *bsize = fs.f_frsize;
-#else
       *bsize = fs.f_bsize;
-#endif
-#if (defined(SOLARIS) || defined(ISC))
-      *dfree = fs.f_bfree;
-#else
       *dfree = fs.f_bavail;
-#endif
       *dsize = fs.f_blocks;
     }
   
