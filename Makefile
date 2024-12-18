@@ -39,85 +39,9 @@ FLAGS4 = -DGUEST_ACCOUNT=\"tridge\"
 # This can be overridden in the runtime configuration file (see smb.conf(5))
 FLAGS5 = -DDEF_CREATE_MASK=0755
 
-
-#####################################
-# WHICH OPERATING SYSTEM?
-# UNCOMMENT ONE OF THE SECTIONS BELOW
-#
-# The following are additional flags that may apply
-#   -DNETGROUP if your machine supports yp netgroups
-#   -DSHADOW_PWD if you are using shadow passwords
-#   -DPWDAUTH if your library has a pwdauth() call
-#   -DHAVE_LOCKF if your library has the lockf() call and you run lockd 
-#   -DUSE_DIRECT if your library uses direct rather than dirent structures
-#####################################
-
-# Use this for Linux with shadow passwords
-# FLAGSM = -DLINUX -DSHADOW_PWD
-# LIBSM = -lshadow
-
 # Use this for Linux without shadow passwords
 FLAGSM = -DLINUX
 LIBSM = -lcrypt
-
-# This is for SUNOS
-# FLAGSM = -DSUN -DPWDAUTH -DHAVE_LOCKF
-# LIBSM =
-
-# This is for SOLARIS
-# FLAGSM = -DSOLARIS -DHAVE_LOCKF -DBSD_COMP
-# LIBSM = -lsocket -lnsl
-
-# This is for SVR4
-# FLAGSM = -DSVR4 -DSHADOW_PWD -DHAVE_LOCKF
-# LIBSM = -lsocket -lnsl -lc -L/usr/ucblib -lucb
-
-# This is for ULTRIX
-# FLAGSM = -DULTRIX -DUSE_DIRECT -DHAVE_LOCKF
-# LIBSM =   
-
-# This is for OSF1 (Alpha)
-# FLAGSM = -DOSF1 -DHAVE_LOCKF
-# LIBSM =
-
-# This is for AIX
-# FLAGSM = -DAIX -DHAVE_LOCKF
-# LIBSM =   
-
-# This is for BSDI
-# FLAGSM = -DBSDI -DPWDAUTH -DUSE_DIRECT -DHAVE_LOCKF
-# LIBSM =   
-
-# This is for NetBSD
-# FLAGSM = -DNETBSD -DUSE_DIRECT -DSHADOW_PWD
-# LIBSM = -lcrypt 
-
-# This is for SEQUENT. Can someone test this please?
-# FLAGSM = -DSEQUENT -DPWDAUTH -DUSE_DIRECT -DHAVE_LOCKF
-# LIBSM =   
-
-# This is for HP-UX
-# FLAGSM = -DHPUX -DHAVE_LOCKF -Aa -D_HPUX_SOURCE -D_POSIX_SOURCE
-# LIBSM = 
-
-# This is for SGI. Can someone test this please?
-# FLAGSM = -DSGI -DPWDAUTH -DUSE_DIRECT -DHAVE_LOCKF
-# LIBSM =   
-
-# This is for FreeBSD
-# FLAGSM = -DFreeBSD -DUSE_DIRECT
-# LIBSM = -lcrypt 
-
-# This is for NeXT
-# FLAGSM = -DNEXT -posix
-# LIBSM = 
-
-
-# This is for ISC SVR3V4
-# FLAGSM = -posix -D_SYSV3 -fpcc-struct-return -DISC -DSHADOW_PWD \
-#      -DHAVE_LOCKF -DHAVE_TIMEZONE
-# LIBSM = -lsec -lcrypt -linet
-
 
 CFLAGS = $(FLAGS1) $(FLAGS2) $(FLAGS3) $(FLAGS4) $(FLAGS5) $(FLAGSM)
 LIBS = $(LIBS1) $(LIBSM)
