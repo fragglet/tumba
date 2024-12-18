@@ -30,7 +30,6 @@
 
 extern BOOL lp_snum_ok(int iService);
 extern char *lp_guestaccount(void);
-extern char *lp_printcapname(void);
 extern char *lp_rootdir(void);
 extern int  lp_maxxmit(void);
 extern int  lp_keepalive(void);
@@ -38,15 +37,12 @@ extern int  lp_deadtime(void);
 extern char *lp_servicename(int iService);
 extern char *lp_pathname(int iService);
 extern char *lp_username(int iService);
-extern char *lp_printcommand(int iService);
-extern char *lp_printername(int iService);
 extern char *lp_hostsallow(int iService);
 extern char *lp_hostsdeny(int iService);
 extern char *lp_dontdescend(int iService);
 extern BOOL lp_readonly(int iService);
 extern BOOL lp_no_set_dir(int iService);
 extern BOOL lp_guest_ok(int iService);
-extern BOOL lp_print_ok(int iService);
 extern BOOL lp_map_hidden(int iService);
 extern BOOL lp_map_system(int iService);
 extern void lp_unload(void);
@@ -55,7 +51,6 @@ extern void lp_dump(void);
 extern int  lp_servicenumber(char *pszServiceName);
 extern BOOL lp_add_home(char *pszHomename, 
                         int iDefaultService, char *pszHomedir);
-extern BOOL lp_add_printer(char *pszPrintername, int iDefaultService);
 extern BOOL lp_readonly(int iService);
 extern int lp_create_mode(int iService);
 extern BOOL lp_add_home(char *pservice,int ifrom,char *phome);

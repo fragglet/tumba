@@ -511,31 +511,6 @@ int find_service(char *service)
       }
    }
 
-   /* If we still don't have a service, attempt to add it as a printer. */
-   if (iService < 0)
-   {
-      int iPrinterService;
-
-      if ((iPrinterService = lp_servicenumber(PRINTERS_NAME)) >= 0)
-      {
-         char *pszTemp;
-
-         Debug(3,"checking whether %s is a valid printer name...\n", service);
-         pszTemp = PRINTCAP;
-         if (pszTemp != NULL)
-         {
-            Debug(3,"%s is a valid printer name\n", service);
-            Debug(3,"adding %s as a printer service\n", service);
-            lp_add_printer(service,iPrinterService);
-            iService = lp_servicenumber(service);
-            if (iService < 0)
-               Debug(0,"failed to add %s as a printer service!\n", service);
-         }
-         else
-            Debug(3,"%s is not a valid printer name\n", service);
-      }
-   }
-
    if (iService >= 0)
       if (!VALID_SNUM(iService))
       {
@@ -3041,150 +3016,14 @@ int reply_tdis(char *inbuf,char *outbuf,int length,int bufsize)
 ****************************************************************************/
 int reply_printopen(char *inbuf,char *outbuf,int length,int bufsize)
 {
-  pstring fname="";
-  pstring fname2="";
   int cnum;
-  int fnum = -1;
-  int outsize;
-  BOOL ok = False;
   
   cnum = SVAL(inbuf,smb_tid);
   if (!OPEN_CNUM(cnum))
     return(ERROR(ERRSRV,ERRinvnid));
 
-  if (!CAN_PRINT(cnum))
-    return(ERROR(ERRDOS,eACCESS_DENIED));
-
-  {
-    pstring s;
-    char *p;
-    strncpy(s,smb_buf(inbuf)+1,sizeof(pstring));
-    p = s;
-    while (*p)
-      {
-	if (!(isalnum(*p) || strchr("._-",*p)))
-	  *p = 'X';
-	p++;
-      }
-    sprintf(fname,"%s.XXXXXX",s);  
-  }
-
-  if (become_user(cnum))
-    {
-      fnum = find_free_file();
-      if (fnum >= 0)
-	{
-	  strcpy(fname2,mktemp(fname));
-	  Files[fnum].fd = creat(fname2,unix_mode(cnum,0));
-	  if (Files[fnum].fd >= 0)
-	    {
-	      strcpy(Files[fnum].name,fname2);
-	      num_files_open++;
-	      Files[fnum].open = True;
-	      Files[fnum].cnum = cnum;
-	    }
-	  else
-	    fnum = -1;
-	}
-      ok = True;
-      unbecome_user();
-    }
-  
-  if (!ok || (fnum < 0))
-    return(ERROR(ERRDOS,eACCESS_DENIED));
-  
-  outsize = set_message(outbuf,1,0);
-  SSVAL(outbuf,smb_vwv0,fnum);
-  
-  Debug(2,"%s openprint %s fd=%d fnum=%d cnum=%d\n",timestring(),fname2,Files[fnum].fd,fnum,cnum);
-  
-  return(outsize);
-}
-
-/****************************************************************************
-Build the print command in the supplied buffer. This means getting the
-print command for the service and inserting the printer name and the
-print file name. Return NULL on error, else the passed buffer pointer.
-****************************************************************************/
-static char *build_print_command(int snum, char *syscmd, char *filename)
-{
-   char *tstr;
-   int iOffset;
-
-   /* get the print command for the service. */
-   tstr = PRINTCOMMAND(snum);
-   if (tstr == NULL)
-   {
-      Debug(0,"No print command for service `%s'\n", SERVICE(snum));
-      return (NULL);
-   }
-
-   /* copy the command into the buffer for extensive meddling. */
-   strcpy(syscmd, tstr);
-
-   /* look for "%s" in the string. If there is no %s, we cannot print. */
-   iOffset = strstr(syscmd, "%s") - syscmd;
-   if (iOffset < 0)
-   {
-      Debug(0,"No placeholder for the filename in the print command "
-              "for service %s!\n", SERVICE(snum));
-      return (NULL);
-   }
-
-   /* Now, some would say that we should recursively replace all %s with*/
-   /* the filename and all %p with the printer name. However, it's too  */
-   /* much hard work to avoid infinite recursion (filename = "%s"!), so */
-   /* we just do it once. If you have anything complicated to do, you'll*/
-   /* just have to write a script to do it. :-) */
-   if (strlen(syscmd) + strlen(filename) - 2 > sizeof(pstring))
-   {
-      Debug(0,"Unable to print file \"%s\"!\n", filename);
-      Debug(0,"Constructed print command is too long for service %s.\n",
-              SERVICE(snum));
-      return (NULL);
-   }
-   else
-      replacestr(syscmd, filename, iOffset, 2);
-
-   /* Does the service have a printername? If not, make a fake and empty    */
-   /* printer name. That way a %p is treated sanely (removed) if no printer */
-   /* name was specified to replace it. This eventuality is logged.         */
-   tstr = PRINTERNAME(snum);
-   if (tstr == NULL || tstr[0] == '\0')
-   {
-      Debug(3, "No printer name - using \"\" in service %s.\n", SERVICE(snum));
-      tstr = "";
-   }
-
-   iOffset = strstr(syscmd, "%p") - syscmd;
-   if (iOffset < 0)
-   {
-      /* Not having a placeholder when you DO have a printer name is    */
-      /* treated as a possible problem and logged, but is not an error. */
-      if (strlen(tstr) > 0)
-         Debug(3,"No placeholder for the printer name in the print command "
-                 "for service %s\n", SERVICE(snum));
-   }
-   else
-   {
-      /* Not having a printer name when you DO have a placeholder is also */
-      /* worth a warning... It is conceivable that the %p was in the      */
-      /* filename. */
-      if (tstr[0] == '\0')
-         Debug(3,"Empty printer name given for service %s\n", SERVICE(snum));
-
-      if (strlen(syscmd) + strlen(tstr) - 2 > sizeof(pstring))
-      {
-         Debug(0,"Unable to print to printer \"%s\"!\n", tstr);
-         Debug(0,"Constructed print command is too long for service %s.\n",
-                 SERVICE(snum));
-         return (NULL);
-      }
-      else
-         replacestr(syscmd, tstr, iOffset, 2);
-   }
-
-   return (syscmd);
+  /* not supported */
+  return(ERROR(ERRDOS,eACCESS_DENIED));
 }
 
 /****************************************************************************
@@ -3193,49 +3032,14 @@ static char *build_print_command(int snum, char *syscmd, char *filename)
 int reply_printclose(char *inbuf,char *outbuf,int length,int bufsize)
 {
   int fnum,cnum;
-  int ret=0;
-  int outsize = set_message(outbuf,0,0);
-  char *tempstr;
-  BOOL ok = False;
   
   cnum = SVAL(inbuf,smb_tid);
   if (!OPEN_CNUM(cnum))
     return(ERROR(ERRSRV,ERRinvnid));
   fnum = SVAL(inbuf,smb_vwv0);
 
-  if (!CAN_PRINT(cnum))
-    return(ERROR(ERRDOS,eACCESS_DENIED));
-  
-  if (become_user(cnum))
-    {
-      pstring syscmd="";
-      if (OPEN_FNUM(fnum) && (Files[fnum].cnum == cnum))
-  	{
-  	  ret = close(Files[fnum].fd);
-	  tempstr = build_print_command(SNUM(cnum), syscmd, Files[fnum].name);
-	  if (tempstr != NULL)
-	    {
-	      ret = system(syscmd);
-	      Debug(2,"Running the command `%s' gave %d\n",syscmd,ret);
-	    }
-  	}
-      num_files_open--;
-      Files[fnum].open = False;
-      ok = True;
-      unbecome_user();
-    }
-
-#ifdef IGNORE_PRINT_RETURN
-  ret = 0;
-#endif
-
-  if ((ret != 0) || !ok)
-    return(ERROR(ERRDOS,eACCESS_DENIED));
-  
-  
-  Debug(2,"%s printclose fd=%d fnum=%d cnum=%d ret=%d\n",timestring(),Files[fnum].fd,fnum,cnum,ret);
-  
-  return(outsize);
+  /* not supported */
+  return(ERROR(ERRDOS,eACCESS_DENIED));
 }
 
 /****************************************************************************
@@ -3244,25 +3048,13 @@ int reply_printclose(char *inbuf,char *outbuf,int length,int bufsize)
 int reply_printqueue(char *inbuf,char *outbuf,int length,int bufsize)
 {
   int cnum;
-  int outsize = set_message(outbuf,2,3);
-  int max_count = SVAL(inbuf,smb_vwv0);
-  int start_index = SVAL(inbuf,smb_vwv1);
   
   cnum = SVAL(inbuf,smb_tid);
   if (!OPEN_CNUM(cnum))
     return(ERROR(ERRSRV,ERRinvnid));
 
-  if (!CAN_PRINT(cnum))
-    return(ERROR(ERRDOS,eACCESS_DENIED));
-  
-  SSVAL(outbuf,smb_vwv0,0);
-  SSVAL(outbuf,smb_vwv1,0);
-  CVAL(smb_buf(outbuf),0) = 1;
-  SSVAL(smb_buf(outbuf),1,0);
-
-  Debug(2,"%s printqueue cnum=%d start_index=%d max_count=%d\n",timestring(),cnum,start_index,max_count);
-  
-  return(outsize);
+  /* not supported */
+  return(ERROR(ERRDOS,eACCESS_DENIED));
 }
 
 /****************************************************************************
@@ -3270,36 +3062,14 @@ int reply_printqueue(char *inbuf,char *outbuf,int length,int bufsize)
 ****************************************************************************/
 int reply_printwrite(char *inbuf,char *outbuf,int length,int bufsize)
 {
-  int cnum,numtowrite,fnum;
-  int outsize = set_message(outbuf,0,0);
-  char *data;
-  BOOL ok = False;
+  int cnum;
   
   cnum = SVAL(inbuf,smb_tid);
   if (!OPEN_CNUM(cnum))
     return(ERROR(ERRSRV,ERRinvnid));
 
-  if (!CAN_PRINT(cnum))
-    return(ERROR(ERRDOS,eACCESS_DENIED));
-
-  fnum = SVAL(inbuf,smb_vwv0);
-  numtowrite = SVAL(smb_buf(inbuf),1);
-  data = smb_buf(inbuf) + 3;
-  
-  if (become_user(cnum))
-    {
-      if (OPEN_FNUM(fnum) && (Files[fnum].cnum == cnum))
-	write(Files[fnum].fd,data,numtowrite);
-      unbecome_user();
-      ok = True;
-    }
-  
-  if (!ok)
-    return(ERROR(ERRDOS,eACCESS_DENIED));
-  
-  Debug(2,"%s printwrite fnum=%d cnum=%d num=%d\n",timestring(),fnum,cnum,numtowrite);
-  
-  return(outsize);
+  /* not supported */
+  return(ERROR(ERRDOS,eACCESS_DENIED));
 }
 
 

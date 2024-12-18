@@ -12,18 +12,6 @@
    refer to the special "homes" service */
 #define HOMES_NAME "homes"
 
-/* This defines the section name in the configuration file that will
-   refer to the special "printers" service */
-#define PRINTERS_NAME "printers"
-
-/* This defines the name of the printcap file. It is MOST UNLIKELY that
-   this will change BUT! Specifying a file with the format of a printcap
-   file but containing only a subset of the printers actualy in your real 
-   printcap file is a quick-n-dirty way to allow dynamic access to a subset
-   of available printers.
-*/
-#define PRINTCAP_NAME "/etc/printcap"
-
 /* set these to define the limits of the server. NOTE These are on a
    per-client basis. Thus any one machine can't connect to more than
    MAX_CONNECTIONS services, but any number of machines may connect at
@@ -41,13 +29,6 @@
 #endif
 
 #define WORDMAX 0xFFFF
-
-
-/* the print command on the server, %s is replaced with the filename  */
-/* note that the -r removes the file after printing - you'll run out  */
-/* of disk pretty quickly if you don't. This command is only used as  */
-/* the default - it can be overridden in the configuration file.      */
-#define PRINT_COMMAND "lpr -r %s"
 
 
 /* define this if you want to stop spoofing with .. and soft links

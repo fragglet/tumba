@@ -81,10 +81,6 @@
 #define PRINTCAP_NAME "/etc/printcap"
 #endif
 
-#ifndef PRINTERS_NAME
-#define PRINTERS_NAME "printers"
-#endif
-
 #ifndef HOMES_NAME
 #define HOMES_NAME "homes"
 #endif
@@ -112,8 +108,6 @@ typedef enum
    E_PATH,
    E_USERNAME,
    E_PRINTCOMMAND,
-   E_PRINTERNAME,
-   E_PRINTCAPNAME,
    E_GUESTACCOUNT,
    E_READONLY,
    E_WRITEOK,
@@ -137,9 +131,6 @@ typedef enum
  */
 typedef struct
 {
-   char *szPrintcommand;
-   char *szPrintername;
-   char *szPrintcapname;
    char *szGuestaccount;
    char *szRootdir;
    char *szHostsallow;
@@ -171,12 +162,9 @@ typedef struct
    BOOL    bUS_hosts_allow;
    BOOL    bUS_hosts_deny;
    BOOL    bUS_username;
-   BOOL    bUS_printcommand;
-   BOOL    bUS_printername;
    BOOL    bUS_read_only;
    BOOL    bUS_no_set_dir;
    BOOL    bUS_guest_ok;
-   BOOL    bUS_print_ok;
    BOOL    bUS_map_system;
    BOOL    bUS_map_hidden;
    BOOL    bUS_create_mode;
@@ -192,15 +180,12 @@ typedef struct
    char *szService;
    char *szPath;
    char *szUsername;
-   char *szPrintcommand;
-   char *szPrintername;
    char *szDontdescend;
    char *szHostsallow;
    char *szHostsdeny;
    BOOL bRead_only;
    BOOL bNo_set_dir;
    BOOL bGuest_ok;
-   BOOL bPrint_ok;
    BOOL bMap_system;
    BOOL bMap_hidden;
    int  iCreate_mode;
@@ -234,15 +219,12 @@ static service DefaultService =
   "",    /* szService */
   "",    /* szPath */
   "",    /* szUsername */
-  "",    /* szPrintcommand */
-  "",    /* szPrintername */
   "",    /* szDontdescend */
   "",    /* szHostsallow */
   "",    /* szHostsdeny */
   True,  /* bRead_only */
   True,  /* bNo_set_dir */
   False, /* bGuest_ok */
-  False, /* bPrint_ok */
   False, /* bMap_system */
   False, /* bMap_hidden */
   DEF_CREATE_MASK,   /* iCreate_mode */
@@ -277,10 +259,6 @@ static parmmap aParmMaps[] =
    {"printable",     E_PRINTOK,      E_SERVICE },
    {"map system",    E_MAPSYSTEM,    E_SERVICE },
    {"map hidden",    E_MAPHIDDEN,    E_SERVICE },
-   {"print command", E_PRINTCOMMAND, E_BOTH    },
-   {"printer",       E_PRINTERNAME,  E_BOTH    },
-   {"printer name",  E_PRINTERNAME,  E_BOTH    },
-   {"printcap name", E_PRINTCAPNAME, E_GLOBAL  },
    {"hosts allow",   E_HOSTSALLOW,   E_BOTH    },
    {"allow hosts",   E_HOSTSALLOW,   E_BOTH    },
    {"hosts deny",    E_HOSTSDENY,    E_BOTH    },
@@ -385,47 +363,10 @@ BOOL lp_add_home(char *pszHomename, int iDefaultService, char *pszHomedir)
 
 
 /***************************************************************************
-add a new printer service, with defaults coming from service iFrom
-***************************************************************************/
-BOOL lp_add_printer(char *pszPrintername, int iDefaultService)
-{
-   int i = add_a_service(&pServices[iDefaultService]);
-
-   if (i < 0)
-      return(False);
-
-   string_set(&pServices[i].szService,pszPrintername);
-
-   /* note that we do NOT default the availability flag to True - */
-   /* we take it from the default service passed. This allows all */
-   /* dynamic printers to be disabled by disabling the [printers] */
-   /* entry (if/when the 'available' keyword is implemented!).    */
-
-   /* if there's no default username and the printer is not guest access, */
-   /* make the username the service name. */
-   if (pServices[i].szUsername[0] == '\0')
-      if (!pServices[i].bGuest_ok)
-         string_set(&pServices[i].szUsername,pszPrintername);
-
-   /* if the default printer name is not set, the printer name is */
-   /* set to the service name too. */
-   if (pServices[i].szPrintername[0] == '\0')
-      string_set(&pServices[i].szPrintername,pszPrintername);
-
-   Debug(2,"adding printer service %s\n",pszPrintername);
-
-   return(True);
-}
-
-
-/***************************************************************************
 Initialise the global parameter structure.
 ***************************************************************************/
 static void init_globals(void)
 {
-   string_init(&Globals.szPrintcommand, PRINT_COMMAND);
-   string_init(&Globals.szPrintcapname, PRINTCAP_NAME);
-   string_init(&Globals.szPrintername, "");
    string_init(&Globals.szGuestaccount, GUEST_ACCOUNT);
    string_init(&Globals.szRootdir, "/");
    string_init(&Globals.szHostsallow, "");
@@ -540,9 +481,6 @@ free the dynamically allocated parts of the globals structure.
 ***************************************************************************/
 static void free_globals(void)
 {
-   string_free(&Globals.szPrintcommand);
-   string_free(&Globals.szPrintcapname);
-   string_free(&Globals.szPrintername);
    string_free(&Globals.szGuestaccount);
    string_free(&Globals.szRootdir);
    string_free(&Globals.szHostsallow);
@@ -560,8 +498,6 @@ static void free_service(service *pservice)
   string_free(&pservice->szService);
   string_free(&pservice->szPath);
   string_free(&pservice->szUsername);
-  string_free(&pservice->szPrintcommand);
-  string_free(&pservice->szPrintername);
   string_free(&pservice->szDontdescend);
   string_free(&pservice->sCopyMap.szSourceService);
   string_free(&pservice->szHostsallow);
@@ -595,12 +531,6 @@ static void copy_service(service *pserviceDest,
    if (bcopyall || pcopymapDest->bUS_username)
       string_set(&pserviceDest->szUsername, pserviceSource->szUsername);
 
-   if (bcopyall || pcopymapDest->bUS_printcommand)
-      string_set(&pserviceDest->szPrintcommand, pserviceSource->szPrintcommand);
-
-   if (bcopyall || pcopymapDest->bUS_printername)
-      string_set(&pserviceDest->szPrintername, pserviceSource->szPrintername);
-
    if (bcopyall || pcopymapDest->bUS_hosts_allow)
       string_set(&pserviceDest->szHostsallow, pserviceSource->szHostsallow);
 
@@ -618,10 +548,6 @@ static void copy_service(service *pserviceDest,
    if (bcopyall || pcopymapDest->bUS_guest_ok)
       pserviceDest->bGuest_ok =
              pserviceSource->bGuest_ok;
-
-   if (bcopyall || pcopymapDest->bUS_print_ok)
-      pserviceDest->bPrint_ok =
-             pserviceSource->bPrint_ok;
 
    if (bcopyall || pcopymapDest->bUS_map_system)
       pserviceDest->bMap_system =
@@ -664,24 +590,6 @@ static BOOL service_ok(int iService)
       bRetval = False;
    }
 
-   /* A printer name in the [printers] entry will override the dynamic */
-   /* printer names. Good for pointing all output to a single printer, */
-   /* but probably not what you wanted. */
-   if (strwicmp(pServices[iService].szService,PRINTERS_NAME) == 0)
-      if (pServices[iService].szPrintername[0] != '\0')
-         Debug(0, "WARNING! Printer name set in [%s] service!\n",
-               pServices[iService].szService);
-
-   /* The [printers] entry MUST be printable. I'm all for flexibility, but */
-   /* I can't see why you'd want a non-printable printer service...        */
-   if (strwicmp(pServices[iService].szService,PRINTERS_NAME) == 0)
-      if (!pServices[iService].bPrint_ok)
-      {
-         Debug(0, "[%s] service MUST be printable!\n",
-               pServices[iService].szService);
-         bRetval = False;
-      }
-
    if (pServices[iService].szPath[0] == '\0' &&
        strwicmp(pServices[iService].szService,HOMES_NAME) != 0)
    {
@@ -697,15 +605,6 @@ static BOOL service_ok(int iService)
             pServices[iService].szService);
       bRetval = False;
    }
-
-   if (!pServices[iService].bPrint_ok && 
-       (pServices[iService].szPrintcommand[0] != '\0'))
-   {
-      Debug(0, "Print command specified for non-print service %s\n",
-            pServices[iService].szService);
-      bRetval = False;
-   }
-
    /* If a service is flagged unavailable, log the fact at level 0. */
    if (!pServices[iService].bAvailable) 
       Debug(0, "NOTE: Service %s is flagged unavailable.\n",
@@ -751,18 +650,6 @@ static BOOL do_global_parameter(parmmap *pparmmap, char *pszParmValue)
    bRetval = True;
    switch (pparmmap->epNumber)
    {
-      case E_PRINTCOMMAND:
-         string_set(&Globals.szPrintcommand, pszParmValue);
-         break;
-
-      case E_PRINTERNAME:
-         string_set(&Globals.szPrintername, pszParmValue);
-         break;
-
-      case E_PRINTCAPNAME:
-         string_set(&Globals.szPrintcapname, pszParmValue);
-         break;
-
       case E_HOSTSALLOW:
          string_set(&Globals.szHostsallow, pszParmValue);
          break;
@@ -878,16 +765,6 @@ static BOOL do_service_parameter(parmmap *pparmmap, char *pszParmValue)
          COPYMAPS(iServiceIndex).bUS_username = False;
          break;
 
-      case E_PRINTCOMMAND:
-         string_set(&pServices[iServiceIndex].szPrintcommand, pszParmValue);
-         COPYMAPS(iServiceIndex).bUS_printcommand = False;
-         break;
-
-      case E_PRINTERNAME:
-         string_set(&pServices[iServiceIndex].szPrintername, pszParmValue);
-         COPYMAPS(iServiceIndex).bUS_printername = False;
-         break;
-
       case E_HOSTSALLOW:
          string_set(&pServices[iServiceIndex].szHostsallow, pszParmValue);
          COPYMAPS(iServiceIndex).bUS_hosts_allow = False;
@@ -920,12 +797,6 @@ static BOOL do_service_parameter(parmmap *pparmmap, char *pszParmValue)
          bRetval = set_boolean(&pServices[iServiceIndex].bGuest_ok, 
                                 pszParmValue);
          COPYMAPS(iServiceIndex).bUS_guest_ok = False;
-         break;
-
-      case E_PRINTOK:
-         bRetval = set_boolean(&pServices[iServiceIndex].bPrint_ok, 
-                                pszParmValue);
-         COPYMAPS(iServiceIndex).bUS_print_ok = False;
          break;
 
       case E_MAPSYSTEM:
@@ -1094,9 +965,6 @@ static void dump_globals(void)
 {
     
       printf("Global parameters:\n");
-      printf("\tPrint command: %s\n",  Globals.szPrintcommand);
-      printf("\tPrinter name : %s\n",  Globals.szPrintername);
-      printf("\tPrintcap name: %s\n",  Globals.szPrintcapname);
       printf("\tGuest account: %s\n",  Globals.szGuestaccount);
       printf("\tRoot dir     : %s\n",  Globals.szRootdir);
       printf("\tHosts allowed: %s\n",  Globals.szHostsallow);
@@ -1116,15 +984,12 @@ static void dump_a_service(service *pService)
       printf("\tavailable     : %s\n", BOOLSTR(pService->bAvailable));
       printf("\tpath          : %s\n", pService->szPath);
       printf("\tusername      : %s\n", pService->szUsername);
-      printf("\tprint command : %s\n", pService->szPrintcommand);
-      printf("\tprinter name  : %s\n", pService->szPrintername);
       printf("\thosts allow   : %s\n", pService->szHostsallow);
       printf("\thosts deny    : %s\n", pService->szHostsdeny);
       printf("\tdont descend  : %s\n", pService->szDontdescend);
       printf("\tread_only     : %s\n", BOOLSTR(pService->bRead_only));
       printf("\tno_set_dir    : %s\n", BOOLSTR(pService->bNo_set_dir));
       printf("\tguest_ok      : %s\n", BOOLSTR(pService->bGuest_ok));
-      printf("\tprint_ok      : %s\n", BOOLSTR(pService->bPrint_ok));
       printf("\tmap_system    : %s\n", BOOLSTR(pService->bMap_system));
       printf("\tmap_hidden    : %s\n", BOOLSTR(pService->bMap_hidden));
       printf("\tcreate_mode   : 0%o\n", pService->iCreate_mode);
@@ -1150,14 +1015,11 @@ static void dump_copy_map(copymap *pcopymap)
          printf("\t\tavailable   : %s\n", BOOLSTR(pcopymap->bUS_available));
          printf("\t\tpath        : %s\n", BOOLSTR(pcopymap->bUS_path));
          printf("\t\tusername    : %s\n", BOOLSTR(pcopymap->bUS_username));
-         printf("\t\tprintcommand: %s\n", BOOLSTR(pcopymap->bUS_printcommand));
-         printf("\t\tprinter name: %s\n", BOOLSTR(pcopymap->bUS_printername));
          printf("\t\thosts allow : %s\n", BOOLSTR(pcopymap->bUS_hosts_allow));
          printf("\t\thosts deny  : %s\n", BOOLSTR(pcopymap->bUS_hosts_deny));
          printf("\t\tread_only   : %s\n", BOOLSTR(pcopymap->bUS_read_only));
          printf("\t\tno_set_dir  : %s\n", BOOLSTR(pcopymap->bUS_no_set_dir));
          printf("\t\tguest_ok    : %s\n", BOOLSTR(pcopymap->bUS_guest_ok));
-         printf("\t\tprint_ok    : %s\n", BOOLSTR(pcopymap->bUS_print_ok));
          printf("\t\tmap_system  : %s\n", BOOLSTR(pcopymap->bUS_map_system));
          printf("\t\tmap_hidden  : %s\n", BOOLSTR(pcopymap->bUS_map_hidden));
          printf("\t\tcreate_mode : %s\n", BOOLSTR(pcopymap->bUS_create_mode));
@@ -1179,15 +1041,6 @@ to treat the pointer as anything but read-only!
 char *lp_guestaccount(void)
 {
    return (&(Globals.szGuestaccount[0]));
-}
-
-/***************************************************************************
-Return a pointer to the global printcap name. It would be MOST unwise 
-to treat the pointer as anything but read-only!
-***************************************************************************/
-char *lp_printcapname(void)
-{
-   return (&(Globals.szPrintcapname[0]));
 }
 
 /***************************************************************************
@@ -1273,56 +1126,6 @@ char *lp_username(int iService)
         else
 	  pszTemp = pServices[iService].szService;
    }
-   return (pszTemp);
-}
-
-/***************************************************************************
-Return a pointer to the printcommand of a specified service. It would be 
-MOST unwise to treat the pointer as anything but read-only! Note that the
-pointer will point to the global printcommand if no service-specific print
-command has been specified. A NULL pointer indicates an error and should
-always be checked for.
-***************************************************************************/
-char *lp_printcommand(int iService)
-{
-   char *pszTemp;
-
-   pszTemp = NULL;
-   if (LP_SNUM_OK(iService))
-   {
-      pszTemp = Globals.szPrintcommand;
-      if (pszTemp[0] == '\0')
-         pszTemp = NULL;
-
-      if (pServices[iService].szPrintcommand[0] != '\0')
-         pszTemp = pServices[iService].szPrintcommand;
-   }
-      
-   return (pszTemp);
-}
-
-/***************************************************************************
-Return a pointer to the printer name of a specified service. It would be 
-MOST unwise to treat the pointer as anything but read-only! Note that the
-pointer will point to the global printer name if no service-specific printer
-name has been specified. A NULL pointer indicates an error and should
-always be checked for.
-***************************************************************************/
-char *lp_printername(int iService)
-{
-   char *pszTemp;
-
-   pszTemp = NULL;
-   if (LP_SNUM_OK(iService))
-   {
-      pszTemp = Globals.szPrintername;
-      if (pszTemp[0] == '\0')
-         pszTemp = NULL;
-
-      if (pServices[iService].szPrintername[0] != '\0')
-         pszTemp = pServices[iService].szPrintername;
-   }
-      
    return (pszTemp);
 }
 
@@ -1414,16 +1217,6 @@ number is not valid the results should be treated as undefined, but in a
 BOOL lp_guest_ok(int iService)
 {
    return (LP_SNUM_OK(iService) ? pServices[iService].bGuest_ok : False);
-}
-
-/***************************************************************************
-Return the bPrint_ok flag from a specified service. If the passed service
-number is not valid the results should be treated as undefined, but in a
-(probably) vain hope of avoiding catastrophe, we return FALSE here...
-***************************************************************************/
-BOOL lp_print_ok(int iService)
-{
-   return (LP_SNUM_OK(iService) ? pServices[iService].bPrint_ok : False);
 }
 
 /***************************************************************************
