@@ -1,0 +1,455 @@
+; Configuration file for smbserver.
+; ============================================================================
+;
+;
+; 
+; FORMAT OF THIS FILE
+; -------------------
+;
+; This file consists of sections and parameters. A section begins with the 
+; name of the section in square brackets and continues until the next
+; section begins. Sections contain parameters of the form 'name = value'
+;
+; Except for the special sections [global], [homes] and [printers], each 
+; section represents one service. The section name is the service name and 
+; the parameters within the section define the service attributes.
+;
+; Section and parameter names are not case sensitive.
+;
+; Only the first equals sign in a parameter is significant. Whitespace before 
+; or after the first equals sign is discarded. Leading, trailing and internal
+; whitespace in section and parameter names is irrelevant. Leading and
+; trailing whitespace in a parameter value is discarded. Internal whitespace
+; within a parameter value is retained verbatim.
+;
+; Any line beginning with a semicolon is ignored, as are lines containing 
+; only whitespace.
+;
+; See below for sample entries. Basically everything is either a string
+; (no quotes needed) or a boolean, which may be given as yes/no, 0/1 or
+; true/false. Case is not significant in boolean values, but is preserved
+; in string values. A few items are numeric (create mode etc).
+;
+;
+;
+; NOTES
+; -----
+; 
+; Although the configuration file permits service names to contain spaces, 
+; your client software may not. Spaces will be ignored in comparisons anyway,
+; so it shouldn't be a problem - but be aware of the possibility.
+;
+; On a similar note, many clients - especially DOS clients - limit service
+; names to eight characters. The server has no such limitation, but attempts
+; to connect from such clients will fail. For this reason you should probably
+; keep your service names down to eight characters in length.
+;
+;
+;
+; THE GLOBAL SECTION
+; ------------------
+;
+; Parameters in this section apply to the server as a whole, or are defaults
+; for services which do not specifically define certain items.
+;
+;
+;
+; THE HOMES SECTION
+; -----------------
+;
+; If a section called 'homes' is included in the configuration file, services
+; connecting clients to their home directories can be created on the fly. When
+; the connection request is made, the existing services are scanned. If a match
+; is found, it is used. If no match is found, the requested service name is
+; treated as a user name and looked up in the local passwords file. If the
+; name exists and the correct password has been given, a service is created
+; by cloning the [homes] section, replacing the path with the user's home
+; directory.
+;
+; This is a fast and simple way to give a large number of clients access to
+; their home directories with a minimum of fuss.
+; 
+; The [homes] section can specify all the parameters a normal service section
+; can specify though some mak more sense than others. Specifying guest access
+; would be a big mistake. The following is a typical and suitable [homes]
+; entry - very simple:
+;
+; [homes]
+;    read only = no
+;
+; 
+;
+; THE [PRINTERS] SECTION
+; ----------------------
+;
+; This section works like [homes], but for printers.
+;
+; If a [printers] section occurs in the configuration file, users are able 
+; to connect to any printer specified in the local host's printcap file. The
+; printer name (unless overridden specifically, which doesn't make a lot of
+; sense) will be the service name. Otherwise access is as for other services -
+; the only exception is that the [printers] service must be printable - if you
+; specify otherwise, the server will refuse to load the config file.
+;
+; Note that you would normally also specify a world-writable spool directory
+; (with the sticky bit set on it). A typical entry would look like this:
+;
+; [printers]
+;    path = /usr/spool/public
+;    read only = yes
+;    guest ok = yes
+;    print ok = yes
+;
+; All aliases given for a printer in the printcap file are legitimate printer
+; names as far as the server is concerned. If your printing subsystem doesn't
+; work like that, you will have to set up a pseudo-printcap. This is a file
+; consisting of one or more lines like this:
+;
+;         alias|alias|alias|alias...
+;
+; Each alias should be an acceptable printer name for your printing 
+; subsystem. In the [global] section, specify the new file as your printcap.
+; The server will then only recognise names found in your pseudo-printcap,
+; which of course can contain whatever aliases you like. The same technique
+; could be used simply to limit access to a subset of your local printers.
+; 
+; An alias, by the way, is defined as any field in the printcap file with a
+; bar symbol ('|') immediately to its left or right. If you have a printcap
+; entry with only a printer name and no aliases, the printer name will not
+; be detected. This is most unlikely to be a problem for most printcaps.
+;
+;
+;
+; VALID PARAMETERS IN THE [GLOBAL] SECTION
+; ----------------------------------------
+;
+; Currently valid parameter names for the [global] section are:
+;
+; print command	 -command to use to print files
+; printer name	 -printer to use to print files
+; printcap name	 -file to use instead of PRINTCAP_NAME
+; guest account	 -default username to use for guest services
+; create mask	 -default creation mask (AS PER MAKEFILE)
+; root dir	 -the server will chroot() to this directory on startup
+; max xmit	 -the maximit transmit packet size. You shouldn't need this.
+; allow hosts	 -list of allowable hosts to connect
+; deny hosts	 -list of hosts to deny connection
+;
+;   printcap name, print command, printer name
+;   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+;   The print command specified in the global section will be used as the 
+;   default for any print service where no service-specific print command 
+;   is given. In this string, %s will be replaced by the name of the spooled 
+;   file and %p will be replaced by the name of the printer. Only the first
+;   occurrence of either is modified. The %s is mandatory, the %p is optional.
+;   At the time a job is submitted, if no printer name is supplied the %p will
+;   be silently removed from the printer command.
+;
+;   Similarly the printer name given here will be the default printer name
+;   used if specific services do not override it.
+;
+;   The printcap name is used if you want the server to refer to a special
+;   set of printer names rather than the compile-time default PRINTCAP_NAME
+;   (usually /etc/printap). See below for some reasons why this is useful.
+;
+;   guest account
+;   ~~~~~~~~~~~~~
+;   This is a username which will be used for access to services which are
+;   specified as 'guest ok' (synonym: 'public'). Whatever privileges this
+;   user has will be available to any client connecting to a guest service.
+;   Typically this user will exist in the password file, but will not have
+;   a valid login. If a username is specified in a given service, the
+;   specified username overrides this one.
+;
+;   create mask
+;   ~~~~~~~~~~~
+;   This parameter (synonym: 'create mode') is the octal modes which are
+;   used when converting DOS modes to Unix modes. It applies to all services
+;   that do not override it specifically.
+;
+;   root dir
+;   ~~~~~~~~
+;   The server will chroot() to this directory on startup. This is not 
+;   strictly necessary for secure operation. Even without it the server
+;   will deny access to files not in one of the service entries. It will 
+;   also check for, and deny access to, soft links to other parts of the 
+;   filesystem, or attempts to use .. in file names to access other 
+;   directories.
+;
+;   Adding a "root dir" entry adds an extra level of security, but at a price.
+;   It absolutely ensures that no access is given to files not in the sub-tree 
+;   specified in the "root dir" option, *including* some files needed for
+;   complete operation of the server. To maintain full operability of the
+;   server you will need to mirror some system files into the "root dir" tree.
+;   In particular you will need to mirror /etc/passwd (or a subset of it),
+;   and any binaries or configuration files needed for printing (if required). 
+;   The precise set of files that must be mirrored is operating system 
+;   dependent.
+;
+;   max xmit
+;   ~~~~~~~~
+;   The maximum transmit packet size. You shouldn't need this.
+;
+;   dead time
+;   ~~~~~~~~~
+;   The time in minutes before an inactive connection is considered dead
+;   and is disconnected. A value of 0 indicates no auto-disconnection. The
+;   default is 0. This value is ignored if there are any files open.
+;
+;   allow hosts
+;   ~~~~~~~~~~~
+;   This is a comma delimited set of hosts which are permitted to access
+;   services. Specific services my have their own list, which override these.
+;   You can specify the hosts by name or IP number. For example, you could
+;   restrict accee to only the hosts on a Class C subnet with something like
+;   'allow hosts = 150.203.5.*'. The full syntax of the list is described in
+;   the source file XXXXX.
+;
+;   deny hosts
+;   ~~~~~~~~~~
+;   The opposite of 'allow hosts' - hosts listed here are NOT permitted
+;   access to services unless the specific services have their own lists to
+;   override this one. Note that where the lists conflict, the 'allow' list
+;   takes precedence.
+;
+;
+;
+; VALID PARAMETERS IN SERVICE SECTIONS
+; ------------------------------------
+;
+; Currently valid parameter names for service sections are as follows, with
+; applicable defaults in parentheses:
+;
+; path		 -path supporting this service
+; username	 -user permitted to access this service
+; print command	 -command to use to print files
+; printer name	 -printer to use to print files
+; copy		 -previously specified service to copy into current service
+; available	 -service may be connected to (YES)
+; read only	 -service may/may not be written (YES)
+; set directory	 -users may/may not use setdir command to change directory (NO)
+; map hidden	 -hidden files should/should not be mapped to execute bits (NO)
+; map system	 -system files should/should not be mapped to execute bits (NO)
+; guest ok	 -guest access is/is not permitted (NO)
+; print ok	 -print access is/is not permitted (NO)
+; create mask	 -file creation mask (AS PER MAKEFILE)
+; dont descend	 -a list of directories which the server shows as empty (NULL)
+; allow hosts	 -list of allowable hosts to connect
+; deny hosts	 -list of hosts to deny connection
+;
+;   path
+;   ~~~~
+;   This parameter specifies a directory. In the case of printable services,
+;   this is where print data will spool prior to being submitted to the host
+;   for printing.
+;
+;   username
+;   ~~~~~~~~
+;   The user name (login name) of the user permitted to access this service.
+;   Clients wishing to access the service will need to know the password
+;   for this user (unless the service pemits guest access). In all cases,
+;   clients using the service will have this user's privileges.
+;
+;   print command
+;   ~~~~~~~~~~~~~
+;   This string will be used when submitting jobs to the host. If not 
+;   specified, the print command from the [global] section will be used.
+;   When a job is to be submitted, the first occurrence of "%s" will be 
+;   replaced with name of the spool file to be submitted. The first 
+;   occurrence of "%p" in the string will be replaced with the printer
+;   name (if specified). Other occurrences of "%s" or "%p" will be submitted
+;   unchanged.
+;
+;   For normal printer services, if a print command is not supplied for the
+;   service then the global one will be used. If there is no global printer
+;   name, the name of the service will be used.
+;
+;   printer name
+;   ~~~~~~~~~~~~
+;   See under 'print command'. This is the name of the printer to submit jobs
+;   to when the client has finished spooling them. It will only be used if the
+;   applicable print command contains "%p".
+;
+;   copy
+;   ~~~~
+;   This parameter allows you to 'clone' service entries. The specified
+;   service is simply duplicated undr the current service's name. Any 
+;   parameters specified in current section will ovverride those in the
+;   section being copied. This feature lets you set up a 'template' service
+;   and create similar services easily. Note that the service being copied
+;   must occur earlier in the configuration file than the service doing 
+;   the copying.
+;
+;   available
+;   ~~~~~~~~~
+;   This parameter lets you 'turn off' a service. If 'available = no', then
+;   ALL attempts to connect to the service will fail. Such failures are always 
+;   logged.
+;
+;   read only
+;   ~~~~~~~~~
+;   If 'readonly = yes', then users of a service may not create or modify
+;   files in the service's directory. Note that a printable service will
+;   ALWAYS allow writing to the directory (user privileges permitting), but
+;   only via the spooling of print data. Useful 'inverse synonyms' for
+;   this parameter are 'write ok' and 'writable'.
+;
+;   set directory
+;   ~~~~~~~~~~~~~
+;   If 'set directory = no', then users of the service may not use the setdir
+;   command to change directory.
+;
+;   map hidden
+;   ~~~~~~~~~~
+;   This controls whether DOS style hidden files should be mapped to Unix
+;   execute bits.
+;
+;   map system
+;   ~~~~~~~~~~
+;   This controls whether DOS style system files should be mapped to Unix
+;   execute bits.
+;
+;   guest ok
+;   ~~~~~~~~
+;   If 'guest ok = yes' (synonym: 'public'), then no password is required to
+;   connect to the service. Privileges will be those of the specified user,
+;   or of the global guest account if no specific user is given.
+;
+;   print ok
+;   ~~~~~~~~
+;   If 'print ok = yes' (synonym: 'printable'), then clients may open, write
+;   to and submit spool files on the directory specified for the service. Note
+;   that a printable service will ALWAYS allow writing to the directory (user
+;   privileges permitting) via the spooling of print data. The 'read only'
+;   parameter controls other access to the resource.
+;
+;   create mask
+;   ~~~~~~~~~~~
+;   If specified, this ovverrides the global create mask. This parameter 
+;   (synonym: 'create mode') is the octal modes which are used when 
+;   converting DOS modes to Unix modes.
+;
+;   dont descend
+;   ~~~~~~~~~~~~
+;   There are certain directories on some systems (eg., the /proc tree under
+;   Linux) that are either not of interest to clients or are infinitely deep
+;   (recursive). This parameter allows you to specify a comma-delimited list
+;   of directories that the server should always show as empty.
+;
+;   allow hosts
+;   ~~~~~~~~~~~
+;   See 'allow hosts' under 'Globals'. This list overrides the list specified
+;   under 'Globals' for this service only.
+;
+;   deny hosts
+;   ~~~~~~~~~~
+;   See 'deny hosts' under 'Globals'. This list overrides the list specified
+;   under 'Globals' for this service only.
+;
+;
+;
+; SAMPLE SECTIONS
+; ---------------
+;
+; Here is a sample configuration file showing all parameters in use (it is 
+; therefore internally inconsistent - don't try to use it!):
+;
+; [global]
+;   print command = lpr -r -P%p %s
+;   printer name  = lp
+;   printcap name = /etc/printcap
+;   guest account = pcuser
+;   root directory= /
+;   create mask   = 0755
+;   max xmit      = 30000
+;   allow hosts   = 150.203.5.*
+;   deny hosts    = 130.56.2.*
+;
+; [homes]
+;   guest ok    = no
+;   read only   = no
+;
+; [printers]
+;   path = /usr/spool/public
+;   read only = yes
+;   guest ok = yes
+;   print ok = yes
+;   create mode = 0755
+;
+; [sample]
+;   path          = /tmp
+;   username      = fred
+;   print command = lpr -r -P%p %s
+;   printer name  = myprinter
+;   available     = yes
+;   read only     = yes
+;   set directory = no
+;   guest ok      = yes
+;   print ok      = no
+;   map system    = yes
+;   map hidden    = no
+;   dont descend  = /proc /hidden
+;   create mask   = 0775
+;
+; [copied service]
+;   path          = /some/other/path
+;   username      = mary
+;   copy          = sample
+;
+;
+
+; A REALISTIC SAMPLE CONFIGURATION
+; --------------------------------
+; 
+; For your first tries, use the following simple configuration. The [fred] and
+; [public] services demonstrate private and public services respectively - you
+; can modify them to suit your needs. There is no need to get them right
+; immediately - the [homes] and [printers] sections should be enough to get
+; you going.
+;
+;
+;
+[global]
+   print command = lpr -r -P%p %s
+   printer name  = lp
+   printcap name = /etc/printcap
+   guest account = pcuser
+
+[homes]
+   read only = no
+   create mode = 0750
+
+[printers]
+   path = /usr/spool/public
+   read only = yes
+   guest ok = yes
+   print ok = yes
+   create mode = 0700
+
+; This is a guest account (ie., access via the default guest user)
+; The path should exist, be world writable and have the sticky bit set.
+[public]
+   path = /usr/users/pcuser
+   guest ok = yes
+
+; This account is private to user fred.
+[private]
+   path = /usr/users/fred
+   username = fred
+   read only = no
+
+; A public printer - access via the default guest user.
+; Note that the service is read only - the 'print ok' parameter will permit 
+; write access, but ONLY in terms of spooled print files. For this kind of 
+; This entry may seem redundant in the light of the [printers] section, but
+; it permits a standard print service to be set up in such a way that users 
+; do not have to know actual printer names. The path should be world-writable
+; and have the sticky bit set.
+[printerA]
+   path = /usr/spool/public
+   print command = lpr -r -P%p %s
+   printer name = public_printer
+   read only = yes
+   guest ok = yes
+   print ok = yes
+

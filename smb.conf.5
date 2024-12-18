@@ -1,0 +1,747 @@
+.TH SMB.CONF 5 21/2/1994 smb.conf smb.conf
+.SH NAME
+smb.conf \- configuration file for smbserver
+.SH SYNOPSIS
+.B smb.conf
+.SH DESCRIPTION
+This file contains runtime configuration information for the smbserver
+program. The smbserver program provides LanManager-like services to clients
+using the SMB protocol.
+
+.SH FILE FORMAT
+The file consists of sections and parameters. A section begins with the 
+name of the section in square brackets and continues until the next
+section begins. Sections contain parameters of the form 'name = value'.
+
+The file is line-based - that is, each newline-terminated line represents
+either a comment, a section name or a parameter.
+
+Section and parameter names are not case sensitive.
+
+Only the first equals sign in a parameter is significant. Whitespace before 
+or after the first equals sign is discarded. Leading, trailing and internal
+whitespace in section and parameter names is irrelevant. Leading and
+trailing whitespace in a parameter value is discarded. Internal whitespace
+within a parameter value is retained verbatim.
+
+Any line beginning with a semicolon is ignored, as are lines containing 
+only whitespace.
+
+The values following the equals sign in parameters are all either a string
+(no quotes needed) or a boolean, which may be given as yes/no, 0/1 or
+true/false. Case is not significant in boolean values, but is preserved
+in string values. Some items such as create modes are numeric.
+.SH SERVICE DESCRIPTIONS
+Each section in the configuration file describes a service. The section name
+is the service name and the parameters within the section define the service's
+attributes.
+
+There are three special sections, [global], [homes] and [printers], which are
+described under 'special sections'. The following notes apply to ordinary 
+service descriptions.
+
+A service consists of a directory to which access is being given plus a 
+description of the access rights which are granted to the user of the 
+service. Some housekeeping options are also specifiable.
+
+Services are either filespace services (used by the client as an extension of
+their native file systems) or printable services (used by the client to access
+print services on the host running the server).
+
+Services may be guest services, in which case no password is required to
+access them. A specified guest account is used to define access privileges
+in this case.
+
+Services other than guest services will require a password to access them. The
+user name is specified in the configuration section for the service. The
+client must supply the password for that user in order to gain access to the
+service.
+
+Note that the access rights granted by the server are masked by the access
+rights granted to the specified or guest user by the host system. The 
+server does not grant more access than the host system grants.
+
+The following sample section defines a file space service. The user has write
+access to the path /home/bar. The service is accessed via the service name 
+"foo":
+
+ 	[foo]
+ 		path = /home/bar
+ 		writable = true
+
+The following sample section defines a printable service. The service is 
+readonly, but printable. That is, the only write access permitted is via 
+calls to open, write to and close a spool file. The 'guest ok' parameter 
+means that all access will be as the default guest user (specified elsewhere):
+
+ 	[aprinter]
+ 		path = /usr/spool/public
+ 		read only = true
+ 		printable = true
+ 		public = true
+
+.SH SPECIAL SECTIONS
+
+.SS The [global] section
+.RS 3
+Parameters in this section apply to the server as a whole, or are defaults
+for services which do not specifically define certain items. See the notes
+under 'Parameters' for more information.
+.RE
+
+.SS The [homes] section
+.RS 3
+If a section called 'homes' is included in the configuration file, services
+connecting clients to their home directories can be created on the fly by the
+server.
+
+When the connection request is made, the existing services are scanned. If a
+match is found, it is used. If no match is found, the requested service name is
+treated as a user name and looked up in the local passwords file. If the
+name exists and the correct password has been given, a service is created
+by cloning the [homes] section.
+
+Some modifications are then made to the newly created section:
+
+.RS 3
+The service name is changed from 'homes' to the located username
+
+The username is set to the located username
+
+If no path was given, the path is set to the user's home directory.
+.RE
+
+This is a fast and simple way to give a large number of clients access to
+their home directories with a minimum of fuss.
+
+The [homes] section can specify all the parameters a normal service section
+can specify, though some make more sense than others. The following is a 
+typical and suitable [homes] section:
+
+ 	[homes]
+ 		writable = yes
+
+Some important points:
+
+.RS 3
+If a path is specified in the [homes] section, it will be copied into all
+dynamically generated services. Specifying a path thus rather defeats the 
+purpose of the [homes] section.
+
+If a username is specified in the [homes] section, it will be ignored. It
+is not possible to have all clients accessing all homes as a single user.
+
+With versions of the protocol higher than core, the username is set to the 
+username passed in the connection request.
+
+If guest access is specified in the [homes] section, all home directories will
+be accessible to all clients
+.B without a password.
+In the very unlikely event
+that this is actually desirable, it would be wise to also specify read only
+access.
+.RE
+.RE
+
+.SS The [printers] section
+.RS 3
+This section works like [homes], but for printers.
+
+If a [printers] section occurs in the configuration file, users are able 
+to connect to any printer specified in the local host's printcap file.
+
+When a connection request is made, the existing services are scanned. If a
+match is found, it is used. If no match is found, but a [homes] section
+exists, it is used as described above. Otherwise, the requested service name is
+treated as a printer name and the appropriate printcap file is scanned to
+see if the requested service name is a valid printer name. If a match is
+found, a new service is created by cloning the [printers] section.
+
+A few modifications are then made to the newly created section:
+
+.RS 3
+The service name is set to the located printer name
+
+If no printer name was given, the printer name is set to the located printer
+name
+
+If the service does not permit guest access and no username was given, the 
+username is set to the located printer name.
+.RE
+
+Note that the [printers] service MUST be printable - if you specify otherwise,
+the server will refuse to load the configuration file.
+
+Typically the path specified would be that of a world-writable spool directory
+with the sticky bit set on it. A typical [printers] entry would look like this:
+
+ 	[printers]
+ 		path = /usr/spool/public
+ 		writable = no
+ 		public = yes
+ 		printable = yes 
+
+All aliases given for a printer in the printcap file are legitimate printer
+names as far as the server is concerned. If your printing subsystem doesn't
+work like that, you will have to set up a pseudo-printcap. This is a file
+consisting of one or more lines like this:
+
+        alias|alias|alias|alias...
+
+Each alias should be an acceptable printer name for your printing 
+subsystem. In the [global] section, specify the new file as your printcap.
+The server will then only recognise names found in your pseudo-printcap,
+which of course can contain whatever aliases you like. The same technique
+could be used simply to limit access to a subset of your local printers.
+
+An alias, by the way, is defined as any field in the printcap file with a
+bar symbol ('|') immediately to its left or right. If you have a printcap
+entry with only a printer name and no aliases, the printer name will not
+be detected. This is most unlikely to be a problem for most printcaps.
+.SH PARAMETERS
+Parameters define the specific attributes of services.
+
+Some parameters are specific to the [global] section (eg., guest account).
+Some parameters are usable in all sections (eg., create mode). All others are
+permissible only in normal sections. For the purposes of the following
+descriptions the [homes] and [printers] sections will be considered normal.
+The letter 'G' in parentheses indicates that a parameter is specific to the
+[global] section. The letter 'S' indicates that a parameter is specific to
+a normal service section. The letter 'B' indicates that a parameter may be
+used in both the [global] section and in normal service sections.
+
+Parameters are arranged here in alphabetical order - this may not create
+best bedfellows, but at least you can find them! Where there are synonyms,
+the preferred synonym is described, others refer to the preferred synonym.
+
+.SS allow hosts (B)
+A synonym for this parameter is 'hosts allow'.
+
+This parameter is a comma delimited set of hosts which are permitted to access
+a services. If specified in the [global] section, matching hosts will be
+allowed access to any service that does not specifically exclude them from
+access. Specific services my have their own list, which override those
+specified in the [global] section.
+
+You can specify the hosts by name or IP number. For example, you could
+restrict access to only the hosts on a Class C subnet with something like
+"allow hosts = 150.203.5.". The full syntax of the list is described in
+the man page
+.B hosts_access
+(5).
+
+You can also specify hosts by network/netmask pairs and by netgroup
+names if your system supports netgroups. The EXCEPT keyword can also
+be used to limit a wildcard list. The following examples may provide
+some help:
+
+Example 1: allow all IPs in 150.203.*.* except one
+
+	hosts allow = 150.203. EXCEPT 150.203.6.66
+
+Example 2: allow hosts that match the given network/netmask
+
+	hosts allow = 150.203.15.0/255.255.255.0
+
+Example 3: allow a couple of hosts
+
+	hosts allow = lapland, arvidsjaur
+
+Example 4: allow only hosts in netgroup "foonet" or localhost, but 
+deny access from one particular host
+
+ 	hosts allow = @foonet, localhost
+ 	hosts deny = pirate
+
+Note that access still requires suitable user-level passwords.
+
+See testparm(1) for a way of testing your host access to see if it
+does what you expect.
+
+.B Default:
+ 	none (ie., all hosts permitted access)
+
+.B Example:
+ 	allow hosts = 150.203.5. myhost.mynet.edu.au
+.SS available (S)
+This parameter lets you 'turn off' a service. If 'available = no', then
+ALL attempts to connect to the service will fail. Such failures are always 
+logged.
+
+.B Default:
+ 	available = yes
+
+.B Example:
+ 	available = no
+.SS copy (S)
+This parameter allows you to 'clone' service entries. The specified
+service is simply duplicated under the current service's name. Any 
+parameters specified in the current section will override those in the
+section being copied.
+
+This feature lets you set up a 'template' service and create similar 
+services easily. Note that the service being copied must occur earlier 
+in the configuration file than the service doing the copying.
+
+.B Default:
+ 	none
+
+.B Example:
+ 	copy = otherservice
+.SS create mask (B)
+A synonym for this parameter is 'create mode'.
+
+This parameter is the octal modes which are used when converting DOS modes 
+to Unix modes.
+
+If specified in the [global] section, this value will be used for all
+services that do not override it specifically.
+
+.B Default:
+ 	specified at compile time
+
+.B Example:
+ 	create mask = 0755
+.SS create mode (B)
+See
+.B create mask.
+.SS deny hosts (B)
+A synonym for this parameter is 'hosts deny'.
+
+The opposite of 'allow hosts' - hosts listed here are NOT permitted
+access to services unless the specific services have their own lists to
+override this one. Where the lists conflict, the 'allow' list takes precedence.
+
+.B Default:
+ 	none (ie., no hosts specifically excluded)
+
+.B Example:
+  	deny hosts = 150.203.4. badhost.mynet.edu.au
+.SS directory (S)
+See
+.B path.
+.SS dont descend (B)
+There are certain directories on some systems (eg., the /proc tree under
+Linux) that are either not of interest to clients or are infinitely deep
+(recursive). This parameter allows you to specify a comma-delimited list
+of directories that the server should always show as empty.
+
+.B Default:
+ 	none (ie., all directories are OK to descend)
+
+.B Example:
+  	dont descend = /proc,/dev
+.SS guest account (G)
+This is a username which will be used for access to services which are
+specified as 'guest ok' (see below). Whatever privileges this user has will
+be available to any client connecting to a guest service. Typically this user
+will exist in the password file, but will not have a valid login. If a 
+username is specified in a given service, the specified username overrides
+this one.
+
+.B Default:
+ 	specified at compile time
+
+.B Example:
+ 	guest account = nobody
+.SS guest ok(S)
+See
+.B public.
+.SS hosts allow (B)
+See
+.B allow hosts.
+.SS hosts deny (B)
+See
+.B deny hosts.
+.SS keep alive (G)
+The value of the parameter (an integer) represents the number of seconds 
+between 'keepalive' packets. If this parameter is zero, no keepalive packets
+will be sent. Keepalive packets, if sent, allow the server to tell whether a
+client is still present and responding.
+
+Keepalives should NOT be used if the socket being used has the SO_KEEPALIVE
+attribute set on it. The server will attempt to set this attribute on client
+connections anyway. Basically you should only use this option if you strike
+difficulties.
+
+.B Default:
+ 	keep alive = 0
+
+.B Example:
+ 	keep alive = 60
+.SS dead time (G)
+The value of the parameter (an integer) represents the number of
+minutes of inactivity before a connection is considered dead, and it
+is disconnected. The deadtime only takes effect if the number of open files
+is zero.
+
+This is useful to stop a server's resources being exhausted by a large
+number of inactive connections.
+
+Most clients have an auto-reconnect feature when a connection is broken so
+in most cases this parameter should be transparent to users.
+
+A deadtime of zero indicates that no auto-disconnection should be performed.
+
+.B Default:
+ 	dead time = 0
+
+.B Example:
+ 	dead time = 15
+.SS map hidden (B)
+This controls whether DOS style hidden files should be mapped to Unix
+execute bits.
+
+.B Default:
+ 	map hidden = no
+
+.B Example:
+ 	map hidden = yes
+.SS map system (B)
+This controls whether DOS style system files should be mapped to Unix
+execute bits.
+
+.B Default:
+ 	map system = no
+
+.B Example:
+ 	map system = yes
+.SS max xmit (G)
+The maximum transmit packet size. You shouldn't need this.
+
+.B Default:
+ 	specified at compile time - usually 65535
+
+.B Example:
+ 	max xmit = 1024
+.SS path (S)
+A synonym for this parameter is 'directory'.
+
+This parameter specifies a directory to which the user of the service is to
+be given access. In the case of printable services, this is where print data 
+will spool prior to being submitted to the host for printing.
+
+For a printable service offering guest access, the service should be readonly
+and the path should be world-writable and have the sticky bit set. This is not
+mandatory of course, but you probably won't get the results you expect if you
+do otherwise.
+
+Note that this path will be based on 'root dir' if one was specified.
+.B Default:
+ 	none
+
+.B Example:
+ 	path = /home/fred
+
+.SS print command (B)
+After a print job has finished spooling to a service, this command will be
+used via a system() call to process the spool file. Typically the command 
+specified will submit the spool file to the host's printing subsystem, but
+there is no requirement that this be the case. The server will not remove the
+spool file, so whatever command you specify should remove the spool file when
+it has been processed, otherwise you will need to manually remove old spool
+files.
+
+The print command is simply a text string. It will be used verbatim, with two
+exceptions: The first occurrence of "%s" will be replaced by the appropriate
+spool file name, and the first occurrence of "%p" will be replaced by the
+appropriate printer name. The spool file name is generated automatically by
+the server, the printer name is discussed below.
+
+The print command MUST contain at least one occurrence of "%s" - the "%p" is
+optional. At the time a job is submitted, if no printer name is supplied the
+"%p" will be silently removed from the printer command.
+
+If specified in the [global] section, the print command given will be used
+for any printable service that does not have its own print command specified.
+
+If there is neither a specified print command for a printable service nor a 
+global print command, spool files will be created but not processed and (most
+importantly) not removed.
+.B Default:
+ 	none
+
+.B Example:
+ 	print command = lpr -r -P%p %s
+.SS print ok (S)
+See
+.B printable.
+.SS printable (S)
+A synonym for this parameter is 'print ok'.
+
+If this parameter is 'yes', then clients may open, write to and submit spool 
+files on the directory specified for the service.
+
+Note that a printable service will ALWAYS allow writing to the service path
+(user privileges permitting) via the spooling of print data. The 'read only'
+parameter controls only non-printing access to the resource.
+
+.B Default:
+ 	printable = no
+
+.B Example:
+ 	printable = yes
+.SS printcap name (G)
+This parameter may be used to override the compiled-in default printcap
+name used by the server (usually /etc/printcap). See the discussion of the
+[printers] section above for reasons why you might want to do this.
+
+.B Default:
+ 	printcap name = /etc/printcap
+
+.B Example:
+ 	printcap name = /etc/myprintcap
+.SS printer (B)
+A synonym for this parameter is 'printer name'.
+
+This parameter specifies the name of the printer to which print jobs spooled
+through a printable service will be sent.
+
+If specified in the [global] section, the printer name given will be used
+for any printable service that does not have its own printer name specified.
+
+.B Default:
+ 	none (but may be 'lp' on many systems)
+
+.B Example:
+ 	printer name = laserwriter
+.SS printer name (B)
+See
+.B printer.
+.SS public (S)
+A synonym for this parameter is 'guest ok'.
+
+If this parameter is 'yes' for a service, then no password is required to
+connect to the service. Privileges will be those of the specified user,
+or of the global guest account if no specific user is given for the service.
+
+.B Default:
+ 	public = no
+
+.B Example:
+ 	public = yes
+.SS read only (S)
+See
+.B writable
+and
+.B write ok.
+Note that this is an inverted synonym for writable and write ok.
+.SS root (G)
+See
+.B root directory.
+.SS root dir (G)
+See
+.B root directory.
+.SS root directory (G)
+Synonyms for this parameter are 'root dir' and 'root'.
+
+The server will chroot() to this directory on startup. This is not 
+strictly necessary for secure operation. Even without it the server
+will deny access to files not in one of the service entries. It will 
+also check for, and deny access to, soft links to other parts of the 
+filesystem, or attempts to use .. in file names to access other 
+directories.
+
+Adding a "root dir" entry other than "/" adds an extra level of security, 
+but at a price. It absolutely ensures that no access is given to files not
+in the sub-tree specified in the "root dir" option, *including* some files 
+needed for complete operation of the server. To maintain full operability
+of the server you will need to mirror some system files into the "root dir"
+tree. In particular you will need to mirror /etc/passwd (or a subset of it),
+and any binaries or configuration files needed for printing (if required). 
+The set of files that must be mirrored is operating system dependent.
+
+.B Default:
+ 	root directory = /
+
+.B Example:
+ 	root directory = /homes/smb
+.SS set directory (S)
+If 'set directory = no', then users of the service may not use the setdir
+command to change directory.
+
+For many clients (eg., DOS clients) this has little meaning, as the client
+treats the service path as the 'root' of a redirected disk. This parameter
+is of most use in restricting access from Unix style clients such as
+smbclient.
+
+.B Default:
+ 	set directory = no
+
+.B Example:
+ 	set directory = yes
+.SS user (S)
+See
+.B username.
+.SS username (S)
+A synonym for this parameter is 'user'.
+
+This parameter specifies the user name (login name) of the user permitted 
+to access this service. If none is specified AND the service is not a
+guest access service, this parameter will default to the name of the service.
+
+Clients wishing to access the service will need to know the password
+for this user (unless the service permits guest access). In all cases,
+clients using the service will have this user's privileges.
+
+If the specified user does not exist, no access to the service will be 
+possible.
+
+.B Default:
+ 	The guest account if a guest service, else the name of the service.
+
+.B Example:
+ 	username = fred
+.SS write ok (S)
+See
+.B writable
+and
+.B read only.
+.SS writable (S)
+A synonym for this parameter is 'write ok'. An inverted synonym is 'read only'.
+
+If this parameter is 'no', then users of a service may not create or modify
+files in the service's directory.
+
+Note that a printable service ('printable = yes') will ALWAYS allow 
+writing to the directory (user privileges permitting), but only via
+spooling operations.
+
+.B Default:
+ 	writable = no
+
+.B Examples:
+ 	read only = no
+ 	writable = yes
+ 	write ok = yes
+.SH WARNINGS
+Although the configuration file permits service names to contain spaces, 
+your client software may not. Spaces will be ignored in comparisons anyway,
+so it shouldn't be a problem - but be aware of the possibility.
+
+On a similar note, many clients - especially DOS clients - limit service
+names to eight characters. smbserver has no such limitation, but attempts
+to connect from such clients will fail if they truncate the service names.
+For this reason you should probably keep your service names down to eight 
+characters in length.
+
+Use of the [homes] and [printers] special sections make life for an 
+administrator easy, but the various combinations of default attributes can be
+tricky. Take extreme care when designing these sections. In particular,
+ensure that the permissions on spool directories are correct.
+.SH VERSION
+This man page is correct for version 1.5.40 of the smbserver suite, plus some
+of the recent patches to it. These notes will necessarily lag behind 
+development of the software, so it is possible that your version of 
+the server has extensions or parameter semantics that differ from or are not 
+covered by this man page. Please notify these to the address below for 
+rectification.
+
+Prior to version 1.5.21 of the smbserver suite, the configuration file was
+radically different (more primitive). If you are using a version earlier than
+1.5.21, it is STRONGLY recommended that you upgrade.
+.SH OPTIONS
+Not applicable.
+
+.SH FILES
+Not applicable.
+
+.SH ENVIRONMENT VARIABLES
+Not applicable.
+
+.SH SEE ALSO
+.B smbserver
+(8),
+.B smbclient
+(1),
+.B nmbserver
+(8),
+.B testparm
+(1), 
+.B testprns
+(1),
+.B hosts_access
+(5)
+.SH DIAGNOSTICS
+[This section under construction]
+
+Most diagnostics issued by the server are logged in a specified log file. The
+log file name is specified at compile time, but may be overridden on the
+smbserver (see smbserver(8)) command line.
+
+The number and nature of diagnostics available depends on the debug level used
+by the server. If you have problems, set the debug level to 3 and peruse the
+log files.
+
+Most messages are reasonably self-explanatory. Unfortunately, at time of
+creation of this man page the source code is still too fluid to warrant
+describing each and every diagnostic. At this stage your best bet is still
+to grep the source code and inspect the conditions that gave rise to the 
+diagnostics you are seeing.
+
+.SH BUGS
+None known.
+
+Please send bug reports, comments and so on to:
+
+.RS 3
+.B Andrew.Tridgell@anu.edu.au (Andrew Tridgell)
+.RS 3
+
+or to the mail group
+
+.RE
+.B netbios@arvidsjaur.anu.edu.au
+.RE
+
+Errors in this man page can be notified to:
+
+.RS 3
+.B Karl.Auer@anu.edu.au (Karl Auer)
+.RS 3
+
+.SH CREDITS
+The original smbserver software and related utilities were created by 
+Andrew Tridgell (Andrew.Tridgell@anu.edu.au). Andrew is also the Keeper
+of the Source for this project.
+
+This man page written by Karl Auer (Karl.Auer@anu.edu.au)
+
+Contributors to the project are (in alphabetical order by email address):
+
+.RS 3
+Andrew.Tridgell@anu.edu.au (Andrew Tridgell)
+
+Karl.Auer@anu.edu.au (Karl Auer)
+
+bogstad@cs.jhu.edu
+
+bryan@alex.com
+
+gadams@ddrive.demon.co.uk
+
+jeremy@netcom.com (Jeremy Allison)
+
+joergs@toppoint.de
+
+leefi@microsoft.com
+
+magnus@axiom.se
+
+mark@scot1.ucsalf.ac.uk
+
+pierson@ketje.enet.dec.com
+
+ppk@atk.tpo.fi (Pasi Kaara)
+
+rossw@march.co.uk
+
+sreiz@aie.nl
+
+tim.hudson@gslmail.mincom.oz.au (Tim Hudson)
+
+troyer@saifr00.ateng.az.honeywell.com
+.RE
+
+(These Credits are simply those who appear in the change log for this project.
+If you want your place in the sun, patch the man page!)
