@@ -459,11 +459,7 @@ void name_extract(char *buf,int ofs,char *name);
 BOOL name_query(char *inbuf,char *outbuf,char *name,struct in_addr *ip);
 BOOL get_broadcast(struct in_addr *if_ipaddr, struct in_addr *if_bcast, struct in_addr *if_nmask);
 BOOL allow_access(char *deny_list,char *allow_list,struct from_host *client);
-#ifdef __STDC__
 void Debug(int, char *, ...);
-#else
-void Debug();
-#endif
 BOOL password_ok(char *user,char *password);
 int chain_reply(int type,char *inbuf,char *inbuf2,char *outbuf,char *outbuf2,int size,int bufsize);
 void close_cnum(int cnum);

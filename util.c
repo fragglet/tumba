@@ -54,28 +54,14 @@ BOOL NeedSwap=False;
 /*******************************************************************
 write an debug message on the debugfile. The first arg is the debuglevel.
 ********************************************************************/
-#ifdef __STDC__
 void Debug(int debug_level, char *format_str, ...)
 {
-#else
-void Debug(va_alist)
-va_dcl
-{
-  int debug_level;
-  char *format_str;
-#endif
 
   va_list ap;
   
   if (!dbf) return;
   
-#ifdef __STDC__
   va_start(ap, format_str);
-#else
-  va_start(ap);
-  debug_level = va_arg(ap,int);
-  format_str = va_arg(ap,char *);
-#endif
 
 
   if (DEBUGLEVEL >= debug_level)

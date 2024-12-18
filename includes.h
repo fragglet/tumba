@@ -17,11 +17,7 @@
 #include <sys/param.h>
 #include <sys/mount.h>
 #include <pwd.h>
-#ifdef __STDC__
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 #include <unistd.h>
 #include <sys/wait.h>
 #include <net/if.h>
