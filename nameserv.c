@@ -20,8 +20,6 @@
 
 #include "includes.h"
 
-pstring debugf = DEBUGFILE;
-
 pstring domain = "";
 
 char *InBuffer = NULL;
@@ -596,7 +594,7 @@ int main(int argc, char *argv[])
 	extern char *optarg;
 	pstring lookup = "";
 
-	while ((opt = getopt(argc, argv, "L:B:N:Rn:l:d:Dp:hPSH:G:")) != EOF)
+	while ((opt = getopt(argc, argv, "L:B:N:Rn:d:Dp:hPSH:G:")) != EOF)
 		switch (opt) {
 		case 'G':
 			add_group_name(optarg);
@@ -627,9 +625,6 @@ int main(int argc, char *argv[])
 		case 'S':
 			dns_serve = True;
 			break;
-		case 'l':
-			strcpy(debugf, optarg);
-			break;
 		case 'L':
 			strcpy(lookup, optarg);
 			break;
@@ -657,17 +652,12 @@ int main(int argc, char *argv[])
 
 	if (DEBUGLEVEL > 2) {
 		extern FILE *login, *logout;
-		pstring fname = "";
-		sprintf(fname, "%s.nmb.in", debugf);
-		login = fopen(fname, "w");
-		sprintf(fname, "%s.nmb.out", debugf);
-		logout = fopen(fname, "w");
+		login = fopen("nmb.in", "w");
+		logout = fopen("nmb.out", "w");
 	}
 
 	if (DEBUGLEVEL > 0) {
-		pstring fname = "";
-		sprintf(fname, "%s.nmb.debug", debugf);
-		dbf = fopen(fname, "w");
+		dbf = fopen("nmb.debug", "w");
 		setbuf(dbf, NULL);
 		Debug(1, "%s netbios nameserver version %s started\n",
 		      timestring(), VERSION);

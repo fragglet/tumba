@@ -28,7 +28,6 @@
 #endif
 
 pstring servicesf = SERVICES;
-pstring debugf = DEBUGFILE;
 
 BOOL append_log = True;
 
@@ -3455,7 +3454,7 @@ int main(int argc, char *argv[])
 	initial_uid = geteuid();
 	initial_gid = getegid();
 
-	while ((opt = getopt(argc, argv, "l:s:d:Dp:hPa")) != EOF)
+	while ((opt = getopt(argc, argv, "s:d:Dp:hPa")) != EOF)
 		switch (opt) {
 		case 'P': {
 			extern BOOL passive;
@@ -3463,9 +3462,6 @@ int main(int argc, char *argv[])
 		} break;
 		case 's':
 			strcpy(servicesf, optarg);
-			break;
-		case 'l':
-			strcpy(debugf, optarg);
 			break;
 		case 'a':
 			append_log = !append_log;
@@ -3492,20 +3488,15 @@ int main(int argc, char *argv[])
 
 	if (DEBUGLEVEL > 2) {
 		extern FILE *login, *logout;
-		pstring fname = "";
-		sprintf(fname, "%s.in", debugf);
-		login = fopen(fname, "w");
-		sprintf(fname, "%s.out", debugf);
-		logout = fopen(fname, "w");
+		login = fopen("smb.in", "w");
+		logout = fopen("smb.out", "w");
 	}
 
 	if (DEBUGLEVEL > 0) {
-		pstring fname = "";
-		sprintf(fname, "%s.debug", debugf);
 		if (append_log)
-			dbf = fopen(fname, "a");
+			dbf = fopen("smb.debug", "a");
 		else
-			dbf = fopen(fname, "w");
+			dbf = fopen("smb.debug", "w");
 		setbuf(dbf, NULL);
 		Debug(1, "%s smbserver version %s started\n", timestring(),
 		      VERSION);

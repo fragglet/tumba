@@ -27,7 +27,7 @@ CC = gcc
 
 # set these to where to find various files
 # These can be overridden by command line switches (see smbserver(8))
-FLAGS2 = -DDEBUGFILE=\"/home/nimbus/tridge/server/log\"
+FLAGS2 =
 FLAGS3 = -DSERVICES=\"/home/nimbus/tridge/server/smb.conf\"
 
 # set this to the name of the default account, which is the one
@@ -40,7 +40,7 @@ FLAGS4 = -DGUEST_ACCOUNT=\"tridge\"
 FLAGS5 = -DDEF_CREATE_MASK=0755
 
 # Use this for Linux without shadow passwords
-FLAGSM = -DLINUX
+FLAGSM = -DLINUX -g
 LIBSM =
 
 CFLAGS = $(FLAGS1) $(FLAGS2) $(FLAGS3) $(FLAGS4) $(FLAGS5) $(FLAGSM)
