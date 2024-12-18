@@ -158,8 +158,6 @@ typedef struct {
 	char *szPath;
 	char *szUsername;
 	char *szDontdescend;
-	char *szHostsallow;
-	char *szHostsdeny;
 	BOOL bRead_only;
 	BOOL bNo_set_dir;
 	BOOL bMap_system;
@@ -191,8 +189,6 @@ static service DefaultService = {
     "",              /* szPath */
     "",              /* szUsername */
     "",              /* szDontdescend */
-    "",              /* szHostsallow */
-    "",              /* szHostsdeny */
     True,            /* bRead_only */
     True,            /* bNo_set_dir */
     False,           /* bMap_system */
@@ -446,8 +442,6 @@ static void free_service(service *pservice)
 	string_free(&pservice->szUsername);
 	string_free(&pservice->szDontdescend);
 	string_free(&pservice->sCopyMap.szSourceService);
-	string_free(&pservice->szHostsallow);
-	string_free(&pservice->szHostsdeny);
 }
 
 /***************************************************************************
@@ -474,14 +468,6 @@ static void copy_service(service *pserviceDest, service *pserviceSource,
 	if (bcopyall || pcopymapDest->bUS_username)
 		string_set(&pserviceDest->szUsername,
 		           pserviceSource->szUsername);
-
-	if (bcopyall || pcopymapDest->bUS_hosts_allow)
-		string_set(&pserviceDest->szHostsallow,
-		           pserviceSource->szHostsallow);
-
-	if (bcopyall || pcopymapDest->bUS_hosts_deny)
-		string_set(&pserviceDest->szHostsdeny,
-		           pserviceSource->szHostsdeny);
 
 	if (bcopyall || pcopymapDest->bUS_read_only)
 		pserviceDest->bRead_only = pserviceSource->bRead_only;
@@ -656,17 +642,6 @@ static BOOL do_service_parameter(parmmap *pparmmap, char *pszParmValue)
 	case E_USERNAME:
 		string_set(&pServices[iServiceIndex].szUsername, pszParmValue);
 		COPYMAPS(iServiceIndex).bUS_username = False;
-		break;
-
-	case E_HOSTSALLOW:
-		string_set(&pServices[iServiceIndex].szHostsallow,
-		           pszParmValue);
-		COPYMAPS(iServiceIndex).bUS_hosts_allow = False;
-		break;
-
-	case E_HOSTSDENY:
-		string_set(&pServices[iServiceIndex].szHostsdeny, pszParmValue);
-		COPYMAPS(iServiceIndex).bUS_hosts_deny = False;
 		break;
 
 	case E_READONLY:
@@ -879,8 +854,6 @@ static void dump_a_service(service *pService)
 	printf("Service name: %s\n", pService->szService);
 	printf("\tpath          : %s\n", pService->szPath);
 	printf("\tusername      : %s\n", pService->szUsername);
-	printf("\thosts allow   : %s\n", pService->szHostsallow);
-	printf("\thosts deny    : %s\n", pService->szHostsdeny);
 	printf("\tdont descend  : %s\n", pService->szDontdescend);
 	printf("\tread_only     : %s\n", BOOLSTR(pService->bRead_only));
 	printf("\tno_set_dir    : %s\n", BOOLSTR(pService->bNo_set_dir));
@@ -1009,9 +982,6 @@ char *lp_hostsallow(int iService)
 		pszTemp = Globals.szHostsallow;
 		if (pszTemp[0] == '\0')
 			pszTemp = NULL;
-
-		if (pServices[iService].szHostsallow[0] != '\0')
-			pszTemp = pServices[iService].szHostsallow;
 	}
 
 	return (pszTemp);
@@ -1033,9 +1003,6 @@ char *lp_hostsdeny(int iService)
 		pszTemp = Globals.szHostsdeny;
 		if (pszTemp[0] == '\0')
 			pszTemp = NULL;
-
-		if (pServices[iService].szHostsdeny[0] != '\0')
-			pszTemp = pServices[iService].szHostsdeny;
 	}
 
 	return (pszTemp);
