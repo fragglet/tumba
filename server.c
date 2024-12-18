@@ -472,6 +472,9 @@ int find_service(char *service)
 {
 	int iService;
 
+	if (strequal(service, "IPC$"))
+		return -1;
+
 	iService = lp_servicenumber(service);
 
 	if (iService >= 0)
@@ -522,6 +525,11 @@ int make_connection(char *service)
 
 	snum = find_service(service);
 	if (snum < 0) {
+		if (strequal(service, "IPC$")) {
+			Debug(3, "%s refusing IPC connection\n", timestring());
+			return -3;
+		}
+
 		Debug(0, "%s couldn't find service %s\n", timestring(),
 		      service);
 
@@ -966,8 +974,18 @@ int reply_tcon(char *inbuf, char *outbuf, int length, int bufsize)
 
 	connection_num = make_connection(service);
 
-	if (connection_num < 0)
-		return (ERROR(ERRDOS, eACCESS_DENIED));
+	if (connection_num < 0) {
+		switch (connection_num) {
+		case -4:
+			return (ERROR(ERRSRV, ERRerror));
+		case -3:
+			return (ERROR(ERRDOS, ERRnoipc));
+		case -2:
+			return (ERROR(ERRSRV, ERRinvnetname));
+		default:
+			return (ERROR(ERRSRV, ERRbadpw));
+		}
+	}
 
 	outsize = set_message(outbuf, 2, 0);
 	SSVAL(outbuf, smb_vwv0, MIN(lp_maxxmit(), BUFFER_SIZE) - 4);
