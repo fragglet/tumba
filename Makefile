@@ -57,12 +57,12 @@ FLAGS5 = -DDEF_CREATE_MASK=0755
 # LIBSM = -lshadow
 
 # Use this for Linux without shadow passwords
-# FLAGSM = -DLINUX
-# LIBSM = 
+FLAGSM = -DLINUX
+LIBSM =
 
 # This is for SUNOS
-FLAGSM = -DSUN -DPWDAUTH -DHAVE_LOCKF
-LIBSM =   
+# FLAGSM = -DSUN -DPWDAUTH -DHAVE_LOCKF
+# LIBSM =
 
 # This is for SOLARIS
 # FLAGSM = -DSOLARIS -DHAVE_LOCKF -DBSD_COMP
