@@ -41,7 +41,7 @@ FLAGS5 = -DDEF_CREATE_MASK=0755
 
 # Use this for Linux without shadow passwords
 FLAGSM = -DLINUX
-LIBSM = -lcrypt
+LIBSM =
 
 CFLAGS = $(FLAGS1) $(FLAGS2) $(FLAGS3) $(FLAGS4) $(FLAGS5) $(FLAGSM)
 LIBS = $(LIBS1) $(LIBSM)
