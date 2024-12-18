@@ -58,7 +58,7 @@ FLAGS5 = -DDEF_CREATE_MASK=0755
 
 # Use this for Linux without shadow passwords
 FLAGSM = -DLINUX
-LIBSM =
+LIBSM = -lcrypt
 
 # This is for SUNOS
 # FLAGSM = -DSUN -DPWDAUTH -DHAVE_LOCKF
