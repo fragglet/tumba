@@ -26,13 +26,11 @@
 
 #define WORDMAX 0xFFFF
 
-
 /* define this if you want to stop spoofing with .. and soft links
    NOTE: This also slows down the server considerably */
 #define REDUCE_PATHS
 
 /* define this to replace the string functions with debugging ones */
 /* #define STRING_DEBUG */
-
 
 #endif
