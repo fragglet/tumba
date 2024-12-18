@@ -41,7 +41,7 @@
 
 #ifdef SUN
 #define HAVE_TIMELOCAL
-#include <sys/dirent.h>
+#include <dirent.h>
 #include <sys/acct.h>
 #include <sys/vfs.h>
 #include <string.h>
