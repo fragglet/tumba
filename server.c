@@ -880,7 +880,6 @@ uint32 *ecode;
 {
   BOOL ok = False;
 
-#ifdef HAVE_LOCKF
   if (Files[fnum].can_lock && become_user(cnum))
     {
       if (OPEN_FNUM(fnum) && (Files[fnum].cnum == cnum))
@@ -891,7 +890,6 @@ uint32 *ecode;
 	}
       unbecome_user();
     }
-#endif
 
   if (!ok) {
     *eclass = ERRDOS;
@@ -918,7 +916,6 @@ uint32 *ecode;
     return -1;
   }
 
-#ifdef HAVE_LOCKF
   if (Files[fnum].can_lock && become_user(cnum))
     {
       if (OPEN_FNUM(fnum) && (Files[fnum].cnum == cnum))
@@ -929,7 +926,6 @@ uint32 *ecode;
 	}
       unbecome_user();
     }
-#endif
 
   if (!ok) {
     *eclass = ERRDOS;
@@ -2203,10 +2199,8 @@ int reply_readbraw(char *inbuf, char *outbuf, int length, int bufsize)
       if (OPEN_FNUM(fnum) && (Files[fnum].cnum == cnum))
 	{
 	  lseek(Files[fnum].fd,startpos,SEEK_SET);
-#ifdef HAVE_LOCKF
 	  if(!Files[fnum].can_lock ||
 	    lockf(Files[fnum].fd,F_TEST,maxcount)==0 )
-#endif
 	    {
 	      nread = read_with_timeout(Files[fnum].fd,
 					&read_buf[4],mincount, maxcount,
@@ -2331,10 +2325,8 @@ int reply_read(char *inbuf,char *outbuf,int length,int bufsize)
       if (OPEN_FNUM(fnum) && (Files[fnum].cnum == cnum))
 	{
 	  lseek(Files[fnum].fd,startpos,SEEK_SET);
-#ifdef HAVE_LOCKF
 	  if (!Files[fnum].can_lock ||
 	      lockf(Files[fnum].fd,F_TEST,numtoread) == 0)
-#endif
 	    {
 	      nread = read(Files[fnum].fd,data,numtoread);
 	      ok = True;
@@ -2393,10 +2385,8 @@ int reply_read_and_X(char *inbuf,char *outbuf,int length,int bufsize)
       if (OPEN_FNUM(smb_fid) && (Files[smb_fid].cnum == cnum))
 	{
 	  lseek(Files[smb_fid].fd,smb_offset,SEEK_SET);
-#ifdef HAVE_LOCKF
 	  if (!Files[smb_fid].can_lock ||
 	      lockf(Files[smb_fid].fd,F_TEST,smb_maxcnt) == 0)
-#endif
 	    {
 	      nread = read(Files[smb_fid].fd,data,smb_maxcnt);
 	      ok = True;
@@ -2475,10 +2465,8 @@ int reply_writebraw(char *inbuf,char *outbuf,int length,int bufsize)
       if (OPEN_FNUM(fnum) && (Files[fnum].cnum == cnum))
 	{
 	  lseek(Files[fnum].fd,startpos,SEEK_SET);
-#ifdef HAVE_LOCKF
 	  if (!Files[fnum].can_lock ||
 	      lockf(Files[fnum].fd,F_TEST,numtowrite) == 0)
-#endif
 	    {
 	      nwritten = write_with_timeout(Files[fnum].fd,
 					    data,numtowrite,
@@ -2527,10 +2515,8 @@ int reply_writebraw(char *inbuf,char *outbuf,int length,int bufsize)
 	  nwritten = 0;
 
 	  /* Try and lock the new range */
-#ifdef HAVE_LOCKF
 	  if (!Files[fnum].can_lock ||
 	      lockf(Files[fnum].fd,F_TEST,numtowrite) == 0)
-#endif
 	    {
 	      nwritten = write_with_timeout(Files[fnum].fd,
 					    data,numtowrite,
@@ -2593,10 +2579,8 @@ int reply_writeunlock(char *inbuf,char *outbuf,int length,int bufsize)
       if (OPEN_FNUM(fnum) && (Files[fnum].cnum == cnum))
 	{
 	  lseek(fd,startpos,SEEK_SET);
-#ifdef HAVE_LOCKF
 	  if (!Files[fnum].can_lock ||
 	      lockf(fd,F_TEST,numtowrite) == 0)
-#endif
 	    {
 	      /* The special X/Open SMB protocol handling of
 			 zero length writes is *NOT* done for
@@ -2656,10 +2640,8 @@ int reply_write(char *inbuf,char *outbuf,int length,int bufsize)
       if (OPEN_FNUM(fnum) && (Files[fnum].cnum == cnum))
 	{
 	  lseek(fd,startpos,SEEK_SET);
-#ifdef HAVE_LOCKF
 	  if (!Files[fnum].can_lock ||
 	      lockf(fd,F_TEST,numtowrite) == 0)
-#endif
 	    {
 	      /* X/Open SMB protocol says that if smb_vwv1 is
 		 zero then the file size should be extended or
@@ -2724,10 +2706,8 @@ int reply_write_and_X(char *inbuf,char *outbuf,int length,int bufsize)
       if (OPEN_FNUM(fnum) && (Files[fnum].cnum == cnum))
 	{
 	  lseek(fd,smb_offset,SEEK_SET);
-#ifdef HAVE_LOCKF
 	  if (!Files[fnum].can_lock ||
 	      lockf(fd,F_TEST,smb_dsize) == 0)
-#endif
 	    {
 	      /* X/Open SMB protocol says that, unlike SMBwrite
 		 if the length is zero then NO truncation is
@@ -2921,10 +2901,8 @@ int reply_writeclose(char *inbuf,char *outbuf,int length,int bufsize)
       if (OPEN_FNUM(fnum) && (Files[fnum].cnum == cnum))
 	{
 	  lseek(Files[fnum].fd,startpos,SEEK_SET);
-#ifdef HAVE_LOCKF
 	  if (!Files[fnum].can_lock ||
 	      lockf(Files[fnum].fd,F_TEST,numtowrite) == 0)
-#endif
 	    {
 	      nwritten = write(Files[fnum].fd,data,numtowrite);
 	      ok = True;

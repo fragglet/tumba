@@ -480,9 +480,6 @@ BOOL sane_unix_date(time_t unixdate);
 time_t start_of_month(void);
 void log_out(char *buffer,int len);
 BOOL register_name(name_struct *name,struct in_addr *destip,void (*)());
-#ifdef NOSTRDUP
-char *strdup(char *s);
-#endif
 #ifdef REPLACE_STRLEN
 int Strlen(char *);
 #endif

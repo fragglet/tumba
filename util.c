@@ -1175,9 +1175,6 @@ read from a socket
 int read_socket(int fd,char *buf,int len)
 {
   /* #define NORECVFROM */
-#ifdef NORECVFROM
-  return(read(fd,buf,len));
-#else
   int ret;
   struct sockaddr sock;
   int socklen;
@@ -1195,7 +1192,6 @@ int read_socket(int fd,char *buf,int len)
 	Debug(3,"read %d bytes\n",ret);
     }
   return(ret);
-#endif
 }
 
 /****************************************************************************
@@ -2547,20 +2543,6 @@ BOOL set_filetime(char *fname,time_t mtime)
 }
 
 
-#ifdef NOSTRDUP
-/****************************************************************************
-duplicate a string
-****************************************************************************/
-char *strdup(char *s)
-{
-  char *ret = NULL;
-  if (!s) return(NULL);
-  ret = (char *)malloc(strlen(s)+1);
-  if (!ret) return(NULL);
-  strcpy(ret,s);
-  return(ret);
-}
-#endif
 
 
 /****************************************************************************
