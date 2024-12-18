@@ -57,22 +57,6 @@ extern char *sys_errlist[];
 char *getwd(char *);
 #endif
 
-#ifdef BSDI
-
-#endif
-
-#ifdef NETBSD
-#include <strings.h>
-#ifndef SIGCLD
-#define SIGCLD SIGCHLD
-#endif
-
-struct spwd { /* fake shadow password structure */
-	char *sp_pwdp;
-};
-struct spwd *getspnam(char *username); /* fake shadow password routine */
-#endif
-
 #ifdef FreeBSD
 #include <strings.h>
 #ifndef SIGCLD

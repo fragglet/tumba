@@ -487,52 +487,6 @@ int find_service(char *service)
 	return (iService);
 }
 
-/* this holds info on user ids that are already validated for this VC */
-user_struct *validated_users = NULL;
-int num_validated_users = 0;
-
-/****************************************************************************
-check if a uid has been validated, and return an index if it has. -1 if not
-****************************************************************************/
-int valid_uid(int uid)
-{
-	int i;
-	for (i = 0; i < num_validated_users; i++)
-		if (validated_users[i].uid == uid) {
-			Debug(3, "valid uid %d mapped to vuid %d\n", uid, i);
-			return (i);
-		}
-	return (-1);
-}
-
-/****************************************************************************
-register a uid/name pair as being valid and that a valid password
-has been given.
-****************************************************************************/
-void register_uid(int uid, char *name)
-{
-	if (valid_uid(uid) >= 0)
-		return;
-	if (!validated_users)
-		validated_users = (user_struct *) malloc(sizeof(user_struct));
-	else
-		validated_users = (user_struct *) realloc(
-		    validated_users,
-		    sizeof(user_struct) * (num_validated_users + 1));
-
-	if (!validated_users) {
-		Debug(0, "Failed to realloc users struct!\n");
-		return;
-	}
-
-	validated_users[num_validated_users].uid = uid;
-	validated_users[num_validated_users].name = strdup(name);
-
-	Debug(3, "uid %d registered to name %s\n", uid, name);
-
-	num_validated_users++;
-}
-
 /****************************************************************************
   find first available connection slot
 ****************************************************************************/
@@ -560,17 +514,11 @@ int find_free_file(void)
 /****************************************************************************
   make a connection to a service
 ****************************************************************************/
-int make_connection(char *service, char *user, char *password, int vuid)
+int make_connection(char *service)
 {
 	int cnum;
 	int snum;
-	struct passwd *pass = NULL;
 
-	if (vuid >= 0) {
-		strcpy(user, validated_users[vuid].name);
-	}
-
-	strlower(user);
 	strlower(service);
 
 	snum = find_service(service);
@@ -588,22 +536,6 @@ int make_connection(char *service, char *user, char *password, int vuid)
 		return (-1);
 	}
 
-	pass = getpwnam(user);
-	if (!pass) {
-		strlower(user);
-		pass = getpwnam(user);
-	}
-
-	if (pass == NULL) {
-		Debug(0, "%s couldn't find account %s\n", timestring(), user);
-		return (-1);
-	}
-
-	if (!check_access(snum))
-		return (-1);
-
-	Connections[cnum].uid = pass->pw_uid;
-	Connections[cnum].gid = pass->pw_gid;
 	Connections[cnum].connect_num = cnum;
 	Connections[cnum].service = snum;
 	Connections[cnum].dirptr = NULL;
@@ -614,9 +546,9 @@ int make_connection(char *service, char *user, char *password, int vuid)
 	{
 		extern struct from_host Client_info;
 		Debug(1,
-		      "%s (%s) has opened a connection to service %s as user "
+		      "%s (%s) has opened a connection to service %s"
 		      "%s\n",
-		      Client_info.name, Client_info.addr, service, user);
+		      Client_info.name, Client_info.addr, service);
 	}
 
 	return (cnum);
@@ -1007,7 +939,7 @@ int reply_negprot(char *inbuf, char *outbuf, int length, int bufsize)
 /****************************************************************************
   parse a connect packet
 ****************************************************************************/
-void parse_connect(char *buf, char *service, char *user, char *password)
+void parse_connect(char *buf, char *service)
 {
 	char *p = smb_buf(buf) + 1;
 	char *p2;
@@ -1019,15 +951,6 @@ void parse_connect(char *buf, char *service, char *user, char *password)
 		strcpy(service, p2 + 1);
 
 	p += strlen(p) + 2;
-
-	strcpy(password, p);
-
-	*user = 0;
-	p = strchr(service, '%');
-	if (p != NULL) {
-		*p = 0;
-		strcpy(user, p + 1);
-	}
 }
 
 /****************************************************************************
@@ -1036,18 +959,13 @@ void parse_connect(char *buf, char *service, char *user, char *password)
 int reply_tcon(char *inbuf, char *outbuf, int length, int bufsize)
 {
 	pstring service = "";
-	pstring user = "";
-	pstring password = "";
 	int connection_num;
 	int outsize;
 	int uid = SVAL(inbuf, smb_uid);
-	int vuid;
 
-	vuid = valid_uid(uid);
+	parse_connect(inbuf, service);
 
-	parse_connect(inbuf, service, user, password);
-
-	connection_num = make_connection(service, user, password, vuid);
+	connection_num = make_connection(service);
 
 	if (connection_num < 0)
 		return (ERROR(ERRDOS, eACCESS_DENIED));
@@ -1057,8 +975,8 @@ int reply_tcon(char *inbuf, char *outbuf, int length, int bufsize)
 	SSVAL(outbuf, smb_vwv1, connection_num);
 	SSVAL(outbuf, smb_tid, connection_num);
 
-	Debug(2, "%s tcon service=%s user=%s cnum=%d\n", timestring(), service,
-	      user, connection_num);
+	Debug(2, "%s tcon service=%s cnum=%d\n", timestring(), service,
+	      connection_num);
 
 	return (outsize);
 }
@@ -1069,8 +987,6 @@ int reply_tcon(char *inbuf, char *outbuf, int length, int bufsize)
 int reply_tcon_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 {
 	pstring service = "";
-	pstring user = "";
-	pstring password = "";
 	int connection_num;
 	int outsize;
 	int uid = SVAL(inbuf, smb_uid);
@@ -1082,19 +998,17 @@ int reply_tcon_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	if ((SVAL(inbuf, smb_vwv2) & 0x1) != 0)
 		close_cnum(SVAL(inbuf, smb_tid));
 
-	vuid = valid_uid(uid);
+	parse_connect(inbuf, service);
 
-	parse_connect(inbuf, service, user, password);
-
-	connection_num = make_connection(service, user, password, vuid);
+	connection_num = make_connection(service);
 
 	if (connection_num < 0)
 		return (ERROR(ERRDOS, eACCESS_DENIED));
 
 	outsize = set_message(outbuf, 2, 3);
 
-	Debug(2, "%s tconX service=%s user=%s cnum=%d\n", timestring(), service,
-	      user, connection_num);
+	Debug(2, "%s tconX service=%s cnum=%d\n", timestring(), service,
+	      connection_num);
 
 	/* set the incoming and outgoing tid to the just created one */
 	SSVAL(inbuf, smb_tid, connection_num);
@@ -1166,10 +1080,6 @@ int reply_sesssetup_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	CVAL(outbuf, smb_vwv0) = smb_com2;
 	SSVAL(outbuf, smb_vwv1, (chain_size + outsize) - 4);
 	SSVAL(outbuf, smb_vwv2, 1);
-
-	/* register the name and uid as being validated, so further connections
-	   to a uid can get through without a password, on the same VC */
-	register_uid(SVAL(inbuf, smb_uid), smb_aname);
 
 	if (smb_com2 != 0xFF)
 		outsize +=

@@ -2132,43 +2132,6 @@ int set_filelen(int fd, long len)
 #endif
 }
 
-#ifdef NETBSD
-/* a fake shadow password routine which just fills a fake spwd struct
- * with the sp_pwdp field. (sreiz@aie.nl)
- */
-struct spwd *getspnam(char *username) /* fake shadow password routine */
-{
-	FILE *f;
-	char line[1024];
-	static char pw[20];
-	static struct spwd static_spwd;
-
-	static_spwd.sp_pwdp = 0;
-	if (!(f = fopen("/etc/master.passwd", "r")))
-		return 0;
-	while (fgets(line, 1024, f)) {
-		if (!strncmp(line, username, strlen(username)) &&
-		    line[strlen(username)] == ':') { /* found entry */
-			char *p, *q;
-
-			p = line + strlen(username) + 1;
-			if (q = strchr(p, ':')) {
-				*q = 0;
-				if (q - p + 1 > 20)
-					break;
-				strcpy(pw, p);
-				static_spwd.sp_pwdp = pw;
-			}
-			break;
-		}
-	}
-	fclose(f);
-	if (static_spwd.sp_pwdp)
-		return &static_spwd;
-	return 0;
-}
-#endif
-
 /****************************************************************************
 return the byte checksum of some data
 ****************************************************************************/
@@ -2251,54 +2214,6 @@ void closestr(char *s, int start, int n)
 				*dest = '\0';
 			}
 		}
-}
-
-/****************************************************************************
-check if a username/password is OK
-****************************************************************************/
-BOOL password_ok(char *user, char *password)
-{
-	BOOL pwok = False;
-	char salt[10];
-#ifdef SHADOW_PWD
-	struct spwd *spass = NULL;
-#endif
-	struct passwd *pass = NULL;
-
-	pass = getpwnam(user);
-	if (!pass) {
-		strlower(user);
-		pass = getpwnam(user);
-	}
-
-	if (!pass) {
-		Debug(0, "Couldn't find user %s\n", user);
-		return (False);
-	}
-
-#ifdef PWDAUTH
-	pwok = (pwdauth(user, password) == 0);
-	if (!pwok) {
-		strlower(password);
-		pwok = (pwdauth(user, password) == 0);
-	}
-	return (pwok);
-#endif
-
-#ifdef SHADOW_PWD
-	spass = getspnam(user);
-	if (spass && spass->sp_pwdp)
-		pass->pw_passwd = spass->sp_pwdp;
-#endif
-	strncpy(salt, pass->pw_passwd, 2);
-	salt[2] = 0;
-	pwok = (strcmp(crypt(password, salt), pass->pw_passwd) == 0);
-	if (!pwok) {
-		strlower(password);
-		pwok = (strcmp(crypt(password, salt), pass->pw_passwd) == 0);
-	}
-
-	return (pwok);
 }
 
 /****************************************************************************

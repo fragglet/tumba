@@ -436,7 +436,6 @@ BOOL get_broadcast(struct in_addr *if_ipaddr, struct in_addr *if_bcast,
                    struct in_addr *if_nmask);
 BOOL allow_access(char *deny_list, char *allow_list, struct from_host *client);
 void Debug(int, char *, ...);
-BOOL password_ok(char *user, char *password);
 int chain_reply(int type, char *inbuf, char *inbuf2, char *outbuf,
                 char *outbuf2, int size, int bufsize);
 void close_cnum(int cnum);
@@ -472,11 +471,6 @@ int setreuid();
 int setregid();
 int closedir();
 char *getpass();
-#ifndef PWD_AUTH
-#ifndef crypt
-char *crypt();
-#endif
-#endif
 
 #ifdef STRING_DEBUG
 #define strcpy mystrcpy
