@@ -83,8 +83,10 @@ source:
                             smb.conf.sample \
                             *.c *.h
 
-.c.o: $(INCLUDES)
-	$(CC) $(CFLAGS) -c $*.c
+.c.o:
+	$(CC) $(CFLAGS) -c $<
+
+%.o: $(INCLUDES)
 
 clean:
 	rm -f *.o *~ *.tar smbserver nmbserver testparm
