@@ -494,23 +494,6 @@ int find_service(char *service)
 
    iService = lp_servicenumber(service);
 
-   /* now handle the special case of a home directory */
-   if (iService < 0)
-   {
-      char *phome_dir = get_home_dir(service);
-      Debug(3,"checking for home directory %s gave %s\n",service,
-	    phome_dir?phome_dir:"(NULL)");
-      if (phome_dir)
-      {   
-	 int iHomeService;
-	 if ((iHomeService = lp_servicenumber(HOMES_NAME)) >= 0)
-	 {
-	    lp_add_home(service,iHomeService,phome_dir);
-	    iService = lp_servicenumber(service);
-	 }
-      }
-   }
-
    if (iService >= 0)
       if (!VALID_SNUM(iService))
       {

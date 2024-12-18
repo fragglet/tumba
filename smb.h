@@ -431,7 +431,6 @@ char *timestring();
 uint16 sval(char *,int );
 BOOL ip_equal(struct in_addr *ip1,struct in_addr *ip2);
 BOOL send_packet(char *buf,int len,struct in_addr *ip,int port,int type);
-char *get_home_dir(char *);
 int set_filelen(int fd, long len);
 uint32 make_dos_date(time_t );
 int lp_keepalive(void);

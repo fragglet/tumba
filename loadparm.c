@@ -81,10 +81,6 @@
 #define PRINTCAP_NAME "/etc/printcap"
 #endif
 
-#ifndef HOMES_NAME
-#define HOMES_NAME "homes"
-#endif
-
 /* some helpful bits */
 #define NUMELS(x) (sizeof(x) / sizeof((x)[0]))
 #define LP_SNUM_OK(iService) (((iService) >= 0) && ((iService) < iNumServices))
@@ -339,30 +335,6 @@ static int add_a_service(service *pservice)
 }
 
 /***************************************************************************
-add a new home service, with the specified home directory, defaults coming 
-from service ifrom
-***************************************************************************/
-BOOL lp_add_home(char *pszHomename, int iDefaultService, char *pszHomedir)
-{
-  int i = add_a_service(&pServices[iDefaultService]);
-
-  if (i < 0)
-    return(False);
-
-  string_set(&pServices[i].szService,pszHomename);
-  string_set(&pServices[i].szPath,pszHomedir);
-  pServices[i].bAvailable = True;
-
-  if (!pServices[i].bGuest_ok)
-    string_set(&pServices[i].szUsername,pszHomename);
-
-  Debug(2,"adding home directory %s at %s\n", pszHomename, pszHomedir);
-
-  return(True);
-}
-
-
-/***************************************************************************
 Initialise the global parameter structure.
 ***************************************************************************/
 static void init_globals(void)
@@ -590,21 +562,6 @@ static BOOL service_ok(int iService)
       bRetval = False;
    }
 
-   if (pServices[iService].szPath[0] == '\0' &&
-       strwicmp(pServices[iService].szService,HOMES_NAME) != 0)
-   {
-      Debug(0, "No path in service %s\n", pServices[iService].szService);
-      bRetval = False;
-   }
-
-   if (!pServices[iService].bGuest_ok && 
-       (pServices[iService].szUsername[0] == '\0') &&
-       strwicmp(pServices[iService].szService,HOMES_NAME) != 0)
-   {
-      Debug(0, "No user specified for non-guest service %s\n",
-            pServices[iService].szService);
-      bRetval = False;
-   }
    /* If a service is flagged unavailable, log the fact at level 0. */
    if (!pServices[iService].bAvailable) 
       Debug(0, "NOTE: Service %s is flagged unavailable.\n",

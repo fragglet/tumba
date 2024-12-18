@@ -8,10 +8,6 @@
 /* a service name. It will default to "global" if not defined here.          */
 #define GLOBAL_NAME "global"
 
-/* This defines the section name in the configuration file that will
-   refer to the special "homes" service */
-#define HOMES_NAME "homes"
-
 /* set these to define the limits of the server. NOTE These are on a
    per-client basis. Thus any one machine can't connect to more than
    MAX_CONNECTIONS services, but any number of machines may connect at

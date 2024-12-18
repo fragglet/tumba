@@ -1956,28 +1956,6 @@ BOOL string_set(char **dest,char *src)
 }
 
 /****************************************************************************
-get a users home directory. tries as-is then lower case
-****************************************************************************/
-char *get_home_dir(char *user)
-{
-  static struct passwd *pass;
-  pstring user2;
-
-  strcpy(user2,user);
-
-  pass = getpwnam(user2);
-  if (!pass) 
-    {
-      strlower(user2);
-      pass = getpwnam(user2);
-    }
-
-  if (!pass) return(NULL);
-  return(pass->pw_dir);      
-}
-
-
-/****************************************************************************
 become a daemon, discarding the controlling terminal
 ****************************************************************************/
 void become_daemon(void)

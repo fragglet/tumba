@@ -49,9 +49,6 @@ extern void lp_unload(void);
 extern BOOL lp_load(char *pszFname);
 extern void lp_dump(void);
 extern int  lp_servicenumber(char *pszServiceName);
-extern BOOL lp_add_home(char *pszHomename, 
-                        int iDefaultService, char *pszHomedir);
 extern BOOL lp_readonly(int iService);
 extern int lp_create_mode(int iService);
-extern BOOL lp_add_home(char *pservice,int ifrom,char *phome);
 #endif

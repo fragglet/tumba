@@ -55,11 +55,6 @@ int main(int argc, char *argv[])
          else
 	   {
 	     printf("Loaded services file OK.\n");
-	     {
-	       int iHomeService;
-	       if ((iHomeService = lp_servicenumber(HOMES_NAME)) >= 0)
-		 lp_add_home("fred",iHomeService,"/home/fred");
-	     }
 	     lp_dump();
 	   }
          fclose(dbf);
