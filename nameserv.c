@@ -48,7 +48,7 @@ name_struct *names = NULL;
 void construct_reply(char *,char *);
 
 /* are we running as a daemon ? */
-BOOL daemon = False;
+BOOL daemon_mode = False;
 
 
 BOOL got_bcast = False;
@@ -230,7 +230,7 @@ void register_groups(void)
   int i;
   for (i=0;i<num_names;i++)
     if (names[i].valid && (names[i].nb_flags & 0x80))
-      register_name(&names[i],&bcast_ip,daemon?NULL:construct_reply);
+      register_name(&names[i],&bcast_ip,daemon_mode?NULL:construct_reply);
 }
 
 
@@ -458,7 +458,7 @@ void process(char *lookup)
   if (!reply_only)
     {
       int i = find_name(myname);
-      if (i < 0 || !register_name(&names[i],&bcast_ip,daemon?NULL:construct_reply))
+      if (i < 0 || !register_name(&names[i],&bcast_ip,daemon_mode?NULL:construct_reply))
 	{
 	  Debug(0,"Failed to register my own name\n");
 	  return;
@@ -665,7 +665,7 @@ int main(int argc,char *argv[])
 	strcpy(lookup,optarg);
 	break;
       case 'D':
-	daemon = True;
+	daemon_mode = True;
 	break;
       case 'd':
 	DEBUGLEVEL = atoi(optarg);
@@ -711,13 +711,13 @@ int main(int argc,char *argv[])
   check_names();
   dump_names();
 
-  if (daemon)
+  if (daemon_mode)
     {
       Debug(2,"%s becoming a daemon\n",timestring());
       become_daemon();
     }
 
-  if (open_sockets(daemon,port))
+  if (open_sockets(daemon_mode,port))
     {
       process(lookup);
       close_sockets();
