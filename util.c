@@ -766,12 +766,7 @@ return the absolute current directory path
 ********************************************************************/
 char *GetWd(char *s)
 {
-#if (defined(LINUX) || defined(SOLARIS) || defined(SVR4) || \
-     defined(HPUX) || defined(NEXT) || defined(ISC))
   return((char *)getcwd(s,sizeof(pstring)));
-#else
-  return((char *)getwd(s));
-#endif
 }
 
 
