@@ -34,13 +34,6 @@
  *     This would also permit the structure to change - perhaps to a
  *     list with entries generated at run time as needed.
  *
- *     I'm reasonably sure that the 'available' flag in the service
- *     is an artifact of the old storage method. However, just in case
- *     it is designed for some future feature, I've maintained it. If
- *     it does turn out to be an artifact, it could still be useful -
- *     we could add a parameter that lets you 'turn off' services
- *     without having to comment them out. 'available = yes/no'.
- *
  *     General cleaning up - this lot is very messy and inefficient. In
  *     particular, I'd like to make the Hungarian notation consistent
  *     again (multi-programmer hazard, that).
@@ -97,7 +90,6 @@ typedef enum {
 /* this is the list of numbers we use to identify parameters */
 typedef enum {
 	E_NULLPARM,
-	E_AVAILABLE,
 	E_COPY,
 	E_PATH,
 	E_USERNAME,
@@ -146,7 +138,6 @@ typedef struct {
 typedef struct {
 	BOOL bCopyEncountered;
 	char *szSourceService;
-	BOOL bUS_available;
 	BOOL bUS_path;
 	BOOL bUS_hosts_allow;
 	BOOL bUS_hosts_deny;
@@ -163,7 +154,6 @@ typedef struct {
  * This structure describes a single service.
  */
 typedef struct {
-	BOOL bAvailable;
 	char *szService;
 	char *szPath;
 	char *szUsername;
@@ -197,7 +187,6 @@ typedef struct {
 
 /* This is a default service used to prime a services structure */
 static service DefaultService = {
-    True,            /* bAvailable */
     "",              /* szService */
     "",              /* szPath */
     "",              /* szUsername */
@@ -222,7 +211,6 @@ static service DefaultService = {
         True,
         True,
         True,
-        True,
     }, /* sCopyMap */
 };
 
@@ -236,7 +224,6 @@ static BOOL bDoneGlobalSection = False;
 
 static parmmap aParmMaps[] = {
     {"", E_NULLPARM, E_NULLTYPE}, /* this must be first */
-    {"available", E_AVAILABLE, E_SERVICE},
     {"copy", E_COPY, E_SERVICE},
     {"path", E_PATH, E_SERVICE},
     {"directory", E_PATH, E_SERVICE},
@@ -477,9 +464,6 @@ static void copy_service(service *pserviceDest, service *pserviceSource,
 	if (bcopyall)
 		string_set(&pserviceDest->szService, pserviceSource->szService);
 
-	if (bcopyall || pcopymapDest->bUS_available)
-		pserviceDest->bAvailable = pserviceSource->bAvailable;
-
 	if (bcopyall || pcopymapDest->bUS_path)
 		string_set(&pserviceDest->szPath, pserviceSource->szPath);
 
@@ -539,11 +523,6 @@ static BOOL service_ok(int iService)
 		Debug(0, "No service name in service entry.\n");
 		bRetval = False;
 	}
-
-	/* If a service is flagged unavailable, log the fact at level 0. */
-	if (!pServices[iService].bAvailable)
-		Debug(0, "NOTE: Service %s is flagged unavailable.\n",
-		      pServices[iService].szService);
 
 	return (bRetval);
 }
@@ -661,12 +640,6 @@ static BOOL do_service_parameter(parmmap *pparmmap, char *pszParmValue)
 			Debug(0,
 			      "Unable to copy service - source not found: %s\n",
 			      pszParmValue);
-		break;
-
-	case E_AVAILABLE:
-		bRetval = set_boolean(&pServices[iServiceIndex].bAvailable,
-		                      pszParmValue);
-		COPYMAPS(iServiceIndex).bUS_available = False;
 		break;
 
 	case E_PATH:
@@ -904,7 +877,6 @@ Display the contents of a single services record.
 static void dump_a_service(service *pService)
 {
 	printf("Service name: %s\n", pService->szService);
-	printf("\tavailable     : %s\n", BOOLSTR(pService->bAvailable));
 	printf("\tpath          : %s\n", pService->szPath);
 	printf("\tusername      : %s\n", pService->szUsername);
 	printf("\thosts allow   : %s\n", pService->szHostsallow);
@@ -932,8 +904,6 @@ static void dump_copy_map(copymap *pcopymap)
 	else {
 		printf("\tCopy details:\n");
 		printf("\t\tsource      : %s\n", pcopymap->szSourceService);
-		printf("\t\tavailable   : %s\n",
-		       BOOLSTR(pcopymap->bUS_available));
 		printf("\t\tpath        : %s\n", BOOLSTR(pcopymap->bUS_path));
 		printf("\t\tusername    : %s\n",
 		       BOOLSTR(pcopymap->bUS_username));
@@ -959,7 +929,7 @@ Return TRUE if the passed service number is within range.
 ***************************************************************************/
 BOOL lp_snum_ok(int iService)
 {
-	return (LP_SNUM_OK(iService) && pServices[iService].bAvailable);
+	return LP_SNUM_OK(iService);
 }
 
 /***************************************************************************
