@@ -42,9 +42,6 @@
 #define NO_UTIMEH
 #endif
 
-#ifdef sun386
-#define NO_UTIMEH
-#endif
 
 
 
@@ -238,15 +235,8 @@ Here come some platform specific sections
 #include <sys/wait.h>
 #include <signal.h>
 /* #include <termios.h> */
-#ifdef sun386
-#define NO_STRFTIME
-#define NO_UTIMBUF
-#define mktime timelocal
-typedef unsigned short mode_t;
-#else
 #include <utime.h>
 #define NO_STRERROR
-#endif
 #ifndef REPLACE_GETPASS
 #define REPLACE_GETPASS
 #endif
