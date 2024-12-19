@@ -294,47 +294,6 @@ typedef unsigned short mode_t;
 #endif
 
 
-#ifdef SUNOS5
-#include <fcntl.h>
-#include <dirent.h>
-#include <sys/acct.h>
-#include <sys/statfs.h>
-#include <sys/statvfs.h>
-#include <sys/filio.h>
-#include <sys/sockio.h>
-#include <netinet/in_systm.h>
-#include <netinet/tcp.h>
-#include <netinet/ip.h>
-#include <string.h>
-#include <arpa/inet.h>
-#include <rpcsvc/ypclnt.h>
-#include <termios.h>
-#include <sys/stropts.h>
-#if !defined(USE_LIBDES) && !defined(KRB4_AUTH)
-#include <crypt.h>
-#endif /* !USE_LIBDES && !KRB4_AUTH */
-extern int gettimeofday (struct timeval *, void *);
-extern int gethostname (char *name, int namelen);
-extern int innetgr (const char *, const char *, const char *, const char *);
-#define USE_SETVBUF
-#define SIGNAL_CAST (void (*)(int))
-#ifndef SYSV
-#define SYSV
-#endif
-#define USE_WAITPID
-#define REPLACE_STRLEN
-#define USE_STATVFS
-#define USE_GETCWD
-#define USE_SETSID
-#define NO_SEMUN
-#ifndef REPLACE_GETPASS
-#define REPLACE_GETPASS
-#endif /* REPLACE_GETPASS */
-#define USE_SIGPROCMASK
-#ifndef QSORT_CAST
-#define QSORT_CAST (int (*)(const void *, const void *))
-#endif /* QSORT_CAST */
-#endif
 
 
 #ifdef ULTRIX

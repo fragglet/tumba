@@ -228,13 +228,8 @@ BOOL disk_quotas(char *path, int *bsize, int *dfree, int *dsize)
 #elif defined(SUNOS5) || defined(SUNOS4)
 
 #include <fcntl.h>
-#if defined(SUNOS5)
-#include <sys/fs/ufs_quota.h>
-#include <sys/mnttab.h>
-#else /* defined(SUNOS4) */
 #include <ufs/quota.h>
 #include <mntent.h>
-#endif
 
 /****************************************************************************
 try to get the disk space from disk quotas (solaris 2 version)
@@ -245,15 +240,8 @@ BOOL disk_quotas(char *path, int *bsize, int *dfree, int *dsize)
   uid_t user_id, euser_id;
   int ret;
   struct dqblk D;
-#if defined(SUNOS5)
-  struct quotctl command;
-  int file;
-  struct mnttab mnt;
-  static pstring name;
-#else
   struct mntent *mnt;
   static pstring name;
-#endif
   FILE *fd;
   struct stat sbuf;
   dev_t devno ;
@@ -267,26 +255,6 @@ BOOL disk_quotas(char *path, int *bsize, int *dfree, int *dsize)
   DEBUG(5,("disk_quotas: looking for path \"%s\" devno=%o\n", path,devno));
   if ( devno != devno_cached ) {
     devno_cached = devno ;
-#if defined(SUNOS5)
-    if ((fd = fopen(MNTTAB, "r")) == NULL)
-      return(False) ;
-    
-    found = False ;
-    while (getmntent(fd, &mnt) == 0) {
-      if ( stat(mnt.mnt_mountp,&sbuf) == -1 )
-	continue ;
-      DEBUG(5,("disk_quotas: testing \"%s\" devno=%o\n", 
-	       mnt.mnt_mountp,sbuf.st_dev));
-      if (sbuf.st_dev == devno) {
-	found = True ;
-	break ;
-      }
-    }
-    
-    pstrcpy(name,mnt.mnt_mountp) ;
-    pstrcat(name,"/quotas") ;
-    fclose(fd) ;
-#else
     if ((fd = setmntent(MOUNTED, "r")) == NULL)
       return(False) ;
     
@@ -304,7 +272,6 @@ BOOL disk_quotas(char *path, int *bsize, int *dfree, int *dsize)
     
     pstrcpy(name,mnt->mnt_fsname) ;
     endmntent(fd) ;
-#endif
     
     if ( ! found )
       return(False) ;
@@ -316,22 +283,8 @@ BOOL disk_quotas(char *path, int *bsize, int *dfree, int *dsize)
   setuid(0);  /* Solaris seems to want to give info only to super-user */
   seteuid(0);
 
-#if defined(SUNOS5)
-  DEBUG(5,("disk_quotas: looking for quotas file \"%s\"\n", name));
-  if((file=open(name, O_RDONLY))<0) {
-    setuid(user_id);  /* Restore the original UID status */
-    seteuid(euser_id);
-    return(False);
-  }
-  command.op = Q_GETQUOTA;
-  command.uid = euser_id;
-  command.addr = (caddr_t) &D;
-  ret = ioctl(file, Q_QUOTACTL, &command);
-  close(file);
-#else
   DEBUG(5,("disk_quotas: trying quotactl on device \"%s\"\n", name));
   ret = quotactl(Q_GETQUOTA, name, euser_id, &D);
-#endif
 
   setuid(user_id); /* Restore the original uid status. */
   seteuid(euser_id);

@@ -4582,20 +4582,6 @@ char *readdirname(void *p)
   dname = ptr->d_name;
 
 
-#ifdef SUNOS5
-  /* this handles a broken compiler setup, causing a mixture
-   of BSD and SYSV headers and libraries */
-  {
-    static BOOL broken_readdir = False;
-    if (!broken_readdir && !(*(dname)) && strequal("..",dname-2))
-      {
-	DEBUG(0,("Your readdir() is broken. You have somehow mixed SYSV and BSD headers and libraries\n"));
-	broken_readdir = True;
-      }
-    if (broken_readdir)
-      dname = dname - 2;
-  }
-#endif
 
   {
     static pstring buf;
