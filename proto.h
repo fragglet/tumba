@@ -6,30 +6,6 @@
 BOOL check_access(int snum);
 BOOL allow_access(char *deny_list,char *allow_list,char *cname,char *caddr);
 
-/*The following definitions come from  asyncdns.c  */
-
-int asyncdns_fd(void);
-void kill_async_dns_child(void);
-void start_async_dns(void);
-void run_dns_queue(void);
-BOOL queue_dns_query(struct packet_struct *p,struct nmb_name *question,
-		     struct name_record **n);
-BOOL queue_dns_query(struct packet_struct *p,struct nmb_name *question,
-		     struct name_record **n);
-void kill_async_dns_child(void);
-
-/*The following definitions come from  cgi.c  */
-
-void cgi_load_variables(FILE *f1);
-char *cgi_variable(char *name);
-char *cgi_vnum(int i, char **name);
-int cgi_boolean(char *name, int def);
-char *quotedup(char *s);
-char *urlquote(char *s);
-char *quotequotes(char *s);
-void quote_spaces(char *buf);
-void cgi_setup(char *rootdir);
-
 /*The following definitions come from  charcnv.c  */
 
 char *unix2dos_format(char *str,BOOL overwrite);
@@ -41,25 +17,6 @@ void interpret_character_set(char *str);
 void charset_initialise(void);
 void codepage_initialise(int client_codepage);
 void add_char_string(char *s);
-
-/*The following definitions come from  chgpasswd.c  */
-
-BOOL chat_with_program(char *passwordprogram,char *name,char *chatsequence, BOOL as_root);
-BOOL chgpasswd(char *name,char *oldpass,char *newpass, BOOL as_root);
-BOOL chgpasswd(char *name,char *oldpass,char *newpass, BOOL as_root);
-BOOL check_lanman_password(char *user, unsigned char *pass1, 
-                           unsigned char *pass2, struct smb_passwd **psmbpw);
-BOOL change_lanman_password(struct smb_passwd *smbpw, unsigned char *pass1, unsigned char *pass2);
-BOOL check_oem_password(char *user, unsigned char *data,
-                        struct smb_passwd **psmbpw, char *new_passwd,
-                        int new_passwd_size);
-BOOL change_oem_password(struct smb_passwd *smbpw, char *new_passwd, BOOL override);
-
-/*The following definitions come from  client.c  */
-
-void cli_smb_close(char *inbuf, char *outbuf, int clnt_fd, int c_num, int f_num);
-void do_dir(char *inbuf,char *outbuf,char *Mask,int attribute,void (*fn)(file_info *),BOOL recurse_dir, BOOL dirstoo);
-void cmd_help(char *dum_in, char *dum_out);
 
 /*The following definitions come from  clientgen.c  */
 
@@ -107,40 +64,6 @@ void cli_error(struct cli_state *cli, int *eclass, int *num);
 void cli_sockopt(struct cli_state *cli, char *options);
 int cli_setpid(struct cli_state *cli, int pid);
 
-/*The following definitions come from  clientutil.c  */
-
-void cli_setup_pkt(char *outbuf);
-BOOL cli_call_api(char *pipe_name, int pipe_name_len,
-			int prcnt,int drcnt, int srcnt,
-		     int mprcnt,int mdrcnt,
-		     int *rprcnt,int *rdrcnt,
-		     char *param,char *data, uint16 *setup,
-		     char **rparam,char **rdata);
-BOOL cli_receive_trans_response(char *inbuf,int trans,
-                                   int *data_len,int *param_len,
-				   char **data,char **param);
-BOOL cli_send_trans_request(char *outbuf,int trans,
-			       char *name,int namelen, int fid,int flags,
-			       char *data,char *param,uint16 *setup,
-			       int ldata,int lparam,int lsetup,
-			       int mdata,int mparam,int msetup);
-BOOL cli_send_session_request(char *inbuf,char *outbuf);
-BOOL cli_send_login(char *inbuf,char *outbuf,BOOL start_session,BOOL use_setup, struct connection_options *options);
-void cli_send_logout(char *dum_in, char *dum_out);
-BOOL cli_open_sockets(int port );
-BOOL cli_reopen_connection(char *inbuf,char *outbuf);
-
-/*The following definitions come from  clitar.c  */
-
-int padit(char *buf, int bufsize, int padsize);
-void cmd_block(char *dum_in, char *dum_out);
-void cmd_tarmode(char *dum_in, char *dum_out);
-void cmd_setmode(char *dum_in, char *dum_out);
-void cmd_tar(char *inbuf, char *outbuf);
-int process_tar(char *inbuf, char *outbuf);
-int clipfind(char **aret, int ret, char *tok);
-int tar_parseargs(int argc, char *argv[], char *Optarg, int Optind);
-
 /*The following definitions come from  credentials.c  */
 
 char *credstr(uchar *cred);
@@ -187,10 +110,6 @@ void DirCacheFlush( int snum );
 /*The following definitions come from  fault.c  */
 
 void fault_setup(void (*fn)(void *));
-
-/*The following definitions come from  getsmbpass.c  */
-
-char *getsmbpass(char *prompt)    ;
 
 /*The following definitions come from  interface.c  */
 
@@ -244,13 +163,6 @@ char *lp_nis_home_map_name(void);
 char *lp_announce_version(void);
 char *lp_netbios_aliases(void);
 char *lp_driverfile(void);
-char *lp_domain_sid(void);
-char *lp_domain_other_sids(void);
-char *lp_domain_groups(void);
-char *lp_domain_admin_users(void);
-char *lp_domain_guest_users(void);
-char *lp_domain_hostsallow(void);
-char *lp_domain_hostsdeny(void);
 BOOL lp_dns_proxy(void);
 BOOL lp_wins_support(void);
 BOOL lp_we_are_a_wins_server(void);
@@ -260,7 +172,6 @@ BOOL lp_domain_controller(void);
 BOOL lp_domain_master(void);
 BOOL lp_domain_logons(void);
 BOOL lp_preferred_master(void);
-BOOL lp_load_printers(void);
 BOOL lp_use_rhosts(void);
 BOOL lp_getwdcache(void);
 BOOL lp_readprediction(void);
@@ -332,7 +243,6 @@ char *lp_mangled_map(int );
 char *lp_veto_files(int );
 char *lp_hide_files(int );
 char *lp_veto_oplocks(int );
-char *lp_driverlocation(int );
 BOOL lp_alternate_permissions(int );
 BOOL lp_revalidate(int );
 BOOL lp_casesensitive(int );
@@ -465,330 +375,6 @@ BOOL getlmhostsent( FILE *fp, char *name, int *name_type, struct in_addr *ipaddr
 void endlmhosts(FILE *fp);
 BOOL resolve_name(char *name, struct in_addr *return_ip);
 
-/*The following definitions come from  nmbd.c  */
-
-BOOL reload_services(BOOL test);
-int main(int argc,char *argv[]);
-
-/*The following definitions come from  nmbd_become_dmb.c  */
-
-void unbecome_domain_master(char *workgroup_name);
-void add_domain_names(time_t t);
-
-/*The following definitions come from  nmbd_become_lmb.c  */
-
-void insert_permanent_name_into_unicast( struct subnet_record *subrec, 
-                                                struct nmb_name *nmbname, uint16 nb_type );
-void unbecome_local_master_success(struct subnet_record *subrec,
-                             struct userdata_struct *userdata,
-                             struct nmb_name *released_name,
-                             struct in_addr released_ip);
-void unbecome_local_master_fail(struct subnet_record *subrec, struct response_record *rrec,
-                       struct nmb_name *fail_name);
-void unbecome_local_master_browser(struct subnet_record *subrec, struct work_record *work,
-                                   BOOL force_new_election);
-void become_local_master_browser(struct subnet_record *subrec, struct work_record *work);
-void set_workgroup_local_master_browser_name( struct work_record *work, char *newname);
-
-/*The following definitions come from  nmbd_browserdb.c  */
-
-void remove_lmb_browser_entry(struct browse_cache_record *browc);
-void update_browser_death_time(struct browse_cache_record *browc);
-struct browse_cache_record *create_browser_in_lmb_cache(char *work_name, char *browser_name, 
-                                                        struct in_addr ip);
-struct browse_cache_record *find_browser_in_lmb_cache( char *browser_name );
-void expire_lmb_browsers(time_t t);
-void remove_workgroup_lmb_browsers(char *work_group);
-
-/*The following definitions come from  nmbd_browsesync.c  */
-
-void dmb_expire_and_sync_browser_lists(time_t t);
-void announce_and_sync_with_domain_master_browser( struct subnet_record *subrec,
-                                                   struct work_record *work);
-void collect_all_workgroup_names_from_wins_server(time_t t);
-
-/*The following definitions come from  nmbd_elections.c  */
-
-void check_master_browser_exists(time_t t);
-void run_elections(time_t t);
-void process_election(struct subnet_record *subrec, struct packet_struct *p, char *buf);
-BOOL check_elections(void);
-
-/*The following definitions come from  nmbd_incomingdgrams.c  */
-
-void tell_become_backup(void);
-void process_host_announce(struct subnet_record *subrec, struct packet_struct *p, char *buf);
-void process_workgroup_announce(struct subnet_record *subrec, struct packet_struct *p, char *buf);
-void process_local_master_announce(struct subnet_record *subrec, struct packet_struct *p, char *buf);
-void process_master_browser_announce(struct subnet_record *subrec, 
-                                     struct packet_struct *p,char *buf);
-void process_lm_host_announce(struct subnet_record *subrec, struct packet_struct *p, char *buf);
-void process_get_backup_list_request(struct subnet_record *subrec,
-                                     struct packet_struct *p,char *buf);
-void process_reset_browser(struct subnet_record *subrec,
-                                  struct packet_struct *p,char *buf);
-void process_announce_request(struct subnet_record *subrec, struct packet_struct *p, char *buf);
-void process_lm_announce_request(struct subnet_record *subrec, struct packet_struct *p, char *buf);
-
-/*The following definitions come from  nmbd_incomingrequests.c  */
-
-void process_name_release_request(struct subnet_record *subrec, 
-                                  struct packet_struct *p);
-void process_name_refresh_request(struct subnet_record *subrec,
-                                  struct packet_struct *p);
-void process_name_registration_request(struct subnet_record *subrec, 
-                                       struct packet_struct *p);
-void process_node_status_request(struct subnet_record *subrec, struct packet_struct *p);
-void process_name_query_request(struct subnet_record *subrec, struct packet_struct *p);
-
-/*The following definitions come from  nmbd_lmhosts.c  */
-
-void load_lmhosts_file(char *fname);
-BOOL find_name_in_lmhosts(struct nmb_name *nmbname, struct name_record **namerecp);
-
-/*The following definitions come from  nmbd_logonnames.c  */
-
-void add_logon_names(void);
-
-/*The following definitions come from  nmbd_mynames.c  */
-
-BOOL register_my_workgroup_and_names(void);
-void release_my_names(void);
-void refresh_my_names(time_t t);
-
-/*The following definitions come from  nmbd_namelistdb.c  */
-
-void set_samba_nb_type(void);
-BOOL ms_browser_name(char *name, int type);
-void remove_name_from_namelist(struct subnet_record *subrec, 
-                               struct name_record *namerec);
-struct name_record *find_name_on_subnet(struct subnet_record *subrec,
-                                      struct nmb_name *nmbname, BOOL self_only);
-struct name_record *find_name_for_remote_broadcast_subnet( struct nmb_name *nmbname, 
-                                                           BOOL self_only);
-void update_name_ttl(struct name_record *namerec, int ttl);
-struct name_record *add_name_to_subnet(struct subnet_record *subrec,
-		char *name, int type, uint16 nb_flags, int ttl, 
-                enum name_source source, int num_ips, struct in_addr *iplist);
-void standard_success_register(struct subnet_record *subrec, 
-                             struct userdata_struct *userdata,
-                             struct nmb_name *nmbname, uint16 nb_flags, int ttl,
-                             struct in_addr registered_ip);
-void standard_fail_register(struct subnet_record *subrec, 
-                             struct response_record *rrec, struct nmb_name *nmbname);
-BOOL find_ip_in_name_record(struct name_record *namerec, struct in_addr ip);
-void add_ip_to_name_record(struct name_record *namerec, struct in_addr new_ip);
-void remove_ip_from_name_record( struct name_record *namerec, struct in_addr remove_ip);
-void standard_success_release(struct subnet_record *subrec, 
-                             struct userdata_struct *userdata,
-                             struct nmb_name *nmbname, struct in_addr released_ip);
-void expire_names_on_subnet(struct subnet_record *subrec, time_t t);
-void expire_names(time_t t);
-void add_samba_names_to_subnet(struct subnet_record *subrec);
-void dump_all_namelists(void);
-
-/*The following definitions come from  nmbd_namequery.c  */
-
-BOOL query_name(struct subnet_record *subrec, char *name, int type,
-                   query_name_success_function success_fn,
-                   query_name_fail_function fail_fn, 
-                   struct userdata_struct *userdata);
-BOOL query_name_from_wins_server(struct in_addr ip_to, 
-                   char *name, int type,
-                   query_name_success_function success_fn,
-                   query_name_fail_function fail_fn, 
-                   struct userdata_struct *userdata);
-
-/*The following definitions come from  nmbd_nameregister.c  */
-
-BOOL register_name(struct subnet_record *subrec,
-                   char *name, int type, uint16 nb_flags,
-                   register_name_success_function success_fn,
-                   register_name_fail_function fail_fn,
-                   struct userdata_struct *userdata);
-BOOL refresh_name(struct subnet_record *subrec, struct name_record *namerec,
-                  refresh_name_success_function success_fn,
-                  refresh_name_fail_function fail_fn,
-                  struct userdata_struct *userdata);
-
-/*The following definitions come from  nmbd_namerelease.c  */
-
-BOOL release_name(struct subnet_record *subrec, struct name_record *namerec,
-                   release_name_success_function success_fn,
-                   release_name_fail_function fail_fn,
-                   struct userdata_struct *userdata);
-
-/*The following definitions come from  nmbd_nodestatus.c  */
-
-BOOL node_status(struct subnet_record *subrec, struct nmb_name *nmbname,
-                 struct in_addr send_ip, node_status_success_function success_fn, 
-                 node_status_fail_function fail_fn, struct userdata_struct *userdata);
-
-/*The following definitions come from  nmbd_packets.c  */
-
-uint16 get_nb_flags(char *buf);
-void set_nb_flags(char *buf, uint16 nb_flags);
-struct response_record *queue_register_name( struct subnet_record *subrec,
-                          response_function resp_fn,
-                          timeout_response_function timeout_fn,
-                          register_name_success_function success_fn,
-                          register_name_fail_function fail_fn,
-                          struct userdata_struct *userdata,
-                          struct nmb_name *nmbname,
-                          uint16 nb_flags);
-struct response_record *queue_register_multihomed_name( struct subnet_record *subrec,
-                          response_function resp_fn,
-                          timeout_response_function timeout_fn,
-                          register_name_success_function success_fn,
-                          register_name_fail_function fail_fn,
-                          struct userdata_struct *userdata,
-                          struct nmb_name *nmbname,
-                          uint16 nb_flags,
-                          struct in_addr register_ip);
-struct response_record *queue_release_name( struct subnet_record *subrec,
-                          response_function resp_fn,
-                          timeout_response_function timeout_fn,
-                          release_name_success_function success_fn,
-                          release_name_fail_function fail_fn,
-                          struct userdata_struct *userdata,
-                          struct nmb_name *nmbname,
-                          uint16 nb_flags,
-                          struct in_addr release_ip);
-struct response_record *queue_refresh_name( struct subnet_record *subrec,
-                          response_function resp_fn,
-                          timeout_response_function timeout_fn,
-                          refresh_name_success_function success_fn,
-                          refresh_name_fail_function fail_fn,
-                          struct userdata_struct *userdata,
-                          struct name_record *namerec,
-                          struct in_addr refresh_ip);
-struct response_record *queue_query_name( struct subnet_record *subrec,
-                          response_function resp_fn,
-                          timeout_response_function timeout_fn,
-                          query_name_success_function success_fn,
-                          query_name_fail_function fail_fn,
-                          struct userdata_struct *userdata,
-                          struct nmb_name *nmbname);
-struct response_record *queue_query_name_from_wins_server( struct in_addr to_ip,
-                          response_function resp_fn,
-                          timeout_response_function timeout_fn,
-                          query_name_success_function success_fn,
-                          query_name_fail_function fail_fn,
-                          struct userdata_struct *userdata,
-                          struct nmb_name *nmbname);
-struct response_record *queue_node_status( struct subnet_record *subrec,
-                          response_function resp_fn,
-                          timeout_response_function timeout_fn,
-                          node_status_success_function success_fn,
-                          node_status_fail_function fail_fn,
-                          struct userdata_struct *userdata,
-                          struct nmb_name *nmbname,
-                          struct in_addr send_ip);
-void reply_netbios_packet(struct packet_struct *orig_packet,
-                          int rcode, enum netbios_reply_type_code rcv_code, int opcode,
-                          int ttl, char *data,int len);
-void queue_packet(struct packet_struct *packet);
-void process_browse_packet(struct packet_struct *p, char *buf,int len);
-void process_lanman_packet(struct packet_struct *p, char *buf,int len);
-BOOL validate_nmb_response_packet( struct nmb_packet *nmb );
-BOOL validate_nmb_packet( struct nmb_packet *nmb );
-void run_packet_queue(void);
-void retransmit_or_expire_response_records(time_t t);
-BOOL listen_for_packets(BOOL run_election);
-BOOL send_mailslot(BOOL unique, char *mailslot,char *buf,int len,
-                   char *srcname, int src_type,
-                   char *dstname, int dest_type,
-                   struct in_addr dest_ip,struct in_addr src_ip);
-
-/*The following definitions come from  nmbd_processlogon.c  */
-
-void process_logon_packet(struct packet_struct *p,char *buf,int len, 
-                          char *mailslot);
-
-/*The following definitions come from  nmbd_responserecordsdb.c  */
-
-void add_response_record(struct subnet_record *subrec,
-				struct response_record *rrec);
-void remove_response_record(struct subnet_record *subrec,
-				struct response_record *rrec);
-struct response_record *make_response_record( struct subnet_record *subrec,
-                    struct packet_struct *p,
-                    response_function resp_fn,
-                    timeout_response_function timeout_fn,
-                    success_function success_fn,
-                    fail_function fail_fn,
-                    struct userdata_struct *userdata);
-struct response_record *find_response_record(struct subnet_record **ppsubrec,
-				uint16 id);
-BOOL is_refresh_already_queued(struct subnet_record *subrec, struct name_record *namerec);
-
-/*The following definitions come from  nmbd_sendannounce.c  */
-
-void send_browser_reset(int reset_type, char *to_name, int to_type, struct in_addr to_ip);
-void broadcast_announce_request(struct subnet_record *subrec, struct work_record *work);
-void announce_my_server_names(time_t t);
-void announce_my_lm_server_names(time_t t);
-void reset_announce_timer(void);
-void announce_myself_to_domain_master_browser(time_t t);
-void announce_my_servers_removed(void);
-void announce_remote(time_t t);
-void browse_sync_remote(time_t t);
-
-/*The following definitions come from  nmbd_serverlistdb.c  */
-
-void remove_all_servers(struct work_record *work);
-struct server_record *find_server_in_workgroup(struct work_record *work, char *name);
-void remove_server_from_workgroup(struct work_record *work, struct server_record *servrec);
-struct server_record *create_server_on_workgroup(struct work_record *work,
-                                                 char *name,int servertype, 
-                                                 int ttl,char *comment);
-void update_server_ttl(struct server_record *servrec, int ttl);
-void expire_servers(struct work_record *work, time_t t);
-void write_browse_list(time_t t, BOOL force_write);
-
-/*The following definitions come from  nmbd_subnetdb.c  */
-
-BOOL create_subnets(void);
-BOOL we_are_a_wins_client(void);
-struct subnet_record *get_next_subnet_maybe_unicast(struct subnet_record *subrec);
-struct subnet_record *get_next_subnet_maybe_unicast_or_wins_server(struct subnet_record *subrec);
-
-/*The following definitions come from  nmbd_winsproxy.c  */
-
-void make_wins_proxy_name_query_request( struct subnet_record *subrec, 
-                                         struct packet_struct *incoming_packet,
-                                         struct nmb_name *question_name);
-
-/*The following definitions come from  nmbd_winsserver.c  */
-
-BOOL packet_is_for_wins_server(struct packet_struct *packet);
-BOOL initialise_wins(void);
-void wins_process_name_refresh_request(struct subnet_record *subrec,
-                                            struct packet_struct *p);
-void wins_process_name_registration_request(struct subnet_record *subrec,
-                                            struct packet_struct *p);
-void wins_process_multihomed_name_registration_request( struct subnet_record *subrec,
-                                                        struct packet_struct *p);
-void send_wins_name_query_response(int rcode, struct packet_struct *p, 
-                                          struct name_record *namerec);
-void wins_process_name_query_request(struct subnet_record *subrec, 
-                                     struct packet_struct *p);
-void wins_process_name_release_request(struct subnet_record *subrec,
-                                       struct packet_struct *p);
-void initiate_wins_processing(time_t t);
-void wins_write_database(void);
-
-/*The following definitions come from  nmbd_workgroupdb.c  */
-
-struct work_record *find_workgroup_on_subnet(struct subnet_record *subrec, 
-                                             fstring name);
-struct work_record *create_workgroup_on_subnet(struct subnet_record *subrec,
-                                               fstring name, int ttl);
-void update_workgroup_ttl(struct work_record *work, int ttl);
-void initiate_myworkgroup_startup(struct subnet_record *subrec, struct work_record *work);
-void dump_workgroups(BOOL force_write);
-void expire_workgroups_and_servers(time_t t);
-
 /*The following definitions come from  nmblib.c  */
 
 char *lookup_opcode_name( int opcode );
@@ -799,11 +385,6 @@ struct packet_struct *read_packet(int fd,enum packet_type packet_type);
 void make_nmb_name(struct nmb_name *n,char *name,int type,char *this_scope);
 BOOL send_packet(struct packet_struct *p);
 struct packet_struct *receive_packet(int fd,enum packet_type type,int t);
-
-/*The following definitions come from  ntclient.c  */
-
-BOOL do_nt_login(char *desthost, char *myhostname,
-				int Client, int cnum);
 
 /*The following definitions come from  params.c  */
 
@@ -836,33 +417,14 @@ BOOL server_validate(char *user, char *domain,
 		     char *pass, int passlen,
 		     char *ntpass, int ntpasslen);
 
-/*The following definitions come from  pipes.c  */
-
-int reply_open_pipe_and_X(char *inbuf,char *outbuf,int length,int bufsize);
-int reply_pipe_close(char *inbuf,char *outbuf);
-BOOL api_LsarpcSNPHS(int pnum, int cnum, char *param);
-BOOL api_LsarpcTNP(int cnum,int uid, char *param,char *data,
-		     int mdrcnt,int mprcnt,
-		     char **rdata,char **rparam,
-		     int *rdata_len,int *rparam_len);
-
 /*The following definitions come from  predict.c  */
 
 int read_predict(int fd,int offset,char *buf,char **ptr,int num);
 void do_read_prediction(void);
 void invalidate_read_prediction(int fd);
 
-/*The following definitions come from  print_svid.c  */
-
-void sysv_printer_fn(void (*fn)(char *, char *));
-int sysv_printername_ok(char *name);
-
 /*The following definitions come from  quotas.c  */
 
-BOOL disk_quotas(char *path, int *bsize, int *dfree, int *dsize);
-BOOL disk_quotas(char *path, int *bsize, int *dfree, int *dsize);
-BOOL disk_quotas(char *path, int *bsize, int *dfree, int *dsize);
-BOOL disk_quotas(char *path, int *bsize, int *dfree, int *dsize);
 BOOL disk_quotas(char *path, int *bsize, int *dfree, int *dsize);
 BOOL disk_quotas(char *path, int *bsize, int *dfree, int *dsize);
 
@@ -926,281 +488,6 @@ int reply_writebs(char *inbuf,char *outbuf,int dum_size, int dum_buffsize);
 int reply_setattrE(char *inbuf,char *outbuf,int dum_size, int dum_buffsize);
 int reply_getattrE(char *inbuf,char *outbuf, int dum_size, int dum_buffsize);
 
-/*The following definitions come from  rpc_pipes/lsa_hnd.c  */
-
-void init_lsa_policy_hnd(void);
-BOOL open_lsa_policy_hnd(LSA_POL_HND *hnd);
-BOOL set_lsa_policy_samr_rid(LSA_POL_HND *hnd, uint32 rid);
-BOOL set_lsa_policy_samr_pol_status(LSA_POL_HND *hnd, uint32 pol_status);
-BOOL set_lsa_policy_samr_sid(LSA_POL_HND *hnd, DOM_SID *sid);
-uint32 get_lsa_policy_samr_rid(LSA_POL_HND *hnd);
-BOOL close_lsa_policy_hnd(LSA_POL_HND *hnd);
-
-/*The following definitions come from  rpc_pipes/lsaparse.c  */
-
-void make_q_open_pol(LSA_Q_OPEN_POL *r_q, char *server_name,
-			uint32 attributes, uint32 sec_qos,
-			uint16 desired_access);
-char* lsa_io_q_open_pol(BOOL io, LSA_Q_OPEN_POL *r_q, char *q, char *base, int align, int depth);
-char* lsa_io_r_open_pol(BOOL io, LSA_R_OPEN_POL *r_p, char *q, char *base, int align, int depth);
-void make_q_query(LSA_Q_QUERY_INFO *q_q, LSA_POL_HND *hnd, uint16 info_class);
-char* lsa_io_q_query(BOOL io, LSA_Q_QUERY_INFO *q_q, char *q, char *base, int align, int depth);
-char* lsa_io_q_enum_trust_dom(BOOL io, LSA_Q_ENUM_TRUST_DOM *q_e, char *q, char *base, int align, int depth);
-void make_r_enum_trust_dom(LSA_R_ENUM_TRUST_DOM *r_e, LSA_POL_HND *hnd, uint32 status);
-char* lsa_io_r_enum_trust_dom(BOOL io, LSA_R_ENUM_TRUST_DOM *r_e, char *q, char *base, int align, int depth);
-void make_q_close(LSA_Q_CLOSE *q_c, LSA_POL_HND *hnd);
-char* lsa_io_q_close(BOOL io, LSA_Q_CLOSE *q_c, char *q, char *base, int align, int depth);
-void make_r_close(LSA_R_CLOSE *q_r, LSA_POL_HND *hnd);
-char* lsa_io_r_close(BOOL io, LSA_R_CLOSE *r_c, char *q, char *base, int align, int depth);
-char* lsa_io_r_query(BOOL io, LSA_R_QUERY_INFO *r_q, char *q, char *base, int align, int depth);
-char* lsa_io_q_lookup_sids(BOOL io, LSA_Q_LOOKUP_SIDS *q_s, char *q, char *base, int align, int depth);
-char* lsa_io_r_lookup_sids(BOOL io, LSA_R_LOOKUP_SIDS *r_s, char *q, char *base, int align, int depth);
-char* lsa_io_q_lookup_rids(BOOL io, LSA_Q_LOOKUP_RIDS *q_r, char *q, char *base, int align, int depth);
-char* lsa_io_r_lookup_rids(BOOL io, LSA_R_LOOKUP_RIDS *r_r, char *q, char *base, int align, int depth);
-void make_q_req_chal(LSA_Q_REQ_CHAL *q_c,
-				char *logon_srv, char *logon_clnt,
-				DOM_CHAL *clnt_chal);
-char* lsa_io_q_req_chal(BOOL io, LSA_Q_REQ_CHAL *q_c, char *q, char *base, int align, int depth);
-char* lsa_io_r_req_chal(BOOL io, LSA_R_REQ_CHAL *r_c, char *q, char *base, int align, int depth);
-void make_q_auth_2(LSA_Q_AUTH_2 *q_a,
-		char *logon_srv, char *acct_name, uint16 sec_chan, char *comp_name,
-		DOM_CHAL *clnt_chal, uint32 clnt_flgs);
-char* lsa_io_q_auth_2(BOOL io, LSA_Q_AUTH_2 *q_a, char *q, char *base, int align, int depth);
-char* lsa_io_r_auth_2(BOOL io, LSA_R_AUTH_2 *r_a, char *q, char *base, int align, int depth);
-void make_q_srv_pwset(LSA_Q_SRV_PWSET *q_s, char sess_key[8],
-		char *logon_srv, char *acct_name, uint16 sec_chan, char *comp_name,
-		DOM_CRED *cred, char nt_cypher[16]);
-char* lsa_io_q_srv_pwset(BOOL io, LSA_Q_SRV_PWSET *q_s, char *q, char *base, int align, int depth);
-char* lsa_io_r_srv_pwset(BOOL io, LSA_R_SRV_PWSET *r_s, char *q, char *base, int align, int depth);
-char* lsa_io_user_info(BOOL io, LSA_USER_INFO *usr, char *q, char *base, int align, int depth);
-char* lsa_io_q_sam_logon(BOOL io, LSA_Q_SAM_LOGON *q_l, char *q, char *base, int align, int depth);
-char* lsa_io_r_sam_logon(BOOL io, LSA_R_SAM_LOGON *r_l, char *q, char *base, int align, int depth);
-char* lsa_io_q_sam_logoff(BOOL io, LSA_Q_SAM_LOGOFF *q_l, char *q, char *base, int align, int depth);
-char* lsa_io_r_sam_logoff(BOOL io, LSA_R_SAM_LOGOFF *r_l, char *q, char *base, int align, int depth);
-
-/*The following definitions come from  rpc_pipes/ntclientlsa.c  */
-
-BOOL do_lsa_open_policy(uint16 fnum, uint32 call_id,
-			char *server_name, LSA_POL_HND *hnd);
-BOOL do_lsa_query_info_pol(uint16 fnum, uint32 call_id,
-			LSA_POL_HND *hnd, uint16 info_class,
-			fstring domain_name, pstring domain_sid);
-BOOL do_lsa_close(uint16 fnum, uint32 call_id,
-			LSA_POL_HND *hnd);
-
-/*The following definitions come from  rpc_pipes/ntclientnet.c  */
-
-BOOL do_lsa_req_chal(uint16 fnum, uint32 call_id,
-		char *desthost, char *myhostname,
-        DOM_CHAL *clnt_chal, DOM_CHAL *srv_chal);
-BOOL do_lsa_auth2(uint16 fnum, uint32 call_id,
-		char *logon_srv, char *acct_name, uint16 sec_chan, char *comp_name,
-        DOM_CHAL *clnt_chal, uint32 neg_flags, DOM_CHAL *srv_chal);
-BOOL do_lsa_srv_pwset(uint16 fnum, uint32 call_id,
-		uchar sess_key[8], 
-		char *logon_srv, char *mach_acct, uint16 sec_chan_type, char *comp_name,
-        DOM_CRED *clnt_cred, DOM_CRED *srv_cred,
-		char nt_owf_new_mach_pwd[16]);
-BOOL do_lsa_sam_logon(uint16 fnum, uint32 call_id,
-		uchar sess_key[8], DOM_CRED *sto_clnt_cred,
-		char *logon_srv, char *comp_name,
-        DOM_CRED *clnt_cred, DOM_CRED *rtn_cred,
-		uint16 logon_level, uint16 switch_value, DOM_ID_INFO_1 *id1,
-		LSA_USER_INFO *user_info,
-		DOM_CRED *srv_cred);
-BOOL do_lsa_sam_logoff(uint16 fnum, uint32 call_id,
-		uchar sess_key[8], DOM_CRED *sto_clnt_cred,
-		char *logon_srv, char *comp_name,
-        DOM_CRED *clnt_cred, DOM_CRED *rtn_cred,
-		uint16 logon_level, uint16 switch_value, DOM_ID_INFO_1 *id1,
-		DOM_CRED *srv_cred);
-
-/*The following definitions come from  rpc_pipes/ntclientpipe.c  */
-
-uint16 rpc_pipe_open(char *inbuf, char *outbuf, char *rname, int Client, int cnum);
-BOOL rpc_pipe_set_hnd_state(char *pipe_name, uint16 fnum, uint16 device_state);
-BOOL rpc_pipe_bind(char *pipe_name, uint16 fnum, uint32 call_id,
-				RPC_IFACE *abstract, RPC_IFACE *transfer);
-
-/*The following definitions come from  rpc_pipes/pipe_hnd.c  */
-
-void reset_chain_pnum(void);
-void init_rpc_pipe_hnd(void);
-int open_rpc_pipe_hnd(char *pipe_name, int cnum);
-char *get_rpc_pipe_hnd_name(int pnum);
-BOOL set_rpc_pipe_hnd_state(int pnum, int cnum, uint16 device_state);
-BOOL close_rpc_pipe_hnd(int pnum, int cnum);
-int get_rpc_pipe_num(char *buf, int where);
-
-/*The following definitions come from  rpc_pipes/pipenetlog.c  */
-
-BOOL api_netlogrpcTNP(int cnum,int uid, char *param,char *data,
-		     int mdrcnt,int mprcnt,
-		     char **rdata,char **rparam,
-		     int *rdata_len,int *rparam_len);
-
-/*The following definitions come from  rpc_pipes/pipentlsa.c  */
-
-BOOL api_ntLsarpcTNP(int cnum,int uid, char *param,char *data,
-		     int mdrcnt,int mprcnt,
-		     char **rdata,char **rparam,
-		     int *rdata_len,int *rparam_len);
-
-/*The following definitions come from  rpc_pipes/pipesamr.c  */
-
-BOOL api_samrTNP(int cnum,int uid, char *param,char *data,
-		     int mdrcnt,int mprcnt,
-		     char **rdata,char **rparam,
-		     int *rdata_len,int *rparam_len);
-
-/*The following definitions come from  rpc_pipes/pipesrvsvc.c  */
-
-BOOL api_srvsvcTNP(int cnum,int uid, char *param,char *data,
-		     int mdrcnt,int mprcnt,
-		     char **rdata,char **rparam,
-		     int *rdata_len,int *rparam_len);
-
-/*The following definitions come from  rpc_pipes/pipeutil.c  */
-
-void initrpcreply(char *inbuf, char *q);
-void endrpcreply(char *inbuf, char *q, int datalen, int rtnval, int *rlen);
-BOOL name_to_rid(char *user_name, uint32 *u_rid, uint32 *g_rid);
-char *dom_sid_to_string(DOM_SID *sid);
-int make_dom_sids(char *sids_str, DOM_SID *sids, int max_sids);
-int make_dom_gids(char *gids_str, DOM_GID *gids);
-int create_rpc_request(uint32 call_id, uint8 op_num, char *q, int data_len);
-int create_rpc_reply(uint32 call_id, char *q, int data_len);
-
-/*The following definitions come from  rpc_pipes/pipewkssvc.c  */
-
-BOOL api_wkssvcTNP(int cnum,int uid, char *param,char *data,
-		     int mdrcnt,int mprcnt,
-		     char **rdata,char **rparam,
-		     int *rdata_len,int *rparam_len);
-
-/*The following definitions come from  rpc_pipes/samrparse.c  */
-
-char* samr_io_q_close(BOOL io, SAMR_Q_CLOSE *q_u, char *q, char *base, int align, int depth);
-char* samr_io_r_close(BOOL io, SAMR_R_CLOSE *r_u, char *q, char *base, int align, int depth);
-char* samr_io_q_open_secret(BOOL io, SAMR_Q_OPEN_SECRET *q_u, char *q, char *base, int align, int depth);
-char* samr_io_r_open_secret(BOOL io, SAMR_R_OPEN_SECRET *r_u, char *q, char *base, int align, int depth);
-char* samr_io_q_lookup_rids(BOOL io, SAMR_Q_LOOKUP_RIDS *q_u, char *q, char *base, int align, int depth);
-void make_samr_r_lookup_rids(SAMR_R_LOOKUP_RIDS *r_u,
-		uint32 num_rids, uint32 rid, uint32 status);
-char* samr_io_r_lookup_rids(BOOL io, SAMR_R_LOOKUP_RIDS *r_u, char *q, char *base, int align, int depth);
-char* samr_io_q_unknown_22(BOOL io, SAMR_Q_UNKNOWN_22 *q_u, char *q, char *base, int align, int depth);
-char* samr_io_r_unknown_22(BOOL io, SAMR_R_UNKNOWN_22 *r_u, char *q, char *base, int align, int depth);
-char* samr_io_q_unknown_24(BOOL io, SAMR_Q_UNKNOWN_24 *q_u, char *q, char *base, int align, int depth);
-void make_samr_r_unknown_24(SAMR_R_UNKNOWN_24 *r_u,
-				uint16 unknown_0, NTTIME *expiry, char *mach_acct,
-				uint32 unknown_id_0, uint32 status);
-char* samr_io_r_unknown_24(BOOL io, SAMR_R_UNKNOWN_24 *r_u, char *q, char *base, int align, int depth);
-char* samr_io_q_unknown_32(BOOL io, SAMR_Q_UNKNOWN_32 *q_u, char *q, char *base, int align, int depth);
-char* samr_io_r_unknown_32(BOOL io, SAMR_R_UNKNOWN_32 *r_u, char *q, char *base, int align, int depth);
-char* samr_io_q_open_policy(BOOL io, SAMR_Q_OPEN_POLICY *q_u, char *q, char *base, int align, int depth);
-char* samr_io_r_open_policy(BOOL io, SAMR_R_OPEN_POLICY *r_u, char *q, char *base, int align, int depth);
-
-/*The following definitions come from  rpc_pipes/smbparse.c  */
-
-char* smb_io_utime(BOOL io, UTIME *t, char *q, char *base, int align, int depth);
-char* smb_io_time(BOOL io, NTTIME *nttime, char *q, char *base, int align, int depth);
-void make_dom_sid(DOM_SID *sid, char *domsid);
-char* smb_io_dom_sid(BOOL io, DOM_SID *sid, char *q, char *base, int align, int depth);
-void make_uni_hdr(UNIHDR *hdr, int max_len, int len, uint16 terminate);
-char* smb_io_unihdr(BOOL io, UNIHDR *hdr, char *q, char *base, int align, int depth);
-void make_uni_hdr2(UNIHDR2 *hdr, int max_len, int len, uint16 terminate);
-char* smb_io_unihdr2(BOOL io, UNIHDR2 *hdr2, char *q, char *base, int align, int depth);
-void make_unistr(UNISTR *str, char *buf);
-char* smb_io_unistr(BOOL io, UNISTR *uni, char *q, char *base, int align, int depth);
-void make_unistr2(UNISTR2 *str, char *buf, int len);
-char* smb_io_unistr2(BOOL io, UNISTR2 *uni2, char *q, char *base, int align, int depth);
-void make_dom_sid2(DOM_SID2 *sid2, char *sid_str);
-char* smb_io_dom_sid2(BOOL io, DOM_SID2 *sid2, char *q, char *base, int align, int depth);
-void make_dom_rid2(DOM_RID2 *rid2, uint32 rid);
-char* smb_io_dom_rid2(BOOL io, DOM_RID2 *rid2, char *q, char *base, int align, int depth);
-void make_dom_rid3(DOM_RID3 *rid3, uint32 rid);
-char* smb_io_dom_rid3(BOOL io, DOM_RID3 *rid3, char *q, char *base, int align, int depth);
-void make_clnt_srv(DOM_CLNT_SRV *log, char *logon_srv, char *comp_name);
-char* smb_io_clnt_srv(BOOL io, DOM_CLNT_SRV *log, char *q, char *base, int align, int depth);
-void make_log_info(DOM_LOG_INFO *log, char *logon_srv, char *acct_name,
-		uint16 sec_chan, char *comp_name);
-char* smb_io_log_info(BOOL io, DOM_LOG_INFO *log, char *q, char *base, int align, int depth);
-char* smb_io_chal(BOOL io, DOM_CHAL *chal, char *q, char *base, int align, int depth);
-char* smb_io_cred(BOOL io, DOM_CRED *cred, char *q, char *base, int align, int depth);
-void make_clnt_info2(DOM_CLNT_INFO2 *clnt,
-				char *logon_srv, char *comp_name,
-				DOM_CRED *clnt_cred);
-char* smb_io_clnt_info2(BOOL io, DOM_CLNT_INFO2 *clnt, char *q, char *base, int align, int depth);
-char* make_clnt_info(DOM_CLNT_INFO *clnt,
-		char *logon_srv, char *acct_name,
-		uint16 sec_chan, char *comp_name,
-				DOM_CRED *cred);
-char* smb_io_clnt_info(BOOL io, DOM_CLNT_INFO *clnt, char *q, char *base, int align, int depth);
-void make_logon_id(DOM_LOGON_ID *log, uint32 log_id_low, uint32 log_id_high);
-char* smb_io_logon_id(BOOL io, DOM_LOGON_ID *log, char *q, char *base, int align, int depth);
-void make_arc4_owf(ARC4_OWF *hash, char data[16]);
-char* smb_io_arc4_owf(BOOL io, ARC4_OWF *hash, char *q, char *base, int align, int depth);
-void make_id_info1(DOM_ID_INFO_1 *id, char *domain_name,
-				uint32 param_ctrl, uint32 log_id_low, uint32 log_id_high,
-				char *user_name, char *wksta_name,
-				char *sess_key,
-				unsigned char lm_cypher[16], unsigned char nt_cypher[16]);
-char* smb_io_id_info1(BOOL io, DOM_ID_INFO_1 *id, char *q, char *base, int align, int depth);
-void make_sam_info(DOM_SAM_INFO *sam,
-				char *logon_srv, char *comp_name, DOM_CRED *clnt_cred,
-				DOM_CRED *rtn_cred, uint16 logon_level, uint16 switch_value,
-				DOM_ID_INFO_1 *id1);
-char* smb_io_sam_info(BOOL io, DOM_SAM_INFO *sam, char *q, char *base, int align, int depth);
-char* smb_io_gid(BOOL io, DOM_GID *gid, char *q, char *base, int align, int depth);
-void make_rpc_hdr(RPC_HDR *hdr, enum RPC_PKT_TYPE pkt_type, uint8 frag,
-				uint32 call_id, int data_len);
-char* smb_io_rpc_hdr(BOOL io, RPC_HDR *rpc, char *q, char *base, int align, int depth);
-void make_rpc_iface(RPC_IFACE *ifc, char data[16], uint32 version);
-char* smb_io_rpc_iface(BOOL io, RPC_IFACE *ifc, char *q, char *base, int align, int depth);
-void make_rpc_addr_str(RPC_ADDR_STR *str, char *name);
-char* smb_io_rpc_addr_str(BOOL io, RPC_ADDR_STR *str, char *q, char *base, int align, int depth);
-void make_rpc_hdr_bba(RPC_HDR_BBA *bba, uint16 max_tsize, uint16 max_rsize, uint32 assoc_gid);
-char* smb_io_rpc_hdr_bba(BOOL io, RPC_HDR_BBA *rpc, char *q, char *base, int align, int depth);
-void make_rpc_hdr_rb(RPC_HDR_RB *rpc, 
-				uint16 max_tsize, uint16 max_rsize, uint32 assoc_gid,
-				uint32 num_elements, uint16 context_id, uint8 num_syntaxes,
-				RPC_IFACE *abstract, RPC_IFACE *transfer);
-char* smb_io_rpc_hdr_rb(BOOL io, RPC_HDR_RB *rpc, char *q, char *base, int align, int depth);
-void make_rpc_results(RPC_RESULTS *res, 
-				uint8 num_results, uint16 result, uint16 reason);
-char* smb_io_rpc_results(BOOL io, RPC_RESULTS *res, char *q, char *base, int align, int depth);
-void make_rpc_hdr_ba(RPC_HDR_BA *rpc, 
-				uint16 max_tsize, uint16 max_rsize, uint32 assoc_gid,
-				char *pipe_addr,
-				uint8 num_results, uint16 result, uint16 reason,
-				RPC_IFACE *transfer);
-char* smb_io_rpc_hdr_ba(BOOL io, RPC_HDR_BA *rpc, char *q, char *base, int align, int depth);
-void make_obj_attr(LSA_OBJ_ATTR *attr, uint32 attributes, uint32 sec_qos);
-char* smb_io_obj_attr(BOOL io, LSA_OBJ_ATTR *attr, char *q, char *base, int align, int depth);
-void make_rpc_hdr_rr(RPC_HDR_RR *hdr, enum RPC_PKT_TYPE pkt_type,
-				uint32 call_id, int data_len, uint8 opnum);
-char* smb_io_rpc_hdr_rr(BOOL io, RPC_HDR_RR *rpc, char *q, char *base, int align, int depth);
-char* smb_io_pol_hnd(BOOL io, LSA_POL_HND *pol, char *q, char *base, int align, int depth);
-char* smb_io_dom_query_3(BOOL io, DOM_QUERY_3 *d_q, char *q, char *base, int align, int depth);
-char* smb_io_dom_query_5(BOOL io, DOM_QUERY_3 *d_q, char *q, char *base, int align, int depth);
-char* smb_io_dom_query(BOOL io, DOM_QUERY *d_q, char *q, char *base, int align, int depth);
-char* smb_io_dom_r_ref(BOOL io, DOM_R_REF *r_r, char *q, char *base, int align, int depth);
-char* smb_io_dom_name(BOOL io, DOM_NAME *name, char *q, char *base, int align, int depth);
-char* smb_io_neg_flags(BOOL io, NEG_FLAGS *neg, char *q, char *base, int align, int depth);
-
-/*The following definitions come from  rpc_pipes/srvparse.c  */
-
-char* srv_io_share_info1_str(BOOL io, SH_INFO_1_STR *sh1, char *q, char *base, int align, int depth);
-char* srv_io_share_info1(BOOL io, SH_INFO_1 *sh1, char *q, char *base, int align, int depth);
-char* srv_io_share_1_ctr(BOOL io, SHARE_INFO_1_CTR *ctr, char *q, char *base, int align, int depth);
-char* srv_io_q_net_share_enum(BOOL io, SRV_Q_NET_SHARE_ENUM *q_n, char *q, char *base, int align, int depth);
-char* srv_io_r_net_share_enum(BOOL io, SRV_R_NET_SHARE_ENUM *r_n, char *q, char *base, int align, int depth);
-
-/*The following definitions come from  rpc_pipes/wksparse.c  */
-
-char* wks_io_q_unknown_0(BOOL io, WKS_Q_UNKNOWN_0 *q_u, char *q, char *base, int align, int depth);
-char* wks_io_r_unknown_0(BOOL io, WKS_R_UNKNOWN_0 *r_u, char *q, char *base, int align, int depth);
-
 /*The following definitions come from  server.c  */
 
 void  *dflt_sig(void);
@@ -1257,10 +544,6 @@ int construct_reply(char *inbuf,char *outbuf,int size,int bufsize);
 /*The following definitions come from  shmem.c  */
 
 struct shmem_ops *smb_shm_open(int ronly);
-
-/*The following definitions come from  shmem_sysv.c  */
-
-struct shmem_ops *sysv_shm_open(int ronly);
 
 /*The following definitions come from  slprintf.c  */
 
@@ -1378,7 +661,6 @@ void force_check_log_size(void);
 char *tmpdir(void);
 BOOL is_a_socket(int fd);
 BOOL next_token(char **ptr,char *buff,char *sep);
-void *MemMove(void *dest,void *src,int size);
 void array_promote(char *array,int elsize,int element);
 void set_socket_options(int fd, char *options);
 void close_sockets(void );
@@ -1392,7 +674,6 @@ time_t file_modtime(char *fname);
 BOOL directory_exist(char *dname,struct stat *st);
 uint32 file_size(char *file_name);
 int StrCaseCmp(char *s, char *t);
-int StrnCaseCmp(char *s, char *t, int n);
 BOOL strequal(char *s1, char *s2);
 BOOL strcsequal(char *s1,char *s2);
 void strlower(char *s);
@@ -1457,7 +738,6 @@ void become_daemon(void);
 char *fgets_slash(char *s2,int maxlen,FILE *f);
 int set_filelen(int fd, long len);
 void *Realloc(void *p,int size);
-void Abort(void );
 BOOL get_myname(char *my_name,struct in_addr *ip);
 BOOL ip_equal(struct in_addr ip1,struct in_addr ip2);
 int open_socket_in(int type, int port, int dlevel,uint32 socket_addr);
@@ -1488,7 +768,6 @@ BOOL fcntl_lock(int fd,int op,uint32 offset,uint32 count,int type);
 BOOL is_myname(char *s);
 void set_remote_arch(enum remote_arch_types type);
 enum remote_arch_types get_remote_arch(void);
-char *unistrn2(uint16 *buf, int len);
 char *unistr2(uint16 *buf);
 int struni2(uint16 *p, char *buf);
 char *safe_strcpy(char *dest, char *src, int maxlength);
