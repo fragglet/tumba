@@ -647,7 +647,7 @@ INCLUDES = $(INCLUDES1) $(INCLUDES2)
 
 SPROGS = smbd
 PROGS1 = testparm testprns smbstatus make_smbcodepage
-PROGS = $(PROGS1) nmblookup make_printerdef $(MOUNT_PROGS)
+PROGS = $(PROGS1) make_printerdef $(MOUNT_PROGS)
 
 SCRIPTS = smbtar addtosmbpass
 
@@ -688,10 +688,6 @@ LOCKOBJ = locking_shm.o locking_slow.o locking.o shmem.o shmem_sysv.o
 # object files for smbstatus
 STATUS_OBJ = status.o $(UTILOBJ) $(LOCKOBJ) 
 
-# object files for nmblookup
-LOOKUP_OBJ = nmblookup.o $(UTILOBJ) 
-
-
 # object files to be auto-prototyped
 PROTOOBJ = $(UTILOBJ) $(SMBDOBJ) $(NMBDOBJ) $(LOCKOBJ) $(CLIENT_OBJ) $(STATUS_OBJ) cgi.o namequery.o
 
@@ -717,10 +713,6 @@ CHECK :
 smbd: $(SMBDOBJ) $(ARCFOUR_OBJ)
 	@echo Linking smbd
 	@$(CC) $(CFLAGS) -o smbd $(SMBDOBJ) $(ARCFOUR_OBJ) $(LIBS) $(AFS_LIBS)
-
-nmblookup: $(LOOKUP_OBJ)
-	@echo Linking nmblookup
-	@$(CC) $(CFLAGS) -o nmblookup $(LOOKUP_OBJ) $(LIBS)
 
 smbtorture: torture.o clientgen.o getsmbpass.o $(UTILOBJ)
 	@echo Linking smbtorture
