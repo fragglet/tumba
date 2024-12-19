@@ -72,13 +72,6 @@ WORKGROUP = WORKGROUP
 # might have to create a separate guest account that can print.
 GUESTACCOUNT = nobody
 
-# where you are going to have the smbrun binary. This defaults to the 
-# install directory. This binary is needed for correct printing
-# and magic script execution. This should be an absolute path!
-# Also not that this should include the name "smbrun" on the end (the
-# name of the executable)
-SMBRUN = $(BINDIR)/smbrun
-
 #
 # The following (PAM, AFS, DCE/DFS, Kerberos5, SMB) are the
 # alternate choices for Samba authentication. If you are using
@@ -653,7 +646,7 @@ INCLUDES2 = $(srcdir)trans2.h
 INCLUDES = $(INCLUDES1) $(INCLUDES2)
 
 SPROGS = smbd
-PROGS1 = smbclient testparm testprns smbrun smbstatus make_smbcodepage
+PROGS1 = smbclient testparm testprns smbstatus make_smbcodepage
 PROGS = $(PROGS1) nmblookup make_printerdef $(MOUNT_PROGS)
 
 SCRIPTS = smbtar addtosmbpass
@@ -727,10 +720,6 @@ CHECK :
 smbd: $(SMBDOBJ) $(ARCFOUR_OBJ)
 	@echo Linking smbd
 	@$(CC) $(CFLAGS) -o smbd $(SMBDOBJ) $(ARCFOUR_OBJ) $(LIBS) $(AFS_LIBS)
-
-smbrun: smbrun.o 
-	@echo Linking smbrun
-	@$(CC) $(CFLAGS) -o smbrun smbrun.o $(LIBS)
 
 nmblookup: $(LOOKUP_OBJ)
 	@echo Linking nmblookup
