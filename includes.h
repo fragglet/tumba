@@ -240,7 +240,6 @@ Here come some platform specific sections
 #define HAVE_VSNPRINTF
 #define USE_SIGPROCMASK
 #define USE_WAITPID
-#define USE_SYSV_IPC
 #if 0
 /* SETFS disabled until we can check on some bug reports */
 #if _LINUX_C_LIB_VERSION_MAJOR >= 5
@@ -289,7 +288,6 @@ typedef unsigned short mode_t;
 #ifndef USE_WAITPID
 #define USE_WAITPID
 #endif
-#define USE_SYSV_IPC
 /* SunOS doesn't have POSIX atexit */
 #define atexit on_exit
 #define NOSTRCASECMP
@@ -331,7 +329,6 @@ extern int innetgr (const char *, const char *, const char *, const char *);
 #define USE_STATVFS
 #define USE_GETCWD
 #define USE_SETSID
-#define USE_SYSV_IPC
 #define NO_SEMUN
 #ifndef REPLACE_GETPASS
 #define REPLACE_GETPASS
@@ -373,7 +370,6 @@ char *getwd(char *);
 #define USE_WAITPID
 #define USE_DIRECT
 #define USE_SETSID
-#define USE_SYSV_IPC
 #endif
 
 #if defined(SGI5) || defined(SGI6)
@@ -397,7 +393,6 @@ char *getwd(char *);
 #define USE_STATVFS
 #define USE_WAITPID
 #define USE_SETSID
-#define USE_SYSV_IPC
 #ifndef QSORT_CAST
 #define QSORT_CAST (int (*)(const void *, const void *))
 #endif /* QSORT_CAST */
@@ -457,7 +452,6 @@ extern struct passwd *getpwnam();
 #define USE_STATVFS
 #define USE_GETCWD
 #define USE_SETSID
-#define USE_SYSV_IPC
 #define NO_SEMUN
 #endif
 
@@ -484,7 +478,6 @@ char *mktemp(char *); /* No standard include */
 #define PASSWORD_LENGTH 16
 #define NEED_AUTH_PARAMETERS
 #endif  /* OSF1_ENH_SEC */
-#define USE_SYSV_IPC
 #define NO_SEMUN
 #endif
 
@@ -647,7 +640,6 @@ char *mktemp(char *); /* No standard include */
 #define USE_GETCWD
 #define USE_SETSID
 #define USE_SETRES
-#define USE_SYSV_IPC
 #define NO_SEMUN
 #define DEFAULT_PRINTING PRINT_HPUX
 /* Ken Weiss <krweiss@ucdavis.edu> tells us that SIGCLD_IGNORE is
@@ -1171,24 +1163,6 @@ struct spwd { /* fake shadow password structure */
 #endif
 #endif
 
-
-#ifdef USE_SYSV_IPC
-#include <sys/ipc.h>
-#include <sys/sem.h>
-#include <sys/shm.h>
-#ifdef NO_SEMUN
-union semun {
-	int val;
-	struct semid_ds *buf;
-	unsigned short *array;
-};
-#endif
-#if defined(HPUX) && defined(HPUX10)
-#ifdef SEMMSL
-#undef SEMMSL
-#endif /* SEMMSL */
-#endif /* HPUX && HPUX10 */
-#endif
 
 #ifdef AFS_AUTH
 #include <afs/stds.h>

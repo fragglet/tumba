@@ -683,7 +683,7 @@ SMBDOBJ4 = ufc.o smbpass.o
 SMBDOBJ = $(SMBDOBJ1) $(SMBDOBJ2) $(SMBDOBJ3) $(SMBDOBJ4) $(UBIOBJ) $(RPC_OBJ) $(RPC_SERV_OBJ) $(VTP_OBJ) $(LOCKOBJ)
 
 # object code needed for programs that handle the the locking files
-LOCKOBJ = locking_shm.o locking_slow.o locking.o shmem.o shmem_sysv.o
+LOCKOBJ = locking_shm.o locking_slow.o locking.o shmem.o
 
 # object files for smbstatus
 STATUS_OBJ = status.o $(UTILOBJ) $(LOCKOBJ) 
