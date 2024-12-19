@@ -254,15 +254,6 @@ BOOL become_user(connection_struct *conn, int cnum, uint16 vuid)
     {
       if (!become_gid(gid)) return(False);
 
-#ifndef NO_SETGROUPS      
-      if (!(VALID_CNUM(cnum) && conn->ipc)) {
-	/* groups stuff added by ih/wreu */
-	if (current_user.ngroups > 0)
-	  if (setgroups(current_user.ngroups,current_user.groups)<0)
-	    DEBUG(0,("setgroups call failed!\n"));
-      }
-#endif
-
       if (!conn->admin_user && !become_uid(uid))
 	return(False);
     }

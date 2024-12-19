@@ -659,17 +659,6 @@ SCRIPTS = smbtar addtosmbpass
 # modules in the ubiqx library from Chris Hertel
 UBIOBJ = ubiqx/ubi_dLinkList.o
 
-# client specific object code in the rpc_pipes directory
-RPC_CLI_OBJ = rpc_pipes/ntclientpipe.o rpc_pipes/ntclientlsa.o rpc_pipes/ntclientnet.o 
-
-# server specific object code in the rpc_pipes directory
-RPC_SERV_OBJ = rpc_pipes/pipenetlog.o rpc_pipes/pipentlsa.o rpc_pipes/pipesrvsvc.o rpc_pipes/pipewkssvc.o rpc_pipes/pipesamr.o
-
-# server object files in the rpc_pipes subdirectory
-RPC_OBJ1 = rpc_pipes/srvparse.o rpc_pipes/smbparse.o rpc_pipes/lsaparse.o rpc_pipes/pipeutil.o 
-RPC_OBJ2 = rpc_pipes/pipe_hnd.o rpc_pipes/samrparse.o rpc_pipes/wksparse.o rpc_pipes/lsa_hnd.o
-RPC_OBJ = $(RPC_OBJ1) $(RPC_OBJ2) 
-
 # general utility object files
 UTILOBJ1 = util.o system.o charset.o kanji.o fault.o smbencrypt.o smbdes.o charcnv.o
 UTILOBJ2 = $(UTILOBJ1) md4.o loadparm.o params.o username.o time.o namequery.o nmblib.o
@@ -678,9 +667,9 @@ UTILOBJ = $(UTILOBJ2) interface.o replace.o smberr.o mem_man/mem_man.o slprintf.
 # object code for smbd
 SMBDOBJ1 = $(UTILOBJ) trans2.o message.o dir.o
 SMBDOBJ2 = ipc.o reply.o mangle.o password.o quotas.o uid.o
-SMBDOBJ3 = predict.o credentials.o clientgen.o pipes.o server.o access.o 
+SMBDOBJ3 = predict.o credentials.o clientgen.o server.o access.o 
 SMBDOBJ4 = ufc.o smbpass.o
-SMBDOBJ = $(SMBDOBJ1) $(SMBDOBJ2) $(SMBDOBJ3) $(SMBDOBJ4) $(UBIOBJ) $(RPC_OBJ) $(RPC_SERV_OBJ) $(VTP_OBJ) $(LOCKOBJ)
+SMBDOBJ = $(SMBDOBJ1) $(SMBDOBJ2) $(SMBDOBJ3) $(SMBDOBJ4) $(UBIOBJ) $(VTP_OBJ) $(LOCKOBJ)
 
 # object code needed for programs that handle the the locking files
 LOCKOBJ = locking_shm.o locking_slow.o locking.o shmem.o

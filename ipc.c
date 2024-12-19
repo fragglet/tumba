@@ -1712,117 +1712,6 @@ static BOOL api_WAccessGetUserPerms(int cnum,uint16 vuid, char *param,char *data
   return(True);
 }
 
-struct
-{
-  char * name;
-  char * pipe_clnt_name;
-  int subcommand;
-  BOOL (*fn)(int,...);
-} api_fd_commands [] =
-  {
-    { "TransactNmPipe"  ,	"lsarpc",	0x26,	(BOOL (*)(int,...)) api_LsarpcTNP },
-    { NULL,		NULL,		-1,	(BOOL (*)(int,...)) api_Unsupported }
-  };
-
-/****************************************************************************
-  handle remote api calls delivered to a named pipe already opened.
-  ****************************************************************************/
-static int api_fd_reply(int cnum,uint16 vuid,char *outbuf,
-		 	uint16 *setup,char *data,char *params,
-		 	int suwcnt,int tdscnt,int tpscnt,int mdrcnt,int mprcnt)
-{
-  char *rdata = NULL;
-  char *rparam = NULL;
-  int rdata_len = 0;
-  int rparam_len = 0;
-
-  BOOL reply    = False;
-  BOOL bind_req = False;
-  BOOL set_nphs = False;
-
-  int i;
-  int fd;
-  int subcommand;
-  char *pipe_name;
-  
-  DEBUG(5,("api_fd_reply\n"));
-  /* First find out the name of this file. */
-  if (suwcnt != 2)
-    {
-      DEBUG(0,("Unexpected named pipe transaction.\n"));
-      return(-1);
-    }
-  
-  /* Get the file handle and hence the file name. */
-  fd = setup[1];
-  subcommand = setup[0];
-  pipe_name = get_rpc_pipe_hnd_name(fd);
-
-  if (pipe_name == NULL)
-  {
-    DEBUG(1,("api_fd_reply: INVALID PIPE HANDLE: %x\n", fd));
-  }
-
-  DEBUG(3,("Got API command %d on pipe %s (fd %x)",
-            subcommand, pipe_name, fd));
-  DEBUG(3,("(tdscnt=%d,tpscnt=%d,mdrcnt=%d,mprcnt=%d,cnum=%d,vuid=%d)\n",
-	   tdscnt,tpscnt,mdrcnt,mprcnt,cnum,vuid));
-  
-  for (i = 0; api_fd_commands[i].name; i++)
-  {
-    if (strequal(api_fd_commands[i].pipe_clnt_name, pipe_name) &&
-	    api_fd_commands[i].subcommand == subcommand &&
-	    api_fd_commands[i].fn)
-    {
-	  DEBUG(3,("Doing %s\n", api_fd_commands[i].name));
-	  break;
-    }
-  }
-  
-  rdata  = (char *)malloc(1024); if (rdata ) bzero(rdata ,1024);
-  rparam = (char *)malloc(1024); if (rparam) bzero(rparam,1024);
-  
-
-  /* Set Named Pipe Handle state */
-  if (subcommand == 0x1)
-  {
-    set_nphs = True;
-    reply = api_LsarpcSNPHS(fd, cnum, params);
-  }
-
-  if (!bind_req && !set_nphs)
-  {
-    DEBUG(10,("calling api_fd_command\n"));
-
-    reply = api_fd_commands[i].fn(cnum,vuid,params,data,mdrcnt,mprcnt,
-			        &rdata,&rparam,&rdata_len,&rparam_len);
-    DEBUG(10,("called api_fd_command\n"));
-  }
-
-  if (rdata_len > mdrcnt || rparam_len > mprcnt)
-  {
-    reply = api_TooSmall(cnum,vuid,params,data,mdrcnt,mprcnt,
-			   &rdata,&rparam,&rdata_len,&rparam_len);
-  }
-  
-  /* if we get False back then it's actually unsupported */
-  if (!reply)
-  {
-    api_Unsupported(cnum,vuid,params,data,mdrcnt,mprcnt,
-		    &rdata,&rparam,&rdata_len,&rparam_len);
-  }
-  
-  /* now send the reply */
-  send_trans_reply(outbuf,rdata,rparam,NULL,rdata_len,rparam_len,0);
-  
-  if (rdata ) free(rdata );
-  if (rparam) free(rparam);
-  
-  return(-1);
-}
-
-
-
 /****************************************************************************
   the buffer was too small
   ****************************************************************************/
@@ -1947,35 +1836,6 @@ static int api_reply(int cnum,uint16 vuid,char *outbuf,char *data,char *params,
 }
 
 /****************************************************************************
-  handle named pipe commands
-  ****************************************************************************/
-static int named_pipe(int cnum,uint16 vuid, char *outbuf,char *name,
-		      uint16 *setup,char *data,char *params,
-		      int suwcnt,int tdscnt,int tpscnt,
-		      int msrcnt,int mdrcnt,int mprcnt)
-{
-	DEBUG(3,("named pipe command on <%s> name\n", name));
-
-	if (strequal(name,"LANMAN"))
-	{
-		return api_reply(cnum,vuid,outbuf,data,params,tdscnt,tpscnt,mdrcnt,mprcnt);
-	}
-
-	if (strlen(name) < 1)
-	{
-		return api_fd_reply(cnum,vuid,outbuf,setup,data,params,suwcnt,tdscnt,tpscnt,mdrcnt,mprcnt);
-	}
-
-	if (setup)
-	{
-		DEBUG(3,("unknown named pipe: setup 0x%X setup1=%d\n", (int)setup[0],(int)setup[1]));
-	}
-
-	return 0;
-}
-
-
-/****************************************************************************
   reply to a SMBtrans
   ****************************************************************************/
 int reply_trans(char *inbuf,char *outbuf, int size, int bufsize)
@@ -2087,18 +1947,8 @@ int reply_trans(char *inbuf,char *outbuf, int size, int bufsize)
 
 
   DEBUG(3,("trans <%s> data=%d params=%d setup=%d\n",name,tdscnt,tpscnt,suwcnt));
-
-  if (strncmp(name,"\\PIPE\\",strlen("\\PIPE\\")) == 0)
-  {
-    DEBUG(5,("calling named_pipe\n"));
-    outsize = named_pipe(cnum,vuid,outbuf,name+strlen("\\PIPE\\"),setup,data,params,
-			 suwcnt,tdscnt,tpscnt,msrcnt,mdrcnt,mprcnt);
-  }
-  else
-  {
-    DEBUG(3,("invalid pipe name\n"));
-    outsize = 0;
-  }
+  DEBUG(3,("invalid pipe name\n"));
+  outsize = 0;
 
 
   if (data) free(data);

@@ -1313,10 +1313,6 @@ int reply_open_and_X(char *inbuf,char *outbuf,int length,int bufsize)
   BOOL bad_path = False;
   files_struct *fsp;
 
-  /* If it's an IPC, pass off the pipe handler. */
-  if (IS_IPC(cnum))
-    return reply_open_pipe_and_X(inbuf,outbuf,length,bufsize);
-
   /* XXXX we need to handle passed times, sattr and flags */
 
   pstrcpy(fname,smb_buf(inbuf));
@@ -2364,10 +2360,6 @@ int reply_close(char *inbuf,char *outbuf,int dum_size, int dum_buffsize)
   outsize = set_message(outbuf,0,0,True);
 
   cnum = SVAL(inbuf,smb_tid);
-
-  /* If it's an IPC, pass off to the pipe handler. */
-  if (IS_IPC(cnum))
-    return reply_pipe_close(inbuf,outbuf);
 
   fnum = GETFNUM(inbuf,smb_vwv0);
 

@@ -3573,10 +3573,6 @@ int make_connection(char *service,char *user,char *password, int pwlen, char *de
     return(-4);
   }
 
-  /* you can only connect to the IPC$ service as an ipc device */
-  if (strequal(service,"IPC$"))
-    pstrcpy(dev,"IPC");
-
   if (*dev == '?' || !*dev)
     {
        pstrcpy(dev,"A:");
@@ -3665,7 +3661,6 @@ int make_connection(char *service,char *user,char *password, int pwlen, char *de
   pcon->lastused = time(NULL);
   pcon->service = snum;
   pcon->used = True;
-  pcon->ipc = (strncmp(dev,"IPC",3) == 0);
   pcon->dirptr = NULL;
   pcon->veto_list = NULL;
   pcon->hide_list = NULL;
@@ -3724,26 +3719,22 @@ int make_connection(char *service,char *user,char *password, int pwlen, char *de
   pcon->groups = NULL;
   pcon->attrs = NULL;
 
-  if (!IS_IPC(cnum))
-    {
-      /* Find all the groups this uid is in and store them. Used by become_user() */
-      setup_groups(pcon->user,pcon->uid,pcon->gid,
-                  &pcon->ngroups,&pcon->igroups,&pcon->groups,&pcon->attrs);
-      
-      /* check number of connections */
-      if (!claim_connection(cnum,
-			    lp_servicename(SNUM(cnum)),
-			    lp_max_connections(SNUM(cnum)),False))
-	{
-	  DEBUG(1,("too many connections - rejected\n"));
-	  return(-8);
-	}  
+  /* Find all the groups this uid is in and store them. Used by become_user() */
+  setup_groups(pcon->user,pcon->uid,pcon->gid,
+               &pcon->ngroups,&pcon->igroups,&pcon->groups,&pcon->attrs);
+  
+  /* check number of connections */
+  if (!claim_connection(cnum, lp_servicename(SNUM(cnum)),
+                        lp_max_connections(SNUM(cnum)),False))
+  {
+    DEBUG(1,("too many connections - rejected\n"));
+    return(-8);
+  }
 
-      if (lp_status(SNUM(cnum)))
-	claim_connection(cnum,"STATUS.",MAXSTATUS,first_connection);
+  if (lp_status(SNUM(cnum)))
+    claim_connection(cnum,"STATUS.",MAXSTATUS,first_connection);
 
-      first_connection = False;
-    } /* IS_IPC */
+  first_connection = False;
 
   pcon->open = True;
 
@@ -3761,12 +3752,10 @@ int make_connection(char *service,char *user,char *password, int pwlen, char *de
     {
       DEBUG(0,("Can't become connected user!\n"));
       pcon->open = False;
-      if (!IS_IPC(cnum)) {
-	yield_connection(cnum,
-			 lp_servicename(SNUM(cnum)),
-			 lp_max_connections(SNUM(cnum)));
-	if (lp_status(SNUM(cnum))) yield_connection(cnum,"STATUS.",MAXSTATUS);
-      }
+      yield_connection(cnum,
+                       lp_servicename(SNUM(cnum)),
+                       lp_max_connections(SNUM(cnum)));
+      if (lp_status(SNUM(cnum))) yield_connection(cnum,"STATUS.",MAXSTATUS);
       return(-1);
     }
 
@@ -3776,13 +3765,11 @@ int make_connection(char *service,char *user,char *password, int pwlen, char *de
 	       pcon->connectpath,strerror(errno)));
       pcon->open = False;
       unbecome_user();
-      if (!IS_IPC(cnum)) {
-	yield_connection(cnum,
-			 lp_servicename(SNUM(cnum)),
-			 lp_max_connections(SNUM(cnum)));
-	if (lp_status(SNUM(cnum))) yield_connection(cnum,"STATUS.",MAXSTATUS);
-      }
-      return(-5);      
+      yield_connection(cnum,
+                       lp_servicename(SNUM(cnum)),
+                       lp_max_connections(SNUM(cnum)));
+      if (lp_status(SNUM(cnum))) yield_connection(cnum,"STATUS.",MAXSTATUS);
+      return(-5);
     }
 
   string_set(&pcon->origpath,pcon->connectpath);
@@ -3814,22 +3801,19 @@ int make_connection(char *service,char *user,char *password, int pwlen, char *de
   unbecome_user();
 
   /* Add veto/hide lists */
-  if (!IS_IPC(cnum))
-  {
-    set_namearray( &pcon->veto_list, lp_veto_files(SNUM(cnum)));
-    set_namearray( &pcon->hide_list, lp_hide_files(SNUM(cnum)));
-    set_namearray( &pcon->veto_oplock_list, lp_veto_oplocks(SNUM(cnum)));
-  }
+  set_namearray( &pcon->veto_list, lp_veto_files(SNUM(cnum)));
+  set_namearray( &pcon->hide_list, lp_hide_files(SNUM(cnum)));
+  set_namearray( &pcon->veto_oplock_list, lp_veto_oplocks(SNUM(cnum)));
 
   {
-    DEBUG(IS_IPC(cnum)?3:1,("%s %s (%s) connect to service %s as user %s (uid=%d,gid=%d) (pid %d)\n",
-			    timestring(),
-			    remote_machine,
-			    client_addr(),
-			    lp_servicename(SNUM(cnum)),user,
-			    pcon->uid,
-			    pcon->gid,
-			    (int)getpid()));
+    DEBUG(1,("%s %s (%s) connect to service %s as user %s (uid=%d,gid=%d) (pid %d)\n",
+             timestring(),
+             remote_machine,
+             client_addr(),
+             lp_servicename(SNUM(cnum)),user,
+             pcon->uid,
+             pcon->gid,
+             (int)getpid()));
   }
 
   return(cnum);
@@ -4378,10 +4362,10 @@ void close_cnum(int cnum, uint16 vuid)
       return;
     }
 
-  DEBUG(IS_IPC(cnum)?3:1,("%s %s (%s) closed connection to service %s\n",
-			  timestring(),
-			  remote_machine,client_addr(),
-			  lp_servicename(SNUM(cnum))));
+  DEBUG(1,("%s %s (%s) closed connection to service %s\n",
+           timestring(),
+           remote_machine,client_addr(),
+           lp_servicename(SNUM(cnum))));
 
   yield_connection(cnum,
 		   lp_servicename(SNUM(cnum)),
@@ -4981,10 +4965,6 @@ static int switch_message(int type,char *inbuf,char *outbuf,int size,int bufsize
 	  if ((flags & NEED_WRITE) && !CAN_WRITE(cnum))
 	    return(ERROR(ERRSRV,ERRaccess));
 
-	  /* ipc services are limited */
-	  if (IS_IPC(cnum) && (flags & AS_USER) && !(flags & CAN_IPC))
-	    return(ERROR(ERRSRV,ERRaccess));	    
-
 	  /* load service specific parameters */
 	  if (OPEN_CNUM(cnum) && !become_service(cnum,(flags & AS_USER)?True:False))
 	    return(ERROR(ERRSRV,ERRaccess));
@@ -5138,7 +5118,6 @@ int construct_reply(char *inbuf,char *outbuf,int size,int bufsize)
 
   chain_size = 0;
   chain_fnum = -1;
-  reset_chain_pnum();
 
   bzero(outbuf,smb_size);
 
@@ -5358,10 +5337,6 @@ static void init_structs(void )
       fd_ptr->fd_writeonly = -1;
       fd_ptr->real_open_flags = -1;
     }
-
-  /* for RPC pipes */
-  init_rpc_pipe_hnd();
-
 
   init_dptrs();
 }

@@ -399,7 +399,6 @@ typedef struct
   struct uid_cache uid_cache;
   void *dirptr;
   BOOL open;
-  BOOL ipc;
   BOOL read_only;
   BOOL admin_user;
   char *dirpath;
@@ -488,8 +487,6 @@ struct server_info_struct
   fstring name;
   uint32 type;
   fstring comment;
-  fstring domain; /* used ONLY in ipc.c NOT namework.c */
-  BOOL server_added; /* used ONLY in ipc.c NOT namework.c */
 };
 
 
@@ -585,7 +582,6 @@ struct connection_options {
 #define OPEN_FNUM(fnum)    (VALID_FNUM(fnum) && Files[fnum].open)
 #define VALID_CNUM(cnum)   (((cnum) >= 0) && ((cnum) < MAX_CONNECTIONS))
 #define OPEN_CNUM(cnum)    (VALID_CNUM(cnum) && Connections[cnum].open)
-#define IS_IPC(cnum)       (VALID_CNUM(cnum) && Connections[cnum].ipc)
 #define FNUM_OK(fnum,c) (OPEN_FNUM(fnum) && (c)==Files[fnum].cnum)
 
 #define CHECK_FNUM(fnum,c) if (!FNUM_OK(fnum,c)) \
