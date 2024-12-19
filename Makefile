@@ -46,7 +46,6 @@ SHELL = /bin/sh
 # These can be overridden by command line switches (see smbd(8))
 # or in smb.conf (see smb.conf(5))
 SMBLOGFILE = $(VARDIR)/log.smb
-NMBLOGFILE = $(VARDIR)/log.nmb
 CONFIGFILE = $(LIBDIR)/smb.conf
 LMHOSTSFILE = $(LIBDIR)/lmhosts
 DRIVERFILE = $(LIBDIR)/printers.def
@@ -662,7 +661,7 @@ INCLUDES1 = $(srcdir)version.h $(srcdir)local.h $(srcdir)includes.h $(srcdir)smb
 INCLUDES2 = $(srcdir)trans2.h 
 INCLUDES = $(INCLUDES1) $(INCLUDES2)
 
-SPROGS = smbd nmbd
+SPROGS = smbd
 PROGS1 = smbclient testparm testprns smbrun smbstatus smbpasswd make_smbcodepage
 PROGS = $(PROGS1) nmblookup make_printerdef $(MOUNT_PROGS)
 
@@ -701,16 +700,6 @@ SMBDOBJ = $(SMBDOBJ1) $(SMBDOBJ2) $(SMBDOBJ3) $(SMBDOBJ4) $(UBIOBJ) $(RPC_OBJ) $
 
 # object code needed for programs that handle the the locking files
 LOCKOBJ = locking_shm.o locking_slow.o locking.o shmem.o shmem_sysv.o
-
-# object code for nmbd
-NMBDOBJ1 = nmbd.o nmbd_packets.o nmbd_lmhosts.o nmbd_become_dmb.o nmbd_logonnames.o
-NMBDOBJ2 = nmbd_browserdb.o nmbd_responserecordsdb.o nmbd_workgroupdb.o nmbd_serverlistdb.o
-NMBDOBJ3 = nmbd_subnetdb.o nmbd_browsesync.o nmbd_nodestatus.o nmbd_mynames.o nmbd_winsproxy.o
-NMBDOBJ4 = nmbd_sendannounce.o nmbd_processlogon.o nmbd_incomingdgrams.o clientgen.o
-NMBDOBJ5 = asyncdns.o smbpass.o nmbd_winsserver.o nmbd_incomingrequests.o nmbd_nameregister.o
-NMBDOBJ6 = nmbd_namerelease.o nmbd_namequery.o nmbd_become_lmb.o nmbd_elections.o nmbd_namelistdb.o
-
-NMBDOBJ = $(UTILOBJ) $(NMBDOBJ1) $(NMBDOBJ2) $(NMBDOBJ3) $(NMBDOBJ4) $(NMBDOBJ5) $(NMBDOBJ6)
 
 # object files for smbclient
 CLIENT_OBJ = client.o ntclient.o credentials.o clientutil.o clitar.o getsmbpass.o $(UTILOBJ) $(RPC_CLI_OBJ) $(RPC_OBJ)
@@ -764,10 +753,6 @@ smbrun: smbrun.o
 nmblookup: $(LOOKUP_OBJ)
 	@echo Linking nmblookup
 	@$(CC) $(CFLAGS) -o nmblookup $(LOOKUP_OBJ) $(LIBS)
-
-nmbd: $(NMBDOBJ)
-	@echo Linking nmbd
-	@$(CC) $(CFLAGS) -o nmbd $(NMBDOBJ) $(LIBS)
 
 smbclient: $(CLIENT_OBJ) $(ARCFOUR_OBJ)
 	@echo Linking smbclient
