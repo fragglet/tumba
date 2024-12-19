@@ -290,20 +290,6 @@ typedef unsigned short mode_t;
 
 
 
-#ifdef SGI4
-#include <netinet/tcp.h>
-#include <sys/statfs.h>
-#include <string.h>
-#include <signal.h>
-#ifndef SYSV
-#define SYSV
-#endif
-#define SIGNAL_CAST (void (*)())
-#define STATFS4
-#define USE_WAITPID
-#define USE_DIRECT
-#define USE_SETSID
-#endif
 
 #if defined(SGI5) || defined(SGI6)
 #include <sys/types.h>
