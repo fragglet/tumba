@@ -75,9 +75,6 @@
 
 
 #include <sys/socket.h>
-#ifdef AXPROC
-#include <termio.h>
-#endif
 #include <sys/ioctl.h>
 #include <stddef.h>
 #ifdef POSIX_H
