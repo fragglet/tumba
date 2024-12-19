@@ -230,31 +230,6 @@ Here come some platform specific sections
 
 
 
-#if defined(SGI5) || defined(SGI6)
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <arpa/inet.h>
-#include <netinet/tcp.h>
-#include <netinet/in_systm.h>
-#include <netinet/ip.h>
-#include <sys/statvfs.h>
-#include <string.h>
-#include <signal.h>
-#include <dirent.h>
-#define USE_WAITPID
-#define NETGROUP 
-#ifndef SYSV
-#define SYSV
-#endif
-#define SIGNAL_CAST (void (*)(int))
-#define USE_STATVFS
-#define USE_WAITPID
-#define USE_SETSID
-#ifndef QSORT_CAST
-#define QSORT_CAST (int (*)(const void *, const void *))
-#endif /* QSORT_CAST */
-#endif
 
 
 
