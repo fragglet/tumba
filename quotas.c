@@ -504,13 +504,6 @@ BOOL disk_quotas(char *path, int *bsize, int *dfree, int *dsize)
 #if    defined(__FreeBSD__) || defined(__OpenBSD__)
 #include <ufs/ufs/quota.h>
 #include <machine/param.h>
-#elif         AIX
-/* AIX quota patch from Ole Holm Nielsen <ohnielse@fysik.dtu.dk> */
-#include <jfs/quota.h>
-/* AIX 4.X: Rename members of the dqblk structure (ohnielse@fysik.dtu.dk) */
-#define dqb_curfiles dqb_curinodes
-#define dqb_fhardlimit dqb_ihardlimit
-#define dqb_fsoftlimit dqb_isoftlimit
 #else /* !__FreeBSD__ && !AIX && !__OpenBSD__ */
 #include <sys/quota.h>
 #include <devnm.h>
@@ -566,10 +559,6 @@ BOOL disk_quotas(char *path, int *bsize, int *dfree, int *dsize)
     setuid(user_id);
     seteuid(euser_id);
   }
-#elif defined(AIX)
-  /* AIX has both USER and GROUP quotas: 
-     Get the USER quota (ohnielse@fysik.dtu.dk) */
-  r= quotactl(path,QCMD(Q_GETQUOTA,USRQUOTA),euser_id,(char *) &D);
 #else /* !__FreeBSD__ && !AIX && !__OpenBSD__ */
   r=quotactl(Q_GETQUOTA, dev_disk, euser_id, &D);
 #endif /* !__FreeBSD__ && !AIX && !__OpenBSD__ */

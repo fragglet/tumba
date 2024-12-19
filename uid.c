@@ -71,20 +71,6 @@ static BOOL become_uid(int uid)
     DEBUG(1,("WARNING: using uid %d is a security risk\n",uid));    
   }
 
-#ifdef AIX
-  {
-    /* AIX 3 stuff - inspired by a code fragment in wu-ftpd */
-    priv_t priv;
-
-    priv.pv_priv[0] = 0;
-    priv.pv_priv[1] = 0;
-    if (setpriv(PRIV_SET|PRIV_INHERITED|PRIV_EFFECTIVE|PRIV_BEQUEATH,
-		&priv, sizeof(priv_t)) < 0 ||
-	setuidx(ID_REAL|ID_EFFECTIVE, (uid_t)uid) < 0 ||
-	seteuid((uid_t)uid) < 0) 
-      DEBUG(1,("Can't set uid (AIX3)\n"));
-  }
-#endif
 
 #ifdef USE_SETRES
   if (setresuid(-1,uid,-1) != 0)

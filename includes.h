@@ -61,9 +61,6 @@
 #define NO_UNISTDH
 #endif
 
-#ifdef AIX
-#define NO_SYSMOUNTH
-#endif
 
 #ifdef M88K_R3
 #define SVR3H
@@ -539,34 +536,6 @@ char *mktemp(char *); /* No standard include */
 #define USE_SETSID
 #endif 
 
-#ifdef AIX
-#include <strings.h>
-#include <sys/dir.h>
-#include <sys/select.h>
-#include <dirent.h>
-#include <sys/statfs.h>
-#include <sys/vfs.h>
-#include <sys/id.h>
-#include <sys/priv.h>
-#ifdef ALLOW_CHANGE_PASSWORD
-#include <termios.h>
-#endif /* ALLOW_CHANGE_PASSWORD */
-/* According to AIX 4.1 man pages, inet_ntoa needs the following headers */
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netinet/tcp.h>
-#include <locale.h>
-#include <grp.h> 
-#define HAVE_GETGRNAM 1 
-#define SYSV
-#define USE_WAITPID
-#define USE_SIGBLOCK
-#define SIGNAL_CAST (void (*)())
-#define DEFAULT_PRINTING PRINT_AIX
-/* we undef this because sys/param.h is broken in aix. uggh. */
-#undef MAXHOSTNAMELEN
-#endif
 
 
 #ifdef HPUX
@@ -1054,9 +1023,7 @@ struct spwd { /* fake shadow password structure */
    of available printers.
 */
 #ifndef PRINTCAP_NAME
-#ifdef AIX
-#define PRINTCAP_NAME "/etc/qconfig"
-#elif defined(SYSV)
+#if   defined(SYSV)
 #define PRINTCAP_NAME "lpstat"
 #else
 #define PRINTCAP_NAME "/etc/printcap"

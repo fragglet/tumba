@@ -62,178 +62,6 @@
 
 extern int DEBUGLEVEL;
 
-#ifdef AIX
-/*  ******************************************
-     Extend for AIX system and qconfig file
-       from 'boulard@univ-rennes1.fr
-    ****************************************** */
-static int strlocate(char *xpLine,char *xpS)
-{
-	int iS,iL,i,iRet;
-	char *p;
-	iS = strlen(xpS);
-	iL = strlen(xpLine);
-
-	iRet = 0;
-	p = xpLine;
-	while (iL >= iS)
-	{
-		if (strncmp(p,xpS,iS) == 0) {iRet =1;break;};
-		p++;
-		iL--;
-	}
-	/*DEBUG(3,(" strlocate %s in line '%s',ret=%d\n",xpS,xpLine,iRet));*/
-	
-	return(iRet);
-}
-	
-	
-/* ******************************************************************* */
-/* *    Scan qconfig and search all virtual printer (device printer) * */
-/* ******************************************************************* */
-static void ScanQconfig_fn(char *psz,void (*fn)(char *, char *))
-{
-	int iLg,iEtat;
-	FILE *pfile;
-	char *line,*p;
-	pstring name,comment;
-	line  = NULL;
-	*name = 0;
-	*comment = 0;
-
-	if ((pfile = fopen(psz, "r")) == NULL)
-	{
-	      DEBUG(0,( "Unable to open qconfig file %s for read!\n", psz));
-	      return;
-	}
-
-	iEtat = 0;
-	/* scan qconfig file for searching <printername>:	*/
-	for (;(line = fgets_slash(NULL,sizeof(pstring),pfile)); free(line))
-	{
-		if (*line == '*' || *line == 0)
-		continue;
-		switch (iEtat)
-		{
-			case 0: /* locate an entry */
-			 if (*line == '\t' || *line == ' ') continue;
-			 if ((p=strchr(line,':')))
-			 {
-			 	*p = '\0';
-				p = strtok(line,":");
-				if (strcmp(p,"bsh")!=0)
-				  {
-				    pstrcpy(name,p);
-				    iEtat = 1;
-				    continue;
-				  }
-			 }
-			 break;
-			case 1: /* scanning device stanza */
-			 if (*line == '*' || *line == 0) continue;
-		  	 if (*line != '\t' && *line != ' ')
-		  	 {
-		  	   /* name is found without stanza device  */
-		  	   /* probably a good printer ???		*/
-		  	   fn(name,comment);
-		  	   iEtat = 0;
-		  	   continue;
-		  	  }
-		  	
-		  	  if (strlocate(line,"backend"))
-		  	  {
-		  		/* it's a device, not a virtual printer*/
-		  		iEtat = 0;
-		  	  }
-		  	  else if (strlocate(line,"device"))
-		  	  {
-		  		/* it's a good virtual printer */
-		  		fn(name,comment);
-		  		iEtat = 0;
-		  		continue;
-		  	  }
-		  	  break;
-		}
-	}
-	fclose(pfile);
-}
-
-/* Scan qconfig file and locate de printername */
-
-static BOOL ScanQconfig(char *psz,char *pszPrintername)
-{
-	int iLg,iEtat;
-	FILE *pfile;
-	char *pName;
-	char *line;
-
-	pName = NULL;
-	line  = NULL;
-	if ((pszPrintername!= NULL) && ((iLg = strlen(pszPrintername)) > 0))
-	 pName = malloc(iLg+10);
-	if (pName == NULL)
-	{
-		DEBUG(0,(" Unable to allocate memory for printer %s\n",pszPrintername));
-		return(False);
-	}
-	if ((pfile = fopen(psz, "r")) == NULL)
-	{
-	      DEBUG(0,( "Unable to open qconfig file %s for read!\n", psz));
-	      free(pName);
-	      return(False);
-	}
-	slprintf(pName,iLg+9,"%s:",pszPrintername);
-	iLg = strlen(pName);
-	/*DEBUG(3,( " Looking for entry %s\n",pName));*/
-	iEtat = 0;
-	/* scan qconfig file for searching <printername>:	*/
-	for (;(line = fgets_slash(NULL,sizeof(pstring),pfile)); free(line))
-	{
-		if (*line == '*' || *line == 0)
-		continue;
-		switch (iEtat)
-		{
-			case 0: /* scanning entry */
-			 if (strncmp(line,pName,iLg) == 0)
-			 {
-			 	iEtat = 1;
-			 	continue;
-			 }
-			 break;
-			case 1: /* scanning device stanza */
-			 if (*line == '*' || *line == 0) continue;
-		  	 if (*line != '\t' && *line != ' ')
-		  	 {
-		  	   /* name is found without stanza device  */
-		  	   /* probably a good printer ???		*/
-		  	   free (line);
-		  	   free(pName);
-		  	   fclose(pfile);
-		  	   return(True);
-		  	  }
-		  	
-		  	  if (strlocate(line,"backend"))
-		  	  {
-		  		/* it's a device, not a virtual printer*/
-		  		iEtat = 0;
-		  	  }
-		  	  else if (strlocate(line,"device"))
-		  	  {
-		  		/* it's a good virtual printer */
-		  		free (line);
-		  		free(pName);
-		  		fclose(pfile);
-		  		return(True);
-		  	  }
-		  	  break;
-		}
-	}
-	free (pName);
-	fclose(pfile);
-	return(False);
-}
-
-#endif
 /***************************************************************************
 Scan printcap file pszPrintcapname for a printer called pszPrintername. 
 Return True if found, else False. Returns False on error, too, after logging 
@@ -266,10 +94,6 @@ BOOL pcap_printername_ok(char *pszPrintername, char *pszPrintcapname)
        return (sysv_printername_ok(pszPrintername));
 #endif
 
-#ifdef AIX
-  if (strlocate(psz,"/qconfig"))
-     return(ScanQconfig(psz,pszPrintername));
-#endif
 
   if ((pfile = fopen(psz, "r")) == NULL)
     {
@@ -335,13 +159,6 @@ void pcap_printer_fn(void (*fn)(char *, char*))
     }
 #endif
 
-#ifdef AIX
-  if (strlocate(psz,"/qconfig"))
-  {
-  	ScanQconfig_fn(psz,fn);
-     return;
-  }
-#endif
 
   if ((pfile = fopen(psz, "r")) == NULL)
     {
