@@ -738,10 +738,6 @@ make_printerdef: make_printerdef.o $(UTILOBJ)
 	@echo Linking make_printerdef
 	@$(CC) $(CFLAGS) -o make_printerdef make_printerdef.o $(UTILOBJ) $(LIBS)
 
-wsmbstatus: wsmbstatus.o $(UTILOBJ)  
-	@echo Linking wsmbstatus
-	@$(CC) $(CFLAGS) -o wsmbstatus wsmbstatus.o $(UTILOBJ) $(LIBS)
-
 install: installbin installman installscripts installcp
 
 installbin: all
