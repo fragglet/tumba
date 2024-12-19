@@ -758,11 +758,6 @@ void DirCacheFlush( int snum )
  * conditional compilation macros you need to define.  All the options
  * are defined for Interactive UNIX.
  */
-#ifdef ISC
-#define HAVE_UNISTD_H
-#define USGr3
-#define USG
-#endif
 
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>

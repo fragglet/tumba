@@ -847,9 +847,6 @@ int disk_free(char *path,int *bsize,int *dfree,int *dsize)
 #endif /* STATFS4 */
   *dsize = fs.f_blocks;
 
-#if defined(SCO) || defined(ISC) || defined(MIPS)
-  *bsize = 512;
-#endif
 
 /* handle rediculous bsize values - some OSes are broken */
 if ((*bsize) < 512 || (*bsize)>0xFFFF) *bsize = 1024;

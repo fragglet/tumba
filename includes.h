@@ -46,10 +46,6 @@
 
 
 
-#ifdef ISC
-#define SYSSTREAMH
-#define NO_RESOURCEH
-#endif
 
 #ifdef QNX
 #define NO_RESOURCEH
@@ -468,28 +464,6 @@ Here come some platform specific sections
 
 
 
-#ifdef ISC
-#include <net/errno.h>
-#include <string.h>
-#include <sys/dir.h>
-#include <dirent.h>
-#include <sys/statfs.h>
-#include <fcntl.h>
-#include <sys/sioctl.h>
-#include <stropts.h>
-#include <limits.h>
-#include <netinet/tcp.h>
-#define FIONREAD FIORDCHK
-#define SYSV
-#define USE_WAITPID
-#define SIGNAL_CAST (void (*)(int))
-#define USE_GETCWD
-#define USE_SETSID
-#define USE_IFREQ
-#define NO_FTRUNCATE
-#define STATFS4
-#define NO_FSYNC
-#endif
 
 
 
