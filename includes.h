@@ -47,16 +47,6 @@
 
 
 
-#ifdef QNX
-#define NO_RESOURCEH
-#define NO_SYSMOUNTH
-#define USE_MMAP 1
-#ifdef __386__
-   #define __i386__
-#endif
-#define SHADOW_PWD
-#define NO_GETSPNAM
-#endif
 
 #ifdef NEWS42
 #define NO_UTIMEH
@@ -529,25 +519,6 @@ extern char *getpass(char *);
 
 
 
-#ifdef QNX
-#include <arpa/inet.h>
-#define STATFS4
-#include <sys/statfs.h>
-/* Override QNX size of 32 to be 255 */
-#define FD_SETSIZE 255
-#include <sys/select.h>
-#include <signal.h>
-#include <sys/dir.h>
-#define SIGNAL_CAST (void (*)())
-#define USE_WAITPID
-#define NO_INITGROUPS
-#define NO_SETGROUPS
-#define HAVE_TIMEZONE
-#define USE_GETCWD
-#define USE_SETSID
-#define HAVE_FCNTL_LOCK 1
-#define DEFAULT_PRINTING PRINT_QNX
-#endif
 
 
 #ifdef NEWS42
