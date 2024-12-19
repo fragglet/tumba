@@ -190,9 +190,6 @@ static void get_broadcast(struct in_addr *if_ipaddr,
   
     /* Loop through interfaces, looking for given IP address */
     for (i = ifc.ifc_len / sizeof(struct ifreq); --i >= 0; ifr++) {
-#ifdef BSDI
-      if (ioctl(sock, SIOCGIFADDR, ifr) < 0) break;
-#endif
       if (if_ipaddr->s_addr ==
 	  (*(struct sockaddr_in *) &ifr->ifr_addr).sin_addr.s_addr) {
 	found = True;

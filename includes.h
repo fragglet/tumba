@@ -241,13 +241,6 @@ Here come some platform specific sections
 
 
 
-#ifdef BSDI
-#include <string.h>
-#include <netinet/tcp.h>
-#define SIGNAL_CAST (void (*)())
-#define USE_DIRECT
-#define QSORT_CAST (int (*)(const void *, const void *))
-#endif
 
 
 #ifdef NETBSD 
