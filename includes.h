@@ -371,18 +371,6 @@ extern char *getpass(char *);
 #endif
 
 
-#ifdef CRAY
-#define MAXPATHLEN 1024
-#include <dirent.h>
-#include <string.h>
-#include <fcntl.h>
-#include <sys/statfs.h>
-#define SIGNAL_CAST (void (*)(int))
-#define SIGCLD_IGNORE
-#define HAVE_FCNTL_LOCK 1
-#define USE_SETSID
-#define STATFS4
-#endif
 
 
 
