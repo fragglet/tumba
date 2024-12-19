@@ -479,8 +479,6 @@ char *timestring(void )
   else
 #ifdef NO_STRFTIME
   fstrcpy(TimeBuf, asctime(tm));
-#elif defined(CLIX) || defined(CONVEX)
-  strftime(TimeBuf,100,"%Y/%m/%d %I:%M:%S %p",tm);
 #elif defined(AMPM)
   strftime(TimeBuf,100,"%Y/%m/%d %r",tm);
 #elif defined(TZ_TIME)

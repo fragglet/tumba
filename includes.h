@@ -342,33 +342,6 @@ char *strdup (char *);
 
 
 
-#ifdef CONVEX
-#include <netinet/tcp.h>
-#include <arpa/inet.h>
-#include <dirent.h>
-#include <string.h>
-#include <sys/vfs.h>
-#include <fcntl.h>
-#define DONT_REINSTALL_SIG
-#define USE_SIGBLOCK
-#define USE_WAITPID
-#define SIGNAL_CAST (_SigFunc_Ptr_t)
-#define NO_GETSPNAM
-#define HAVE_MEMMOVE
-extern char *mktemp(char *);
-extern int  fsync(int);
-extern int  seteuid(uid_t);
-extern int  setgroups(int, int *);
-extern int  initgroups(char *, int);
-extern int  statfs(char *, struct statfs *);
-extern int  setegid(gid_t);
-extern int  getopt(int, char *const *, const char *);
-extern int  chroot(char *);
-extern int  gettimeofday(struct timeval *, struct timezone *);
-extern int  gethostname(char *, int);
-extern char *crypt(char *, char *);
-extern char *getpass(char *);
-#endif
 
 
 
