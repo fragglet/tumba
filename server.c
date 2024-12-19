@@ -5362,10 +5362,6 @@ static void init_structs(void )
   /* for RPC pipes */
   init_rpc_pipe_hnd();
 
-#ifdef NTDOMAIN
-  /* for LSA handles */
-  init_lsa_policy_hnd();
-#endif
 
   init_dptrs();
 }

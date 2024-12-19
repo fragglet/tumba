@@ -525,43 +525,7 @@ int reply_sesssetup_and_X(char *inbuf,char *outbuf,int length,int bufsize)
   /* say yes to everything ending in $. */
   if (user[strlen(user) - 1] == '$')
   {
-#ifdef NTDOMAIN
-    struct smb_passwd *smb_pass; /* To check if machine account exists */
-/* 
-   PAXX: Ack. We don't want to do this. The workstation trust account
-   with a $ on the end should exist in the local password database
-   or be mapped to something generic, but not modified. For NT
-   domain support we must reject this used in certain circumstances
-   with a code to indicate to the client that it is an invalid use
-   of a workstation trust account. NTWKS needs this error to join
-   a domain. This may be the source of future bugs if we cannot
-   be sure whether to reject this or not.
-*/
-   /* non-null user name indicates search by username not by smb userid */
-   smb_pass = get_smbpwd_entry(user, 0);
-
-   if (!smb_pass)
-   {
-     /* lkclXXXX: if workstation entry doesn't exist, indicate logon failure */
-     DEBUG(4,("Workstation trust account %s doesn't exist.",user));
-     SSVAL(outbuf, smb_flg2, 0xc003); /* PAXX: Someone please unhack this */
-     CVAL(outbuf, smb_reh) = 1; /* PAXX: Someone please unhack this */
-     return(ERROR(NT_STATUS_LOGON_FAILURE, 0xc000)); /* decimal 109 NT error, 0xc000 */
-   }
-   else
-   {
-     /* PAXX: This is the NO LOGON workstation trust account stuff */
-     /* lkclXXXX: if the workstation *does* exist, indicate failure differently! */
-     DEBUG(4,("No Workstation trust account %s",user));
-     SSVAL(outbuf, smb_flg2, 0xc003); /* PAXX: Someone please unhack this */
-     CVAL(outbuf, smb_reh) = 1; /* PAXX: Someone please unhack this */
-     return(ERROR(NT_STATUS_NOLOGON_WORKSTATION_TRUST_ACCOUNT, 0xc000)); /* decimal 409 NT error, 0xc000 */
-   }
-
-   computer_id = True;
-#else /* not NTDOMAIN, leave this in. PAXX: Someone get rid of this */
     user[strlen(user) - 1] = '\0';
-#endif
   }
 
 

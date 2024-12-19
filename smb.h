@@ -478,10 +478,6 @@ typedef struct
   int n_sids;
   int *sids;
 
-#ifdef NTDOMAIN
-  /* per-user authentication information on NT RPCs */
-  struct dcinfo dc;
-#endif /* NTDOMAIN */
 
 } user_struct;
 

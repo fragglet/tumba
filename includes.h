@@ -26,10 +26,6 @@
    and add a section for the new unix below.
 */
 
-#ifdef NTDOMAIN
-#error WARNING: remove this option (-DNTDOMAIN) from your [Mm]akefile.
-#error Please read NTDOMAIN.txt with _this_ distribution.
-#endif
 
 
 /* the first OS dependent section is to setup what includes will be used.

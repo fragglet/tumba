@@ -54,12 +54,6 @@ extern fstring myworkgroup;
 char * known_pipes [] =
 {
   "lsarpc",
-#if NTDOMAIN
-  "NETLOGON",
-  "srvsvc",
-  "wkssvc",
-  "samr",
-#endif
   NULL
 };
 

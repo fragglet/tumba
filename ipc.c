@@ -1716,24 +1716,12 @@ struct
 {
   char * name;
   char * pipe_clnt_name;
-#ifdef NTDOMAIN
-  char * pipe_srv_name;
-#endif
   int subcommand;
   BOOL (*fn)(int,...);
 } api_fd_commands [] =
   {
-#ifdef NTDOMAIN
-    { "TransactNmPipe",     "lsarpc",	"lsass",	0x26,	api_ntLsarpcTNP },
-    { "TransactNmPipe",     "samr",	"lsass",	0x26,	api_samrTNP },
-    { "TransactNmPipe",     "srvsvc",	"lsass",	0x26,	api_srvsvcTNP },
-    { "TransactNmPipe",     "wkssvc",	"ntsvcs",	0x26,	api_wkssvcTNP },
-    { "TransactNmPipe",     "NETLOGON",	"NETLOGON",	0x26,	api_netlogrpcTNP },
-    { NULL,		            NULL,       NULL,	-1,	api_Unsupported }
-#else
     { "TransactNmPipe"  ,	"lsarpc",	0x26,	(BOOL (*)(int,...)) api_LsarpcTNP },
     { NULL,		NULL,		-1,	(BOOL (*)(int,...)) api_Unsupported }
-#endif
   };
 
 /****************************************************************************
@@ -1794,52 +1782,6 @@ static int api_fd_reply(int cnum,uint16 vuid,char *outbuf,
   rdata  = (char *)malloc(1024); if (rdata ) bzero(rdata ,1024);
   rparam = (char *)malloc(1024); if (rparam) bzero(rparam,1024);
   
-#ifdef NTDOMAIN
-  /* RPC Pipe command 0x26. */
-  if (data != NULL && api_fd_commands[i].subcommand == 0x26)
-  {
-    RPC_HDR hdr;
-
-    /* process the rpc header */
-    char *q = smb_io_rpc_hdr(True, &hdr, data, data, 4, 0);
-    
-	/* bind request received */
-    if ((bind_req = ((q != NULL) && (hdr.pkt_type == RPC_BIND))))
-    {
-      RPC_HDR_RB hdr_rb;
-
-      /* decode the bind request */
-      char *p = smb_io_rpc_hdr_rb(True, &hdr_rb, q, data, 4, 0);
-
-      if ((bind_req = (p != NULL)))
-      {
-        RPC_HDR_BA hdr_ba;
-        fstring ack_pipe_name;
-
-        /* name has to be \PIPE\xxxxx */
-        pstrcpy(ack_pipe_name, "\\PIPE\\");
-        pstrcat(ack_pipe_name, api_fd_commands[i].pipe_srv_name);
-
-        /* make a bind acknowledgement */
-        make_rpc_hdr_ba(&hdr_ba,
-               hdr_rb.bba.max_tsize, hdr_rb.bba.max_rsize, hdr_rb.bba.assoc_gid,
-               ack_pipe_name,
-               0x1, 0x0, 0x0,
-               &(hdr_rb.transfer));
-
-        p = smb_io_rpc_hdr_ba(False, &hdr_ba, rdata + 0x10, rdata, 4, 0);
-
-		rdata_len = PTR_DIFF(p, rdata);
-
-        make_rpc_hdr(&hdr, RPC_BINDACK, 0x0, hdr.call_id, rdata_len);
-
-        p = smb_io_rpc_hdr(False, &hdr, rdata, rdata, 4, 0);
-        
-        reply = (p != NULL);
-      }
-    }
-  }
-#endif
 
   /* Set Named Pipe Handle state */
   if (subcommand == 0x1)
