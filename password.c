@@ -295,35 +295,6 @@ static struct spwd *getspnam(char *username) /* fake shadow password routine */
 #endif
 
 
-#ifdef OSF1_ENH_SEC
-/****************************************************************************
-an enhanced crypt for OSF1
-****************************************************************************/
-static char *osf1_bigcrypt(char *password,char *salt1)
-{
-  static char result[AUTH_MAX_PASSWD_LENGTH] = "";
-  char *p1;
-  char *p2=password;
-  char salt[3];
-  int i;
-  int parts = strlen(password) / AUTH_CLEARTEXT_SEG_CHARS;
-  if (strlen(password)%AUTH_CLEARTEXT_SEG_CHARS)
-    parts++;
-
-  StrnCpy(salt,salt1,2);
-  StrnCpy(result,salt1,2);
-
-  for (i=0; i<parts;i++)
-    {
-      p1 = crypt(p2,salt);
-      safe_strcat(result,p1+2,sizeof(result)-1);
-      StrnCpy(salt,&result[2+i*AUTH_CIPHERTEXT_SEG_CHARS],2);
-      p2 += AUTH_CLEARTEXT_SEG_CHARS;
-    }
-
-  return(result);
-}
-#endif
 
 /****************************************************************************
 update the encrypted smbpasswd file from the plaintext username and password
@@ -353,37 +324,7 @@ update the enhanced security database. Only relevant for OSF1 at the moment.
 ****************************************************************************/
 static void update_protected_database( char *user, BOOL result)
 {
-#ifdef OSF1_ENH_SEC
-  struct pr_passwd *mypasswd;
-  time_t starttime;
-
-  mypasswd = getprpwnam (user);
-  starttime = time (NULL);
-
-  if (result)
-    {
-      mypasswd->ufld.fd_slogin = starttime;
-      mypasswd->ufld.fd_nlogins = 0;
-      
-      putprpwnam(user,mypasswd);
-      
-      DEBUG(3,("Update protected database for Account %s after succesful connection\n",user));
-    }
-  else
-    {
-      mypasswd->ufld.fd_ulogin = starttime;
-      mypasswd->ufld.fd_nlogins = mypasswd->ufld.fd_nlogins + 1;
-      if ( mypasswd->ufld.fd_max_tries != 0 && mypasswd->ufld.fd_nlogins > mypasswd->ufld.fd_max_tries )
-	{
-	  mypasswd->uflg.fg_lock = 0;
-	  DEBUG(3,("Account is disabled -- see Account Administrator.\n"));
-	}
-      putprpwnam ( user , mypasswd );
-      DEBUG(3,("Update protected database for Account %s after refusing connection\n",user));
-    }
-#else
   DEBUG(6,("Updated database with %s %s\n",user,BOOLSTR(result)));
-#endif
 }
 
 
@@ -837,16 +778,6 @@ Hence we make a direct return to avoid a second chance!!!
     return(True);
 #endif
 
-#ifdef OSF1_ENH_SEC
-  {
-    BOOL ret = (strcmp(osf1_bigcrypt(password,this_salt),this_crypted) == 0);
-    if(!ret) {
-      DEBUG(2,("password_check: OSF1_ENH_SEC failed. Trying normal crypt.\n"));
-      ret = (strcmp((char *)crypt(password,this_salt),this_crypted) == 0);
-    }
-    return ret;
-  }
-#endif
 
 #ifdef ULTRIX_AUTH
   return (strcmp((char *)crypt16(password, this_salt ),this_crypted) == 0);
@@ -1075,23 +1006,6 @@ BOOL password_ok(char *user,char *password, int pwlen, struct passwd *pwd)
   }
 #endif
 
-#ifdef OSF1_ENH_SEC
-  {
-    struct pr_passwd *mypasswd;
-    DEBUG(5,("Checking password for user %s in OSF1_ENH_SEC\n",user));
-    mypasswd = getprpwnam (user);
-    if ( mypasswd )
-      { 
-  	pstrcpy(pass->pw_name,mypasswd->ufld.fd_name);
-  	pstrcpy(pass->pw_passwd,mypasswd->ufld.fd_encrypt);
-      }
-    else
-      {
-	DEBUG(5,("No entry for user %s in protected database !\n",user));
-	return(False);
-      }
-  }
-#endif
 
 #ifdef ULTRIX_AUTH
   {
