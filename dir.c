@@ -777,11 +777,9 @@ void DirCacheFlush( int snum )
 #  endif /* !MAXPATHLEN */
 #endif /* !PATH_MAX */
 
-#if defined (_POSIX_VERSION) || defined (USGr3) || defined (HAVE_DIRENT_H)
 #  if !defined (HAVE_DIRENT)
 #    define HAVE_DIRENT
 #  endif /* !HAVE_DIRENT */
-#endif /* _POSIX_VERSION || USGr3 || HAVE_DIRENT_H */
 
 #if defined (HAVE_DIRENT)
 #  define D_NAMLEN(d)	(strlen ((d)->d_name))
