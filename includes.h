@@ -538,40 +538,6 @@ char *mktemp(char *); /* No standard include */
 
 
 
-#ifdef HPUX
-#include <string.h>
-#include <dirent.h>
-#include <fcntl.h>
-#include <sys/vfs.h>
-#include <sys/types.h>
-#include <sys/termios.h>
-#include <netinet/tcp.h>
-#include <arpa/inet.h>                /* needed for inet_ntoa proto */
-#ifdef HPUX_10_TRUSTED
-#include <hpsecurity.h>
-#include <prot.h>
-#define NEED_AUTH_PARAMETERS
-#endif
-#define SIGNAL_CAST (void (*)(__harg))
-#ifdef HPUX10
-#include <stropts.h>
-#else /* HPUX10 */
-/* This is only needed for HPUX 9.x */
-#define SELECT_CAST (int *)
-#endif /* HPUX10 */
-#define SYSV
-#define USE_WAITPID
-#define WAIT3_CAST2 (int *)
-#define USE_GETCWD
-#define USE_SETSID
-#define USE_SETRES
-#define NO_SEMUN
-#define DEFAULT_PRINTING PRINT_HPUX
-/* Ken Weiss <krweiss@ucdavis.edu> tells us that SIGCLD_IGNORE is
-   not good for HPUX */
-/* #define SIGCLD_IGNORE */
-#define USE_SIGPROCMASK /* Needed to stop zombie processes on HPUX 9.x and 10.x.*/
-#endif /* HPUX */
 
 
 #ifdef SEQUENT

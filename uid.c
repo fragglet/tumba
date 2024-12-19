@@ -41,12 +41,8 @@ void init_uid(void)
 
   if (initial_gid != 0 && initial_uid == 0)
     {
-#ifdef HPUX
-      setresgid(0,0,0);
-#else
       setgid(0);
       setegid(0);
-#endif
     }
 
   initial_uid = geteuid();
