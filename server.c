@@ -3762,7 +3762,6 @@ int make_connection(char *service,char *user,char *password, int pwlen, char *de
   string_set(&pcon->dirpath,"");
   string_set(&pcon->user,user);
 
-#if HAVE_GETGRNAM 
   if (*lp_force_group(snum))
     {
       struct group *gptr;
@@ -3781,7 +3780,6 @@ int make_connection(char *service,char *user,char *password, int pwlen, char *de
       else
 	DEBUG(1,("Couldn't find group %s\n",gname));
     }
-#endif
 
   if (*lp_force_user(snum))
     {

@@ -1105,7 +1105,6 @@ static char *validate_group(char *group,char *password,int pwlen,int snum)
   }
 #endif
   
-#if HAVE_GETGRNAM 
   {
     struct group *gptr = (struct group *)getgrnam(group);
     char **member;
@@ -1142,7 +1141,6 @@ static char *validate_group(char *group,char *password,int pwlen,int snum)
 #endif /* GROUP_CHECK_PWENT */
       }
   }      
-#endif
   return(NULL);
 }
 

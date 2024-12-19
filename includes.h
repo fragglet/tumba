@@ -494,9 +494,6 @@ extern char *sys_errlist[];
 #define EDQUOT ENOSPC
 #endif
 
-#ifndef HAVE_GETGRNAM
-#define HAVE_GETGRNAM 1
-#endif
 
 #ifndef SOL_TCP
 #define SOL_TCP 6

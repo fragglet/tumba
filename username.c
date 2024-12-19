@@ -252,7 +252,6 @@ check if a user is in a UNIX user list
 ****************************************************************************/
 static BOOL user_in_group_list(char *user,char *gname)
 {
-#if HAVE_GETGRNAM 
   struct group *gptr;
   char **member;  
   struct passwd *pass = Get_Pwnam(user,False);
@@ -276,7 +275,6 @@ static BOOL user_in_group_list(char *user,char *gname)
       member++;
     }
   }
-#endif /* HAVE_GETGRNAM */
   return False;
 }	      
 
