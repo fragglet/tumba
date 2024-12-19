@@ -301,22 +301,7 @@ update the encrypted smbpasswd file from the plaintext username and password
 *****************************************************************************/
 BOOL update_smbpassword_file( struct passwd *pass, fstring password)
 {
-  struct smb_passwd smbpw;
-  BOOL ret;
-
-  /* Fake up an smb_passwd. */
-  smbpw.smb_userid = pass->pw_uid;
-  smbpw.smb_name = pass->pw_name;
-  smbpw.smb_passwd = NULL;
-  smbpw.smb_nt_passwd = NULL;
-  smbpw.acct_ctrl = ACB_NORMAL;
-
-  /* Here, the flag is one, because we want to ignore the XXXXXXX'd out password */
-  ret = change_oem_password( &smbpw, password, 1);
-  if (ret == False)
-    DEBUG(3,("update_smbpasswd_entry: change_oem_password returned False\n"));
- 
-  return ret;
+  return False;
 }
 
 /****************************************************************************

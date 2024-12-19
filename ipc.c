@@ -1522,157 +1522,6 @@ static BOOL api_NetRemoteTOD(int cnum,uint16 vuid, char *param,char *data,
 }
 
 /****************************************************************************
-  set the user password
-  ****************************************************************************/
-static BOOL api_SetUserPassword(int cnum,uint16 vuid, char *param,char *data,
-				int mdrcnt,int mprcnt,
-				char **rdata,char **rparam,
-				int *rdata_len,int *rparam_len)
-{
-  char *p = skip_string(param+2,2);
-  fstring user;
-  fstring pass1,pass2;
-
-  fstrcpy(user,p);
-
-  p = skip_string(p,1);
-
-  memcpy(pass1,p,16);
-  memcpy(pass2,p+16,16);
-
-  *rparam_len = 4;
-  *rparam = REALLOC(*rparam,*rparam_len);
-
-  *rdata_len = 0;
-
-  SSVAL(*rparam,0,NERR_badpass);
-  SSVAL(*rparam,2,0);		/* converter word */
-
-  DEBUG(3,("Set password for <%s>\n",user));
-  /*
-   * Pass the user through the NT -> unix user mapping
-   * function. 
-   */
-   
-  (void)map_username(user); 
-   
-  /* 
-   * Do any UNIX username case mangling.
-   */
-  (void)Get_Pwnam( user, True);
-   
-  /*
-   * Attempt the plaintext password change first.
-   * Older versions of Windows seem to do this.
-   */
-
-  if (password_ok(user,pass1,strlen(pass1),NULL) &&
-      chgpasswd(user,pass1,pass2,False))
-  {
-    SSVAL(*rparam,0,NERR_Success);
-  }
-
-  /*
-   * If the plaintext change failed, attempt
-   * the encrypted. NT will generate this
-   * after trying the samr method.
-   */
-
-  if(SVAL(*rparam,0) != NERR_Success)
-  {
-    struct smb_passwd *smbpw = NULL;
-
-    if(check_lanman_password(user,(unsigned char *)pass1,(unsigned char *)pass2, &smbpw) && 
-       change_lanman_password(smbpw,(unsigned char *)pass1,(unsigned char *)pass2))
-    {
-      SSVAL(*rparam,0,NERR_Success);
-    }
-  }
-
-  bzero(pass1,sizeof(fstring));
-  bzero(pass2,sizeof(fstring));	 
-	 
-  return(True);
-}
-
-/****************************************************************************
-  Set the user password (SamOEM version - gets plaintext).
-****************************************************************************/
-
-static BOOL api_SamOEMChangePassword(int cnum,uint16 vuid, char *param,char *data,
-				int mdrcnt,int mprcnt,
-				char **rdata,char **rparam,
-				int *rdata_len,int *rparam_len)
-{
-  fstring user;
-  fstring new_passwd;
-  struct smb_passwd *smbpw = NULL;
-  char *p = param + 2;
-  int ret = True;
-
-  *rparam_len = 2;
-  *rparam = REALLOC(*rparam,*rparam_len);
-
-  *rdata_len = 0;
-
-  SSVAL(*rparam,0,NERR_badpass);
-
-  /*
-   * Check the parameter definition is correct.
-   */
-  if(!strequal(param + 2, "zsT")) {
-    DEBUG(0,("api_SamOEMChangePassword: Invalid parameter string %sn\n", param + 2));
-    return False;
-  }
-  p = skip_string(p, 1);
-
-  if(!strequal(p, "B516B16")) {
-    DEBUG(0,("api_SamOEMChangePassword: Invalid data parameter string %sn\n", p));
-    return False;
-  }
-  p = skip_string(p,1);
-
-  fstrcpy(user,p);
-  p = skip_string(p,1);
-
-  DEBUG(3,("api_SamOEMChangePassword: Change password for <%s>\n",user));
-
-  /*
-   * Pass the user through the NT -> unix user mapping
-   * function.
-   */
-
-  (void)map_username(user); 
-   
-  /* 
-   * Do any UNIX username case mangling.
-   */
-  (void)Get_Pwnam( user, True);
-
-  if(check_oem_password( user, (unsigned char *)data, &smbpw, 
-                         new_passwd, (int)sizeof(new_passwd)) == False) {
-    return True;
-  }
-
-  /* 
-   * At this point we have the new case-sensitive plaintext
-   * password in the fstring new_passwd. If we wanted to synchronise
-   * with UNIX passwords we would call a UNIX password changing 
-   * function here. However it would have to be done as root
-   * as the plaintext of the old users password is not 
-   * available. JRA.
-   */
-  if(lp_unix_password_sync())
-    ret = chgpasswd(user,"", new_passwd, True);
-  
-  if(ret && change_oem_password( smbpw, new_passwd, False)) {
-    SSVAL(*rparam,0,NERR_Success);
-  }
-
-  return(True);
-}
-
-/****************************************************************************
   delete a print job
   Form: <W> <> 
   ****************************************************************************/
@@ -3275,13 +3124,11 @@ struct
   {"WPrintQueuePurge",	103,	api_WPrintQueuePurge,0},
   {"NetServerEnum",	104,	api_RNetServerEnum,0},
   {"WAccessGetUserPerms",105,	api_WAccessGetUserPerms,0},
-  {"SetUserPassword",	115,	api_SetUserPassword,0},
   {"WWkstaUserLogon",	132,	api_WWkstaUserLogon,0},
   {"PrintJobInfo",	147,	api_PrintJobInfo,0},
   {"WPrintDriverEnum",	205,	api_WPrintDriverEnum,0},
   {"WPrintQProcEnum",	206,	api_WPrintQProcEnum,0},
   {"WPrintPortEnum",	207,	api_WPrintPortEnum,0},
-  {"SamOEMChangePassword", 214, api_SamOEMChangePassword,0},
   {NULL,		-1,	api_Unsupported,0}};
 
 
