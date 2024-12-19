@@ -115,11 +115,8 @@ typedef struct
   char *szHostsEquiv;
   char *szServerString;
   char *szAutoServices;
-  char *szPasswdProgram;
-  char *szPasswdChat;
   char *szLogFile;
   char *szConfigFile;
-  char *szSMBPasswdFile;
   char *szPasswordServer;
   char *szSocketOptions;
   char *szValidChars;
@@ -195,8 +192,6 @@ typedef struct
   BOOL bTimeServer;
   BOOL bBindInterfacesOnly;
   BOOL bNetWkstaUserLogon;
-  BOOL bUnixPasswdSync;
-  BOOL bPasswdChatDebug;
   BOOL bOleLockingCompat;
 } global;
 
@@ -442,7 +437,6 @@ static struct parm_struct
   {"smbrun",           P_STRING,  P_GLOBAL, &Globals.szSmbrun,          NULL,   NULL},
   {"log file",         P_STRING,  P_GLOBAL, &Globals.szLogFile,         NULL,   NULL},
   {"config file",      P_STRING,  P_GLOBAL, &Globals.szConfigFile,      NULL,   NULL},
-  {"smb passwd file",  P_STRING,  P_GLOBAL, &Globals.szSMBPasswdFile,   NULL,   NULL},
   {"hosts equiv",      P_STRING,  P_GLOBAL, &Globals.szHostsEquiv,      NULL,   NULL},
   {"preload",          P_STRING,  P_GLOBAL, &Globals.szAutoServices,    NULL,   NULL},
   {"auto services",    P_STRING,  P_GLOBAL, &Globals.szAutoServices,    NULL,   NULL},
@@ -456,9 +450,6 @@ static struct parm_struct
   {"default",          P_STRING,  P_GLOBAL, &Globals.szDefaultService,  NULL,   NULL},
   {"message command",  P_STRING,  P_GLOBAL, &Globals.szMsgCommand,      NULL,   NULL},
   {"dfree command",    P_STRING,  P_GLOBAL, &Globals.szDfree,           NULL,   NULL},
-  {"passwd program",   P_STRING,  P_GLOBAL, &Globals.szPasswdProgram,   NULL,   NULL},
-  {"passwd chat",      P_STRING,  P_GLOBAL, &Globals.szPasswdChat,      NULL,   NULL},
-  {"passwd chat debug",P_BOOL,    P_GLOBAL, &Globals.bPasswdChatDebug, NULL,   NULL},
   {"valid chars",      P_STRING,  P_GLOBAL, &Globals.szValidChars,      handle_valid_chars, NULL},
   {"workgroup",        P_USTRING, P_GLOBAL, &Globals.szWorkGroup,       NULL,   NULL},
   {"username map",     P_STRING,  P_GLOBAL, &Globals.szUsernameMap,     NULL,   NULL},
@@ -506,7 +497,6 @@ static struct parm_struct
   {"browse list",      P_BOOL,    P_GLOBAL, &Globals.bBrowseList,       NULL,   NULL},
   {"unix realname",    P_BOOL,    P_GLOBAL, &Globals.bUnixRealname,     NULL,   NULL},
   {"NIS homedir",      P_BOOL,    P_GLOBAL, &Globals.bNISHomeMap,       NULL,   NULL},
-  {"unix password sync", P_BOOL,  P_GLOBAL, &Globals.bUnixPasswdSync,   NULL,   NULL},
   {"time server",      P_BOOL,    P_GLOBAL, &Globals.bTimeServer,	NULL,   NULL},
   {"ole locking compatibility",      P_BOOL,    P_GLOBAL, &Globals.bOleLockingCompat,	NULL,   NULL},
   {"-valid",           P_BOOL,    P_LOCAL,  &sDefault.valid,            NULL,   NULL},
@@ -628,12 +618,7 @@ static void init_globals(void)
 
   DEBUG(3,("Initialising global parameters\n"));
 
-#ifdef SMB_PASSWD_FILE
-  string_set(&Globals.szSMBPasswdFile, SMB_PASSWD_FILE);
-#endif
-  string_set(&Globals.szPasswdChat,"*old*password* %o\\n *new*password* %n\\n *new*password* %n\\n *changed*");
   string_set(&Globals.szWorkGroup, WORKGROUP);
-  string_set(&Globals.szPasswdProgram, SMB_PASSWD);
   string_set(&Globals.szDriverFile, DRIVERFILE);
   string_set(&Globals.szLockDir, LOCKDIR);
   string_set(&Globals.szRootdir, "/");
@@ -695,8 +680,6 @@ static void init_globals(void)
   Globals.bBindInterfacesOnly = False;
   Globals.bNetWkstaUserLogon = False; /* This is now set to false by default as
                                          the code in password.c protects us from this bug. */
-  Globals.bUnixPasswdSync = False;
-  Globals.bPasswdChatDebug = False;
   Globals.bOleLockingCompat = True;
 
 /* these parameters are set to defaults that are more appropriate
@@ -824,7 +807,6 @@ char *lp_string(char *s)
 FN_GLOBAL_STRING(lp_logfile,&Globals.szLogFile)
 FN_GLOBAL_STRING(lp_smbrun,&Globals.szSmbrun)
 FN_GLOBAL_STRING(lp_configfile,&Globals.szConfigFile)
-FN_GLOBAL_STRING(lp_smb_passwd_file,&Globals.szSMBPasswdFile)
 FN_GLOBAL_STRING(lp_serverstring,&Globals.szServerString)
 FN_GLOBAL_STRING(lp_lockdir,&Globals.szLockDir)
 FN_GLOBAL_STRING(lp_rootdir,&Globals.szRootdir)
@@ -833,8 +815,6 @@ FN_GLOBAL_STRING(lp_msg_command,&Globals.szMsgCommand)
 FN_GLOBAL_STRING(lp_dfree_command,&Globals.szDfree)
 FN_GLOBAL_STRING(lp_hosts_equiv,&Globals.szHostsEquiv)
 FN_GLOBAL_STRING(lp_auto_services,&Globals.szAutoServices)
-FN_GLOBAL_STRING(lp_passwd_program,&Globals.szPasswdProgram)
-FN_GLOBAL_STRING(lp_passwd_chat,&Globals.szPasswdChat)
 FN_GLOBAL_STRING(lp_passwordserver,&Globals.szPasswordServer)
 FN_GLOBAL_STRING(lp_name_resolve_order,&Globals.szNameResolveOrder)
 FN_GLOBAL_STRING(lp_workgroup,&Globals.szWorkGroup)
@@ -881,8 +861,6 @@ FN_GLOBAL_BOOL(lp_nis_home_map,&Globals.bNISHomeMap)
 FN_GLOBAL_BOOL(lp_time_server,&Globals.bTimeServer)
 FN_GLOBAL_BOOL(lp_bind_interfaces_only,&Globals.bBindInterfacesOnly)
 FN_GLOBAL_BOOL(lp_net_wksta_user_logon,&Globals.bNetWkstaUserLogon)
-FN_GLOBAL_BOOL(lp_unix_password_sync,&Globals.bUnixPasswdSync)
-FN_GLOBAL_BOOL(lp_passwd_chat_debug,&Globals.bPasswdChatDebug)
 FN_GLOBAL_BOOL(lp_ole_locking_compat,&Globals.bOleLockingCompat)
 
 FN_GLOBAL_INTEGER(lp_os_level,&Globals.os_level)
