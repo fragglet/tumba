@@ -738,11 +738,7 @@ int disk_free(char *path,int *bsize,int *dfree,int *dsize)
 #ifdef USE_STATVFS
   struct statvfs fs;
 #else
-#ifdef ULTRIX
-  struct fs_data fs;
-#else
   struct statfs fs;
-#endif
 #endif
 #endif
 
@@ -832,11 +828,6 @@ int disk_free(char *path,int *bsize,int *dfree,int *dsize)
 	    return(((*bsize)/1024)*(*dfree));
 	  }
 
-#ifdef ULTRIX
-  *bsize = 1024;
-  *dfree = fs.fd_req.bfree;
-  *dsize = fs.fd_req.btot;
-#else
 #ifdef USE_STATVFS
   *bsize = fs.f_frsize;
 #else
@@ -855,7 +846,6 @@ int disk_free(char *path,int *bsize,int *dfree,int *dsize)
   *dfree = fs.f_bavail;
 #endif /* STATFS4 */
   *dsize = fs.f_blocks;
-#endif /* ULTRIX */
 
 #if defined(SCO) || defined(ISC) || defined(MIPS)
   *bsize = 512;

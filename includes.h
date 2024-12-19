@@ -293,22 +293,6 @@ typedef unsigned short mode_t;
 
 
 
-#ifdef ULTRIX
-#include <strings.h>
-#include <nfs/nfs_clnt.h>
-#include <nfs/vfs.h>
-#include <netinet/tcp.h>
-#ifdef ULTRIX_AUTH
-#include <auth.h>
-#endif
-char *getwd(char *);
-#define NOSTRDUP
-#ifdef __STDC__
-#define SIGNAL_CAST (void(*)(int))
-#endif
-#define USE_DIRECT
-#define USE_WAITPID
-#endif
 
 #ifdef SGI4
 #include <netinet/tcp.h>
