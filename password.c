@@ -987,13 +987,6 @@ BOOL password_ok(char *user,char *password, int pwlen, struct passwd *pwd)
   }
 #endif
 
-#ifdef SecureWare
-  {
-    struct pr_passwd *pr_pw = getprpwnam(pass->pw_name);
-    if (pr_pw && pr_pw->ufld.fd_encrypt)
-      pass->pw_passwd = pr_pw->ufld.fd_encrypt;
-  }
-#endif
 
 #ifdef HPUX_10_TRUSTED
   {

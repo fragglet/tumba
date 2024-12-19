@@ -339,9 +339,6 @@ end of the platform specific sections
 #include <sys/mman.h>
 #endif
 
-#ifdef SecureWare
-#define NEED_AUTH_PARAMETERS
-#endif
 
 #ifdef REPLACE_GETPASS
 extern char    *getsmbpass(char *);

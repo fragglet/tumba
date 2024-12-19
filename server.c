@@ -5500,9 +5500,6 @@ static void usage(char *pname)
   set_auth_parameters(argc,argv);
 #endif
 
-#ifdef SecureWare
-  setluid(0);
-#endif
 
   append_log = True;
 
