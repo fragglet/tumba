@@ -597,8 +597,6 @@ struct connection_options {
 #define SERVICE(snum)      (lp_servicename(snum))
 #define CAN_WRITE(cnum)    (OPEN_CNUM(cnum) && !Connections[cnum].read_only)
 #define VALID_SNUM(snum)   (lp_snum_ok(snum))
-#define GUEST_OK(snum)     (VALID_SNUM(snum) && lp_guest_ok(snum))
-#define GUEST_ONLY(snum)   (VALID_SNUM(snum) && lp_guest_only(snum))
 #define CAN_SETDIR(snum)   (!lp_no_set_dir(snum))
 #define MAP_HIDDEN(cnum)   (OPEN_CNUM(cnum) && lp_map_hidden(SNUM(cnum)))
 #define MAP_SYSTEM(cnum)   (OPEN_CNUM(cnum) && lp_map_system(SNUM(cnum)))

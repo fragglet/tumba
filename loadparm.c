@@ -253,8 +253,6 @@ typedef struct
   BOOL bAvailable;
   BOOL bRead_only;
   BOOL bNo_set_dir;
-  BOOL bGuest_only;
-  BOOL bGuest_ok;
   BOOL bMap_system;
   BOOL bMap_hidden;
   BOOL bMap_archive;
@@ -332,8 +330,6 @@ static service sDefault =
   True,  /* bAvailable */
   True,  /* bRead_only */
   True,  /* bNo_set_dir */
-  False, /* bGuest_only */
-  False, /* bGuest_ok */
   False, /* bMap_system */
   False, /* bMap_hidden */
   True,  /* bMap_archive */
@@ -553,10 +549,6 @@ static struct parm_struct
   {"veto files",       P_STRING,  P_LOCAL,  &sDefault.szVetoFiles,      NULL,   NULL},
   {"hide files",       P_STRING,  P_LOCAL,  &sDefault.szHideFiles,      NULL,   NULL},
   {"veto oplock files",P_STRING,  P_LOCAL,  &sDefault.szVetoOplockFiles,NULL,   NULL},
-  {"guest only",       P_BOOL,    P_LOCAL,  &sDefault.bGuest_only,      NULL,   NULL},
-  {"only guest",       P_BOOL,    P_LOCAL,  &sDefault.bGuest_only,      NULL,   NULL},
-  {"guest ok",         P_BOOL,    P_LOCAL,  &sDefault.bGuest_ok,        NULL,   NULL},
-  {"public",           P_BOOL,    P_LOCAL,  &sDefault.bGuest_ok,        NULL,   NULL},
   {"map system",       P_BOOL,    P_LOCAL,  &sDefault.bMap_system,      NULL,   NULL},
   {"map hidden",       P_BOOL,    P_LOCAL,  &sDefault.bMap_hidden,      NULL,   NULL},
   {"map archive",      P_BOOL,    P_LOCAL,  &sDefault.bMap_archive,     NULL,   NULL},
@@ -927,8 +919,6 @@ FN_LOCAL_BOOL(lp_hide_dot_files,bHideDotFiles)
 FN_LOCAL_BOOL(lp_browseable,bBrowseable)
 FN_LOCAL_BOOL(lp_readonly,bRead_only)
 FN_LOCAL_BOOL(lp_no_set_dir,bNo_set_dir)
-FN_LOCAL_BOOL(lp_guest_ok,bGuest_ok)
-FN_LOCAL_BOOL(lp_guest_only,bGuest_only)
 FN_LOCAL_BOOL(lp_map_hidden,bMap_hidden)
 FN_LOCAL_BOOL(lp_map_archive,bMap_archive)
 FN_LOCAL_BOOL(lp_locking,bLocking)
@@ -1118,8 +1108,6 @@ static BOOL lp_add_ipc(void)
   iSERVICE(i).iMaxConnections = 0;
   iSERVICE(i).bAvailable = True;
   iSERVICE(i).bRead_only = True;
-  iSERVICE(i).bGuest_only = False;
-  iSERVICE(i).bGuest_ok = True;
   iSERVICE(i).bBrowseable = sDefault.bBrowseable;
 
   DEBUG(3,("adding IPC service\n"));

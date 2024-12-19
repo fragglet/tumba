@@ -249,8 +249,6 @@ BOOL lp_hide_dot_files(int );
 BOOL lp_browseable(int );
 BOOL lp_readonly(int );
 BOOL lp_no_set_dir(int );
-BOOL lp_guest_ok(int );
-BOOL lp_guest_only(int );
 BOOL lp_map_hidden(int );
 BOOL lp_map_archive(int );
 BOOL lp_locking(int );
@@ -397,7 +395,6 @@ void invalidate_vuid(uint16 vuid);
 char *validated_username(uint16 vuid);
 uint16 register_vuid(int uid,int gid, char *unix_name, char *requested_name, BOOL guest);
 void add_session_user(char *user);
-void dfs_unlogin(void);
 BOOL password_ok(char *user,char *password, int pwlen, struct passwd *pwd);
 BOOL user_ok(char *user,int snum);
 BOOL authorise_login(int snum,char *user,char *password, int pwlen, 
