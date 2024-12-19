@@ -306,18 +306,6 @@ Here come some platform specific sections
 
 
 /* Definitions for RiscIX */
-#ifdef RiscIX
-#define SIGNAL_CAST (void (*)(int))
-#include <sys/dirent.h>
-#include <sys/acct.h>
-#include <sys/vfs.h>
-#include <string.h>
-#include <utime.h>
-#include <signal.h>
-#define HAVE_GETTIMEOFDAY
-#define NOSTRCASECMP
-#define NOSTRDUP
-#endif
 
 
 
