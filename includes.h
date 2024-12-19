@@ -37,10 +37,6 @@
 */
 
 
-#ifdef MIPS
-#define POSIX_H
-#define NO_UTIMEH
-#endif
 
 
 
@@ -289,22 +285,6 @@ Here come some platform specific sections
 #endif
 
 
-#ifdef MIPS
-#include <bsd/net/soioctl.h>
-#include <string.h>
-#include <dirent.h>
-#include <fcntl.h>
-#include <sys/statfs.h>
-#include <sys/wait.h>
-#include <sys/termio.h>
-#define SIGNAL_CAST (void (*)())
-typedef int mode_t;
-extern struct group *getgrnam();
-extern struct passwd *getpwnam();
-#define STATFS4
-#define NO_STRERROR
-#define REPLACE_STRSTR
-#endif /* MIPS */
 
 
 
