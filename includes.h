@@ -324,19 +324,6 @@ Here come some platform specific sections
 
 
 
-#ifdef AUX
-#include <fstab.h>
-#include <string.h>
-#include <dirent.h>
-#include <sys/vfs.h>
-#include <fcntl.h>
-#include <termios.h>
-#define SYSV
-#define USE_WAITPID
-#define SIGNAL_CAST (void (*)(int))
-char *strdup (char *);
-#define USE_GETCWD
-#endif
 
 
 
