@@ -354,17 +354,6 @@ char *strdup (char *);
 
 
 
-#ifdef BOS
-#define SIGNAL_CAST (void (*)(int))
-#include <string.h>
-#include <sys/dir.h>
-#include <sys/select.h>
-#include <dirent.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <sys/statfs.h>
-#include <sys/bsdioctl.h>
-#endif
 
 
 /* For UnixWare 2.x's ia_uinfo routines. (tangent@cyberport.com) */
