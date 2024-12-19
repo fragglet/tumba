@@ -151,7 +151,6 @@ typedef struct
   int max_xmit;
   int max_mux;
   int max_packet;
-  int pwordlevel;
   int unamelevel;
   int deadtime;
   int maxprotocol;
@@ -169,17 +168,11 @@ typedef struct
   int client_code_page;
   int announce_as;   /* This is initialised in init_globals */
   BOOL bDNSproxy;
-  BOOL bWINSsupport;
-  BOOL bWINSproxy;
   BOOL bLocalMaster;
   BOOL bPreferredMaster;
-  BOOL bDomainController;
-  BOOL bDomainMaster;
-  BOOL bDomainLogons;
   BOOL bEncryptPasswords;
   BOOL bUpdateEncrypt;
   BOOL bStripDot;
-  BOOL bNullPasswords;
   BOOL bUseRhosts;
   BOOL bReadRaw;
   BOOL bWriteRaw;
@@ -421,7 +414,6 @@ static struct parm_struct
   {"read raw",         P_BOOL,    P_GLOBAL, &Globals.bReadRaw,          NULL,   NULL},
   {"write raw",        P_BOOL,    P_GLOBAL, &Globals.bWriteRaw,         NULL,   NULL},
   {"use rhosts",       P_BOOL,    P_GLOBAL, &Globals.bUseRhosts,        NULL,   NULL},
-  {"null passwords",   P_BOOL,    P_GLOBAL, &Globals.bNullPasswords,    NULL,   NULL},
   {"strip dot",        P_BOOL,    P_GLOBAL, &Globals.bStripDot,         NULL,   NULL},
   {"interfaces",       P_STRING,  P_GLOBAL, &Globals.szInterfaces,      NULL,   NULL},
   {"bind interfaces only", P_BOOL,P_GLOBAL, &Globals.bBindInterfacesOnly,NULL,   NULL},
@@ -466,7 +458,6 @@ static struct parm_struct
   {"max packet",       P_INTEGER, P_GLOBAL, &Globals.max_packet,        NULL,   NULL},
   {"name resolve order",  P_STRING,  P_GLOBAL, &Globals.szNameResolveOrder,  NULL,   NULL},
   {"packet size",      P_INTEGER, P_GLOBAL, &Globals.max_packet,        NULL,   NULL},
-  {"password level",   P_INTEGER, P_GLOBAL, &Globals.pwordlevel,        NULL,   NULL},
   {"username level",   P_INTEGER, P_GLOBAL, &Globals.unamelevel,        NULL,   NULL},
   {"keepalive",        P_INTEGER, P_GLOBAL, &keepalive,                 NULL,   NULL},
   {"deadtime",         P_INTEGER, P_GLOBAL, &Globals.deadtime,          NULL,   NULL},
@@ -482,14 +473,10 @@ static struct parm_struct
   {"lm announce",      P_ENUM,    P_GLOBAL, &Globals.lm_announce,       NULL,   enum_lm_announce},
   {"lm interval",      P_INTEGER, P_GLOBAL, &Globals.lm_interval,       NULL,   NULL},
   {"dns proxy",        P_BOOL,    P_GLOBAL, &Globals.bDNSproxy,         NULL,   NULL},
-  {"wins support",     P_BOOL,    P_GLOBAL, &Globals.bWINSsupport,      NULL,   NULL},
-  {"wins proxy",       P_BOOL,    P_GLOBAL, &Globals.bWINSproxy,        NULL,   NULL},
   {"wins server",      P_STRING,  P_GLOBAL, &Globals.szWINSserver,      NULL,   NULL},
   {"preferred master", P_BOOL,    P_GLOBAL, &Globals.bPreferredMaster,  NULL,   NULL},
   {"prefered master",  P_BOOL,    P_GLOBAL, &Globals.bPreferredMaster,  NULL,   NULL},
   {"local master",     P_BOOL,    P_GLOBAL, &Globals.bLocalMaster,      NULL,   NULL},
-  {"domain master",    P_BOOL,    P_GLOBAL, &Globals.bDomainMaster,     NULL,   NULL},
-  {"domain logons",    P_BOOL,    P_GLOBAL, &Globals.bDomainLogons,     NULL,   NULL},
   {"browse list",      P_BOOL,    P_GLOBAL, &Globals.bBrowseList,       NULL,   NULL},
   {"unix realname",    P_BOOL,    P_GLOBAL, &Globals.bUnixRealname,     NULL,   NULL},
   {"NIS homedir",      P_BOOL,    P_GLOBAL, &Globals.bNISHomeMap,       NULL,   NULL},
@@ -633,7 +620,6 @@ static void init_globals(void)
   Globals.mangled_stack = 50;
   Globals.max_xmit = 65535;
   Globals.max_mux = 50; /* This is *needed* for profile support. */
-  Globals.pwordlevel = 0;
   Globals.unamelevel = 0;
   Globals.deadtime = 0;
   Globals.max_log_size = 5000;
@@ -645,7 +631,6 @@ static void init_globals(void)
   Globals.bWriteRaw = True;
   Globals.bReadPrediction = False;
   Globals.bReadbmpx = True;
-  Globals.bNullPasswords = False;
   Globals.bStripDot = False;
   Globals.syslog = 1;
   Globals.bSyslogOnly = False;
@@ -688,11 +673,7 @@ static void init_globals(void)
 
   Globals.bPreferredMaster = False;
   Globals.bLocalMaster = True;
-  Globals.bDomainMaster = False;
-  Globals.bDomainLogons = False;
   Globals.bBrowseList = True;
-  Globals.bWINSsupport = False;
-  Globals.bWINSproxy = False;
 
   Globals.bDNSproxy = True;
 
@@ -828,13 +809,7 @@ FN_GLOBAL_STRING(lp_driverfile,&Globals.szDriverFile)
 
 
 FN_GLOBAL_BOOL(lp_dns_proxy,&Globals.bDNSproxy)
-FN_GLOBAL_BOOL(lp_wins_support,&Globals.bWINSsupport)
-FN_GLOBAL_BOOL(lp_we_are_a_wins_server,&Globals.bWINSsupport)
-FN_GLOBAL_BOOL(lp_wins_proxy,&Globals.bWINSproxy)
 FN_GLOBAL_BOOL(lp_local_master,&Globals.bLocalMaster)
-FN_GLOBAL_BOOL(lp_domain_controller,&Globals.bDomainController)
-FN_GLOBAL_BOOL(lp_domain_master,&Globals.bDomainMaster)
-FN_GLOBAL_BOOL(lp_domain_logons,&Globals.bDomainLogons)
 FN_GLOBAL_BOOL(lp_preferred_master,&Globals.bPreferredMaster)
 FN_GLOBAL_BOOL(lp_use_rhosts,&Globals.bUseRhosts)
 FN_GLOBAL_BOOL(lp_getwdcache,&use_getwd_cache)
@@ -842,7 +817,6 @@ FN_GLOBAL_BOOL(lp_readprediction,&Globals.bReadPrediction)
 FN_GLOBAL_BOOL(lp_readbmpx,&Globals.bReadbmpx)
 FN_GLOBAL_BOOL(lp_readraw,&Globals.bReadRaw)
 FN_GLOBAL_BOOL(lp_writeraw,&Globals.bWriteRaw)
-FN_GLOBAL_BOOL(lp_null_passwords,&Globals.bNullPasswords)
 FN_GLOBAL_BOOL(lp_strip_dot,&Globals.bStripDot)
 FN_GLOBAL_BOOL(lp_encrypted_passwords,&Globals.bEncryptPasswords)
 FN_GLOBAL_BOOL(lp_update_encrypted,&Globals.bUpdateEncrypt)
@@ -865,7 +839,6 @@ FN_GLOBAL_INTEGER(lp_maxxmit,&Globals.max_xmit)
 FN_GLOBAL_INTEGER(lp_maxmux,&Globals.max_mux)
 FN_GLOBAL_INTEGER(lp_maxpacket,&Globals.max_packet)
 FN_GLOBAL_INTEGER(lp_keepalive,&keepalive)
-FN_GLOBAL_INTEGER(lp_passwordlevel,&Globals.pwordlevel)
 FN_GLOBAL_INTEGER(lp_usernamelevel,&Globals.unamelevel)
 FN_GLOBAL_INTEGER(lp_readsize,&Globals.ReadSize)
 FN_GLOBAL_INTEGER(lp_shmem_size,&Globals.shmem_size)
