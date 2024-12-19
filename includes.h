@@ -50,10 +50,6 @@
 #endif
 
 
-#ifdef NEXT3_0
-#define NO_UTIMEH
-#define NO_UNISTDH
-#endif
 
 #ifdef APOLLO
 #define NO_UTIMEH
@@ -510,23 +506,6 @@ extern struct passwd *getpwnam();
 
 
 
-#ifdef NEXT3_0
-#include <strings.h>
-#include <sys/dir.h>
-#include <sys/vfs.h>
-#define bzero(b,len) memset(b,0,len)
-#define NO_UTIMBUF
-#include <libc.h>
-#define NOSTRDUP
-#define USE_DIRECT
-#define mode_t int
-#define GID_TYPE int
-#define gid_t int
-#define pid_t int
-#define SIGNAL_CAST (void (*)(int))
-#define WAIT3_CAST1 (union wait *)
-#define HAVE_GMTOFF
-#endif
 
 
 
