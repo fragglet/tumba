@@ -89,10 +89,6 @@ BOOL pcap_printername_ok(char *pszPrintername, char *pszPrintcapname)
 	return(False);
       }
 
-#ifdef SYSV
-    if (strequal(psz, "lpstat"))
-       return (sysv_printername_ok(pszPrintername));
-#endif
 
 
   if ((pfile = fopen(psz, "r")) == NULL)
@@ -152,12 +148,6 @@ void pcap_printer_fn(void (*fn)(char *, char*))
       return;
     }
 
-#ifdef SYSV
-    if (strequal(psz, "lpstat")) {
-      sysv_printer_fn(fn);
-      return;
-    }
-#endif
 
 
   if ((pfile = fopen(psz, "r")) == NULL)

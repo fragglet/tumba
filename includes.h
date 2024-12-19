@@ -386,11 +386,7 @@ struct spwd { /* fake shadow password structure */
 
 /* if undefined then use bsd or sysv printing */
 #ifndef DEFAULT_PRINTING
-#ifdef SYSV
-#define DEFAULT_PRINTING PRINT_SYSV
-#else
 #define DEFAULT_PRINTING PRINT_BSD
-#endif
 #endif
 
 /* This defines the name of the printcap file. It is MOST UNLIKELY that
@@ -400,11 +396,7 @@ struct spwd { /* fake shadow password structure */
    of available printers.
 */
 #ifndef PRINTCAP_NAME
-#if   defined(SYSV)
-#define PRINTCAP_NAME "lpstat"
-#else
 #define PRINTCAP_NAME "/etc/printcap"
-#endif
 #endif
 
 
