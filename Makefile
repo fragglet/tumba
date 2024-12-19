@@ -49,7 +49,6 @@ SMBLOGFILE = $(VARDIR)/log.smb
 CONFIGFILE = $(LIBDIR)/smb.conf
 LMHOSTSFILE = $(LIBDIR)/lmhosts
 DRIVERFILE = $(LIBDIR)/printers.def
-SMB_PASSWD = $(BINDIR)/smbpasswd
 SMB_PASSWD_FILE = $(BASEDIR)/private/smbpasswd
 WEB_ROOT = $(BASEDIR)
 
@@ -192,14 +191,6 @@ AWK = awk
 # FLAGSM = -DSUNOS4 -DFAST_SHARE_MODES
 # LIBSM =   
 # AWK = nawk 
-
-# If you are using Linux kernel version 2.1.70 and later, you should
-# uncomment the following line to compile the smbmount utilities
-# together with Samba. If you are using Linux kernel version 2.0.x
-# you must use the smbfs utilities from
-# ftp://ftp.gwdg.de/pub/linux/misc/smbfs
-
-# MOUNT_PROGS = smbmount smbmnt smbumount
 
 # Use this for Linux with shadow passwords - but not using PAM!
 # contributed by Andrew.Tridgell@anu.edu.au
@@ -662,7 +653,7 @@ INCLUDES2 = $(srcdir)trans2.h
 INCLUDES = $(INCLUDES1) $(INCLUDES2)
 
 SPROGS = smbd
-PROGS1 = smbclient testparm testprns smbrun smbstatus smbpasswd make_smbcodepage
+PROGS1 = smbclient testparm testprns smbrun smbstatus make_smbcodepage
 PROGS = $(PROGS1) nmblookup make_printerdef $(MOUNT_PROGS)
 
 SCRIPTS = smbtar addtosmbpass
@@ -703,15 +694,6 @@ LOCKOBJ = locking_shm.o locking_slow.o locking.o shmem.o shmem_sysv.o
 
 # object files for smbclient
 CLIENT_OBJ = client.o ntclient.o credentials.o clientutil.o clitar.o getsmbpass.o $(UTILOBJ) $(RPC_CLI_OBJ) $(RPC_OBJ)
-
-# object files for smbmount
-MOUNT_OBJ = smbmount.o ntclient.o credentials.o clientutil.o getsmbpass.o $(UTILOBJ) $(RPC_CLI_OBJ) $(RPC_OBJ)
-
-# object files for smbmnt
-MNT_OBJ = smbmnt.o
-
-# object files for smbumount
-UMOUNT_OBJ = smbumount.o $(UTILOBJ)
 
 # object files for smbstatus
 STATUS_OBJ = status.o $(UTILOBJ) $(LOCKOBJ) 
@@ -758,18 +740,6 @@ smbclient: $(CLIENT_OBJ) $(ARCFOUR_OBJ)
 	@echo Linking smbclient
 	@$(CC) $(CFLAGS) -o smbclient $(CLIENT_OBJ) $(ARCFOUR_OBJ) $(LIBS)
 
-smbmount: $(MOUNT_OBJ) $(ARCFOUR_OBJ)
-	@echo Linking smbmount
-	@$(CC) $(CFLAGS) -o smbmount $(MOUNT_OBJ) $(ARCFOUR_OBJ) $(LIBS)
-
-smbmnt: $(MNT_OBJ)
-	@echo Linking smbmnt
-	@$(CC) $(CFLAGS) -o smbmnt $(MNT_OBJ)
-
-smbumount: $(UMOUNT_OBJ)
-	@echo Linking smbumount
-	@$(CC) $(CFLAGS) -o smbumount $(UMOUNT_OBJ)
-
 smbtorture: torture.o clientgen.o getsmbpass.o $(UTILOBJ)
 	@echo Linking smbtorture
 	@$(CC) $(CFLAGS) -o smbtorture torture.o clientgen.o getsmbpass.o $(UTILOBJ) $(LIBS)
@@ -785,10 +755,6 @@ testparm: testparm.o access.o $(UTILOBJ)
 testprns: testprns.o $(UTILOBJ)
 	@echo Linking testprns
 	@$(CC) $(CFLAGS) -o testprns testprns.o $(UTILOBJ) $(LIBS)
-
-smbpasswd: smbpasswd.o getsmbpass.o smbpass.o clientgen.o $(UTILOBJ)
-	@echo Linking smbpasswd
-	@$(CC) $(CFLAGS) -o smbpasswd smbpasswd.o getsmbpass.o smbpass.o clientgen.o $(UTILOBJ) $(LIBS)
 
 make_smbcodepage: make_smbcodepage.o $(UTILOBJ) 
 	@echo Linking make_smbcodepage
