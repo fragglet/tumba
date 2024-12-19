@@ -357,11 +357,6 @@ struct spwd { /* fake shadow password structure */
 };
 #endif
 
-#ifndef HAVE_BZERO
-#ifndef bzero
-#define bzero(p,s) memset(p,0,s)
-#endif
-#endif
 
 #ifndef HAVE_MEMMOVE
 #ifndef memmove
