@@ -405,38 +405,6 @@ extern char *getpass(char *);
 #include <sys/bsdioctl.h>
 #endif
 
-#ifdef AMIGA
-#include <arpa/inet.h>
-#include <dirent.h>
-#include <string.h>
-#include <netinet/tcp.h>
-#include <sys/acct.h>
-#include <sys/fcntl.h>
-#include <sys/filio.h>
-#include <sys/sockio.h>
-#include <netinet/in_systm.h>
-#include <netinet/ip.h>
-#include <sys/termios.h>
-#include <limits.h>
-#include <sys/timeb.h>
-
-#define SIGNAL_CAST (void (*)(int))
-#define USE_GETCWD
-#define HAVE_BZERO
-#define HAVE_MEMMOVE
-#define USE_SIGPROCMASK
-#define USE_WAITPID
-#define USE_DIRECT
-#define USE_F_FSIZE
-#define HAVE_FCNTL_LOCK 0
-#define HAVE_GETTIMEOFDAY
-#define HAVE_PATHCONF
-
-#define HAVE_NO_PROC
-#define NO_FORK_DEBUG
-#define HAVE_FORK 0
-#define HAVE_VFORK 1
-#endif
 
 /* For UnixWare 2.x's ia_uinfo routines. (tangent@cyberport.com) */
 #ifdef IA_UINFO
