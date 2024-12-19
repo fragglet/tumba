@@ -54,13 +54,6 @@
 
 
 
-#ifdef DNIX
-#define NO_SYSMOUNTH
-#define NO_NETIFH
-#define NO_RESOURCEH
-#define PRIME_NMBD 0
-#define NO_SETGROUPS
-#endif
 
 
 #ifdef ISC
@@ -550,22 +543,6 @@ char *strdup (char *);
 
 
 
-#ifdef DNIX
-#include <dirent.h>
-#include <string.h>
-#include <fcntl.h>
-#include <sys/statfs.h>
-#include <sys/stropts.h>
-#define NO_GET_BROADCAST
-#define USE_WAITPID
-#define USE_GETCWD
-#define USE_SETSID
-#define STATFS4
-#define NO_EID
-#define PF_INET AF_INET
-#define NO_STRERROR
-#define ftruncate(f,l) chsize(f,l)
-#endif /* DNIX */
 
 #ifdef CONVEX
 #include <netinet/tcp.h>
