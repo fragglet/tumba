@@ -779,9 +779,6 @@ Hence we make a direct return to avoid a second chance!!!
 #endif
 
 
-#ifdef ULTRIX_AUTH
-  return (strcmp((char *)crypt16(password, this_salt ),this_crypted) == 0);
-#endif
 
 #ifdef LINUX_BIGCRYPT
   return(linux_bigcrypt(password,this_salt,this_crypted));
@@ -1007,16 +1004,6 @@ BOOL password_ok(char *user,char *password, int pwlen, struct passwd *pwd)
 #endif
 
 
-#ifdef ULTRIX_AUTH
-  {
-    AUTHORIZATION *ap = getauthuid( pass->pw_uid );
-    if (ap)
-      {
-	pstrcpy( pass->pw_passwd, ap->a_password );
-	endauthent();
-      }
-  }
-#endif
 
   /* extract relevant info */
   fstrcpy(this_user,pass->pw_name);  
