@@ -59,22 +59,10 @@ extern int DEBUGLEVEL;
 static int findpty(char **slave)
 {
   int master;
-#if defined(SVR4) || defined(SUNOS5)
-  extern char *ptsname();
-#else /* defined(SVR4) || defined(SUNOS5) */
   static char line[12];
   void *dirp;
   char *dpname;
-#endif /* defined(SVR4) || defined(SUNOS5) */
   
-#if defined(SVR4) || defined(SUNOS5)
-  if ((master = open("/dev/ptmx", O_RDWR)) >= 1) {
-    grantpt(master);
-    unlockpt(master);
-    *slave = ptsname(master);
-    return (master);
-  }
-#else /* defined(SVR4) || defined(SUNOS5) */
   safe_strcpy( line, "/dev/ptyXX", sizeof(line)-1 );
 
   dirp = OpenDir(-1, "/dev", False);
@@ -94,7 +82,6 @@ static int findpty(char **slave)
     }
   }
   CloseDir(dirp);
-#endif /* defined(SVR4) || defined(SUNOS5) */
   return (-1);
 }
 
@@ -132,15 +119,10 @@ static int dochild(int master,char *slavedev, char *name, char *passwordprogram,
 	     slavedev));
     return(False);
   }
-#if defined(SVR4) || defined(SUNOS5) || defined(SCO) || defined(HPUX)
-  ioctl(slave, I_PUSH, "ptem");
-  ioctl(slave, I_PUSH, "ldterm");
-#else /* defined(SVR4) || defined(SUNOS5) || defined(SCO) || defined(HPUX) */
   if (ioctl(slave,TIOCSCTTY,0) <0) {
      DEBUG(3,("Error in ioctl call for slave pty\n"));
      /* return(False); */
   }
-#endif /* defined(SVR4) || defined(SUNOS5) || defined(SCO) || defined(HPUX) */
 
   /* Close master. */
   close(master);

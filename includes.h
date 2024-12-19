@@ -370,27 +370,6 @@ extern struct passwd *getpwnam();
 #endif
 
 
-#ifdef SVR4
-#include <string.h>
-#include <sys/dir.h>
-#include <dirent.h>
-#include <sys/statfs.h>
-#include <sys/statvfs.h>
-#include <sys/vfs.h>
-#include <sys/filio.h>
-#include <fcntl.h>
-#include <sys/sockio.h>
-#include <netinet/tcp.h>
-#include <stropts.h>
-#include <termios.h>
-#define SYSV
-#define USE_WAITPID
-#define SIGNAL_CAST (void (*)(int))
-#define USE_STATVFS
-#define USE_GETCWD
-#define USE_SETSID
-#define NO_SEMUN
-#endif
 
 
 

@@ -833,15 +833,8 @@ static void init_locals(void)
       string_initial(&sDefault.szLpqcommand,"lpstat -o%p");
       string_initial(&sDefault.szLprmcommand,"cancel %p-%j");
       string_initial(&sDefault.szPrintcommand,"lp -c -d%p %s; rm %s");
-#ifdef SVR4
-      string_initial(&sDefault.szLppausecommand,"lp -i %p-%j -H hold");
-      string_initial(&sDefault.szLpresumecommand,"lp -i %p-%j -H resume");
-      string_initial(&sDefault.szQueuepausecommand, "lpc stop %p");
-      string_initial(&sDefault.szQueueresumecommand, "lpc start %p");
-#else /* SVR4 */
       string_initial(&sDefault.szQueuepausecommand, "disable %p");
       string_initial(&sDefault.szQueueresumecommand, "enable %p");
-#endif /* SVR4 */
       break;
 
     case PRINT_QNX:
