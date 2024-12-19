@@ -29,9 +29,6 @@ support vtp-sessions
 #include	"vt_mode.h"
 #include	<utmp.h>
 
-#ifdef SCO
-	extern char	*strdup();
-#endif
 
 extern int Client;
 
@@ -39,12 +36,6 @@ extern int Client;
 #	define	HAS_VTY
 #endif
 
-#ifdef SCO
-#	define	HAS_PTY
-#	define	HAS_VTY
-
-#	include	<sys/tty.h>
-#endif
 
 extern int	DEBUGLEVEL;
 extern char	*InBuffer, *OutBuffer;
@@ -192,14 +183,6 @@ int	VT_Start(void)
 #	define	POS2		9
 #endif
 
-#ifdef SCO
-#	define	MASTER_TMPL	"/dev/ptyp_  "
-#	define	SLAVE_TMPL	"/dev/ttyp_  "
-#	define	LETTER1		"0123456"
-#	define	POS1		10
-#	define	LETTER2		"0123456789abcdef"
-#	define	POS2		11
-#endif
 
 	if(ms_poll == MS_VTY || ms_poll == 0) {
 		fstrcpy(master_name, MASTER_TMPL);
@@ -231,12 +214,6 @@ int	VT_Start(void)
 
 
 #ifdef HAS_PTY
-#ifdef SCO
-#	define	MASTER_TMPL	"/dev/ptyp%d"
-#	define	SLAVE_TMPL	"/dev/ttyp%d"
-#	define	MIN_I		0
-#	define	MAX_I		63
-#endif
 
 	if(ms_poll == MS_PTY || ms_poll == 0) {
 		int	i;
@@ -272,9 +249,6 @@ int	VT_Start(void)
 		break;
 
 	case 0:
-#ifdef SCO
-		setsid();
-#endif
 		close(0);
 		close(1);
 		close(2);
@@ -287,9 +261,6 @@ int	VT_Start(void)
 		setsid();
 		if (ioctl(slave, TIOCSCTTY, (char *)NULL) == -1)
 			exit(1);
-#endif
-#ifdef SCO
-		tcsetpgrp(0, getpid());
 #endif
 
 		VT_Start_utmp();

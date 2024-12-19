@@ -749,49 +749,6 @@ char *mktemp(char *); /* No standard include */
 
 
 
-#ifdef SCO
-#include <sys/netinet/tcp.h>
-#include <sys/netinet/in_systm.h>
-#include <sys/netinet/ip.h>
-#include <dirent.h>
-#include <string.h>
-#include <termios.h>
-#include <fcntl.h>
-#include <sys/statfs.h>
-#include <sys/stropts.h>
-#include <limits.h>
-#include <locale.h>
-#ifdef EVEREST
-#include <unistd.h> 
-#endif /* EVEREST */
-#ifdef NETGROUP
-#include <rpcsvc/ypclnt.h>
-#endif /* NETGROUP */
-#ifdef SecureWare
-#include <sys/security.h>
-#include <sys/audit.h>
-#include <prot.h>
-#define crypt bigcrypt
-#endif /* SecureWare */
-#define SIGNAL_CAST (void (*)(int))
-#define USE_WAITPID
-#define USE_GETCWD
-#define USE_SETSID
-#ifdef SCO3_2_2
-#define setuid(u) setreuid(u,-1)
-#define seteuid(u) setreuid(-1,u)
-#else /* SCO3_2_2 */
-#ifndef EVEREST
-#define ftruncate(f,l) syscall(0x0a28,f,l)
-#define USE_IFREQ
-#define NO_INITGROUPS
-#endif /* EVEREST */
-#endif /* SCO3_2_2 */
-#define STATFS4
-#define NO_FSYNC
-#define HAVE_PATHCONF
-#define NO_GETRLIMIT
-#endif /* SCO */
 
 
 
