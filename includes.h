@@ -48,13 +48,6 @@
 
 
 
-#ifdef NEWS42
-#define NO_UTIMEH
-#define NO_STRFTIME
-#define NO_UTIMBUF
-#define REPLACE_MKTIME
-#define NO_TM_NAME
-#endif
 
 #ifdef OS2
 #define NO_SYSMOUNTH
@@ -521,13 +514,6 @@ extern char *getpass(char *);
 
 
 
-#ifdef NEWS42
-#include <string.h>
-#include <dirent.h>
-#include <sys/vfs.h>
-#include <sys/timeb.h>
-typedef int mode_t;
-#endif
 
 #ifdef OS2
 #include <dirent.h>
