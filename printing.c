@@ -206,32 +206,16 @@ Rank   Pri Owner      Job  Files                             Total Size
 ****************************************************************************/
 static BOOL parse_lpq_bsd(char *line,print_queue_struct *buf,BOOL first)
 {
-#ifdef	OSF1
-#define	RANKTOK	0
-#define	PRIOTOK 1
-#define	USERTOK 2
-#define	JOBTOK	3
-#define	FILETOK	4
-#define	TOTALTOK 5
-#define	NTOK	6
-#else	/* OSF1 */
 #define	RANKTOK	0
 #define	USERTOK 1
 #define	JOBTOK	2
 #define	FILETOK	3
 #define	TOTALTOK 4
 #define	NTOK	5
-#endif	/* OSF1 */
 
   fstring tok[NTOK];
   int count=0;
 
-#ifdef	OSF1
-  int length;
-  length = strlen(line);
-  if (line[length-3] == ':')
-	return(False);
-#endif	/* OSF1 */
 
   /* handle the case of "(standard input)" as a filename */
   string_sub(line,"standard input","STDIN");

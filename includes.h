@@ -393,30 +393,6 @@ extern struct passwd *getpwnam();
 #endif
 
 
-#ifdef OSF1
-#include <termios.h>
-#include <strings.h>
-#include <dirent.h>
-char *getwd(char *);
-char *mktemp(char *); /* No standard include */
-#include <netinet/in.h>
-#include <arpa/inet.h> /* both for inet_ntoa */
-#define SIGNAL_CAST ( void (*) (int) )
-#define STATFS3
-#define USE_F_FSIZE
-#define USE_SETSID
-#include <netinet/tcp.h>
-#ifdef OSF1_ENH_SEC
-#include <pwd.h>
-#include <sys/types.h>
-#include <sys/security.h>
-#include <prot.h>
-#include <unistd.h>
-#define PASSWORD_LENGTH 16
-#define NEED_AUTH_PARAMETERS
-#endif  /* OSF1_ENH_SEC */
-#define NO_SEMUN
-#endif
 
 
 #ifdef CLIX

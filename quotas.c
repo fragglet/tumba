@@ -319,59 +319,6 @@ DEBUG(5,("disk_quotas for path \"%s\" returning  bsize %d, dfree %d, dsize %d\n"
 }
 
 
-#elif defined(OSF1)
-#include <ufs/quota.h>
-
-/****************************************************************************
-try to get the disk space from disk quotas - OFS1 version
-****************************************************************************/
-BOOL disk_quotas(char *path, int *bsize, int *dfree, int *dsize)
-{
-  uid_t user_id, euser_id;
-  int r, save_errno;
-  struct dqblk D;
-  struct stat S;
-
-  euser_id = geteuid();
-  user_id = getuid();
-
-  setreuid(euser_id, -1);
-  r= quotactl(path,QCMD(Q_GETQUOTA, USRQUOTA),euser_id,(char *) &D);
-  if (r)
-     save_errno = errno;
-
-  if (setreuid(user_id, -1) == -1)
-    DEBUG(5,("Unable to reset uid to %d\n", user_id));
-
-  *bsize = DEV_BSIZE;
-
-  if (r)
-  {
-      if (save_errno == EDQUOT)   // disk quota exceeded
-      {
-         *dfree = 0;
-         *dsize = D.dqb_curblocks;
-         return (True);
-      }
-      else
-         return (False);  
-  }
-
-  /* Use softlimit to determine disk space, except when it has been exceeded */
-
-  if (D.dqb_bsoftlimit==0)
-    return(False);
-
-  if ((D.dqb_curblocks>D.dqb_bsoftlimit)) {
-    *dfree = 0;
-    *dsize = D.dqb_curblocks;
-  } else {
-    *dfree = D.dqb_bsoftlimit - D.dqb_curblocks;
-    *dsize = D.dqb_bsoftlimit;
-  }
-  return (True);
-}
-
 #elif defined (SGI6)
 /****************************************************************************
 try to get the disk space from disk quotas (IRIX 6.2 version)
