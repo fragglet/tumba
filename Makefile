@@ -646,7 +646,7 @@ INCLUDES2 = $(srcdir)trans2.h
 INCLUDES = $(INCLUDES1) $(INCLUDES2)
 
 SPROGS = smbd
-PROGS1 = smbclient testparm testprns smbstatus make_smbcodepage
+PROGS1 = testparm testprns smbstatus make_smbcodepage
 PROGS = $(PROGS1) nmblookup make_printerdef $(MOUNT_PROGS)
 
 SCRIPTS = smbtar addtosmbpass
@@ -685,9 +685,6 @@ SMBDOBJ = $(SMBDOBJ1) $(SMBDOBJ2) $(SMBDOBJ3) $(SMBDOBJ4) $(UBIOBJ) $(RPC_OBJ) $
 # object code needed for programs that handle the the locking files
 LOCKOBJ = locking_shm.o locking_slow.o locking.o shmem.o shmem_sysv.o
 
-# object files for smbclient
-CLIENT_OBJ = client.o ntclient.o credentials.o clientutil.o clitar.o getsmbpass.o $(UTILOBJ) $(RPC_CLI_OBJ) $(RPC_OBJ)
-
 # object files for smbstatus
 STATUS_OBJ = status.o $(UTILOBJ) $(LOCKOBJ) 
 
@@ -724,10 +721,6 @@ smbd: $(SMBDOBJ) $(ARCFOUR_OBJ)
 nmblookup: $(LOOKUP_OBJ)
 	@echo Linking nmblookup
 	@$(CC) $(CFLAGS) -o nmblookup $(LOOKUP_OBJ) $(LIBS)
-
-smbclient: $(CLIENT_OBJ) $(ARCFOUR_OBJ)
-	@echo Linking smbclient
-	@$(CC) $(CFLAGS) -o smbclient $(CLIENT_OBJ) $(ARCFOUR_OBJ) $(LIBS)
 
 smbtorture: torture.o clientgen.o getsmbpass.o $(UTILOBJ)
 	@echo Linking smbtorture
