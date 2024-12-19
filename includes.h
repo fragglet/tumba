@@ -51,11 +51,6 @@
 
 
 
-#ifdef APOLLO
-#define NO_UTIMEH
-#define NO_SYSMOUNTH
-#define NO_UNISTDH
-#endif
 
 
 #ifdef M88K_R3
@@ -495,18 +490,6 @@ extern struct passwd *getpwnam();
 
 
 
-#ifdef APOLLO
-#include <string.h>
-#include <fcntl.h>
-#include <sys/statfs.h>
-#define NO_UTIMBUF
-#define USE_DIRECT
-#define USE_GETCWD
-#define SIGNAL_CAST     (void (*)())
-#define HAVE_FCNTL_LOCK 0
-#define HAVE_GETTIMEOFDAY
-#define STATFS4
-#endif
 
 
 
