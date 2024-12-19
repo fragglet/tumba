@@ -36,9 +36,6 @@
    the main OS dependent section comes later on 
 */
 
-#ifdef ALTOS
-#define NO_UTIMEH
-#endif
 
 #ifdef MIPS
 #define POSIX_H
@@ -587,36 +584,6 @@ extern char *getpass(char *);
 #endif
 
 
-#ifdef ALTOS
-#include <unistd.h>
-#include <string.h>
-#include <dirent.h>
-#include <sys/fcntl.h>
-#include <sys/statfs.h>
-#define        const
-#define        uid_t           int
-#define        gid_t           int
-#define        mode_t          int
-#define        ptrdiff_t       int
-#define HAVE_GETGRNAM  0
-#define NO_EID
-#define NO_FSYNC
-#define        NO_FTRUNCATE
-#define        NO_GETRLIMIT
-#define        NO_INITGROUPS
-#define NO_SELECT
-#define NO_SETGROUPS
-#define NO_STRERROR
-#define NO_STRFTIME
-#define        NO_TM_NAME
-#define NO_UTIMEH
-#define NOSTRCASECMP
-#define REPLACE_MKTIME
-#define REPLACE_RENAME
-#define REPLACE_STRSTR
-#define STATFS4
-#define        USE_GETCWD
-#endif
 
 #ifdef QNX
 #include <arpa/inet.h>
