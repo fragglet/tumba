@@ -53,10 +53,6 @@
 
 
 
-#ifdef M88K_R3
-#define SVR3H
-#define NO_RESOURCEH
-#endif
 
 #ifdef DNIX
 #define NO_SYSMOUNTH
@@ -552,20 +548,6 @@ char *strdup (char *);
 #endif
 
 
-#ifdef M88K_R3
-#include <string.h>
-#include <dirent.h>
-#include <fcntl.h>
-#include <termios.h>
-#define STATFS4
-#define SYSV
-#define USE_WAITPID
-#define SIGNAL_CAST (void (*)(int))
-char *strdup (char *);
-#define USE_GETCWD
-#define NO_FSYNC
-#define NO_EID
-#endif
 
 
 #ifdef DNIX
