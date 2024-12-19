@@ -200,10 +200,7 @@ typedef struct
   BOOL valid;
   char *szService;
   char *szPath;
-  char *szUsername;
   char *szGuestaccount;
-  char *szInvalidUsers;
-  char *szValidUsers;
   char *szAdminUsers;
   char *szCopy;
   char *szInclude;
@@ -253,7 +250,6 @@ typedef struct
   BOOL bStrictLocking;
   BOOL bShareModes;
   BOOL bOpLocks;
-  BOOL bOnlyUser;
   BOOL bMangledNames;
   BOOL bWidelinks;
   BOOL bSymlinks;
@@ -277,10 +273,7 @@ static service sDefault =
   True,   /* valid */
   NULL,    /* szService */
   NULL,    /* szPath */
-  NULL,    /* szUsername */
   NULL,    /* szGuestAccount  - this is set in init_globals() */
-  NULL,    /* szInvalidUsers */
-  NULL,    /* szValidUsers */
   NULL,    /* szAdminUsers */
   NULL,    /* szCopy */
   NULL,    /* szInclude */
@@ -330,7 +323,6 @@ static service sDefault =
   False,  /* bStrictLocking */
   True,  /* bShareModes */
   True,  /* bOpLocks */
-  False, /* bOnlyUser */
   True,  /* bMangledNames */
   True,  /* bWidelinks */
   True,  /* bSymlinks */
@@ -505,12 +497,7 @@ static struct parm_struct
   {"available",        P_BOOL,    P_LOCAL,  &sDefault.bAvailable,       NULL,   NULL},
   {"path",             P_STRING,  P_LOCAL,  &sDefault.szPath,           NULL,   NULL},
   {"directory",        P_STRING,  P_LOCAL,  &sDefault.szPath,           NULL,   NULL},
-  {"username",         P_STRING,  P_LOCAL,  &sDefault.szUsername,       NULL,   NULL},
-  {"user",             P_STRING,  P_LOCAL,  &sDefault.szUsername,       NULL,   NULL},
-  {"users",            P_STRING,  P_LOCAL,  &sDefault.szUsername,       NULL,   NULL},
   {"guest account",    P_STRING,  P_LOCAL,  &sDefault.szGuestaccount,   NULL,   NULL},
-  {"invalid users",    P_STRING,  P_LOCAL,  &sDefault.szInvalidUsers,   NULL,   NULL},
-  {"valid users",      P_STRING,  P_LOCAL,  &sDefault.szValidUsers,     NULL,   NULL},
   {"admin users",      P_STRING,  P_LOCAL,  &sDefault.szAdminUsers,     NULL,   NULL},
   {"read list",        P_STRING,  P_LOCAL,  &sDefault.readlist,         NULL,   NULL},
   {"write list",       P_STRING,  P_LOCAL,  &sDefault.writelist,        NULL,   NULL},
@@ -543,7 +530,6 @@ static struct parm_struct
   {"strict locking",   P_BOOL,    P_LOCAL,  &sDefault.bStrictLocking,   NULL,   NULL},
   {"share modes",      P_BOOL,    P_LOCAL,  &sDefault.bShareModes,      NULL,   NULL},
   {"oplocks",          P_BOOL,    P_LOCAL,  &sDefault.bOpLocks,         NULL,   NULL},
-  {"only user",        P_BOOL,    P_LOCAL,  &sDefault.bOnlyUser,        NULL,   NULL},
   {"wide links",       P_BOOL,    P_LOCAL,  &sDefault.bWidelinks,       NULL,   NULL},
   {"follow symlinks",  P_BOOL,    P_LOCAL,  &sDefault.bSymlinks,        NULL,   NULL},
   {"sync always",      P_BOOL,    P_LOCAL,  &sDefault.bSyncAlways,      NULL,   NULL},
@@ -859,10 +845,7 @@ FN_LOCAL_STRING(lp_rootpostexec,szRootPostExec)
 FN_LOCAL_STRING(lp_servicename,szService)
 FN_LOCAL_STRING(lp_pathname,szPath)
 FN_LOCAL_STRING(lp_dontdescend,szDontdescend)
-FN_LOCAL_STRING(lp_username,szUsername)
 FN_LOCAL_STRING(lp_guestaccount,szGuestaccount)
-FN_LOCAL_STRING(lp_invalid_users,szInvalidUsers)
-FN_LOCAL_STRING(lp_valid_users,szValidUsers)
 FN_LOCAL_STRING(lp_admin_users,szAdminUsers)
 FN_LOCAL_STRING(lp_queuepausecommand,szQueuepausecommand)
 FN_LOCAL_STRING(lp_queueresumecommand,szQueueresumecommand)
@@ -898,7 +881,6 @@ FN_LOCAL_BOOL(lp_locking,bLocking)
 FN_LOCAL_BOOL(lp_strict_locking,bStrictLocking)
 FN_LOCAL_BOOL(lp_share_modes,bShareModes)
 FN_LOCAL_BOOL(lp_oplocks,bOpLocks)
-FN_LOCAL_BOOL(lp_onlyuser,bOnlyUser)
 FN_LOCAL_BOOL(lp_manglednames,bMangledNames)
 FN_LOCAL_BOOL(lp_widelinks,bWidelinks)
 FN_LOCAL_BOOL(lp_symlinks,bSymlinks)
@@ -1075,7 +1057,6 @@ static BOOL lp_add_ipc(void)
 	   "IPC Service (%s)", Globals.szServerString );
 
   string_set(&iSERVICE(i).szPath,tmpdir());
-  string_set(&iSERVICE(i).szUsername,"");
   string_set(&iSERVICE(i).comment,comment);
   iSERVICE(i).status = False;
   iSERVICE(i).iMaxConnections = 0;

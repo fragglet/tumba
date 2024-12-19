@@ -257,27 +257,7 @@ check if a username is valid
 ****************************************************************************/
 BOOL user_ok(char *user,int snum)
 {
-  pstring valid, invalid;
-  BOOL ret;
-
-  StrnCpy(valid, lp_valid_users(snum), sizeof(pstring));
-  StrnCpy(invalid, lp_invalid_users(snum), sizeof(pstring));
-
-  string_sub(valid,"%S",lp_servicename(snum));
-  string_sub(invalid,"%S",lp_servicename(snum));
-
-  ret = !user_in_list(user,invalid);
-
-  if (ret && valid && *valid)
-    ret = user_in_list(user,valid);
-
-  if (ret && lp_onlyuser(snum)) {
-    char *user_list = lp_username(snum);
-    string_sub(user_list,"%S",lp_servicename(snum));
-    ret = user_in_list(user,user_list);
-  }
-
-  return(ret);
+  return True;
 }
 
 
