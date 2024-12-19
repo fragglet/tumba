@@ -759,9 +759,7 @@ void DirCacheFlush( int snum )
  * are defined for Interactive UNIX.
  */
 
-#if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
-#endif
 
 #if defined (__STDC__)
 #  define CONST const
