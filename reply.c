@@ -625,16 +625,6 @@ int reply_sesssetup_and_X(char *inbuf,char *outbuf,int length,int bufsize)
     guest = True;
   }
 
-  if (!strequal(user,lp_guestaccount(-1)) &&
-      lp_servicenumber(user) < 0)      
-    {
-      int homes = lp_servicenumber(HOMES_NAME);
-      char *home = get_home_dir(user);
-      if (homes >= 0 && home)
-	lp_add_home(user,homes,home);
-    }
-
-
   /* it's ok - setup a reply */
   if (Protocol < PROTOCOL_NT1) {
     set_message(outbuf,3,0,True);

@@ -13,10 +13,6 @@
 #define GLOBAL_NAME2 "globals"
 
 /* This defines the section name in the configuration file that will
-   refer to the special "homes" service */
-#define HOMES_NAME "homes"
-
-/* This defines the section name in the configuration file that will
    refer to the special "printers" service */
 #define PRINTERS_NAME "printers"
 

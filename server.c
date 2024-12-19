@@ -2264,18 +2264,6 @@ int find_service(char *service)
         if(map_username(service))
           phome_dir = get_home_dir(service);
       }
-
-      DEBUG(3,("checking for home directory %s gave %s\n",service,
-	    phome_dir?phome_dir:"(NULL)"));
-      if (phome_dir)
-      {   
-	 int iHomeService;
-	 if ((iHomeService = lp_servicenumber(HOMES_NAME)) >= 0)
-	 {
-	    lp_add_home(service,iHomeService,phome_dir);
-	    iService = lp_servicenumber(service);
-	 }
-      }
    }
 
    /* just possibly it's a default service? */
@@ -3538,33 +3526,6 @@ int make_connection(char *service,char *user,char *password, int pwlen, char *de
       DEBUG(0,("%s %s (%s) couldn't find service %s\n",timestring(),remote_machine,client_addr(),service));      
       return(-2);
     }
-
-  if (strequal(service,HOMES_NAME))
-    {
-      if (*user && Get_Pwnam(user,True))
-	return(make_connection(user,user,password,pwlen,dev,vuid));
-
-      if(lp_security() != SEC_SHARE)
-      {
-        if (validated_username(vuid))
-        {
-          pstrcpy(user,validated_username(vuid));
-          return(make_connection(user,user,password,pwlen,dev,vuid));
-        }
-      }
-      else
-      {
-        /*
-         * Security = share. Try with sesssetup_user as the username.
-         */
-        if(*sesssetup_user)
-        {
-          pstrcpy(user,sesssetup_user);
-          return(make_connection(user,user,password,pwlen,dev,vuid));
-        }
-      }
-    }
-
   if (!lp_snum_ok(snum) || !check_access(snum)) {    
     return(-4);
   }

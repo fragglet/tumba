@@ -75,10 +75,6 @@ extern pstring myname;
 #define GLOBAL_NAME "global"
 #endif
 
-#ifndef HOMES_NAME
-#define HOMES_NAME "homes"
-#endif
-
 /* some helpful bits */
 #define pSERVICE(i) ServicePtrs[i]
 #define iSERVICE(i) (*pSERVICE(i))
@@ -1006,34 +1002,6 @@ static int add_a_service(service *pservice, char *name)
 }
 
 /***************************************************************************
-add a new home service, with the specified home directory, defaults coming 
-from service ifrom
-***************************************************************************/
-BOOL lp_add_home(char *pszHomename, int iDefaultService, char *pszHomedir)
-{
-  int i = add_a_service(pSERVICE(iDefaultService),pszHomename);
-
-  if (i < 0)
-    return(False);
-
-  if (!(*(iSERVICE(i).szPath)) || strequal(iSERVICE(i).szPath,lp_pathname(-1)))
-    string_set(&iSERVICE(i).szPath,pszHomedir);
-  if (!(*(iSERVICE(i).comment)))
-    {
-      pstring comment;
-      slprintf(comment,sizeof(comment),
-	       "Home directory of %s",pszHomename);
-      string_set(&iSERVICE(i).comment,comment);
-    }
-  iSERVICE(i).bAvailable = sDefault.bAvailable;
-  iSERVICE(i).bBrowseable = sDefault.bBrowseable;
-
-  DEBUG(3,("adding home directory %s at %s\n", pszHomename, pszHomedir));
-
-  return(True);
-}
-
-/***************************************************************************
 add a new service, based on an old one
 ***************************************************************************/
 int lp_add_service(char *pszService, int iDefaultService)
@@ -1247,8 +1215,7 @@ static BOOL service_ok(int iService)
       bRetval = False;
    }
 
-   if (iSERVICE(iService).szPath[0] == '\0' &&
-       strwicmp(iSERVICE(iService).szService,HOMES_NAME) != 0)
+   if (iSERVICE(iService).szPath[0] == '\0')
    {
       DEBUG(0,("No path in service %s - using %s\n",iSERVICE(iService).szService,tmpdir()));
       string_set(&iSERVICE(iService).szPath,tmpdir());      
@@ -1900,37 +1867,6 @@ BOOL lp_snum_ok(int iService)
 }
 
 
-/***************************************************************************
-auto-load some homes services
-***************************************************************************/
-static void lp_add_auto_services(char *str)
-{
-  char *s;
-  char *p;
-  int homes;
-
-  if (!str)
-    return;
-
-  s = strdup(str);
-  if (!s) return;
-
-  homes = lp_servicenumber(HOMES_NAME);    
-
-  for (p=strtok(s,LIST_SEP);p;p=strtok(NULL,LIST_SEP))
-    {
-      char *home = get_home_dir(p);
-
-      if (lp_servicenumber(p) >= 0) continue;
-
-      if (home && homes >= 0)
-	{
-	  lp_add_home(p,homes,home);
-	  continue;
-	}
-    }
-  free(s);
-}
 
 /***************************************************************************
 have we loaded a services file yet?
@@ -1984,8 +1920,6 @@ BOOL lp_load(char *pszFname,BOOL global_only)
   if (bRetval)
     if (iServiceIndex >= 0)
       bRetval = service_ok(iServiceIndex);	   
-
-  lp_add_auto_services(lp_auto_services());
 
   lp_add_ipc();
 
