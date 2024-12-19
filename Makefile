@@ -646,7 +646,7 @@ INCLUDES2 = $(srcdir)trans2.h
 INCLUDES = $(INCLUDES1) $(INCLUDES2)
 
 SPROGS = smbd
-PROGS1 = testparm testprns smbstatus make_smbcodepage
+PROGS1 = testparm smbstatus make_smbcodepage
 PROGS = $(PROGS1) $(MOUNT_PROGS)
 
 SCRIPTS = smbtar addtosmbpass
@@ -672,7 +672,7 @@ RPC_OBJ = $(RPC_OBJ1) $(RPC_OBJ2)
 
 # general utility object files
 UTILOBJ1 = util.o system.o charset.o kanji.o fault.o smbencrypt.o smbdes.o charcnv.o
-UTILOBJ2 = $(UTILOBJ1) md4.o loadparm.o params.o pcap.o username.o time.o namequery.o nmblib.o
+UTILOBJ2 = $(UTILOBJ1) md4.o loadparm.o params.o username.o time.o namequery.o nmblib.o
 UTILOBJ = $(UTILOBJ2) interface.o replace.o smberr.o mem_man/mem_man.o slprintf.o
 
 # object code for smbd
@@ -725,10 +725,6 @@ smbstatus: $(STATUS_OBJ)
 testparm: testparm.o access.o $(UTILOBJ)
 	@echo Linking testparm
 	@$(CC) $(CFLAGS) -o testparm testparm.o access.o $(UTILOBJ) $(LIBS)
-
-testprns: testprns.o $(UTILOBJ)
-	@echo Linking testprns
-	@$(CC) $(CFLAGS) -o testprns testprns.o $(UTILOBJ) $(LIBS)
 
 make_smbcodepage: make_smbcodepage.o $(UTILOBJ) 
 	@echo Linking make_smbcodepage

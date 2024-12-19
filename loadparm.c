@@ -2187,9 +2187,6 @@ static void lp_add_auto_services(char *str)
 	  lp_add_home(p,homes,home);
 	  continue;
 	}
-
-      if (printers >= 0 && pcap_printername_ok(p,NULL))
-	lp_add_printer(p,printers);
     }
   free(s);
 }
@@ -2219,8 +2216,6 @@ static void lp_add_all_printers(void)
   int printers = lp_servicenumber(PRINTERS_NAME);
 
   if (printers < 0) return;
-
-  pcap_printer_fn(lp_add_one_printer);
 }
 
 /***************************************************************************

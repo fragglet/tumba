@@ -864,11 +864,6 @@ BOOL server_validate(char *user, char *domain,
 		     char *pass, int passlen,
 		     char *ntpass, int ntpasslen);
 
-/*The following definitions come from  pcap.c  */
-
-BOOL pcap_printername_ok(char *pszPrintername, char *pszPrintcapname);
-void pcap_printer_fn(void (*fn)(char *, char*));
-
 /*The following definitions come from  pipes.c  */
 
 int reply_open_pipe_and_X(char *inbuf,char *outbuf,int length,int bufsize);
