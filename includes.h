@@ -479,27 +479,6 @@ extern struct passwd *getpwnam();
 
 
 
-#ifdef SEQUENT
-#include <signal.h>
-#include <string.h>
-#include <dirent.h>
-#include <sys/types.h>
-#include <sys/statfs.h>
-#include <sys/stat.h>
-#include <sys/buf.h>
-#include <sys/socket.h>
-#include <unistd.h>
-#include <fcntl.h>
-#define SIGNAL_CAST (void (*)(int))
-#define USE_WAITPID
-#define USE_GETCWD
-#define NO_EID
-#define STATFS4
-#define USE_DIRECT
-#ifdef PTX4
-#undef USE_DIRECT
-#endif
-#endif
 
 
 
