@@ -134,7 +134,6 @@ char *lp_string(char *s);
 char *lp_logfile(void);
 char *lp_smbrun(void);
 char *lp_configfile(void);
-char *lp_smb_passwd_file(void);
 char *lp_serverstring(void);
 char *lp_lockdir(void);
 char *lp_rootdir(void);
@@ -143,8 +142,6 @@ char *lp_msg_command(void);
 char *lp_dfree_command(void);
 char *lp_hosts_equiv(void);
 char *lp_auto_services(void);
-char *lp_passwd_program(void);
-char *lp_passwd_chat(void);
 char *lp_passwordserver(void);
 char *lp_name_resolve_order(void);
 char *lp_workgroup(void);
@@ -189,8 +186,6 @@ BOOL lp_nis_home_map(void);
 BOOL lp_time_server(void);
 BOOL lp_bind_interfaces_only(void);
 BOOL lp_net_wksta_user_logon(void);
-BOOL lp_unix_password_sync(void);
-BOOL lp_passwd_chat_debug(void);
 BOOL lp_ole_locking_compat(void);
 int lp_os_level(void);
 int lp_max_ttl(void);
@@ -402,10 +397,7 @@ void invalidate_vuid(uint16 vuid);
 char *validated_username(uint16 vuid);
 uint16 register_vuid(int uid,int gid, char *unix_name, char *requested_name, BOOL guest);
 void add_session_user(char *user);
-BOOL update_smbpassword_file( struct passwd *pass, fstring password);
 void dfs_unlogin(void);
-BOOL password_check(char *password);
-BOOL smb_password_check(char *password, unsigned char *part_passwd, unsigned char *c8);
 BOOL password_ok(char *user,char *password, int pwlen, struct passwd *pwd);
 BOOL user_ok(char *user,int snum);
 BOOL authorise_login(int snum,char *user,char *password, int pwlen, 
@@ -565,14 +557,6 @@ void SMBencrypt(uchar *passwd, uchar *c8, uchar *p24);
 /*The following definitions come from  smberr.c  */
 
 char *smb_errstr(char *inbuf);
-
-/*The following definitions come from  smbpass.c  */
-
-int pw_file_lock(char *name, int type, int secs);
-int pw_file_unlock(int fd);
-struct smb_passwd *get_smbpwd_entry(char *name, int smb_userid);
-BOOL add_smbpwd_entry(struct smb_passwd* pwd);
-BOOL mod_smbpwd_entry(struct smb_passwd* pwd, BOOL override);
 
 /*The following definitions come from  status.c  */
 
