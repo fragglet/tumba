@@ -555,22 +555,6 @@ BOOL unix_convert(char *name,int cnum,pstring saved_last_component, BOOL *bad_pa
       (!case_preserve || (is_8_3(name, False) && !short_case_preserve)))
     strnorm(name);
 
-  /* check if it's a printer file */
-  if (Connections[cnum].printer)
-    {
-      if ((! *name) || strchr(name,'/') || !is_8_3(name, True))
-	{
-	  char *s;
-	  fstring name2;
-	  slprintf(name2,sizeof(name2)-1,"%.6s.XXXXXX",remote_machine);
-	  /* sanitise the name */
-	  for (s=name2 ; *s ; s++)
-	    if (!issafe(*s)) *s = '_';
-	  pstrcpy(name,(char *)mktemp(name2));	  
-	}      
-      return(True);
-    }
-
   /* stat the name - if it exists then we are all done! */
   if (sys_stat(name,&st) == 0)
     return(True);
@@ -1421,25 +1405,6 @@ static void open_file(int fnum,int cnum,char *fname1,int flags,int mode, struct 
     }
   }
 
-  if ((fd_ptr->fd >=0) && 
-      Connections[cnum].printer && lp_minprintspace(SNUM(cnum))) {
-    pstring dname;
-    int dum1,dum2,dum3;
-    char *p;
-    pstrcpy(dname,fname);
-    p = strrchr(dname,'/');
-    if (p) *p = 0;
-    if (sys_disk_free(dname,&dum1,&dum2,&dum3) < 
-	lp_minprintspace(SNUM(cnum))) {
-      fd_attempt_close(fd_ptr);
-      fsp->fd_ptr = 0;
-      if(fd_ptr->ref_count == 0)
-        sys_unlink(fname);
-      errno = ENOSPC;
-      return;
-    }
-  }
-    
   if (fd_ptr->fd < 0)
   {
     DEBUG(3,("Error opening file %s (%s) (flags=%d)\n",
@@ -2339,31 +2304,6 @@ int find_service(char *service)
 	    lp_add_home(service,iHomeService,phome_dir);
 	    iService = lp_servicenumber(service);
 	 }
-      }
-   }
-
-   /* If we still don't have a service, attempt to add it as a printer. */
-   if (iService < 0)
-   {
-      int iPrinterService;
-
-      if ((iPrinterService = lp_servicenumber(PRINTERS_NAME)) >= 0)
-      {
-         char *pszTemp;
-
-         DEBUG(3,("checking whether %s is a valid printer name...\n", service));
-         pszTemp = PRINTCAP;
-         if ((pszTemp != NULL) && pcap_printername_ok(service, pszTemp))
-         {
-            DEBUG(3,("%s is a valid printer name\n", service));
-            DEBUG(3,("adding %s as a printer service\n", service));
-            lp_add_printer(service,iPrinterService);
-            iService = lp_servicenumber(service);
-            if (iService < 0)
-               DEBUG(0,("failed to add %s as a printer service!\n", service));
-         }
-         else
-            DEBUG(3,("%s is not a valid printer name\n", service));
       }
    }
 
