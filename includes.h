@@ -202,19 +202,6 @@ Here come some platform specific sections
 
 
 
-#ifdef DGUX
-#include <string.h>
-#include <dirent.h>
-#include <sys/statfs.h>
-#include <sys/statvfs.h>
-#include <fcntl.h>
-#include <termios.h>
-#define SYSV
-#define USE_WAITPID
-#define SIGNAL_CAST (void (*)(int))
-#define STATFS4
-#define USE_GETCWD
-#endif
 
 
 
