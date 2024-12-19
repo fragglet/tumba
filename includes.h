@@ -73,13 +73,6 @@
 #endif
 #include <sys/types.h>
 
-#ifdef SVR3H
-#include <sys/statfs.h>
-#include <sys/stream.h>
-#include <netinet/types.h>
-#include <netinet/ether.h>
-#include <netinet/ip_if.h>
-#endif
 
 #include <sys/socket.h>
 #ifdef AXPROC
