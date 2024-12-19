@@ -50,9 +50,6 @@
 
 
 
-#ifdef LYNX
-#define NO_SYSMOUNTH
-#endif
 
 
 #if (defined(SHADOW_PWD)||defined(OSF1_ENH_SEC)||defined(SecureWare)||defined(PWDAUTH))
@@ -513,19 +510,6 @@ extern char *getpass(char *);
 
 
 
-#ifdef LYNX
-#define SIGNAL_CAST (void (*)())
-#define WAIT3_CAST1 (union wait *)
-#define STATFS4
-#include <fcntl.h>
-#include <resource.h>
-#include <stat.h>
-#include <string.h>
-#include <dirent.h>
-#include <sys/statfs.h>
-#define USE_GETCWD
-#define USE_GETSID
-#endif
 
 
 #ifdef BOS
