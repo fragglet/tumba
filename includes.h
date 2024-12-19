@@ -191,39 +191,6 @@ Here come some platform specific sections
 #endif
 #endif
 
-#ifdef SUNOS4
-#define SIGNAL_CAST (void (*)(int))
-#include <netinet/tcp.h>
-#include <dirent.h>
-#include <sys/acct.h>
-#include <sys/vfs.h>
-#include <string.h>
-#include <strings.h>
-#include <errno.h>
-#include <sys/wait.h>
-#include <signal.h>
-/* #include <termios.h> */
-#include <utime.h>
-#define NO_STRERROR
-#ifndef REPLACE_GETPASS
-#define REPLACE_GETPASS
-#endif
-#ifndef BSD_TERMIO
-#define BSD_TERMIO
-#endif
-#ifndef USE_SIGPROCMASK
-#define USE_SIGPROCMASK
-#endif
-#ifndef USE_WAITPID
-#define USE_WAITPID
-#endif
-/* SunOS doesn't have POSIX atexit */
-#define atexit on_exit
-#define NOSTRCASECMP
-#ifndef QSORT_CAST
-#define QSORT_CAST (int (*)(const void *, const void *))
-#endif /* QSORT_CAST */
-#endif
 
 
 
