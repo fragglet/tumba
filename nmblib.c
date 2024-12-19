@@ -590,18 +590,6 @@ static struct packet_struct *copy_dgram_packet(struct packet_struct *packet)
 }
 
 /*******************************************************************
-  'Copy constructor' for a generic packet
-  ******************************************************************/
-struct packet_struct *copy_packet(struct packet_struct *packet)
-{  
-  if(packet->packet_type == NMB_PACKET)
-    return copy_nmb_packet(packet);
-  else if (packet->packet_type == DGRAM_PACKET)
-    return copy_dgram_packet(packet);
-  return NULL;
-}
- 
-/*******************************************************************
   free up any resources associated with an nmb packet
   ******************************************************************/
 static void free_nmb_packet(struct nmb_packet *nmb)
@@ -768,17 +756,6 @@ void make_nmb_name(struct nmb_name *n,char *name,int type,char *this_scope)
   strupper(n->name);
   n->name_type = (unsigned int)type & 0xFF;
   StrnCpy(n->scope,this_scope,63);
-}
-
-/*******************************************************************
-  Compare two nmb names
-  ******************************************************************/
-
-BOOL nmb_name_equal(struct nmb_name *n1, struct nmb_name *n2)
-{
-  return ((n1->name_type == n2->name_type) &&
-         strequal(n1->name ,n2->name ) &&
-         strequal(n1->scope,n2->scope));
 }
 
 /*******************************************************************

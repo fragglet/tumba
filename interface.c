@@ -379,28 +379,6 @@ void load_interfaces(void)
 
 
 /****************************************************************************
-  override the defaults
-  **************************************************************************/
-void iface_set_default(char *ip,char *bcast,char *nmask)
-{
-  if (ip) {
-    got_ip = True;
-    default_ip = *interpret_addr2(ip);
-  }
-
-  if (bcast) {
-    got_bcast = True;
-    default_bcast = *interpret_addr2(bcast);
-  }
-
-  if (nmask) {
-    got_nmask = True;
-    default_nmask = *interpret_addr2(nmask);
-  }
-}
-
-
-/****************************************************************************
   check if an IP is one of mine
   **************************************************************************/
 BOOL ismyip(struct in_addr ip)
@@ -408,29 +386,6 @@ BOOL ismyip(struct in_addr ip)
   struct interface *i;
   for (i=local_interfaces;i;i=i->next)
     if (ip_equal(i->ip,ip)) return True;
-  return False;
-}
-
-/****************************************************************************
-  check if a bcast is one of mine
-  **************************************************************************/
-BOOL ismybcast(struct in_addr bcast)
-{
-  struct interface *i;
-  for (i=local_interfaces;i;i=i->next)
-    if (ip_equal(i->bcast,bcast)) return True;
-  return False;
-}
-
-/****************************************************************************
-  check if a packet is from a local (known) net
-  **************************************************************************/
-BOOL is_local_net(struct in_addr from)
-{
-  struct interface *i;
-  for (i=local_interfaces;i;i=i->next)
-    if((from.s_addr & i->nmask.s_addr) == (i->ip.s_addr & i->nmask.s_addr))
-      return True;
   return False;
 }
 
@@ -445,33 +400,6 @@ int iface_count(void)
   for (i=local_interfaces;i;i=i->next)
     ret++;
   return ret;
-}
-
-/****************************************************************************
- True if we have two or more interfaces.
-  **************************************************************************/
-BOOL we_are_multihomed(void)
-{
-  static int multi = -1;
-
-  if(multi == -1)
-    multi = (iface_count() > 1 ? True : False);
-
-  return multi;
-}
-
-/****************************************************************************
-  return the Nth interface
-  **************************************************************************/
-struct interface *get_interface(int n)
-{ 
-  struct interface *i;
-  
-  for (i=local_interfaces;i && n;i=i->next)
-    n--;
-
-  if (i) return i;
-  return NULL;
 }
 
 /****************************************************************************
@@ -512,18 +440,3 @@ struct in_addr *iface_bcast(struct in_addr ip)
   struct interface *i = iface_find(ip);
   return(i ? &i->bcast : &local_interfaces->bcast);
 }
-
-struct in_addr *iface_nmask(struct in_addr ip)
-{
-  struct interface *i = iface_find(ip);
-  return(i ? &i->nmask : &local_interfaces->nmask);
-}
-
-struct in_addr *iface_ip(struct in_addr ip)
-{
-  struct interface *i = iface_find(ip);
-  return(i ? &i->ip : &local_interfaces->ip);
-}
-
-
-

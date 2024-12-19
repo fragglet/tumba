@@ -75,7 +75,6 @@ BOOL cli_ulogoff(struct cli_state *cli);
 BOOL cli_send_tconX(struct cli_state *cli, 
 		    char *share, char *dev, char *pass, int passlen);
 BOOL cli_tdis(struct cli_state *cli);
-BOOL cli_mv(struct cli_state *cli, char *fname_src, char *fname_dst);
 BOOL cli_unlink(struct cli_state *cli, char *fname);
 BOOL cli_mkdir(struct cli_state *cli, char *dname);
 BOOL cli_rmdir(struct cli_state *cli, char *dname);
@@ -196,17 +195,10 @@ char *getsmbpass(char *prompt)    ;
 /*The following definitions come from  interface.c  */
 
 void load_interfaces(void);
-void iface_set_default(char *ip,char *bcast,char *nmask);
 BOOL ismyip(struct in_addr ip);
-BOOL ismybcast(struct in_addr bcast);
-BOOL is_local_net(struct in_addr from);
 int iface_count(void);
-BOOL we_are_multihomed(void);
-struct interface *get_interface(int n);
 struct in_addr *iface_n_ip(int n);
 struct in_addr *iface_bcast(struct in_addr ip);
-struct in_addr *iface_nmask(struct in_addr ip);
-struct in_addr *iface_ip(struct in_addr ip);
 
 /*The following definitions come from  ipc.c  */
 
@@ -466,9 +458,6 @@ int reply_sendend(char *inbuf,char *outbuf, int dum_size, int dum_buffsize);
 
 /*The following definitions come from  namequery.c  */
 
-BOOL name_status(int fd,char *name,int name_type,BOOL recurse,
-		 struct in_addr to_ip,char *master,char *rname,
-		 void (*fn)(struct packet_struct *));
 struct in_addr *name_query(int fd,char *name,int name_type, BOOL bcast,BOOL recurse,
          struct in_addr to_ip, int *count, void (*fn)(struct packet_struct *));
 FILE *startlmhosts(char *fname);
@@ -805,11 +794,9 @@ void expire_workgroups_and_servers(time_t t);
 char *lookup_opcode_name( int opcode );
 void debug_nmb_packet(struct packet_struct *p);
 char *namestr(struct nmb_name *n);
-struct packet_struct *copy_packet(struct packet_struct *packet);
 void free_packet(struct packet_struct *packet);
 struct packet_struct *read_packet(int fd,enum packet_type packet_type);
 void make_nmb_name(struct nmb_name *n,char *name,int type,char *this_scope);
-BOOL nmb_name_equal(struct nmb_name *n1, struct nmb_name *n2);
 BOOL send_packet(struct packet_struct *p);
 struct packet_struct *receive_packet(int fd,enum packet_type type,int t);
 
@@ -1283,7 +1270,6 @@ int vslprintf(char *str, int n, char *format, va_list ap);
 
 void E_P16(unsigned char *p14,unsigned char *p16);
 void E_P24(unsigned char *p21, unsigned char *c8, unsigned char *p24);
-void D_P16(unsigned char *p14, unsigned char *in, unsigned char *out);
 void E_old_pw_hash( unsigned char *p14, unsigned char *in, unsigned char *out);
 void cred_hash1(unsigned char *out,unsigned char *in,unsigned char *key);
 void cred_hash2(unsigned char *out,unsigned char *in,unsigned char *key);
@@ -1292,9 +1278,6 @@ void SamOEMhash( unsigned char *data, unsigned char *key, int val);
 /*The following definitions come from  smbencrypt.c  */
 
 void SMBencrypt(uchar *passwd, uchar *c8, uchar *p24);
-void E_md4hash(uchar *passwd, uchar *p16);
-void SMBNTencrypt(uchar *passwd, uchar *c8, uchar *p24);
-void nt_lm_owf_gen(char *pwd, char *nt_p16, char *p16);
 
 /*The following definitions come from  smberr.c  */
 
@@ -1313,7 +1296,6 @@ BOOL mod_smbpwd_entry(struct smb_passwd* pwd, BOOL override);
 void Ucrit_addUsername(pstring username);
 unsigned int Ucrit_checkUsername(pstring username);
 void Ucrit_addPid(int pid);
-unsigned int   Ucrit_checkPid(int pid);
 
 /*The following definitions come from  system.c  */
 
@@ -1396,7 +1378,6 @@ void force_check_log_size(void);
 char *tmpdir(void);
 BOOL is_a_socket(int fd);
 BOOL next_token(char **ptr,char *buff,char *sep);
-char **toktocliplist(int *ctok, char *sep);
 void *MemMove(void *dest,void *src,int size);
 void array_promote(char *array,int elsize,int element);
 void set_socket_options(int fd, char *options);
@@ -1410,11 +1391,9 @@ BOOL file_exist(char *fname,struct stat *sbuf);
 time_t file_modtime(char *fname);
 BOOL directory_exist(char *dname,struct stat *st);
 uint32 file_size(char *file_name);
-char *attrib_string(int mode);
 int StrCaseCmp(char *s, char *t);
 int StrnCaseCmp(char *s, char *t, int n);
 BOOL strequal(char *s1, char *s2);
-BOOL strnequal(char *s1,char *s2,int n);
 BOOL strcsequal(char *s1,char *s2);
 void strlower(char *s);
 void strupper(char *s);
@@ -1422,7 +1401,6 @@ void strnorm(char *s);
 BOOL strisnormal(char *s);
 void string_replace(char *s,char oldc,char newc);
 void unix_format(char *fname);
-void dos_format(char *fname);
 void show_msg(char *buf);
 int smb_len(char *buf);
 void _smb_setlen(char *buf,int len);
@@ -1440,7 +1418,6 @@ void unix_clean_name(char *s);
 int ChDir(char *path);
 char *GetWd(char *str);
 BOOL reduce_name(char *s,char *dir,BOOL widelinks);
-void expand_mask(char *Mask,BOOL doext);
 BOOL strhasupper(char *s);
 BOOL strhaslower(char *s);
 int count_chars(char *s,char c);
@@ -1450,7 +1427,6 @@ int set_blocking(int fd, BOOL set);
 int write_socket(int fd,char *buf,int len);
 int read_udp_socket(int fd,char *buf,int len);
 int read_with_timeout(int fd,char *buf,int mincnt,int maxcnt,long time_out);
-int read_max_udp(int fd,char *buffer,int bufsize,int maxtime);
 int TvalDiff(struct timeval *tvalold,struct timeval *tvalnew);
 BOOL send_keepalive(int client);
 int read_data(int fd,char *buffer,int N);
@@ -1478,11 +1454,8 @@ BOOL string_sub(char *s,char *pattern,char *insert);
 BOOL do_match(char *str, char *regexp, int case_sig);
 BOOL mask_match(char *str, char *regexp, int case_sig,BOOL trans2);
 void become_daemon(void);
-BOOL yesno(char *p);
 char *fgets_slash(char *s2,int maxlen,FILE *f);
 int set_filelen(int fd, long len);
-int byte_checksum(char *buf,int len);
-char *dirname_dos(char *path,char *buf);
 void *Realloc(void *p,int size);
 void Abort(void );
 BOOL get_myname(char *my_name,struct in_addr *ip);
@@ -1490,7 +1463,6 @@ BOOL ip_equal(struct in_addr ip1,struct in_addr ip2);
 int open_socket_in(int type, int port, int dlevel,uint32 socket_addr);
 int open_socket_out(int type, struct in_addr *addr, int port ,int timeout);
 int interpret_protocol(char *str,int def);
-int interpret_security(char *str,int def);
 uint32 interpret_addr(char *str);
 struct in_addr *interpret_addr2(char *str);
 BOOL zero_ip(struct in_addr ip);
@@ -1513,22 +1485,14 @@ BOOL is_in_path(char *name, name_compare_entry *namelist);
 void set_namearray(name_compare_entry **ppname_array, char *namelist);
 void free_namearray(name_compare_entry *name_array);
 BOOL fcntl_lock(int fd,int op,uint32 offset,uint32 count,int type);
-int file_lock(char *name,int timeout);
-void file_unlock(int fd);
 BOOL is_myname(char *s);
 void set_remote_arch(enum remote_arch_types type);
 enum remote_arch_types get_remote_arch(void);
-char *skip_unicode_string(char *buf,int n);
 char *unistrn2(uint16 *buf, int len);
 char *unistr2(uint16 *buf);
 int struni2(uint16 *p, char *buf);
-char *unistr(char *buf);
-int unistrncpy(char *dst, char *src, int len);
-int unistrcpy(char *dst, char *src);
 char *safe_strcpy(char *dest, char *src, int maxlength);
 char *safe_strcat(char *dest, char *src, int maxlength);
-char *align4(char *q, char *base);
-char *align2(char *q, char *base);
 char *align_offset(char *q, char *base, int align_offset_len);
 void print_asc(int level, unsigned char *buf,int len);
 void dump_data(int level,char *buf1,int len);

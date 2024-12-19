@@ -553,7 +553,6 @@ extern int errno;
 
 #ifdef NOSTRCASECMP
 #define strcasecmp(s1,s2) StrCaseCmp(s1,s2)
-#define strncasecmp(s1,s2,n) StrnCaseCmp(s1,s2,n)
 #endif
 
 #ifdef strcpy

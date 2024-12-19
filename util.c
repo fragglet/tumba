@@ -440,45 +440,6 @@ BOOL next_token(char **ptr,char *buff,char *sep)
 }
 
 /****************************************************************************
-Convert list of tokens to array; dependent on above routine.
-Uses last_ptr from above - bit of a hack.
-****************************************************************************/
-char **toktocliplist(int *ctok, char *sep)
-{
-  char *s=last_ptr;
-  int ictok=0;
-  char **ret, **iret;
-
-  if (!sep) sep = " \t\n\r";
-
-  while(*s && strchr(sep,*s)) s++;
-
-  /* nothing left? */
-  if (!*s) return(NULL);
-
-  do {
-    ictok++;
-    while(*s && (!strchr(sep,*s))) s++;
-    while(*s && strchr(sep,*s)) *s++=0;
-  } while(*s);
-
-  *ctok=ictok;
-  s=last_ptr;
-
-  if (!(ret=iret=malloc(ictok*sizeof(char *)))) return NULL;
-  
-  while(ictok--) {    
-    *iret++=s;
-    while(*s++);
-    while(!*s) s++;
-  }
-
-  return ret;
-}
-
-
-
-/****************************************************************************
 prompte a dptr (to make it recently used)
 ****************************************************************************/
 void array_promote(char *array,int elsize,int element)
@@ -833,26 +794,6 @@ uint32 file_size(char *file_name)
 }
 
 /*******************************************************************
-return a string representing an attribute for a file
-********************************************************************/
-char *attrib_string(int mode)
-{
-  static fstring attrstr;
-
-  attrstr[0] = 0;
-
-  if (mode & aVOLID) fstrcat(attrstr,"V");
-  if (mode & aDIR) fstrcat(attrstr,"D");
-  if (mode & aARCH) fstrcat(attrstr,"A");
-  if (mode & aHIDDEN) fstrcat(attrstr,"H");
-  if (mode & aSYSTEM) fstrcat(attrstr,"S");
-  if (mode & aRONLY) fstrcat(attrstr,"R");	  
-
-  return(attrstr);
-}
-
-
-/*******************************************************************
   case insensitive string compararison
 ********************************************************************/
 int StrCaseCmp(char *s, char *t)
@@ -926,90 +867,6 @@ int StrCaseCmp(char *s, char *t)
 }
 
 /*******************************************************************
-  case insensitive string compararison, length limited
-********************************************************************/
-int StrnCaseCmp(char *s, char *t, int n)
-{
-  /* compare until we run out of string, either t or s, or chars */
-  /* We *must* use toupper rather than tolower here due to the
-     asynchronous upper to lower mapping.
-   */
-#if !defined(KANJI_WIN95_COMPATIBILITY)
-  /*
-   * For completeness we should put in equivalent code for code pages
-   * 949 (Korean hangul) and 950 (Big5 Traditional Chinese) here - but
-   * doubt anyone wants Samba to behave differently from Win95 and WinNT
-   * here. They both treat full width ascii characters as case senstive
-   * filenames (ie. they don't do the work we do here).
-   * JRA. 
-   */
-
-  if(lp_client_code_page() == KANJI_CODEPAGE)
-  {
-    /* Win95 treats full width ascii characters as case sensitive. */
-    int diff;
-    for (;n > 0;)
-    {
-      if (!*s || !*t)
-        return toupper (*s) - toupper (*t);
-      else if (is_sj_alph (*s) && is_sj_alph (*t))
-      {
-        diff = sj_toupper2 (*(s+1)) - sj_toupper2 (*(t+1));
-        if (diff)
-          return diff;
-        s += 2;
-        t += 2;
-        n -= 2;
-      }
-      else if (is_shift_jis (*s) && is_shift_jis (*t))
-      {
-        diff = ((int) (unsigned char) *s) - ((int) (unsigned char) *t);
-        if (diff)
-          return diff;
-        diff = ((int) (unsigned char) *(s+1)) - ((int) (unsigned char) *(t+1));
-        if (diff)
-          return diff;
-        s += 2;
-        t += 2;
-        n -= 2;
-      }
-      else if (is_shift_jis (*s))
-        return 1;
-      else if (is_shift_jis (*t))
-        return -1;
-      else 
-      {
-        diff = toupper (*s) - toupper (*t);
-        if (diff)
-          return diff;
-        s++;
-        t++;
-        n--;
-      }
-    }
-    return 0;
-  }
-  else
-#endif /* KANJI_WIN95_COMPATIBILITY */
-  {
-    while (n && *s && *t && toupper(*s) == toupper(*t))
-    {
-      s++;
-      t++;
-      n--;
-    }
-
-    /* not run out of chars - strings are different lengths */
-    if (n) 
-      return(toupper(*s) - toupper(*t));
-
-    /* identical up to where we run out of chars, 
-       and strings are same length */
-    return(0);
-  }
-}
-
-/*******************************************************************
   compare 2 strings 
 ********************************************************************/
 BOOL strequal(char *s1, char *s2)
@@ -1018,17 +875,6 @@ BOOL strequal(char *s1, char *s2)
   if (!s1 || !s2) return(False);
   
   return(StrCaseCmp(s1,s2)==0);
-}
-
-/*******************************************************************
-  compare 2 strings up to and including the nth char.
-  ******************************************************************/
-BOOL strnequal(char *s1,char *s2,int n)
-{
-  if (s1 == s2) return(True);
-  if (!s1 || !s2 || !n) return(False);
-  
-  return(StrnCaseCmp(s1,s2,n)==0);
 }
 
 /*******************************************************************
@@ -1207,15 +1053,6 @@ void unix_format(char *fname)
       pstrcat(fname,namecopy);
     }  
 }
-
-/****************************************************************************
-  make a file into dos format
-****************************************************************************/
-void dos_format(char *fname)
-{
-  string_replace(fname,'/','\\');
-}
-
 
 /*******************************************************************
   show a smb message structure
@@ -1726,67 +1563,6 @@ static void expand_one(char *Mask,int len)
 }
 
 /****************************************************************************
-expand a wildcard expression, replacing *s with ?s
-****************************************************************************/
-void expand_mask(char *Mask,BOOL doext)
-{
-  pstring mbeg,mext;
-  pstring dirpart;
-  pstring filepart;
-  BOOL hasdot = False;
-  char *p1;
-  BOOL absolute = (*Mask == '\\');
-
-  *mbeg = *mext = *dirpart = *filepart = 0;
-
-  /* parse the directory and filename */
-  if (strchr(Mask,'\\'))
-    dirname_dos(Mask,dirpart);
-
-  filename_dos(Mask,filepart);
-
-  pstrcpy(mbeg,filepart);
-  if ((p1 = strchr(mbeg,'.')) != NULL)
-    {
-      hasdot = True;
-      *p1 = 0;
-      p1++;
-      pstrcpy(mext,p1);
-    }
-  else
-    {
-      pstrcpy(mext,"");
-      if (strlen(mbeg) > 8)
-	{
-	  pstrcpy(mext,mbeg + 8);
-	  mbeg[8] = 0;
-	}
-    }
-
-  if (*mbeg == 0)
-    pstrcpy(mbeg,"????????");
-  if ((*mext == 0) && doext && !hasdot)
-    pstrcpy(mext,"???");
-
-  if (strequal(mbeg,"*") && *mext==0) 
-    pstrcpy(mext,"*");
-
-  /* expand *'s */
-  expand_one(mbeg,8);
-  if (*mext)
-    expand_one(mext,3);
-
-  pstrcpy(Mask,dirpart);
-  if (*dirpart || absolute) pstrcat(Mask,"\\");
-  pstrcat(Mask,mbeg);
-  pstrcat(Mask,".");
-  pstrcat(Mask,mext);
-
-  DEBUG(6,("Mask expanded to [%s]\n",Mask));
-}  
-
-
-/****************************************************************************
 does a string have any uppercase chars in it?
 ****************************************************************************/
 BOOL strhasupper(char *s)
@@ -2157,33 +1933,6 @@ int read_with_timeout(int fd,char *buf,int mincnt,int maxcnt,long time_out)
     }
 
   /* Return the number we got */
-  return(nread);
-}
-
-/****************************************************************************
-read data from the client. Maxtime is in milliseconds
-****************************************************************************/
-int read_max_udp(int fd,char *buffer,int bufsize,int maxtime)
-{
-  fd_set fds;
-  int selrtn;
-  int nread;
-  struct timeval timeout;
- 
-  FD_ZERO(&fds);
-  FD_SET(fd,&fds);
-
-  timeout.tv_sec = maxtime / 1000;
-  timeout.tv_usec = (maxtime % 1000) * 1000;
-
-  selrtn = sys_select(&fds,maxtime>0?&timeout:NULL);
-
-  if (!FD_ISSET(fd,&fds))
-    return 0;
-
-  nread = read_udp_socket(fd, buffer, bufsize);
-
-  /* return the number got */
   return(nread);
 }
 
@@ -3388,23 +3137,6 @@ void become_daemon(void)
 
 
 /****************************************************************************
-put up a yes/no prompt
-****************************************************************************/
-BOOL yesno(char *p)
-{
-  pstring ans;
-  printf("%s",p);
-
-  if (!fgets(ans,sizeof(ans)-1,stdin))
-    return(False);
-
-  if (*ans == 'y' || *ans == 'Y')
-    return(True);
-
-  return(False);
-}
-
-/****************************************************************************
 read a line from a file with possible \ continuation chars. 
 Blanks at the start or end of a line are stripped.
 The string will be allocated if s2 is NULL
@@ -3519,42 +3251,6 @@ int set_filelen(int fd, long len)
 
 
 /****************************************************************************
-return the byte checksum of some data
-****************************************************************************/
-int byte_checksum(char *buf,int len)
-{
-  unsigned char *p = (unsigned char *)buf;
-  int ret = 0;
-  while (len--)
-    ret += *p++;
-  return(ret);
-}
-
-
-
-
-
-/****************************************************************************
-parse out a directory name from a path name. Assumes dos style filenames.
-****************************************************************************/
-char *dirname_dos(char *path,char *buf)
-{
-  char *p = strrchr(path,'\\');
-
-  if (!p)
-    pstrcpy(buf,path);
-  else
-    {
-      *p = 0;
-      pstrcpy(buf,path);
-      *p = '\\';
-    }
-
-  return(buf);
-}
-
-
-/****************************************************************************
 parse out a filename from a path name. Assumes dos style filenames.
 ****************************************************************************/
 static char *filename_dos(char *path,char *buf)
@@ -3611,15 +3307,6 @@ duplicate a string
 }
 #endif
 
-
-/****************************************************************************
-  Signal handler for SIGPIPE (write on a disconnected socket) 
-****************************************************************************/
-void Abort(void )
-{
-  DEBUG(0,("Probably got SIGPIPE\nExiting\n"));
-  exit(2);
-}
 
 /****************************************************************************
 get my own name and IP
@@ -3824,24 +3511,6 @@ int interpret_protocol(char *str,int def)
   
   return(def);
 }
-
-/****************************************************************************
-interpret a security level
-****************************************************************************/
-int interpret_security(char *str,int def)
-{
-  if (strequal(str,"SERVER"))
-    return(SEC_SERVER);
-  if (strequal(str,"USER"))
-    return(SEC_USER);
-  if (strequal(str,"SHARE"))
-    return(SEC_SHARE);
-  
-  DEBUG(0,("Unrecognised security level %s\n",str));
-  
-  return(def);
-}
-
 
 /****************************************************************************
 interpret an internet address or name into an IP address in 4 byte form
@@ -4782,34 +4451,6 @@ BOOL fcntl_lock(int fd,int op,uint32 offset,uint32 count,int type)
 }
 
 /*******************************************************************
-lock a file - returning a open file descriptor or -1 on failure
-The timeout is in seconds. 0 means no timeout
-********************************************************************/
-int file_lock(char *name,int timeout)
-{  
-  int fd = open(name,O_RDWR|O_CREAT,0666);
-  time_t t=0;
-  if (fd < 0) return(-1);
-
-  if (timeout) t = time(NULL);
-  while (!timeout || (time(NULL)-t < timeout)) {
-    if (fcntl_lock(fd,F_SETLK,0,1,F_WRLCK)) return(fd);    
-    msleep(LOCK_RETRY_TIMEOUT);
-  }
-  return(-1);
-}
-
-/*******************************************************************
-unlock a file locked by file_lock
-********************************************************************/
-void file_unlock(int fd)
-{
-  if (fd<0) return;
-  fcntl_lock(fd,F_SETLK,0,1,F_UNLCK);
-  close(fd);
-}
-
-/*******************************************************************
 is the name specified one of my netbios names
 returns true is it is equal, false otherwise
 ********************************************************************/
@@ -4862,49 +4503,6 @@ void set_remote_arch(enum remote_arch_types type)
 enum remote_arch_types get_remote_arch(void)
 {
   return ra_type;
-}
-
-
-/*******************************************************************
-skip past some unicode strings in a buffer
-********************************************************************/
-char *skip_unicode_string(char *buf,int n)
-{
-  while (n--)
-  {
-    while (*buf)
-      buf += 2;
-    buf += 2;
-  }
-  return(buf);
-}
-
-/*******************************************************************
-Return a ascii version of a unicode string
-Hack alert: uses fixed buffer(s) and only handles ascii strings
-********************************************************************/
-#define MAXUNI 1024
-char *unistrn2(uint16 *buf, int len)
-{
-	static char lbufs[8][MAXUNI];
-	static int nexti;
-	char *lbuf = lbufs[nexti];
-	char *p;
-
-	nexti = (nexti+1)%8;
-
-	DEBUG(10, ("unistrn2: "));
-
-	for (p = lbuf; *buf && p-lbuf < MAXUNI-2 && len > 0; len--, p++, buf++)
-	{
-		DEBUG(10, ("%4x ", *buf));
-		*p = *buf;
-	}
-
-	DEBUG(10,("\n"));
-
-	*p = 0;
-	return lbuf;
 }
 
 /*******************************************************************
@@ -4964,68 +4562,6 @@ int struni2(uint16 *p, char *buf)
 	*p = 0;
 
 	return len;
-}
-
-/*******************************************************************
-Return a ascii version of a unicode string
-Hack alert: uses fixed buffer(s) and only handles ascii strings
-********************************************************************/
-#define MAXUNI 1024
-char *unistr(char *buf)
-{
-	static char lbufs[8][MAXUNI];
-	static int nexti;
-	char *lbuf = lbufs[nexti];
-	char *p;
-
-	nexti = (nexti+1)%8;
-
-	for (p = lbuf; *buf && p-lbuf < MAXUNI-2; p++, buf += 2)
-	{
-		*p = *buf;
-	}
-	*p = 0;
-	return lbuf;
-}
-
-/*******************************************************************
-strncpy for unicode strings
-********************************************************************/
-int unistrncpy(char *dst, char *src, int len)
-{
-	int num_wchars = 0;
-
-	while (*src && len > 0)
-	{
-		*dst++ = *src++;
-		*dst++ = *src++;
-		len--;
-		num_wchars++;
-	}
-	*dst++ = 0;
-	*dst++ = 0;
-
-	return num_wchars;
-}
-
-
-/*******************************************************************
-strcpy for unicode strings.  returns length (in num of wide chars)
-********************************************************************/
-int unistrcpy(char *dst, char *src)
-{
-	int num_wchars = 0;
-
-	while (*src)
-	{
-		*dst++ = *src++;
-		*dst++ = *src++;
-		num_wchars++;
-	}
-	*dst++ = 0;
-	*dst++ = 0;
-
-	return num_wchars;
 }
 
 /*******************************************************************
@@ -5092,30 +4628,6 @@ char *safe_strcat(char *dest, char *src, int maxlength)
 
 
 /*******************************************************************
-align a pointer to a multiple of 4 bytes
-********************************************************************/
-char *align4(char *q, char *base)
-{
-	if ((q - base) & 3)
-	{
-		q += 4 - ((q - base) & 3);
-	}
-	return q;
-}
-
-/*******************************************************************
-align a pointer to a multiple of 2 bytes
-********************************************************************/
-char *align2(char *q, char *base)
-{
-	if ((q - base) & 1)
-	{
-		q++;
-	}
-	return q;
-}
-
-/*******************************************************************
 align a pointer to a multiple of align_offset bytes.  looks like it
 will work for offsets of 0, 2 and 4...
 ********************************************************************/
@@ -5176,5 +4688,3 @@ char *tab_depth(int depth)
 	spaces[depth * 4] = 0;
 	return spaces;
 }
-
-

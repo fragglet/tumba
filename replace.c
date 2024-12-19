@@ -23,10 +23,6 @@
 
 extern int DEBUGLEVEL;
 
-
- void replace_dummy(void) 
-{}
-
 #ifdef REPLACE_STRLEN
 /****************************************************************************
 a replacement strlen() that returns int for solaris

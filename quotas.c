@@ -225,8 +225,5 @@ BOOL disk_quotas(char *path, int *bsize, int *dfree, int *dsize)
 
 #endif
 
-#else
-/* this keeps fussy compilers happy */
- void quotas_dummy(void) {}
 #endif /* QUOTAS */
 

@@ -300,13 +300,3 @@ void Ucrit_addPid(int pid)
     if( pid == Ucrit_pid[i] ) return;
   Ucrit_pid[Ucrit_MaxPid++] = pid;
 }
-
-unsigned int   Ucrit_checkPid(int pid)
-{
-  int i;
-  if ( !Ucrit_IsActive) return 1;
-  for (i=0;i<Ucrit_MaxPid;i++)
-    if( pid == Ucrit_pid[i] ) return 1;
-  return 0;
-}
-
