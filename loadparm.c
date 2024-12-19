@@ -75,10 +75,6 @@ extern pstring myname;
 #define GLOBAL_NAME "global"
 #endif
 
-#ifndef PRINTERS_NAME
-#define PRINTERS_NAME "printers"
-#endif
-
 #ifndef HOMES_NAME
 #define HOMES_NAME "homes"
 #endif
@@ -111,7 +107,6 @@ extern int extra_time_offset;
  */
 typedef struct
 {
-  char *szPrintcapname;
   char *szLockDir;
   char *szRootdir;
   char *szDefaultService;
@@ -189,7 +184,6 @@ typedef struct
   BOOL bUpdateEncrypt;
   BOOL bStripDot;
   BOOL bNullPasswords;
-  BOOL bLoadPrinters;
   BOOL bUseRhosts;
   BOOL bReadRaw;
   BOOL bWriteRaw;
@@ -230,16 +224,12 @@ typedef struct
   char *szPostExec;
   char *szRootPreExec;
   char *szRootPostExec;
-  char *szPrintcommand;
   char *szLpqcommand;
   char *szLprmcommand;
   char *szLppausecommand;
   char *szLpresumecommand;
   char *szQueuepausecommand;
   char *szQueueresumecommand;
-  char *szPrintername;
-  char *szPrinterDriver;
-  char *szPrinterDriverLocation;
   char *szDontdescend;
   char *szHostsallow;
   char *szHostsdeny;
@@ -255,14 +245,12 @@ typedef struct
   char *readlist;
   char *writelist;
   char *volume;
-  int  iMinPrintSpace;
   int  iCreate_mask;
   int  iCreate_force_mode;
   int  iDir_mask;
   int  iDir_force_mode;
   int  iMaxConnections;
   int  iDefaultCase;
-  int  iPrinting;
   BOOL bAlternatePerm;
   BOOL bRevalidate;
   BOOL bCaseSensitive;
@@ -277,8 +265,6 @@ typedef struct
   BOOL bNo_set_dir;
   BOOL bGuest_only;
   BOOL bGuest_ok;
-  BOOL bPrint_ok;
-  BOOL bPostscript;
   BOOL bMap_system;
   BOOL bMap_hidden;
   BOOL bMap_archive;
@@ -321,16 +307,12 @@ static service sDefault =
   NULL,    /* szPostExec */
   NULL,    /* szRootPreExec */
   NULL,    /* szRootPostExec */
-  NULL,    /* szPrintcommand */
   NULL,    /* szLpqcommand */
   NULL,    /* szLprmcommand */
   NULL,    /* szLppausecommand */
   NULL,    /* szLpresumecommand */
   NULL,    /* szQueuepausecommand */
   NULL,    /* szQueueresumecommand */
-  NULL,    /* szPrintername */
-  NULL,    /* szPrinterDriver - this is set in init_globals() */
-  NULL,    /* szPrinterDriverLocation */
   NULL,    /* szDontdescend */
   NULL,    /* szHostsallow */
   NULL,    /* szHostsdeny */
@@ -346,14 +328,12 @@ static service sDefault =
   NULL,    /* readlist */
   NULL,    /* writelist */
   NULL,    /* volume */
-  0,       /* iMinPrintSpace */
   0744,    /* iCreate_mask */
   0000,    /* iCreate_force_mode */
   0755,    /* iDir_mask */
   0000,    /* iDir_force_mode */
   0,       /* iMaxConnections */
   CASE_LOWER, /* iDefaultCase */
-  DEFAULT_PRINTING, /* iPrinting */
   False,   /* bAlternatePerm */
   False,   /* revalidate */
   False,   /* case sensitive */
@@ -368,8 +348,6 @@ static service sDefault =
   True,  /* bNo_set_dir */
   False, /* bGuest_only */
   False, /* bGuest_ok */
-  False, /* bPrint_ok */
-  False, /* bPostscript */
   False, /* bMap_system */
   False, /* bMap_hidden */
   True,  /* bMap_archive */
@@ -428,12 +406,6 @@ static struct enum_list enum_protocol[] = {{PROTOCOL_NT1, "NT1"}, {PROTOCOL_LANM
 static struct enum_list enum_security[] = {{SEC_SHARE, "SHARE"},  {SEC_USER, "USER"}, 
 					   {SEC_SERVER, "SERVER"}, {-1, NULL}};
 
-static struct enum_list enum_printing[] = {{PRINT_SYSV, "sysv"}, {PRINT_AIX, "aix"}, 
-					   {PRINT_HPUX, "hpux"}, {PRINT_BSD, "bsd"},
-					   {PRINT_QNX, "qnx"},   {PRINT_PLP, "plp"},
-					   {PRINT_LPRNG, "lprng"}, {PRINT_SOFTQ, "softq"},
-					   {-1, NULL}};
-
 static struct enum_list enum_announce_as[] = {{ANNOUNCE_AS_NT, "NT"}, {ANNOUNCE_AS_WIN95, "win95"},
 					      {ANNOUNCE_AS_WFW, "WfW"}, {-1, NULL}};
 
@@ -468,7 +440,6 @@ static struct parm_struct
   {"read raw",         P_BOOL,    P_GLOBAL, &Globals.bReadRaw,          NULL,   NULL},
   {"write raw",        P_BOOL,    P_GLOBAL, &Globals.bWriteRaw,         NULL,   NULL},
   {"use rhosts",       P_BOOL,    P_GLOBAL, &Globals.bUseRhosts,        NULL,   NULL},
-  {"load printers",    P_BOOL,    P_GLOBAL, &Globals.bLoadPrinters,     NULL,   NULL},
   {"null passwords",   P_BOOL,    P_GLOBAL, &Globals.bNullPasswords,    NULL,   NULL},
   {"strip dot",        P_BOOL,    P_GLOBAL, &Globals.bStripDot,         NULL,   NULL},
   {"interfaces",       P_STRING,  P_GLOBAL, &Globals.szInterfaces,      NULL,   NULL},
@@ -486,8 +457,6 @@ static struct parm_struct
   {"preload",          P_STRING,  P_GLOBAL, &Globals.szAutoServices,    NULL,   NULL},
   {"auto services",    P_STRING,  P_GLOBAL, &Globals.szAutoServices,    NULL,   NULL},
   {"server string",    P_STRING,  P_GLOBAL, &Globals.szServerString,    NULL,   NULL},
-  {"printcap name",    P_STRING,  P_GLOBAL, &Globals.szPrintcapname,    NULL,   NULL},
-  {"printcap",         P_STRING,  P_GLOBAL, &Globals.szPrintcapname,    NULL,   NULL},
   {"lock dir",         P_STRING,  P_GLOBAL, &Globals.szLockDir,         NULL,   NULL},
   {"lock directory",   P_STRING,  P_GLOBAL, &Globals.szLockDir,         NULL,   NULL},
   {"root directory",   P_STRING,  P_GLOBAL, &Globals.szRootdir,         NULL,   NULL},
@@ -562,7 +531,6 @@ static struct parm_struct
   {"unix password sync", P_BOOL,  P_GLOBAL, &Globals.bUnixPasswdSync,   NULL,   NULL},
   {"time server",      P_BOOL,    P_GLOBAL, &Globals.bTimeServer,	NULL,   NULL},
   {"ole locking compatibility",      P_BOOL,    P_GLOBAL, &Globals.bOleLockingCompat,	NULL,   NULL},
-  {"printer driver file", P_STRING,  P_GLOBAL, &Globals.szDriverFile,   NULL,   NULL},
   {"-valid",           P_BOOL,    P_LOCAL,  &sDefault.valid,            NULL,   NULL},
   {"comment",          P_STRING,  P_LOCAL,  &sDefault.comment,          NULL,   NULL},
   {"copy",             P_STRING,  P_LOCAL,  &sDefault.szCopy,           handle_copy, NULL},
@@ -604,7 +572,6 @@ static struct parm_struct
   {"writeable",        P_BOOLREV, P_LOCAL,  &sDefault.bRead_only,       NULL,   NULL},
   {"writable",         P_BOOLREV, P_LOCAL,  &sDefault.bRead_only,       NULL,   NULL},
   {"max connections",  P_INTEGER, P_LOCAL,  &sDefault.iMaxConnections,  NULL,   NULL},
-  {"min print space",  P_INTEGER, P_LOCAL,  &sDefault.iMinPrintSpace,   NULL,   NULL},
   {"create mask",      P_OCTAL,   P_LOCAL,  &sDefault.iCreate_mask,     NULL,   NULL},
   {"create mode",      P_OCTAL,   P_LOCAL,  &sDefault.iCreate_mask,     NULL,   NULL},
   {"force create mode",P_OCTAL,   P_LOCAL,  &sDefault.iCreate_force_mode,     NULL,   NULL},
@@ -622,9 +589,6 @@ static struct parm_struct
   {"only guest",       P_BOOL,    P_LOCAL,  &sDefault.bGuest_only,      NULL,   NULL},
   {"guest ok",         P_BOOL,    P_LOCAL,  &sDefault.bGuest_ok,        NULL,   NULL},
   {"public",           P_BOOL,    P_LOCAL,  &sDefault.bGuest_ok,        NULL,   NULL},
-  {"print ok",         P_BOOL,    P_LOCAL,  &sDefault.bPrint_ok,        NULL,   NULL},
-  {"printable",        P_BOOL,    P_LOCAL,  &sDefault.bPrint_ok,        NULL,   NULL},
-  {"postscript",       P_BOOL,    P_LOCAL,  &sDefault.bPostscript,      NULL,   NULL},
   {"map system",       P_BOOL,    P_LOCAL,  &sDefault.bMap_system,      NULL,   NULL},
   {"map hidden",       P_BOOL,    P_LOCAL,  &sDefault.bMap_hidden,      NULL,   NULL},
   {"map archive",      P_BOOL,    P_LOCAL,  &sDefault.bMap_archive,     NULL,   NULL},
@@ -639,18 +603,12 @@ static struct parm_struct
   {"strict sync",      P_BOOL,    P_LOCAL,  &sDefault.bStrictSync,      NULL,   NULL},
   {"mangled names",    P_BOOL,    P_LOCAL,  &sDefault.bMangledNames,    NULL,   NULL},
   {"fake oplocks",     P_BOOL,    P_LOCAL,  &sDefault.bFakeOplocks,     NULL,   NULL},
-  {"printing",         P_ENUM,    P_LOCAL,  &sDefault.iPrinting,        NULL,   enum_printing},
-  {"print command",    P_STRING,  P_LOCAL,  &sDefault.szPrintcommand,   NULL,   NULL},
   {"lpq command",      P_STRING,  P_LOCAL,  &sDefault.szLpqcommand,     NULL,   NULL},
   {"lprm command",     P_STRING,  P_LOCAL,  &sDefault.szLprmcommand,    NULL,   NULL},
   {"lppause command",  P_STRING,  P_LOCAL,  &sDefault.szLppausecommand, NULL,   NULL},
   {"lpresume command", P_STRING,  P_LOCAL,  &sDefault.szLpresumecommand,NULL,   NULL},
   {"queuepause command", P_STRING, P_LOCAL, &sDefault.szQueuepausecommand, NULL, NULL},
   {"queueresume command", P_STRING, P_LOCAL, &sDefault.szQueueresumecommand, NULL, NULL},
-  {"printer",          P_STRING,  P_LOCAL,  &sDefault.szPrintername,    NULL,   NULL},
-  {"printer name",     P_STRING,  P_LOCAL,  &sDefault.szPrintername,    NULL,   NULL},
-  {"printer driver",   P_STRING,  P_LOCAL,  &sDefault.szPrinterDriver,  NULL,   NULL},
-  {"printer driver location",   P_STRING,  P_LOCAL,  &sDefault.szPrinterDriverLocation,  NULL,   NULL},
   {"hosts allow",      P_STRING,  P_LOCAL,  &sDefault.szHostsallow,     NULL,   NULL},
   {"allow hosts",      P_STRING,  P_LOCAL,  &sDefault.szHostsallow,     NULL,   NULL},
   {"hosts deny",       P_STRING,  P_LOCAL,  &sDefault.szHostsdeny,      NULL,   NULL},
@@ -689,7 +647,6 @@ static void init_globals(void)
 	  string_init(parm_table[i].ptr,"");
 
       string_set(&sDefault.szGuestaccount, GUEST_ACCOUNT);
-      string_set(&sDefault.szPrinterDriver, "NULL");
 
       done_init = True;
     }
@@ -703,7 +660,6 @@ static void init_globals(void)
   string_set(&Globals.szPasswdChat,"*old*password* %o\\n *new*password* %n\\n *new*password* %n\\n *changed*");
   string_set(&Globals.szWorkGroup, WORKGROUP);
   string_set(&Globals.szPasswdProgram, SMB_PASSWD);
-  string_set(&Globals.szPrintcapname, PRINTCAP_NAME);
   string_set(&Globals.szDriverFile, DRIVERFILE);
   string_set(&Globals.szLockDir, LOCKDIR);
   string_set(&Globals.szRootdir, "/");
@@ -721,7 +677,6 @@ static void init_globals(void)
 
   string_set(&Globals.szNameResolveOrder, "lmhosts host wins bcast");
 
-  Globals.bLoadPrinters = True;
   Globals.bUseRhosts = False;
   Globals.max_packet = 65535;
   Globals.mangled_stack = 50;
@@ -816,42 +771,6 @@ Initialise the sDefault parameter structure.
 ***************************************************************************/
 static void init_locals(void)
 {
-  /* choose defaults depending on the type of printing */
-  switch (sDefault.iPrinting)
-    {
-    case PRINT_BSD:
-    case PRINT_AIX:
-    case PRINT_LPRNG:
-    case PRINT_PLP:
-      string_initial(&sDefault.szLpqcommand,"lpq -P%p");
-      string_initial(&sDefault.szLprmcommand,"lprm -P%p %j");
-      string_initial(&sDefault.szPrintcommand,"lpr -r -P%p %s");
-      break;
-
-    case PRINT_SYSV:
-    case PRINT_HPUX:
-      string_initial(&sDefault.szLpqcommand,"lpstat -o%p");
-      string_initial(&sDefault.szLprmcommand,"cancel %p-%j");
-      string_initial(&sDefault.szPrintcommand,"lp -c -d%p %s; rm %s");
-      string_initial(&sDefault.szQueuepausecommand, "disable %p");
-      string_initial(&sDefault.szQueueresumecommand, "enable %p");
-      break;
-
-    case PRINT_QNX:
-      string_initial(&sDefault.szLpqcommand,"lpq -P%p");
-      string_initial(&sDefault.szLprmcommand,"lprm -P%p %j");
-      string_initial(&sDefault.szPrintcommand,"lp -r -P%p %s");
-      break;
-
-    case PRINT_SOFTQ:
-      string_initial(&sDefault.szLpqcommand,"qstat -l -d%p");
-      string_initial(&sDefault.szLprmcommand,"qstat -s -j%j -c");
-      string_initial(&sDefault.szPrintcommand,"lp -d%p -s %s; rm %s");
-      string_initial(&sDefault.szLppausecommand,"qstat -s -j%j -h");
-      string_initial(&sDefault.szLpresumecommand,"qstat -s -j%j -r");
-      break;
-      
-    }
 }
 
 
@@ -934,7 +853,6 @@ FN_GLOBAL_STRING(lp_smbrun,&Globals.szSmbrun)
 FN_GLOBAL_STRING(lp_configfile,&Globals.szConfigFile)
 FN_GLOBAL_STRING(lp_smb_passwd_file,&Globals.szSMBPasswdFile)
 FN_GLOBAL_STRING(lp_serverstring,&Globals.szServerString)
-FN_GLOBAL_STRING(lp_printcapname,&Globals.szPrintcapname)
 FN_GLOBAL_STRING(lp_lockdir,&Globals.szLockDir)
 FN_GLOBAL_STRING(lp_rootdir,&Globals.szRootdir)
 FN_GLOBAL_STRING(lp_defaultservice,&Globals.szDefaultService)
@@ -982,7 +900,6 @@ FN_GLOBAL_BOOL(lp_domain_controller,&Globals.bDomainController)
 FN_GLOBAL_BOOL(lp_domain_master,&Globals.bDomainMaster)
 FN_GLOBAL_BOOL(lp_domain_logons,&Globals.bDomainLogons)
 FN_GLOBAL_BOOL(lp_preferred_master,&Globals.bPreferredMaster)
-FN_GLOBAL_BOOL(lp_load_printers,&Globals.bLoadPrinters)
 FN_GLOBAL_BOOL(lp_use_rhosts,&Globals.bUseRhosts)
 FN_GLOBAL_BOOL(lp_getwdcache,&use_getwd_cache)
 FN_GLOBAL_BOOL(lp_readprediction,&Globals.bReadPrediction)
@@ -1041,15 +958,12 @@ FN_LOCAL_STRING(lp_guestaccount,szGuestaccount)
 FN_LOCAL_STRING(lp_invalid_users,szInvalidUsers)
 FN_LOCAL_STRING(lp_valid_users,szValidUsers)
 FN_LOCAL_STRING(lp_admin_users,szAdminUsers)
-FN_LOCAL_STRING(lp_printcommand,szPrintcommand)
 FN_LOCAL_STRING(lp_lpqcommand,szLpqcommand)
 FN_LOCAL_STRING(lp_lprmcommand,szLprmcommand)
 FN_LOCAL_STRING(lp_lppausecommand,szLppausecommand)
 FN_LOCAL_STRING(lp_lpresumecommand,szLpresumecommand)
 FN_LOCAL_STRING(lp_queuepausecommand,szQueuepausecommand)
 FN_LOCAL_STRING(lp_queueresumecommand,szQueueresumecommand)
-FN_LOCAL_STRING(lp_printername,szPrintername)
-FN_LOCAL_STRING(lp_printerdriver,szPrinterDriver)
 FN_LOCAL_STRING(lp_hostsallow,szHostsallow)
 FN_LOCAL_STRING(lp_hostsdeny,szHostsdeny)
 FN_LOCAL_STRING(lp_magicscript,szMagicScript)
@@ -1064,7 +978,6 @@ FN_LOCAL_STRING(lp_mangled_map,szMangledMap)
 FN_LOCAL_STRING(lp_veto_files,szVetoFiles)
 FN_LOCAL_STRING(lp_hide_files,szHideFiles)
 FN_LOCAL_STRING(lp_veto_oplocks,szVetoOplockFiles)
-FN_LOCAL_STRING(lp_driverlocation,szPrinterDriverLocation)
 
 FN_LOCAL_BOOL(lp_alternate_permissions,bAlternatePerm)
 FN_LOCAL_BOOL(lp_revalidate,bRevalidate)
@@ -1079,8 +992,6 @@ FN_LOCAL_BOOL(lp_readonly,bRead_only)
 FN_LOCAL_BOOL(lp_no_set_dir,bNo_set_dir)
 FN_LOCAL_BOOL(lp_guest_ok,bGuest_ok)
 FN_LOCAL_BOOL(lp_guest_only,bGuest_only)
-FN_LOCAL_BOOL(lp_print_ok,bPrint_ok)
-FN_LOCAL_BOOL(lp_postscript,bPostscript)
 FN_LOCAL_BOOL(lp_map_hidden,bMap_hidden)
 FN_LOCAL_BOOL(lp_map_archive,bMap_archive)
 FN_LOCAL_BOOL(lp_locking,bLocking)
@@ -1107,8 +1018,6 @@ FN_LOCAL_INTEGER(lp_dir_mode,iDir_mask)
 FN_LOCAL_INTEGER(lp_force_dir_mode,iDir_force_mode)
 FN_LOCAL_INTEGER(lp_max_connections,iMaxConnections)
 FN_LOCAL_INTEGER(lp_defaultcase,iDefaultCase)
-FN_LOCAL_INTEGER(lp_minprintspace,iMinPrintSpace)
-FN_LOCAL_INTEGER(lp_printing,iPrinting)
 
 FN_LOCAL_CHAR(lp_magicchar,magic_char)
 
@@ -1274,46 +1183,10 @@ static BOOL lp_add_ipc(void)
   iSERVICE(i).bRead_only = True;
   iSERVICE(i).bGuest_only = False;
   iSERVICE(i).bGuest_ok = True;
-  iSERVICE(i).bPrint_ok = False;
   iSERVICE(i).bBrowseable = sDefault.bBrowseable;
 
   DEBUG(3,("adding IPC service\n"));
 
-  return(True);
-}
-
-
-/***************************************************************************
-add a new printer service, with defaults coming from service iFrom
-***************************************************************************/
-BOOL lp_add_printer(char *pszPrintername, int iDefaultService)
-{
-  char *comment = "From Printcap";
-  int i = add_a_service(pSERVICE(iDefaultService),pszPrintername);
-  
-  if (i < 0)
-    return(False);
-  
-  /* note that we do NOT default the availability flag to True - */
-  /* we take it from the default service passed. This allows all */
-  /* dynamic printers to be disabled by disabling the [printers] */
-  /* entry (if/when the 'available' keyword is implemented!).    */
-  
-  /* the printer name is set to the service name. */
-  string_set(&iSERVICE(i).szPrintername,pszPrintername);
-  string_set(&iSERVICE(i).comment,comment);
-  iSERVICE(i).bBrowseable = sDefault.bBrowseable;
-  /* Printers cannot be read_only. */
-  iSERVICE(i).bRead_only = False;
-  /* No share modes on printer services. */
-  iSERVICE(i).bShareModes = False;
-  /* No oplocks on printer services. */
-  iSERVICE(i).bOpLocks = False;
-  /* Printer services must be printable. */
-  iSERVICE(i).bPrint_ok = True;
-  
-  DEBUG(3,("adding printer service %s\n",pszPrintername));
-  
   return(True);
 }
 
@@ -1494,16 +1367,6 @@ static BOOL service_ok(int iService)
       DEBUG(0,( "No service name in service entry.\n"));
       bRetval = False;
    }
-
-   /* The [printers] entry MUST be printable. I'm all for flexibility, but */
-   /* I can't see why you'd want a non-printable printer service...        */
-   if (strwicmp(iSERVICE(iService).szService,PRINTERS_NAME) == 0)
-      if (!iSERVICE(iService).bPrint_ok)
-      {
-         DEBUG(0,( "WARNING: [%s] service MUST be printable!\n",
-               iSERVICE(iService).szService));
-	 iSERVICE(iService).bPrint_ok = True;
-      }
 
    if (iSERVICE(iService).szPath[0] == '\0' &&
        strwicmp(iSERVICE(iService).szService,HOMES_NAME) != 0)
@@ -2159,13 +2022,13 @@ BOOL lp_snum_ok(int iService)
 
 
 /***************************************************************************
-auto-load some homes and printer services
+auto-load some homes services
 ***************************************************************************/
 static void lp_add_auto_services(char *str)
 {
   char *s;
   char *p;
-  int homes, printers;
+  int homes;
 
   if (!str)
     return;
@@ -2174,7 +2037,6 @@ static void lp_add_auto_services(char *str)
   if (!s) return;
 
   homes = lp_servicenumber(HOMES_NAME);    
-  printers = lp_servicenumber(PRINTERS_NAME);
 
   for (p=strtok(s,LIST_SEP);p;p=strtok(NULL,LIST_SEP))
     {
@@ -2189,33 +2051,6 @@ static void lp_add_auto_services(char *str)
 	}
     }
   free(s);
-}
-
-/***************************************************************************
-auto-load one printer
-***************************************************************************/
-static void lp_add_one_printer(char *name,char *comment)
-{
-  int printers = lp_servicenumber(PRINTERS_NAME);
-  int i;
-
-  if (lp_servicenumber(name) < 0)
-    {
-      lp_add_printer(name,printers);
-      if ((i=lp_servicenumber(name)) >= 0)
-	string_set(&iSERVICE(i).comment,comment);
-    }      
-}
-
-
-/***************************************************************************
-auto-load printer services
-***************************************************************************/
-static void lp_add_all_printers(void)
-{
-  int printers = lp_servicenumber(PRINTERS_NAME);
-
-  if (printers < 0) return;
 }
 
 /***************************************************************************
@@ -2272,8 +2107,6 @@ BOOL lp_load(char *pszFname,BOOL global_only)
       bRetval = service_ok(iServiceIndex);	   
 
   lp_add_auto_services(lp_auto_services());
-  if (lp_load_printers())
-    lp_add_all_printers();
 
   lp_add_ipc();
 
@@ -2347,27 +2180,6 @@ char *volume_label(int snum)
   return(ret);
 }
 
-#if 0
-/*
- * nmbd only loads the global section. There seems to be no way to
- * determine exactly is a service is printable by only looking at the
- * [global] section so for now always announce as a print server. This
- * will need looking at in the future. Jeremy (jallison@whistle.com).
- */
-/*******************************************************************
- Return true if any printer services are defined.
-  ******************************************************************/
-static BOOL lp_printer_services(void)
-{
-  int iService;
-
-  for (iService = iNumServices - 1; iService >= 0; iService--)
-      if (VALID(iService) && iSERVICE(iService).bPrint_ok)
-          return True;
-  return False;
-}
-#endif
-
 /*******************************************************************
  Set the server type we will announce as via nmbd.
 ********************************************************************/
@@ -2382,15 +2194,6 @@ static void set_default_server_announce_type()
   else if(lp_announce_as() == ANNOUNCE_AS_WFW)
     default_server_announce |= SV_TYPE_WFW;
   default_server_announce |= (lp_time_server() ? SV_TYPE_TIME_SOURCE : 0);
-/*
- * nmbd only loads the [global] section. There seems to be no way to
- * determine exactly if any service is printable by only looking at the
- * [global] section so for now always announce as a print server. This
- * will need looking at in the future. Jeremy (jallison@whistle.com).
- */
-#if 0
-  default_server_announce |= (lp_printer_services() ? SV_TYPE_PRINTQ_SERVER : 0);
-#endif
 }
 
 

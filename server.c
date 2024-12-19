@@ -1259,7 +1259,7 @@ static void open_file(int fnum,int cnum,char *fname1,int flags,int mode, struct 
    * JRA.
    */
 
-  if (!CAN_WRITE(cnum) && !Connections[cnum].printer) {
+  if (!CAN_WRITE(cnum)) {
     /* It's a read-only share - fail if we wanted to write. */
     if(accmode != O_RDONLY) {
       DEBUG(3,("Permission denied opening %s\n",fname));
@@ -1274,11 +1274,6 @@ static void open_file(int fnum,int cnum,char *fname1,int flags,int mode, struct 
       flags &= ~O_CREAT;
     }
   }
-
-  /* this handles a bug in Win95 - it doesn't say to create the file when it 
-     should */
-  if (Connections[cnum].printer)
-    flags |= O_CREAT;
 
 /*
   if (flags == O_WRONLY)
@@ -1448,7 +1443,6 @@ static void open_file(int fnum,int cnum,char *fname1,int flags,int mode, struct 
     fsp->can_read = ((flags & O_WRONLY)==0);
     fsp->can_write = ((flags & (O_WRONLY|O_RDWR))!=0);
     fsp->share_mode = 0;
-    fsp->print_file = Connections[cnum].printer;
     fsp->modified = False;
     fsp->granted_oplock = False;
     fsp->sent_oplock_break = False;
@@ -1463,19 +1457,6 @@ static void open_file(int fnum,int cnum,char *fname1,int flags,int mode, struct 
     string_set(&fsp->name,fname);
     fsp->wbmpx_ptr = NULL;      
 
-    /*
-     * If the printer is marked as postscript output a leading
-     * file identifier to ensure the file is treated as a raw
-     * postscript file.
-     * This has a similar effect as CtrlD=0 in WIN.INI file.
-     * tim@fsg.com 09/06/94
-     */
-    if (fsp->print_file && POSTSCRIPT(cnum) && fsp->can_write) 
-    {
-      DEBUG(3,("Writing postscript line\n"));
-      write_file(fnum,"%!\n",3);
-    }
-      
     DEBUG(2,("%s %s opened file %s read=%s write=%s (numopen=%d fnum=%d)\n",
           timestring(),
           *sesssetup_user ? sesssetup_user : Connections[cnum].user,fname,
@@ -1600,10 +1581,6 @@ void close_file(int fnum, BOOL normal_close)
 
   if (lp_share_modes(SNUM(cnum)))
     unlock_share_entry( cnum, dev, inode, token);
-
-  /* NT uses smbclose to start a print - weird */
-  if (normal_close && fs_p->print_file)
-    print_file(fnum);
 
   /* check for magic scripts */
   if (normal_close)
@@ -2139,8 +2116,6 @@ seek a file. Try to avoid the seek if possible
 int seek_file(int fnum,uint32 pos)
 {
   uint32 offset = 0;
-  if (Files[fnum].print_file && POSTSCRIPT(Files[fnum].cnum))
-    offset = 3;
 
   Files[fnum].pos = (int)(lseek(Files[fnum].fd_ptr->fd,pos+offset,SEEK_SET) 
                                   - offset);
@@ -3604,15 +3579,12 @@ int make_connection(char *service,char *user,char *password, int pwlen, char *de
 
   if (*dev == '?' || !*dev)
     {
-      if (lp_print_ok(snum))
-	pstrcpy(dev,"LPT1:");
-      else
-	pstrcpy(dev,"A:");
+       pstrcpy(dev,"A:");
     }
 
   /* if the request is as a printer and you can't print then refuse */
   strupper(dev);
-  if (!lp_print_ok(snum) && (strncmp(dev,"LPT",3) == 0)) {
+  if (strncmp(dev,"LPT",3) == 0) {
     DEBUG(1,("Attempt to connect to non-printer as a printer\n"));
     return(-6);
   }
@@ -3693,7 +3665,6 @@ int make_connection(char *service,char *user,char *password, int pwlen, char *de
   pcon->lastused = time(NULL);
   pcon->service = snum;
   pcon->used = True;
-  pcon->printer = (strncmp(dev,"LPT",3) == 0);
   pcon->ipc = (strncmp(dev,"IPC",3) == 0);
   pcon->dirptr = NULL;
   pcon->veto_list = NULL;
@@ -3843,7 +3814,7 @@ int make_connection(char *service,char *user,char *password, int pwlen, char *de
   unbecome_user();
 
   /* Add veto/hide lists */
-  if (!IS_IPC(cnum) && !IS_PRINT(cnum))
+  if (!IS_IPC(cnum))
   {
     set_namearray( &pcon->veto_list, lp_veto_files(SNUM(cnum)));
     set_namearray( &pcon->hide_list, lp_hide_files(SNUM(cnum)));

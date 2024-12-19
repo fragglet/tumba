@@ -676,7 +676,7 @@ UTILOBJ2 = $(UTILOBJ1) md4.o loadparm.o params.o username.o time.o namequery.o n
 UTILOBJ = $(UTILOBJ2) interface.o replace.o smberr.o mem_man/mem_man.o slprintf.o
 
 # object code for smbd
-SMBDOBJ1 = $(UTILOBJ) trans2.o message.o dir.o printing.o 
+SMBDOBJ1 = $(UTILOBJ) trans2.o message.o dir.o
 SMBDOBJ2 = ipc.o reply.o mangle.o password.o quotas.o uid.o
 SMBDOBJ3 = predict.o credentials.o clientgen.o pipes.o server.o access.o 
 SMBDOBJ4 = ufc.o smbpass.o

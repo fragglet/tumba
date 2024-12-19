@@ -373,7 +373,6 @@ typedef struct
   BOOL can_read;
   BOOL can_write;
   BOOL share_mode;
-  BOOL print_file;
   BOOL modified;
   BOOL granted_oplock;
   BOOL sent_oplock_break;
@@ -400,7 +399,6 @@ typedef struct
   struct uid_cache uid_cache;
   void *dirptr;
   BOOL open;
-  BOOL printer;
   BOOL ipc;
   BOOL read_only;
   BOOL admin_user;
@@ -487,27 +485,6 @@ typedef struct
 
 } user_struct;
 
-
-enum {LPQ_QUEUED,LPQ_PAUSED,LPQ_SPOOLING,LPQ_PRINTING};
-
-typedef struct
-{
-  int job;
-  int size;
-  int status;
-  int priority;
-  time_t time;
-  char user[30];
-  char file[100];
-} print_queue_struct;
-
-enum {LPSTAT_OK, LPSTAT_STOPPED, LPSTAT_ERROR};
-
-typedef struct
-{
-  fstring message;
-  int status;
-}  print_status_struct;
 
 /* used for server information: client, nameserv and ipc */
 struct server_info_struct
@@ -613,7 +590,6 @@ struct connection_options {
 #define VALID_CNUM(cnum)   (((cnum) >= 0) && ((cnum) < MAX_CONNECTIONS))
 #define OPEN_CNUM(cnum)    (VALID_CNUM(cnum) && Connections[cnum].open)
 #define IS_IPC(cnum)       (VALID_CNUM(cnum) && Connections[cnum].ipc)
-#define IS_PRINT(cnum)       (VALID_CNUM(cnum) && Connections[cnum].printer)
 #define FNUM_OK(fnum,c) (OPEN_FNUM(fnum) && (c)==Files[fnum].cnum)
 
 #define CHECK_FNUM(fnum,c) if (!FNUM_OK(fnum,c)) \
@@ -630,16 +606,11 @@ struct connection_options {
 
 /* access various service details */
 #define SERVICE(snum)      (lp_servicename(snum))
-#define PRINTCAP           (lp_printcapname())
-#define PRINTCOMMAND(snum) (lp_printcommand(snum))
-#define PRINTERNAME(snum)  (lp_printername(snum))
 #define CAN_WRITE(cnum)    (OPEN_CNUM(cnum) && !Connections[cnum].read_only)
 #define VALID_SNUM(snum)   (lp_snum_ok(snum))
 #define GUEST_OK(snum)     (VALID_SNUM(snum) && lp_guest_ok(snum))
 #define GUEST_ONLY(snum)   (VALID_SNUM(snum) && lp_guest_only(snum))
 #define CAN_SETDIR(snum)   (!lp_no_set_dir(snum))
-#define CAN_PRINT(cnum)    (OPEN_CNUM(cnum) && lp_print_ok(SNUM(cnum)))
-#define POSTSCRIPT(cnum)   (OPEN_CNUM(cnum) && lp_postscript(SNUM(cnum)))
 #define MAP_HIDDEN(cnum)   (OPEN_CNUM(cnum) && lp_map_hidden(SNUM(cnum)))
 #define MAP_SYSTEM(cnum)   (OPEN_CNUM(cnum) && lp_map_system(SNUM(cnum)))
 #define MAP_ARCHIVE(cnum)   (OPEN_CNUM(cnum) && lp_map_archive(SNUM(cnum)))
@@ -1009,10 +980,6 @@ enum protocol_types {PROTOCOL_NONE,PROTOCOL_CORE,PROTOCOL_COREPLUS,PROTOCOL_LANM
 
 /* security levels */
 enum security_types {SEC_SHARE,SEC_USER,SEC_SERVER};
-
-/* printing types */
-enum printing_types {PRINT_BSD,PRINT_SYSV,PRINT_AIX,PRINT_HPUX,
-		     PRINT_QNX,PRINT_PLP,PRINT_LPRNG,PRINT_SOFTQ};
 
 /* Remote architectures we know about. */
 enum remote_arch_types {RA_UNKNOWN, RA_WFWG, RA_OS2, RA_WIN95, RA_WINNT, RA_SAMBA};

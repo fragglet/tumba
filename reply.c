@@ -2623,65 +2623,7 @@ int reply_echo(char *inbuf,char *outbuf, int size, int bufsize)
 ****************************************************************************/
 int reply_printopen(char *inbuf,char *outbuf,int dum_size, int dum_buffsize)
 {
-  pstring fname;
-  pstring fname2;
-  int cnum;
-  int fnum = -1;
-  int outsize = 0;
-
-  *fname = *fname2 = 0;
-
-  cnum = SVAL(inbuf,smb_tid);
-
-  if (!CAN_PRINT(cnum))
-    return(ERROR(ERRDOS,ERRnoaccess));
-
-  {
-    pstring s;
-    char *p;
-    pstrcpy(s,smb_buf(inbuf)+1);
-    p = s;
-    while (*p)
-      {
-	if (!(isalnum(*p) || strchr("._-",*p)))
-	  *p = 'X';
-	p++;
-      }
-
-    if (strlen(s) > 10) s[10] = 0;
-
-    slprintf(fname,sizeof(fname)-1, "%s.XXXXXX",s);  
-  }
-
-  fnum = find_free_file();
-  if (fnum < 0)
-    return(ERROR(ERRSRV,ERRnofids));
-
-  pstrcpy(fname2,(char *)mktemp(fname));
-
-  if (!check_name(fname2,cnum)) {
-	  Files[fnum].reserved = False;
-	  return(ERROR(ERRDOS,ERRnoaccess));
-  }
-
-  /* Open for exclusive use, write only. */
-  open_file_shared(fnum,cnum,fname2,(DENY_ALL<<4)|1, 0x12, unix_mode(cnum,0), 
-                   0, NULL, NULL);
-
-  if (!Files[fnum].open) {
-	  Files[fnum].reserved = False;
-	  return(UNIXERROR(ERRDOS,ERRnoaccess));
-  }
-
-  /* force it to be a print file */
-  Files[fnum].print_file = True;
-  
-  outsize = set_message(outbuf,1,0,True);
-  SSVAL(outbuf,smb_vwv0,fnum);
-  
-  DEBUG(3,("%s openprint %s fd=%d fnum=%d cnum=%d\n",timestring(),fname2,Files[fnum].fd_ptr->fd,fnum,cnum));
-  
-  return(outsize);
+  return(ERROR(ERRDOS,ERRnoaccess));
 }
 
 
@@ -2690,23 +2632,7 @@ int reply_printopen(char *inbuf,char *outbuf,int dum_size, int dum_buffsize)
 ****************************************************************************/
 int reply_printclose(char *inbuf,char *outbuf,int dum_size, int dum_buffsize)
 {
-  int fnum,cnum;
-  int outsize = set_message(outbuf,0,0,True);
-  
-  cnum = SVAL(inbuf,smb_tid);
-  fnum = GETFNUM(inbuf,smb_vwv0);
-
-  CHECK_FNUM(fnum,cnum);
-  CHECK_ERROR(fnum);
-
-  if (!CAN_PRINT(cnum))
-    return(ERROR(ERRDOS,ERRnoaccess));
-  
-  DEBUG(3,("%s printclose fd=%d fnum=%d cnum=%d\n",timestring(),Files[fnum].fd_ptr->fd,fnum,cnum));
-  
-  close_file(fnum,True);
-  
-  return(outsize);
+  return(ERROR(ERRDOS,ERRnoaccess));
 }
 
 
@@ -2715,92 +2641,7 @@ int reply_printclose(char *inbuf,char *outbuf,int dum_size, int dum_buffsize)
 ****************************************************************************/
 int reply_printqueue(char *inbuf,char *outbuf,int dum_size, int dum_buffsize)
 {
-  int cnum;
-  int outsize = set_message(outbuf,2,3,True);
-  int max_count = SVAL(inbuf,smb_vwv0);
-  int start_index = SVAL(inbuf,smb_vwv1);
-  uint16 vuid;
-
-  cnum = SVAL(inbuf,smb_tid);
-  vuid = SVAL(inbuf,smb_uid);
-
-/* allow checking the queue for anyone */
-#if 0
-  if (!CAN_PRINT(cnum))
-    return(ERROR(ERRDOS,ERRnoaccess));
-#endif
-
-  SSVAL(outbuf,smb_vwv0,0);
-  SSVAL(outbuf,smb_vwv1,0);
-  CVAL(smb_buf(outbuf),0) = 1;
-  SSVAL(smb_buf(outbuf),1,0);
-  
-  DEBUG(3,("%s printqueue cnum=%d start_index=%d max_count=%d\n",
-	timestring(),cnum,start_index,max_count));
-
-  if (!OPEN_CNUM(cnum) || !Connections[cnum].printer)
-    {
-      int i;
-      cnum = -1;
-
-      for (i=0;i<MAX_CONNECTIONS;i++)
-	if (CAN_PRINT(i) && Connections[i].printer)
-	  cnum = i;
-
-      if (cnum == -1)
-	for (i=0;i<MAX_CONNECTIONS;i++)
-	  if (OPEN_CNUM(i))
-	    cnum = i;
-
-      if (!OPEN_CNUM(cnum))
-	return(ERROR(ERRSRV,ERRinvnid));
-
-      DEBUG(5,("connection not open or not a printer, using cnum %d\n",cnum));
-    }
-
-  if (!become_user(&Connections[cnum], cnum, vuid))
-    return(ERROR(ERRSRV,ERRinvnid));
-
-  {
-    print_queue_struct *queue = NULL;
-    char *p = smb_buf(outbuf) + 3;
-    int count = get_printqueue(SNUM(cnum),cnum,&queue,NULL);
-    int num_to_get = ABS(max_count);
-    int first = (max_count>0?start_index:start_index+max_count+1);
-    int i;
-
-    if (first >= count)
-      num_to_get = 0;
-    else
-      num_to_get = MIN(num_to_get,count-first);
-    
-
-    for (i=first;i<first+num_to_get;i++)
-      {
-	put_dos_date2(p,0,queue[i].time);
-	CVAL(p,4) = (queue[i].status==LPQ_PRINTING?2:3);
-	SSVAL(p,5,printjob_encode(SNUM(cnum), queue[i].job));
-	SIVAL(p,7,queue[i].size);
-	CVAL(p,11) = 0;
-	StrnCpy(p+12,queue[i].user,16);
-	p += 28;
-      }
-
-    if (count > 0)
-      {
-	outsize = set_message(outbuf,2,28*count+3,False);	  
-	SSVAL(outbuf,smb_vwv0,count);
-	SSVAL(outbuf,smb_vwv1,(max_count>0?first+count:first-1));
-	CVAL(smb_buf(outbuf),0) = 1;
-	SSVAL(smb_buf(outbuf),1,28*count);
-      }
-
-    if (queue) free(queue);
-	  
-    DEBUG(3,("%d entries returned in queue\n",count));
-  }
-  
-  return(outsize);
+  return(ERROR(ERRDOS,ERRnoaccess));
 }
 
 
@@ -2809,30 +2650,7 @@ int reply_printqueue(char *inbuf,char *outbuf,int dum_size, int dum_buffsize)
 ****************************************************************************/
 int reply_printwrite(char *inbuf,char *outbuf,int dum_size, int dum_buffsize)
 {
-  int cnum,numtowrite,fnum;
-  int outsize = set_message(outbuf,0,0,True);
-  char *data;
-  
-  cnum = SVAL(inbuf,smb_tid);
-
-  if (!CAN_PRINT(cnum))
-    return(ERROR(ERRDOS,ERRnoaccess));
-
-  fnum = GETFNUM(inbuf,smb_vwv0);
-
-  CHECK_FNUM(fnum,cnum);
-  CHECK_WRITE(fnum);
-  CHECK_ERROR(fnum);
-
-  numtowrite = SVAL(smb_buf(inbuf),1);
-  data = smb_buf(inbuf) + 3;
-  
-  if (write_file(fnum,data,numtowrite) != numtowrite)
-    return(UNIXERROR(ERRDOS,ERRnoaccess));
-  
-  DEBUG(3,("%s printwrite fnum=%d cnum=%d num=%d\n",timestring(),fnum,cnum,numtowrite));
-  
-  return(outsize);
+  return(ERROR(ERRDOS,ERRnoaccess));
 }
 
 

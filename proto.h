@@ -210,7 +210,6 @@ struct in_addr *iface_ip(struct in_addr ip);
 
 /*The following definitions come from  ipc.c  */
 
-int get_printerdrivernumber(int snum);
 int reply_trans(char *inbuf,char *outbuf, int size, int bufsize);
 
 /*The following definitions come from  kanji.c  */
@@ -226,7 +225,6 @@ char *lp_smbrun(void);
 char *lp_configfile(void);
 char *lp_smb_passwd_file(void);
 char *lp_serverstring(void);
-char *lp_printcapname(void);
 char *lp_lockdir(void);
 char *lp_rootdir(void);
 char *lp_defaultservice(void);
@@ -327,15 +325,12 @@ char *lp_guestaccount(int );
 char *lp_invalid_users(int );
 char *lp_valid_users(int );
 char *lp_admin_users(int );
-char *lp_printcommand(int );
 char *lp_lpqcommand(int );
 char *lp_lprmcommand(int );
 char *lp_lppausecommand(int );
 char *lp_lpresumecommand(int );
 char *lp_queuepausecommand(int );
 char *lp_queueresumecommand(int );
-char *lp_printername(int );
-char *lp_printerdriver(int );
 char *lp_hostsallow(int );
 char *lp_hostsdeny(int );
 char *lp_magicscript(int );
@@ -364,8 +359,6 @@ BOOL lp_readonly(int );
 BOOL lp_no_set_dir(int );
 BOOL lp_guest_ok(int );
 BOOL lp_guest_only(int );
-BOOL lp_print_ok(int );
-BOOL lp_postscript(int );
 BOOL lp_map_hidden(int );
 BOOL lp_map_archive(int );
 BOOL lp_locking(int );
@@ -391,12 +384,9 @@ int lp_dir_mode(int );
 int lp_force_dir_mode(int );
 int lp_max_connections(int );
 int lp_defaultcase(int );
-int lp_minprintspace(int );
-int lp_printing(int );
 char lp_magicchar(int );
 BOOL lp_add_home(char *pszHomename, int iDefaultService, char *pszHomedir);
 int lp_add_service(char *pszService, int iDefaultService);
-BOOL lp_add_printer(char *pszPrintername, int iDefaultService);
 BOOL lp_file_list_changed(void);
 BOOL lp_do_parameter(int snum, char *pszParmName, char *pszParmValue);
 int lp_next_parameter(int snum, int *i, char *label, 
@@ -884,18 +874,6 @@ void invalidate_read_prediction(int fd);
 
 void sysv_printer_fn(void (*fn)(char *, char *));
 int sysv_printername_ok(char *name);
-
-/*The following definitions come from  printing.c  */
-
-void lpq_reset(int snum);
-void print_file(int fnum);
-int get_printqueue(int snum,int cnum,print_queue_struct **queue,
-		   print_status_struct *status);
-void del_printqueue(int cnum,int snum,int jobid);
-void status_printjob(int cnum,int snum,int jobid,int status);
-int printjob_encode(int snum, int job);
-void printjob_decode(int jobid, int *snum, int *job);
-void status_printqueue(int cnum,int snum,int status);
 
 /*The following definitions come from  quotas.c  */
 
