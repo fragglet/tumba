@@ -160,7 +160,6 @@ typedef struct
   int maxprotocol;
   int security;
   int maxdisksize;
-  int lpqcachetime;
   int syslog;
   int os_level;
   int max_ttl;
@@ -224,10 +223,6 @@ typedef struct
   char *szPostExec;
   char *szRootPreExec;
   char *szRootPostExec;
-  char *szLpqcommand;
-  char *szLprmcommand;
-  char *szLppausecommand;
-  char *szLpresumecommand;
   char *szQueuepausecommand;
   char *szQueueresumecommand;
   char *szDontdescend;
@@ -307,10 +302,6 @@ static service sDefault =
   NULL,    /* szPostExec */
   NULL,    /* szRootPreExec */
   NULL,    /* szRootPostExec */
-  NULL,    /* szLpqcommand */
-  NULL,    /* szLprmcommand */
-  NULL,    /* szLppausecommand */
-  NULL,    /* szLpresumecommand */
   NULL,    /* szQueuepausecommand */
   NULL,    /* szQueueresumecommand */
   NULL,    /* szDontdescend */
@@ -430,7 +421,6 @@ static struct parm_struct
   {"protocol",         P_ENUM,    P_GLOBAL, &Globals.maxprotocol,       NULL,   enum_protocol},
   {"security",         P_ENUM,    P_GLOBAL, &Globals.security,          NULL,   enum_security},
   {"max disk size",    P_INTEGER, P_GLOBAL, &Globals.maxdisksize,       NULL,   NULL},
-  {"lpq cache time",   P_INTEGER, P_GLOBAL, &Globals.lpqcachetime,      NULL,   NULL},
   {"announce as",      P_ENUM,    P_GLOBAL, &Globals.announce_as,       NULL,   enum_announce_as},
   {"encrypt passwords",P_BOOL,    P_GLOBAL, &Globals.bEncryptPasswords, NULL,   NULL},
   {"update encrypted", P_BOOL,    P_GLOBAL, &Globals.bUpdateEncrypt,    NULL,   NULL},
@@ -591,10 +581,6 @@ static struct parm_struct
   {"strict sync",      P_BOOL,    P_LOCAL,  &sDefault.bStrictSync,      NULL,   NULL},
   {"mangled names",    P_BOOL,    P_LOCAL,  &sDefault.bMangledNames,    NULL,   NULL},
   {"fake oplocks",     P_BOOL,    P_LOCAL,  &sDefault.bFakeOplocks,     NULL,   NULL},
-  {"lpq command",      P_STRING,  P_LOCAL,  &sDefault.szLpqcommand,     NULL,   NULL},
-  {"lprm command",     P_STRING,  P_LOCAL,  &sDefault.szLprmcommand,    NULL,   NULL},
-  {"lppause command",  P_STRING,  P_LOCAL,  &sDefault.szLppausecommand, NULL,   NULL},
-  {"lpresume command", P_STRING,  P_LOCAL,  &sDefault.szLpresumecommand,NULL,   NULL},
   {"queuepause command", P_STRING, P_LOCAL, &sDefault.szQueuepausecommand, NULL, NULL},
   {"queueresume command", P_STRING, P_LOCAL, &sDefault.szQueueresumecommand, NULL, NULL},
   {"hosts allow",      P_STRING,  P_LOCAL,  &sDefault.szHostsallow,     NULL,   NULL},
@@ -670,7 +656,6 @@ static void init_globals(void)
   Globals.mangled_stack = 50;
   Globals.max_xmit = 65535;
   Globals.max_mux = 50; /* This is *needed* for profile support. */
-  Globals.lpqcachetime = 10;
   Globals.pwordlevel = 0;
   Globals.unamelevel = 0;
   Globals.deadtime = 0;
@@ -918,7 +903,6 @@ FN_GLOBAL_INTEGER(lp_deadtime,&Globals.deadtime)
 FN_GLOBAL_INTEGER(lp_maxprotocol,&Globals.maxprotocol)
 FN_GLOBAL_INTEGER(lp_security,&Globals.security)
 FN_GLOBAL_INTEGER(lp_maxdisksize,&Globals.maxdisksize)
-FN_GLOBAL_INTEGER(lp_lpqcachetime,&Globals.lpqcachetime)
 FN_GLOBAL_INTEGER(lp_syslog,&Globals.syslog)
 FN_GLOBAL_INTEGER(lp_client_code_page,&Globals.client_code_page)
 FN_GLOBAL_INTEGER(lp_announce_as,&Globals.announce_as)
@@ -937,10 +921,6 @@ FN_LOCAL_STRING(lp_guestaccount,szGuestaccount)
 FN_LOCAL_STRING(lp_invalid_users,szInvalidUsers)
 FN_LOCAL_STRING(lp_valid_users,szValidUsers)
 FN_LOCAL_STRING(lp_admin_users,szAdminUsers)
-FN_LOCAL_STRING(lp_lpqcommand,szLpqcommand)
-FN_LOCAL_STRING(lp_lprmcommand,szLprmcommand)
-FN_LOCAL_STRING(lp_lppausecommand,szLppausecommand)
-FN_LOCAL_STRING(lp_lpresumecommand,szLpresumecommand)
 FN_LOCAL_STRING(lp_queuepausecommand,szQueuepausecommand)
 FN_LOCAL_STRING(lp_queueresumecommand,szQueueresumecommand)
 FN_LOCAL_STRING(lp_hostsallow,szHostsallow)
