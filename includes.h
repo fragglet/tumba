@@ -221,23 +221,6 @@ Here come some platform specific sections
 
 
 
-#ifdef CLIX
-#include <dirent.h>
-#define SIGNAL_CAST	(void (*)())
-#include <sys/fcntl.h>
-#include <sys/statfs.h>
-#include <string.h>
-#define NO_EID
-#define USE_WAITPID
-#define STATFS4
-#define NO_FSYNC
-#define USE_GETCWD
-#define USE_SETSID
-#ifndef REPLACE_GETPASS
-#define REPLACE_GETPASS
-#endif /* REPLACE_GETPASS */
-#define NO_GETRLIMIT
-#endif	/* CLIX */
 
 
 
