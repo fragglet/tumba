@@ -52,11 +52,8 @@ typedef int BOOL;
    as signed and unsigned int will work.
 */
 
-/* afs/stds.h defines int16 and int32 */
-#ifndef AFS_AUTH
 typedef short int16;
 typedef int int32;
-#endif
 
 #ifndef uint8
 typedef unsigned char uint8;
@@ -816,11 +813,6 @@ int slprintf(char *str, int n, char *format, ...);
 #else
 int Debug1();
 int slprintf();
-#endif
-
-#ifdef DFS_AUTH
-void dfs_unlogin(void);
-extern int dcelogin_atmost_once;
 #endif
 
 #if AJT

@@ -386,24 +386,6 @@ struct spwd { /* fake shadow password structure */
 #endif
 
 
-#ifdef AFS_AUTH
-#include <afs/stds.h>
-#include <afs/kautils.h>
-#endif
-
-#ifdef DFS_AUTH
-#include <dce/dce_error.h>
-#include <dce/sec_login.h>
-#endif
-
-#ifdef KRB5_AUTH
-#include <krb5.h>
-#endif
-
-#ifdef KRB4_AUTH
-#include <krb.h>
-#endif
-
 #ifdef NO_UTIMBUF
 struct utimbuf {
   time_t actime;

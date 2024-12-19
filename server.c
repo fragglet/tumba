@@ -54,10 +54,6 @@ extern int smb_read_error;
 
 extern pstring user_socket_options;
 
-#ifdef DFS_AUTH
-extern int dcelogin_atmost_once;
-#endif /* DFS_AUTH */
-
 connection_struct Connections[MAX_CONNECTIONS];
 files_struct Files[MAX_OPEN_FILES];
 
@@ -4649,10 +4645,6 @@ void exit_server(char *reason)
   for (i=0;i<MAX_CONNECTIONS;i++)
     if (Connections[i].open)
       close_cnum(i,(uint16)-1);
-#ifdef DFS_AUTH
-  if (dcelogin_atmost_once)
-    dfs_unlogin();
-#endif
   if (!reason) {   
     int oldlevel = DEBUGLEVEL;
     DEBUGLEVEL = 10;

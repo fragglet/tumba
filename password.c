@@ -70,16 +70,6 @@ BOOL set_challenge(char *challenge)
   return(True);
 }
 
-/*******************************************************************
-get the last challenge sent
-********************************************************************/
-BOOL last_challenge(char *challenge)
-{
-  if (!challenge_sent) return(False);
-  memcpy(challenge,saved_challenge,8);
-  return(True);
-}
-
 /* this holds info on user ids that are already validated for this VC */
 static user_struct *validated_users = NULL;
 static int num_validated_users = 0;
@@ -251,14 +241,6 @@ void add_session_user(char *user)
     }
 }
 
-
-#ifdef DFS_AUTH
-
-void dfs_unlogin(void)
-{
-}
-
-#endif
 
 /****************************************************************************
 check if a username/password is OK
