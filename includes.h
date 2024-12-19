@@ -358,11 +358,6 @@ struct spwd { /* fake shadow password structure */
 #endif
 
 
-#ifndef HAVE_MEMMOVE
-#ifndef memmove
-#define memmove(d,s,n) MemMove(d,s,n)
-#endif
-#endif
 
 #ifdef USE_DIRECT
 #include <sys/dir.h>

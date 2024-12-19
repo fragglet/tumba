@@ -476,65 +476,6 @@ char **toktocliplist(int *ctok, char *sep)
   return ret;
 }
 
-#ifndef HAVE_MEMMOVE
-/*******************************************************************
-safely copies memory, ensuring no overlap problems.
-this is only used if the machine does not have it's own memmove().
-this is not the fastest algorithm in town, but it will do for our
-needs.
-********************************************************************/
-void *MemMove(void *dest,void *src,int size)
-{
-  unsigned long d,s;
-  int i;
-  if (dest==src || !size) return(dest);
-
-  d = (unsigned long)dest;
-  s = (unsigned long)src;
-
-  if ((d >= (s+size)) || (s >= (d+size))) {
-    /* no overlap */
-    memcpy(dest,src,size);
-    return(dest);
-  }
-
-  if (d < s)
-    {
-      /* we can forward copy */
-      if (s-d >= sizeof(int) && 
-	  !(s%sizeof(int)) && !(d%sizeof(int)) && !(size%sizeof(int))) {
-	/* do it all as words */
-	int *idest = (int *)dest;
-	int *isrc = (int *)src;
-	size /= sizeof(int);
-	for (i=0;i<size;i++) idest[i] = isrc[i];
-      } else {
-	/* simplest */
-	char *cdest = (char *)dest;
-	char *csrc = (char *)src;
-	for (i=0;i<size;i++) cdest[i] = csrc[i];
-      }
-    }
-  else
-    {
-      /* must backward copy */
-      if (d-s >= sizeof(int) && 
-	  !(s%sizeof(int)) && !(d%sizeof(int)) && !(size%sizeof(int))) {
-	/* do it all as words */
-	int *idest = (int *)dest;
-	int *isrc = (int *)src;
-	size /= sizeof(int);
-	for (i=size-1;i>=0;i--) idest[i] = isrc[i];
-      } else {
-	/* simplest */
-	char *cdest = (char *)dest;
-	char *csrc = (char *)src;
-	for (i=size-1;i>=0;i--) cdest[i] = csrc[i];
-      }      
-    }
-  return(dest);
-}
-#endif
 
 
 /****************************************************************************
