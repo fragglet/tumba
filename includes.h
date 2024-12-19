@@ -517,9 +517,6 @@ it works and getting lots of bug reports */
 #define MAP_FILE 0
 #endif
 
-#ifndef HAVE_FCNTL_LOCK
-#define HAVE_FCNTL_LOCK 1
-#endif
 
 #ifndef WAIT3_CAST2
 #define WAIT3_CAST2 (struct rusage *)
@@ -557,16 +554,6 @@ extern int errno;
 #endif
 
 
-#if (HAVE_FCNTL_LOCK == 0)
-/* since there is no locking available, system includes  */
-/* for DomainOS 10.4 do not contain any of the following */
-/* #define's. So, to satisfy the compiler, add these     */
-/* #define's, although they arn't really necessary.      */
-#define F_GETLK 0
-#define F_SETLK 0
-#define F_WRLCK 0
-#define F_UNLCK 0
-#endif /* HAVE_FCNTL_LOCK == 0 */
 
 #ifdef NOSTRCASECMP
 #define strcasecmp(s1,s2) StrCaseCmp(s1,s2)

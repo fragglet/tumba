@@ -4693,7 +4693,6 @@ routine to do file locking
 ****************************************************************************/
 BOOL fcntl_lock(int fd,int op,uint32 offset,uint32 count,int type)
 {
-#if HAVE_FCNTL_LOCK
   struct flock lock;
   int ret;
 
@@ -4780,9 +4779,6 @@ BOOL fcntl_lock(int fd,int op,uint32 offset,uint32 count,int type)
   DEBUG(8,("Lock call successful\n"));
 
   return(True);
-#else
-  return(False);
-#endif
 }
 
 /*******************************************************************
@@ -4795,16 +4791,12 @@ int file_lock(char *name,int timeout)
   time_t t=0;
   if (fd < 0) return(-1);
 
-#if HAVE_FCNTL_LOCK
   if (timeout) t = time(NULL);
   while (!timeout || (time(NULL)-t < timeout)) {
     if (fcntl_lock(fd,F_SETLK,0,1,F_WRLCK)) return(fd);    
     msleep(LOCK_RETRY_TIMEOUT);
   }
   return(-1);
-#else
-  return(fd);
-#endif
 }
 
 /*******************************************************************
@@ -4813,9 +4805,7 @@ unlock a file locked by file_lock
 void file_unlock(int fd)
 {
   if (fd<0) return;
-#if HAVE_FCNTL_LOCK
   fcntl_lock(fd,F_SETLK,0,1,F_UNLCK);
-#endif
   close(fd);
 }
 
