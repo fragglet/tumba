@@ -4581,9 +4581,6 @@ char *readdirname(void *p)
 
   dname = ptr->d_name;
 
-#ifdef NEXT2
-  if (telldir(p) < 0) return(NULL);
-#endif
 
 #ifdef SUNOS5
   /* this handles a broken compiler setup, causing a mixture

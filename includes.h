@@ -49,9 +49,6 @@
 #define NO_UTIMEH
 #endif
 
-#ifdef NEXT2
-#define NO_UTIMEH
-#endif
 
 #ifdef NEXT3_0
 #define NO_UTIMEH
@@ -699,19 +696,6 @@ char *mktemp(char *); /* No standard include */
 #endif
 
 
-#ifdef NEXT2
-#include <sys/types.h>
-#include <strings.h>
-#include <dirent.h>
-#include <sys/vfs.h>
-#define bzero(b,len) memset(b,0,len)
-#define mode_t int
-#define NO_UTIMBUF
-#include <libc.h>
-#define NOSTRDUP
-#define USE_DIRECT
-#define USE_WAITPID
-#endif 
 
 
 #ifdef NEXT3_0
