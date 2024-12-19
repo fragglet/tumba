@@ -689,7 +689,7 @@ LOCKOBJ = locking_shm.o locking_slow.o locking.o shmem.o
 STATUS_OBJ = status.o $(UTILOBJ) $(LOCKOBJ) 
 
 # object files to be auto-prototyped
-PROTOOBJ = $(UTILOBJ) $(SMBDOBJ) $(NMBDOBJ) $(LOCKOBJ) $(CLIENT_OBJ) $(STATUS_OBJ) cgi.o namequery.o
+PROTOOBJ = $(UTILOBJ) $(SMBDOBJ) $(NMBDOBJ) $(LOCKOBJ) $(CLIENT_OBJ) $(STATUS_OBJ) namequery.o
 
 
 ######################################################################
@@ -741,10 +741,6 @@ make_printerdef: make_printerdef.o $(UTILOBJ)
 wsmbstatus: wsmbstatus.o $(UTILOBJ)  
 	@echo Linking wsmbstatus
 	@$(CC) $(CFLAGS) -o wsmbstatus wsmbstatus.o $(UTILOBJ) $(LIBS)
-
-wsmbconf: wsmbconf.o $(UTILOBJ) cgi.o
-	@echo Linking wsmbconf
-	@$(CC) $(CFLAGS) -o wsmbconf wsmbconf.o $(UTILOBJ) cgi.o $(LIBS)
 
 install: installbin installman installscripts installcp
 
