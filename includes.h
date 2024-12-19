@@ -49,10 +49,6 @@
 
 
 
-#ifdef OS2
-#define NO_SYSMOUNTH
-#define NO_NETIFH
-#endif
 
 #ifdef LYNX
 #define NO_SYSMOUNTH
@@ -515,25 +511,6 @@ extern char *getpass(char *);
 
 
 
-#ifdef OS2
-#include <dirent.h>
-#include <sys/statfs.h>
-#include <string.h>
-#include <limits.h>
-#define SIGNAL_CAST (void (*)())
-#define HAVE_FCNTL_LOCK 0
-#define USE_WAITPID
-#define NO_GET_BROADCAST
-#define NO_EID
-#define NO_SETGROUPS
-#define NO_INITGROUPS
-#define NO_CRYPT
-#define NO_STATFS
-#define NO_CHROOT
-#define NO_CHOWN
-#define strcasecmp stricmp
-#define strncasecmp strnicmp
-#endif
 
 
 #ifdef LYNX
