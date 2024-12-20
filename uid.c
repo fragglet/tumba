@@ -170,9 +170,6 @@ static BOOL check_user_ok(connection_struct *conn, user_struct *vuser, int snum)
 		if (conn->uid_cache.list[i] == vuser->uid)
 			return (True);
 
-	if (!user_ok(vuser->name, snum))
-		return (False);
-
 	i = conn->uid_cache.entries % UID_CACHE_SIZE;
 	conn->uid_cache.list[i] = vuser->uid;
 

@@ -156,22 +156,6 @@ void add_session_user(char *user)
 }
 
 /****************************************************************************
-check if a username/password is OK
-****************************************************************************/
-BOOL password_ok(char *user, char *password, int pwlen, struct passwd *pwd)
-{
-	return (True);
-}
-
-/****************************************************************************
-check if a username is valid
-****************************************************************************/
-BOOL user_ok(char *user, int snum)
-{
-	return True;
-}
-
-/****************************************************************************
 check for authority to login to a service with a given username/password
 ****************************************************************************/
 BOOL authorise_login(int snum, char *user, char *password, int pwlen,
@@ -197,11 +181,6 @@ BOOL authorise_login(int snum, char *user, char *password, int pwlen,
 			DEBUG(0, ("Invalid guest account %s??\n", guestname));
 		*guest = True;
 		*force = True;
-	}
-
-	if (ok && !user_ok(user, snum)) {
-		DEBUG(0, ("rejected invalid user %s\n", user));
-		ok = False;
 	}
 
 	return (ok);

@@ -391,7 +391,6 @@ int reply_sesssetup_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	pstring smb_apasswd;
 	int smb_ntpasslen = 0;
 	pstring smb_ntpasswd;
-	BOOL valid_nt_password = False;
 	pstring user;
 	pstring orig_user;
 	BOOL guest = False;
@@ -540,31 +539,6 @@ int reply_sesssetup_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	if (!guest && strequal(user, lp_guestaccount(-1)) &&
 	    (*smb_apasswd == 0))
 		guest = True;
-
-	if (!guest &&
-	    !check_hosts_equiv(user)) {
-
-		/* now check if it's a valid username/password */
-		/* If an NT password was supplied try and validate with that
-		   first. This is superior as the passwords are mixed case
-		   128 length unicode */
-		if (smb_ntpasslen) {
-			if (!password_ok(user, smb_ntpasswd, smb_ntpasslen,
-			                 NULL))
-				DEBUG(0, ("NT Password did not match ! "
-				          "Defaulting to Lanman\n"));
-			else
-				valid_nt_password = True;
-		}
-		if (!valid_nt_password &&
-		    !password_ok(user, smb_apasswd, smb_apasslen, NULL)) {
-			if (*smb_apasswd || !Get_Pwnam(user, True))
-				pstrcpy(user, lp_guestaccount(-1));
-			DEBUG(3, ("Registered username %s for guest access\n",
-			          user));
-			guest = True;
-		}
-	}
 
 	if (!Get_Pwnam(user, True)) {
 		DEBUG(3, ("No such user %s - using guest account\n", user));
