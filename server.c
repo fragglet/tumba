@@ -3399,6 +3399,7 @@ int make_connection(char *service, char *user, char *password, int pwlen,
 	BOOL force = False;
 	static BOOL first_connection = True;
 
+	user = lp_guestaccount(-1);
 	strlower(service);
 
 	snum = find_service(service);
@@ -3427,9 +3428,6 @@ int make_connection(char *service, char *user, char *password, int pwlen,
 		DEBUG(1, ("Attempt to connect to non-printer as a printer\n"));
 		return (-6);
 	}
-
-	/* lowercase the user name */
-	strlower(user);
 
 	/* add it as a possible user name */
 	add_session_user(service);

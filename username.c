@@ -161,7 +161,7 @@ Note that this changes user!
 ****************************************************************************/
 struct passwd *Get_Pwnam(char *user, BOOL allow_change)
 {
-	return _Get_Pwnam(lp_guestaccount(-1));
+	return _Get_Pwnam(user);
 }
 
 /****************************************************************************

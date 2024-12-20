@@ -3584,19 +3584,10 @@ void standard_sub_basic(char *str)
 {
 	char *s, *p;
 	char pidstr[10];
-	struct passwd *pass;
 	char *username = sam_logon_in_ssb ? samlogon_user : sesssetup_user;
 
 	for (s = str; s && *s && (p = strchr(s, '%')); s = p) {
 		switch (*(p + 1)) {
-		case 'G': {
-			if ((pass = Get_Pwnam(username, False)) != NULL) {
-				string_sub(p, "%G", gidtoname(pass->pw_gid));
-			} else {
-				p += 2;
-			}
-			break;
-		}
 		case 'I':
 			string_sub(p, "%I", client_addr());
 			break;
