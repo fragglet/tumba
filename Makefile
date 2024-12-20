@@ -661,7 +661,7 @@ UBIOBJ = ubiqx/ubi_dLinkList.o
 
 # general utility object files
 UTILOBJ1 = util.o system.o charset.o kanji.o fault.o smbencrypt.o smbdes.o charcnv.o
-UTILOBJ2 = $(UTILOBJ1) loadparm.o params.o username.o time.o namequery.o nmblib.o
+UTILOBJ2 = $(UTILOBJ1) loadparm.o params.o username.o time.o nmblib.o
 UTILOBJ = $(UTILOBJ2) interface.o replace.o smberr.o slprintf.o
 
 # object code for smbd
@@ -674,7 +674,7 @@ SMBDOBJ = $(SMBDOBJ1) $(SMBDOBJ2) $(SMBDOBJ3) $(UBIOBJ) $(VTP_OBJ) $(LOCKOBJ)
 LOCKOBJ = locking_slow.o locking.o
 
 # object files to be auto-prototyped
-PROTOOBJ = $(UTILOBJ) $(SMBDOBJ) $(NMBDOBJ) $(LOCKOBJ) $(CLIENT_OBJ) namequery.o
+PROTOOBJ = $(UTILOBJ) $(SMBDOBJ) $(NMBDOBJ) $(LOCKOBJ) $(CLIENT_OBJ)
 
 
 ######################################################################

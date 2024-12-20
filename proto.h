@@ -254,17 +254,6 @@ int reply_sendstrt(char *inbuf, char *outbuf, int dum_size, int dum_buffsize);
 int reply_sendtxt(char *inbuf, char *outbuf, int dum_size, int dum_buffsize);
 int reply_sendend(char *inbuf, char *outbuf, int dum_size, int dum_buffsize);
 
-/*The following definitions come from  namequery.c  */
-
-struct in_addr *name_query(int fd, char *name, int name_type, BOOL bcast,
-                           BOOL recurse, struct in_addr to_ip, int *count,
-                           void (*fn)(struct packet_struct *));
-FILE *startlmhosts(char *fname);
-BOOL getlmhostsent(FILE *fp, char *name, int *name_type,
-                   struct in_addr *ipaddr);
-void endlmhosts(FILE *fp);
-BOOL resolve_name(char *name, struct in_addr *return_ip);
-
 /*The following definitions come from  nmblib.c  */
 
 char *lookup_opcode_name(int opcode);
