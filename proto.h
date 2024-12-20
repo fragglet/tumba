@@ -246,17 +246,6 @@ int reply_sendstrt(char *inbuf, char *outbuf, int dum_size, int dum_buffsize);
 int reply_sendtxt(char *inbuf, char *outbuf, int dum_size, int dum_buffsize);
 int reply_sendend(char *inbuf, char *outbuf, int dum_size, int dum_buffsize);
 
-/*The following definitions come from  nmblib.c  */
-
-char *lookup_opcode_name(int opcode);
-void debug_nmb_packet(struct packet_struct *p);
-char *namestr(struct nmb_name *n);
-void free_packet(struct packet_struct *packet);
-struct packet_struct *read_packet(int fd, enum packet_type packet_type);
-void make_nmb_name(struct nmb_name *n, char *name, int type, char *this_scope);
-BOOL send_packet(struct packet_struct *p);
-struct packet_struct *receive_packet(int fd, enum packet_type type, int t);
-
 /*The following definitions come from  params.c  */
 
 BOOL pm_process(char *FileName, BOOL (*sfunc)(char *),

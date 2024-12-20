@@ -310,7 +310,6 @@ extern char *sys_errlist[];
 #include "smb.h"
 #include "version.h"
 
-#include "nameserv.h"
 #include "ubiqx/ubi_dLinkList.h"
 
 #include "byteorder.h"
