@@ -149,7 +149,6 @@ typedef struct {
 	int unamelevel;
 	int deadtime;
 	int maxprotocol;
-	int security;
 	int maxdisksize;
 	int syslog;
 	int os_level;
@@ -346,11 +345,6 @@ static struct enum_list enum_protocol[] = {{PROTOCOL_NT1, "NT1"},
                                            {PROTOCOL_COREPLUS, "CORE+"},
                                            {-1, NULL}};
 
-static struct enum_list enum_security[] = {{SEC_SHARE, "SHARE"},
-                                           {SEC_USER, "USER"},
-                                           {SEC_SERVER, "SERVER"},
-                                           {-1, NULL}};
-
 static struct enum_list enum_case[] = {
     {CASE_LOWER, "lower"}, {CASE_UPPER, "upper"}, {-1, NULL}};
 
@@ -367,7 +361,6 @@ static struct parm_struct {
     {"syslog", P_INTEGER, P_GLOBAL, &Globals.syslog, NULL, NULL},
     {"syslog only", P_BOOL, P_GLOBAL, &Globals.bSyslogOnly, NULL, NULL},
     {"protocol", P_ENUM, P_GLOBAL, &Globals.maxprotocol, NULL, enum_protocol},
-    {"security", P_ENUM, P_GLOBAL, &Globals.security, NULL, enum_security},
     {"max disk size", P_INTEGER, P_GLOBAL, &Globals.maxdisksize, NULL, NULL},
     {"getwd cache", P_BOOL, P_GLOBAL, &use_getwd_cache, NULL, NULL},
     {"read prediction", P_BOOL, P_GLOBAL, &Globals.bReadPrediction, NULL, NULL},
@@ -574,7 +567,6 @@ static void init_globals(void)
 	Globals.deadtime = 0;
 	Globals.max_log_size = 5000;
 	Globals.maxprotocol = PROTOCOL_NT1;
-	Globals.security = SEC_SHARE;
 	Globals.bReadRaw = True;
 	Globals.bWriteRaw = True;
 	Globals.bReadPrediction = False;
@@ -771,7 +763,6 @@ FN_GLOBAL_INTEGER(lp_readsize, &Globals.ReadSize)
 FN_GLOBAL_INTEGER(lp_shmem_size, &Globals.shmem_size)
 FN_GLOBAL_INTEGER(lp_deadtime, &Globals.deadtime)
 FN_GLOBAL_INTEGER(lp_maxprotocol, &Globals.maxprotocol)
-FN_GLOBAL_INTEGER(lp_security, &Globals.security)
 FN_GLOBAL_INTEGER(lp_maxdisksize, &Globals.maxdisksize)
 FN_GLOBAL_INTEGER(lp_syslog, &Globals.syslog)
 FN_GLOBAL_INTEGER(lp_client_code_page, &Globals.client_code_page)

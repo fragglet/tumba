@@ -945,13 +945,6 @@ enum protocol_types {
 	PROTOCOL_NT1
 };
 
-/* security levels */
-enum security_types {
-	SEC_SHARE,
-	SEC_USER,
-	SEC_SERVER
-};
-
 /* Remote architectures we know about. */
 enum remote_arch_types {
 	RA_UNKNOWN,

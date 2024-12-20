@@ -47,10 +47,6 @@ extern pstring myhostname;
 
 void do_global_checks(void)
 {
-	if (lp_security() > SEC_SHARE && lp_revalidate(-1))
-		printf(
-		    "WARNING: the 'revalidate' parameter is ignored in all but \
-'security=share' mode.\n");
 }
 
 int main(int argc, char *argv[])

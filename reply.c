@@ -414,9 +414,7 @@ int reply_sesssetup_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 		smb_apasswd[smb_apasslen] = 0;
 		pstrcpy(user, smb_buf(inbuf) + smb_apasslen);
 
-		if (lp_security() != SEC_SERVER) {
-			smb_apasslen = strlen(smb_apasswd);
-		}
+		smb_apasslen = strlen(smb_apasswd);
 	} else {
 		uint16 passlen1 = SVAL(inbuf, smb_vwv7);
 		uint16 passlen2 = SVAL(inbuf, smb_vwv8);
@@ -507,7 +505,7 @@ int reply_sesssetup_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	 * working.
 	 */
 
-	if ((lp_security() != SEC_SHARE) || *user)
+	if (*user)
 		pstrcpy(sesssetup_user, user);
 
 	reload_services(True);
@@ -544,10 +542,6 @@ int reply_sesssetup_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 		guest = True;
 
 	if (!guest &&
-	    !(lp_security() == SEC_SERVER &&
-	      /* Check with orig_user for security=server. */
-	      server_validate(orig_user, domain, smb_apasswd, smb_apasslen,
-	                      smb_ntpasswd, smb_ntpasslen)) &&
 	    !check_hosts_equiv(user)) {
 
 		/* now check if it's a valid username/password */
@@ -564,15 +558,6 @@ int reply_sesssetup_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 		}
 		if (!valid_nt_password &&
 		    !password_ok(user, smb_apasswd, smb_apasslen, NULL)) {
-			if (!computer_id && lp_security() >= SEC_USER) {
-#if (GUEST_SESSSETUP == 0)
-				return (ERROR(ERRSRV, ERRbadpw));
-#endif
-#if (GUEST_SESSSETUP == 1)
-				if (Get_Pwnam(user, True))
-					return (ERROR(ERRSRV, ERRbadpw));
-#endif
-			}
 			if (*smb_apasswd || !Get_Pwnam(user, True))
 				pstrcpy(user, lp_guestaccount(-1));
 			DEBUG(3, ("Registered username %s for guest access\n",
@@ -1333,16 +1318,6 @@ int reply_ulogoffX(char *inbuf, char *outbuf, int length, int bufsize)
 	if (vuser == 0) {
 		DEBUG(3,
 		      ("ulogoff, vuser id %d does not map to user.\n", vuid));
-	}
-
-	/* in user level security we are supposed to close any files
-	   open by this user */
-	if ((vuser != 0) && (lp_security() != SEC_SHARE)) {
-		int i;
-		for (i = 0; i < MAX_OPEN_FILES; i++)
-			if ((Files[i].vuid == vuid) && Files[i].open) {
-				close_file(i, False);
-			}
 	}
 
 	invalidate_vuid(vuid);

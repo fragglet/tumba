@@ -3846,9 +3846,6 @@ int reply_lanman1(char *outbuf)
 	int secword = 0;
 	time_t t = time(NULL);
 
-	if (lp_security() >= SEC_USER)
-		secword |= 1;
-
 	set_message(outbuf, 13, 0, True);
 	SSVAL(outbuf, smb_vwv1, secword);
 
@@ -3878,9 +3875,6 @@ int reply_lanman2(char *outbuf)
 	int secword = 0;
 	time_t t = time(NULL);
 	char crypt_len = 0;
-
-	if (lp_security() >= SEC_USER)
-		secword |= 1;
 
 	set_message(outbuf, 13, crypt_len, True);
 	SSVAL(outbuf, smb_vwv1, secword);
@@ -3921,9 +3915,6 @@ int reply_nt1(char *outbuf)
 	if (lp_readraw() && lp_writeraw()) {
 		capabilities |= CAP_RAW_MODE;
 	}
-
-	if (lp_security() >= SEC_USER)
-		secword |= 1;
 
 	/* decide where (if) to put the encryption challenge, and
 	   follow it with the OEM'd domain name
@@ -4094,11 +4085,6 @@ static int reply_negprot(char *inbuf, char *outbuf, int size, int bufsize)
 
 	/* possibly reload - change of architecture */
 	reload_services(True);
-
-	/* a special case to stop password server loops */
-	if (Index == 1 && strequal(remote_machine, myhostname) &&
-	    lp_security() == SEC_SERVER)
-		exit_server("Password server loop!");
 
 	/* Check for protocols, most desirable first */
 	for (protocol = 0; supported_protocols[protocol].proto_name;
@@ -4718,9 +4704,7 @@ static int switch_message(int type, char *inbuf, char *outbuf, int size,
 			int flags = smb_messages[match].flags;
 			static uint16 last_session_tag = UID_FIELD_INVALID;
 			/* In share mode security we must ignore the vuid. */
-			uint16 session_tag = (lp_security() == SEC_SHARE)
-			                       ? UID_FIELD_INVALID
-			                       : SVAL(inbuf, smb_uid);
+			uint16 session_tag = UID_FIELD_INVALID;
 			/* Ensure this value is replaced in the incoming packet.
 			 */
 			SSVAL(inbuf, smb_uid, session_tag);

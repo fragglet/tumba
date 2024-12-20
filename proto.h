@@ -163,7 +163,6 @@ int lp_readsize(void);
 int lp_shmem_size(void);
 int lp_deadtime(void);
 int lp_maxprotocol(void);
-int lp_security(void);
 int lp_maxdisksize(void);
 int lp_syslog(void);
 int lp_client_code_page(void);

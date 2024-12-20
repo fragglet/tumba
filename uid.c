@@ -198,7 +198,7 @@ BOOL become_user(connection_struct *conn, int cnum, uint16 vuid)
 	 * SMB's - this hurts performance - Badly.
 	 */
 
-	if ((lp_security() == SEC_SHARE) && (current_user.cnum == cnum) &&
+	if ((current_user.cnum == cnum) &&
 	    (current_user.uid == conn->uid)) {
 		DEBUG(4, ("Skipping become_user - already user\n"));
 		return (True);
@@ -221,28 +221,13 @@ BOOL become_user(connection_struct *conn, int cnum, uint16 vuid)
 	if ((vuser != NULL) && !check_user_ok(conn, vuser, snum))
 		return False;
 
-	if (conn->force_user || lp_security() == SEC_SHARE || !(vuser) ||
-	    (vuser->guest)) {
+	{
 		uid = conn->uid;
 		gid = conn->gid;
 		current_user.groups = conn->groups;
 		current_user.igroups = conn->igroups;
 		current_user.ngroups = conn->ngroups;
 		current_user.attrs = conn->attrs;
-	} else {
-		if (!vuser) {
-			DEBUG(2, ("Invalid vuid used %d\n", vuid));
-			return (False);
-		}
-		uid = vuser->uid;
-		if (!*lp_force_group(snum))
-			gid = vuser->gid;
-		else
-			gid = conn->gid;
-		current_user.ngroups = vuser->n_groups;
-		current_user.groups = vuser->groups;
-		current_user.igroups = vuser->igroups;
-		current_user.attrs = vuser->attrs;
 	}
 
 	if (initial_uid == 0) {
