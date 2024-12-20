@@ -3454,21 +3454,6 @@ int make_connection(char *service, char *user, char *password, int pwlen,
 
 	pcon->read_only = lp_readonly(snum);
 
-	{
-		pstring list;
-		StrnCpy(list, lp_readlist(snum), sizeof(pstring) - 1);
-		string_sub(list, "%S", service);
-
-		if (user_in_list(user, list))
-			pcon->read_only = True;
-
-		StrnCpy(list, lp_writelist(snum), sizeof(pstring) - 1);
-		string_sub(list, "%S", service);
-
-		if (user_in_list(user, list))
-			pcon->read_only = False;
-	}
-
 	/* admin user check */
 
 	/* JRA - original code denied admin user if the share was

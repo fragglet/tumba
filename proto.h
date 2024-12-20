@@ -131,8 +131,6 @@ char *lp_magicoutput(int);
 char *lp_comment(int);
 char *lp_force_user(int);
 char *lp_force_group(int);
-char *lp_readlist(int);
-char *lp_writelist(int);
 char *lp_volume(int);
 char *lp_mangled_map(int);
 char *lp_veto_files(int);

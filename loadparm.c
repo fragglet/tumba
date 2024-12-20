@@ -195,8 +195,6 @@ typedef struct {
 	char *comment;
 	char *force_user;
 	char *force_group;
-	char *readlist;
-	char *writelist;
 	char *volume;
 	int iCreate_mask;
 	int iCreate_force_mode;
@@ -266,8 +264,6 @@ static service sDefault = {
     NULL,       /* comment */
     NULL,       /* force user */
     NULL,       /* force group */
-    NULL,       /* readlist */
-    NULL,       /* writelist */
     NULL,       /* volume */
     0744,       /* iCreate_mask */
     0000,       /* iCreate_force_mode */
@@ -443,8 +439,6 @@ static struct parm_struct {
     {"directory", P_STRING, P_LOCAL, &sDefault.szPath, NULL, NULL},
     {"guest account", P_STRING, P_LOCAL, &sDefault.szGuestaccount, NULL, NULL},
     {"admin users", P_STRING, P_LOCAL, &sDefault.szAdminUsers, NULL, NULL},
-    {"read list", P_STRING, P_LOCAL, &sDefault.readlist, NULL, NULL},
-    {"write list", P_STRING, P_LOCAL, &sDefault.writelist, NULL, NULL},
     {"volume", P_STRING, P_LOCAL, &sDefault.volume, NULL, NULL},
     {"force user", P_STRING, P_LOCAL, &sDefault.force_user, NULL, NULL},
     {"force group", P_STRING, P_LOCAL, &sDefault.force_group, NULL, NULL},
@@ -758,8 +752,6 @@ FN_LOCAL_STRING(lp_magicoutput, szMagicOutput)
 FN_LOCAL_STRING(lp_comment, comment)
 FN_LOCAL_STRING(lp_force_user, force_user)
 FN_LOCAL_STRING(lp_force_group, force_group)
-FN_LOCAL_STRING(lp_readlist, readlist)
-FN_LOCAL_STRING(lp_writelist, writelist)
 FN_LOCAL_STRING(lp_volume, volume)
 FN_LOCAL_STRING(lp_mangled_map, szMangledMap)
 FN_LOCAL_STRING(lp_veto_files, szVetoFiles)
