@@ -396,18 +396,6 @@ void load_interfaces(void)
 }
 
 /****************************************************************************
-  check if an IP is one of mine
-  **************************************************************************/
-BOOL ismyip(struct in_addr ip)
-{
-	struct interface *i;
-	for (i = local_interfaces; i; i = i->next)
-		if (ip_equal(i->ip, ip))
-			return True;
-	return False;
-}
-
-/****************************************************************************
   how many interfaces do we have
   **************************************************************************/
 int iface_count(void)
@@ -433,31 +421,4 @@ struct in_addr *iface_n_ip(int n)
 	if (i)
 		return &i->ip;
 	return NULL;
-}
-
-/****************************************************************************
-Try and find an interface that matches an ip. If we cannot, return NULL
-  **************************************************************************/
-static struct interface *iface_find(struct in_addr ip)
-{
-	struct interface *i;
-	if (zero_ip(ip))
-		return local_interfaces;
-
-	for (i = local_interfaces; i; i = i->next)
-		if (same_net(i->ip, ip, i->nmask))
-			return i;
-
-	return NULL;
-}
-
-/* these 3 functions return the ip/bcast/nmask for the interface
-   most appropriate for the given ip address. If they can't find
-   an appropriate interface they return the requested field of the
-   first known interface. */
-
-struct in_addr *iface_bcast(struct in_addr ip)
-{
-	struct interface *i = iface_find(ip);
-	return (i ? &i->bcast : &local_interfaces->bcast);
 }

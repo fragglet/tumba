@@ -53,10 +53,8 @@ void fault_setup(void (*fn)(void *));
 /*The following definitions come from  interface.c  */
 
 void load_interfaces(void);
-BOOL ismyip(struct in_addr ip);
 int iface_count(void);
 struct in_addr *iface_n_ip(int n);
-struct in_addr *iface_bcast(struct in_addr ip);
 
 /*The following definitions come from  ipc.c  */
 
@@ -469,7 +467,6 @@ BOOL in_group(gid_t group, int current_gid, int ngroups, int *groups);
 char *StrCpy(char *dest, char *src);
 char *StrnCpy(char *dest, char *src, int n);
 void putip(void *dest, void *src);
-int name_mangle(char *In, char *Out, char name_type);
 BOOL file_exist(char *fname, struct stat *sbuf);
 time_t file_modtime(char *fname);
 BOOL directory_exist(char *dname, struct stat *st);
@@ -507,7 +504,6 @@ void make_dir_struct(char *buf, char *mask, char *fname, unsigned int size,
 void close_low_fds(void);
 int set_blocking(int fd, BOOL set);
 int write_socket(int fd, char *buf, int len);
-int read_udp_socket(int fd, char *buf, int len);
 int read_with_timeout(int fd, char *buf, int mincnt, int maxcnt, long time_out);
 int TvalDiff(struct timeval *tvalold, struct timeval *tvalnew);
 int read_data(int fd, char *buffer, int N);
@@ -516,7 +512,6 @@ int transfer_file(int infd, int outfd, int n, char *header, int headlen,
                   int align);
 int read_smb_length(int fd, char *inbuf, int timeout);
 BOOL receive_smb(int fd, char *buffer, int timeout);
-BOOL client_receive_smb(int fd, char *buffer, int timeout);
 BOOL receive_local_message(int fd, char *buffer, int buffer_len, int timeout);
 BOOL push_smb_message(char *buf, int msg_len);
 BOOL receive_message_or_smb(int smbfd, int oplock_fd, char *buffer,
@@ -541,8 +536,6 @@ void *Realloc(void *p, int size);
 BOOL get_myname(char *my_name, struct in_addr *ip);
 BOOL ip_equal(struct in_addr ip1, struct in_addr ip2);
 int open_socket_in(int type, int port, int dlevel, uint32 socket_addr);
-int open_socket_out(int type, struct in_addr *addr, int port, int timeout);
-int interpret_protocol(char *str, int def);
 uint32 interpret_addr(char *str);
 struct in_addr *interpret_addr2(char *str);
 BOOL zero_ip(struct in_addr ip);

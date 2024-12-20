@@ -660,62 +660,6 @@ static int name_interpret(char *in, char *out)
 	return (ret);
 }
 
-/****************************************************************************
-mangle a name into netbios format
-
-  Note:  <Out> must be (33 + strlen(scope) + 2) bytes long, at minimum.
-****************************************************************************/
-int name_mangle(char *In, char *Out, char name_type)
-{
-	int i;
-	int c;
-	int len;
-	char buf[20];
-	char *p = Out;
-
-	/* Safely copy the input string, In, into buf[]. */
-	(void) memset(buf, 0, 20);
-	if ('*' == In[0])
-		buf[0] = '*';
-	else
-		(void) slprintf(buf, sizeof(buf) - 1, "%-15.15s%c", In,
-		                name_type);
-
-	/* Place the length of the first field into the output buffer. */
-	p[0] = 32;
-	p++;
-
-	/* Now convert the name to the rfc1001/1002 format. */
-	for (i = 0; i < 16; i++) {
-		c = toupper(buf[i]);
-		p[i * 2] = ((c >> 4) & 0x000F) + 'A';
-		p[(i * 2) + 1] = (c & 0x000F) + 'A';
-	}
-	p += 32;
-	p[0] = '\0';
-
-	/* Add the scope string. */
-	for (i = 0, len = 0; NULL != scope; i++, len++) {
-		switch (scope[i]) {
-		case '\0':
-			p[0] = len;
-			if (len > 0)
-				p[len + 1] = 0;
-			return (name_len(Out));
-		case '.':
-			p[0] = len;
-			p += (len + 1);
-			len = 0;
-			break;
-		default:
-			p[len + 1] = scope[i];
-			break;
-		}
-	}
-
-	return (name_len(Out));
-} /* name_mangle */
-
 /*******************************************************************
   check if a file exists
 ********************************************************************/
@@ -2040,34 +1984,6 @@ BOOL receive_smb(int fd, char *buffer, int timeout)
 }
 
 /****************************************************************************
-  read an smb from a fd ignoring all keepalive packets. Note that the buffer
-  *MUST* be of size BUFFER_SIZE+SAFETY_MARGIN.
-  The timeout is in milli seconds
-
-  This is exactly the same as receive_smb except that it never returns
-  a session keepalive packet (just as receive_smb used to do).
-  receive_smb was changed to return keepalives as the oplock processing means
-this call should never go into a blocking read.
-****************************************************************************/
-
-BOOL client_receive_smb(int fd, char *buffer, int timeout)
-{
-	BOOL ret;
-
-	for (;;) {
-		ret = receive_smb(fd, buffer, timeout);
-
-		if (ret == False)
-			return ret;
-
-		/* Ignore session keepalive packets. */
-		if (CVAL(buffer, 0) != 0x85)
-			break;
-	}
-	return ret;
-}
-
-/****************************************************************************
   read a message from a udp fd.
 The timeout is in milli seconds
 ****************************************************************************/
@@ -3285,100 +3201,6 @@ int open_socket_in(int type, int port, int dlevel, uint32 socket_addr)
 	DEBUG(3, ("bind succeeded on port %d\n", port));
 
 	return res;
-}
-
-/****************************************************************************
-  create an outgoing socket
-  **************************************************************************/
-int open_socket_out(int type, struct in_addr *addr, int port, int timeout)
-{
-	struct sockaddr_in sock_out;
-	int res, ret;
-	int connect_loop = 250; /* 250 milliseconds */
-	int loops = (timeout * 1000) / connect_loop;
-
-	/* create a socket to write to */
-	res = socket(PF_INET, type, 0);
-	if (res == -1) {
-		DEBUG(0, ("socket error\n"));
-		return -1;
-	}
-
-	if (type != SOCK_STREAM)
-		return (res);
-
-	bzero((char *) &sock_out, sizeof(sock_out));
-	putip((char *) &sock_out.sin_addr, (char *) addr);
-
-	sock_out.sin_port = htons(port);
-	sock_out.sin_family = PF_INET;
-
-	/* set it non-blocking */
-	set_blocking(res, False);
-
-	DEBUG(3, ("Connecting to %s at port %d\n", inet_ntoa(*addr), port));
-
-	/* and connect it to the destination */
-connect_again:
-	ret = connect(res, (struct sockaddr *) &sock_out, sizeof(sock_out));
-
-	/* Some systems return EAGAIN when they mean EINPROGRESS */
-	if (ret < 0 &&
-	    (errno == EINPROGRESS || errno == EALREADY || errno == EAGAIN) &&
-	    loops--) {
-		msleep(connect_loop);
-		goto connect_again;
-	}
-
-	if (ret < 0 &&
-	    (errno == EINPROGRESS || errno == EALREADY || errno == EAGAIN)) {
-		DEBUG(1, ("timeout connecting to %s:%d\n", inet_ntoa(*addr),
-		          port));
-		close(res);
-		return -1;
-	}
-
-#ifdef EISCONN
-	if (ret < 0 && errno == EISCONN) {
-		errno = 0;
-		ret = 0;
-	}
-#endif
-
-	if (ret < 0) {
-		DEBUG(1, ("error connecting to %s:%d (%s)\n", inet_ntoa(*addr),
-		          port, strerror(errno)));
-		close(res);
-		return -1;
-	}
-
-	/* set it blocking again */
-	set_blocking(res, True);
-
-	return res;
-}
-
-/****************************************************************************
-interpret a protocol description string, with a default
-****************************************************************************/
-int interpret_protocol(char *str, int def)
-{
-	if (strequal(str, "NT1"))
-		return (PROTOCOL_NT1);
-	if (strequal(str, "LANMAN2"))
-		return (PROTOCOL_LANMAN2);
-	if (strequal(str, "LANMAN1"))
-		return (PROTOCOL_LANMAN1);
-	if (strequal(str, "CORE"))
-		return (PROTOCOL_CORE);
-	if (strequal(str, "COREPLUS"))
-		return (PROTOCOL_COREPLUS);
-	if (strequal(str, "CORE+"))
-		return (PROTOCOL_COREPLUS);
-
-	DEBUG(0, ("Unrecognised protocol level %s\n", str));
-
-	return (def);
 }
 
 /****************************************************************************
