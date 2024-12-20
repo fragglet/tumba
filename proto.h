@@ -151,8 +151,6 @@ BOOL lp_readbmpx(void);
 BOOL lp_readraw(void);
 BOOL lp_writeraw(void);
 BOOL lp_strip_dot(void);
-BOOL lp_encrypted_passwords(void);
-BOOL lp_update_encrypted(void);
 BOOL lp_syslog_only(void);
 BOOL lp_browse_list(void);
 BOOL lp_unix_realname(void);

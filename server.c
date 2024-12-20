@@ -3844,19 +3844,13 @@ int reply_lanman1(char *outbuf)
 {
 	int raw = (lp_readraw() ? 1 : 0) | (lp_writeraw() ? 2 : 0);
 	int secword = 0;
-	BOOL doencrypt = SMBENCRYPT();
 	time_t t = time(NULL);
 
 	if (lp_security() >= SEC_USER)
 		secword |= 1;
-	if (doencrypt)
-		secword |= 2;
 
-	set_message(outbuf, 13, doencrypt ? 8 : 0, True);
+	set_message(outbuf, 13, 0, True);
 	SSVAL(outbuf, smb_vwv1, secword);
-	/* Create a token value and add it to the outgoing packet. */
-	if (doencrypt)
-		generate_next_challenge(smb_buf(outbuf));
 
 	Protocol = PROTOCOL_LANMAN1;
 
@@ -3882,41 +3876,15 @@ int reply_lanman2(char *outbuf)
 {
 	int raw = (lp_readraw() ? 1 : 0) | (lp_writeraw() ? 2 : 0);
 	int secword = 0;
-	BOOL doencrypt = SMBENCRYPT();
 	time_t t = time(NULL);
-	struct cli_state *cli = NULL;
-	char cryptkey[8];
 	char crypt_len = 0;
-
-	if (lp_security() == SEC_SERVER) {
-		cli = server_cryptkey();
-	}
-
-	if (cli) {
-		DEBUG(3, ("using password server validation\n"));
-		doencrypt = ((cli->sec_mode & 2) != 0);
-	}
 
 	if (lp_security() >= SEC_USER)
 		secword |= 1;
-	if (doencrypt)
-		secword |= 2;
-
-	if (doencrypt) {
-		crypt_len = 8;
-		if (!cli) {
-			generate_next_challenge(cryptkey);
-		} else {
-			memcpy(cryptkey, cli->cryptkey, 8);
-			set_challenge(cli->cryptkey);
-		}
-	}
 
 	set_message(outbuf, 13, crypt_len, True);
 	SSVAL(outbuf, smb_vwv1, secword);
 	SIVAL(outbuf, smb_vwv6, getpid());
-	if (doencrypt)
-		memcpy(smb_buf(outbuf), cryptkey, 8);
 
 	Protocol = PROTOCOL_LANMAN2;
 
@@ -3946,31 +3914,9 @@ int reply_nt1(char *outbuf)
 	 */
 
 	int secword = 0;
-	BOOL doencrypt = SMBENCRYPT();
 	time_t t = time(NULL);
 	int data_len;
-	struct cli_state *cli = NULL;
-	char cryptkey[8];
 	char crypt_len = 0;
-
-	if (lp_security() == SEC_SERVER) {
-		cli = server_cryptkey();
-	}
-
-	if (cli) {
-		DEBUG(3, ("using password server validation\n"));
-		doencrypt = ((cli->sec_mode & 2) != 0);
-	}
-
-	if (doencrypt) {
-		crypt_len = 8;
-		if (!cli) {
-			generate_next_challenge(cryptkey);
-		} else {
-			memcpy(cryptkey, cli->cryptkey, 8);
-			set_challenge(cli->cryptkey);
-		}
-	}
 
 	if (lp_readraw() && lp_writeraw()) {
 		capabilities |= CAP_RAW_MODE;
@@ -3978,8 +3924,6 @@ int reply_nt1(char *outbuf)
 
 	if (lp_security() >= SEC_USER)
 		secword |= 1;
-	if (doencrypt)
-		secword |= 2;
 
 	/* decide where (if) to put the encryption challenge, and
 	   follow it with the OEM'd domain name
@@ -3991,8 +3935,6 @@ int reply_nt1(char *outbuf)
 
 	CVAL(outbuf, smb_vwv1) = secword;
 	SSVALS(outbuf, smb_vwv16 + 1, crypt_len);
-	if (doencrypt)
-		memcpy(smb_buf(outbuf), cryptkey, 8);
 
 	Protocol = PROTOCOL_NT1;
 

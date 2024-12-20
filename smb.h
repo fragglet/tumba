@@ -588,8 +588,6 @@ struct connection_options {
 #define IS_VETO_OPLOCK_PATH(cnum, path)                                        \
 	(is_in_path((path), Connections[(cnum)].veto_oplock_list))
 
-#define SMBENCRYPT() (lp_encrypted_passwords())
-
 /* the basic packet size, assuming no words or bytes */
 #define smb_size 39
 
