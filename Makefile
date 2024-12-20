@@ -701,10 +701,6 @@ smbd: $(SMBDOBJ) $(ARCFOUR_OBJ)
 	@echo Linking smbd
 	@$(CC) $(CFLAGS) -o smbd $(SMBDOBJ) $(ARCFOUR_OBJ) $(LIBS) $(AFS_LIBS)
 
-smbtorture: torture.o clientgen.o getsmbpass.o $(UTILOBJ)
-	@echo Linking smbtorture
-	@$(CC) $(CFLAGS) -o smbtorture torture.o clientgen.o getsmbpass.o $(UTILOBJ) $(LIBS)
-
 testparm: testparm.o access.o $(UTILOBJ)
 	@echo Linking testparm
 	@$(CC) $(CFLAGS) -o testparm testparm.o access.o $(UTILOBJ) $(LIBS)
