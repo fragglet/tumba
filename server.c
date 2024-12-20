@@ -688,6 +688,9 @@ int disk_free(char *path, int *bsize, int *dfree, int *dsize)
 	/* Don't bother. We always say there is always 1GiB free.
 	   Disks nowadays are so large that it would probably overflow the
 	   value anyway. */
+	*bsize = 512;
+	*dfree = 1024 * 1024;
+	*dsize = 2 * 1024 * 1024;
 	return 1024 * 1024;
 }
 
