@@ -79,7 +79,6 @@ char *lp_rootdir(void);
 char *lp_defaultservice(void);
 char *lp_msg_command(void);
 char *lp_dfree_command(void);
-char *lp_hosts_equiv(void);
 char *lp_auto_services(void);
 char *lp_passwordserver(void);
 char *lp_workgroup(void);
@@ -89,7 +88,6 @@ char *lp_interfaces(void);
 char *lp_socket_address(void);
 char *lp_driverfile(void);
 BOOL lp_preferred_master(void);
-BOOL lp_use_rhosts(void);
 BOOL lp_getwdcache(void);
 BOOL lp_readprediction(void);
 BOOL lp_readbmpx(void);
@@ -275,7 +273,6 @@ void invalidate_vuid(uint16 vuid);
 uint16 register_vuid(int uid, int gid, char *unix_name, char *requested_name,
                      BOOL guest);
 void add_session_user(char *user);
-BOOL check_hosts_equiv(char *user);
 
 /*The following definitions come from  predict.c  */
 

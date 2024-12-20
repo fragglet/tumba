@@ -117,7 +117,6 @@ typedef struct {
 	char *szDefaultService;
 	char *szDfree;
 	char *szMsgCommand;
-	char *szHostsEquiv;
 	char *szServerString;
 	char *szAutoServices;
 	char *szLogFile;
@@ -156,7 +155,6 @@ typedef struct {
 	int client_code_page;
 	BOOL bPreferredMaster;
 	BOOL bStripDot;
-	BOOL bUseRhosts;
 	BOOL bReadRaw;
 	BOOL bWriteRaw;
 	BOOL bReadPrediction;
@@ -365,7 +363,6 @@ static struct parm_struct {
     {"read bmpx", P_BOOL, P_GLOBAL, &Globals.bReadbmpx, NULL, NULL},
     {"read raw", P_BOOL, P_GLOBAL, &Globals.bReadRaw, NULL, NULL},
     {"write raw", P_BOOL, P_GLOBAL, &Globals.bWriteRaw, NULL, NULL},
-    {"use rhosts", P_BOOL, P_GLOBAL, &Globals.bUseRhosts, NULL, NULL},
     {"strip dot", P_BOOL, P_GLOBAL, &Globals.bStripDot, NULL, NULL},
     {"interfaces", P_STRING, P_GLOBAL, &Globals.szInterfaces, NULL, NULL},
     {"bind interfaces only", P_BOOL, P_GLOBAL, &Globals.bBindInterfacesOnly,
@@ -377,7 +374,6 @@ static struct parm_struct {
     {"smbrun", P_STRING, P_GLOBAL, &Globals.szSmbrun, NULL, NULL},
     {"log file", P_STRING, P_GLOBAL, &Globals.szLogFile, NULL, NULL},
     {"config file", P_STRING, P_GLOBAL, &Globals.szConfigFile, NULL, NULL},
-    {"hosts equiv", P_STRING, P_GLOBAL, &Globals.szHostsEquiv, NULL, NULL},
     {"preload", P_STRING, P_GLOBAL, &Globals.szAutoServices, NULL, NULL},
     {"auto services", P_STRING, P_GLOBAL, &Globals.szAutoServices, NULL, NULL},
     {"server string", P_STRING, P_GLOBAL, &Globals.szServerString, NULL, NULL},
@@ -550,7 +546,6 @@ static void init_globals(void)
 	slprintf(s, sizeof(s) - 1, "%d.%d", DEFAULT_MAJOR_VERSION,
 	         DEFAULT_MINOR_VERSION);
 
-	Globals.bUseRhosts = False;
 	Globals.max_packet = 65535;
 	Globals.mangled_stack = 50;
 	Globals.max_xmit = 65535;
@@ -714,7 +709,6 @@ FN_GLOBAL_STRING(lp_rootdir, &Globals.szRootdir)
 FN_GLOBAL_STRING(lp_defaultservice, &Globals.szDefaultService)
 FN_GLOBAL_STRING(lp_msg_command, &Globals.szMsgCommand)
 FN_GLOBAL_STRING(lp_dfree_command, &Globals.szDfree)
-FN_GLOBAL_STRING(lp_hosts_equiv, &Globals.szHostsEquiv)
 FN_GLOBAL_STRING(lp_auto_services, &Globals.szAutoServices)
 FN_GLOBAL_STRING(lp_passwordserver, &Globals.szPasswordServer)
 FN_GLOBAL_STRING(lp_workgroup, &Globals.szWorkGroup)
@@ -725,7 +719,6 @@ FN_GLOBAL_STRING(lp_socket_address, &Globals.szSocketAddress)
 FN_GLOBAL_STRING(lp_driverfile, &Globals.szDriverFile)
 
 FN_GLOBAL_BOOL(lp_preferred_master, &Globals.bPreferredMaster)
-FN_GLOBAL_BOOL(lp_use_rhosts, &Globals.bUseRhosts)
 FN_GLOBAL_BOOL(lp_getwdcache, &use_getwd_cache)
 FN_GLOBAL_BOOL(lp_readprediction, &Globals.bReadPrediction)
 FN_GLOBAL_BOOL(lp_readbmpx, &Globals.bReadbmpx)
