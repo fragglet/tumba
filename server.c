@@ -4004,55 +4004,12 @@ static int reply_negprot(char *inbuf, char *outbuf, int size, int bufsize)
 	int protocol;
 	char *p;
 	int bcc = SVAL(smb_buf(inbuf), -2);
-	int arch = ARCH_ALL;
 
 	p = smb_buf(inbuf) + 1;
 	while (p < (smb_buf(inbuf) + bcc)) {
 		Index++;
 		DEBUG(3, ("Requested protocol [%s]\n", p));
-		if (strcsequal(p, "Windows for Workgroups 3.1a"))
-			arch &= (ARCH_WFWG | ARCH_WIN95 | ARCH_WINNT);
-		else if (strcsequal(p, "DOS LM1.2X002"))
-			arch &= (ARCH_WFWG | ARCH_WIN95);
-		else if (strcsequal(p, "DOS LANMAN2.1"))
-			arch &= (ARCH_WFWG | ARCH_WIN95);
-		else if (strcsequal(p, "NT LM 0.12"))
-			arch &= (ARCH_WIN95 | ARCH_WINNT);
-		else if (strcsequal(p, "LANMAN2.1"))
-			arch &= (ARCH_WINNT | ARCH_OS2);
-		else if (strcsequal(p, "LM1.2X002"))
-			arch &= (ARCH_WINNT | ARCH_OS2);
-		else if (strcsequal(p, "MICROSOFT NETWORKS 1.03"))
-			arch &= ARCH_WINNT;
-		else if (strcsequal(p, "XENIX CORE"))
-			arch &= (ARCH_WINNT | ARCH_OS2);
-		else if (strcsequal(p, "Samba")) {
-			arch = ARCH_SAMBA;
-			break;
-		}
-
 		p += strlen(p) + 2;
-	}
-
-	switch (arch) {
-	case ARCH_SAMBA:
-		set_remote_arch(RA_SAMBA);
-		break;
-	case ARCH_WFWG:
-		set_remote_arch(RA_WFWG);
-		break;
-	case ARCH_WIN95:
-		set_remote_arch(RA_WIN95);
-		break;
-	case ARCH_WINNT:
-		set_remote_arch(RA_WINNT);
-		break;
-	case ARCH_OS2:
-		set_remote_arch(RA_OS2);
-		break;
-	default:
-		set_remote_arch(RA_UNKNOWN);
-		break;
 	}
 
 	/* possibly reload - change of architecture */

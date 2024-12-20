@@ -919,16 +919,6 @@ enum protocol_types {
 	PROTOCOL_NT1
 };
 
-/* Remote architectures we know about. */
-enum remote_arch_types {
-	RA_UNKNOWN,
-	RA_WFWG,
-	RA_OS2,
-	RA_WIN95,
-	RA_WINNT,
-	RA_SAMBA
-};
-
 /* case handling */
 enum case_handling {
 	CASE_LOWER,

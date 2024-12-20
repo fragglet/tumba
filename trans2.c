@@ -704,16 +704,6 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 			unix_ERR_code = ERRbadpath;
 		}
 
-#if 0
-    /* Ugly - NT specific hack - maybe not needed ? (JRA) */
-    if((errno == ENOTDIR) && (Protocol >= PROTOCOL_NT1) && 
-       (get_remote_arch() == RA_WINNT))
-    {
-      unix_ERR_class = ERRDOS;
-      unix_ERR_code = ERRbaddirectory;
-    }
-#endif
-
 		return (ERROR(ERRDOS, ERRbadpath));
 	}
 

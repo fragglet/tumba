@@ -389,7 +389,6 @@ int reply_sesssetup_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	int smb_bufsize;
 	int smb_apasslen = 0;
 	pstring smb_apasswd;
-	int smb_ntpasslen = 0;
 	pstring smb_ntpasswd;
 	pstring user;
 	pstring orig_user;
@@ -417,22 +416,8 @@ int reply_sesssetup_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	} else {
 		uint16 passlen1 = SVAL(inbuf, smb_vwv7);
 		uint16 passlen2 = SVAL(inbuf, smb_vwv8);
-		uint32 client_caps = IVAL(inbuf, smb_vwv11);
-		enum remote_arch_types ra_type = get_remote_arch();
 
 		char *p = smb_buf(inbuf);
-
-		/* client_caps is used as final determination if client is NT or
-		   Win95. This is needed to return the correct error codes in
-		   some circumstances.
-		 */
-
-		if (ra_type == RA_WINNT || ra_type == RA_WIN95) {
-			if (client_caps & (CAP_NT_SMBS | CAP_STATUS32))
-				set_remote_arch(RA_WINNT);
-			else
-				set_remote_arch(RA_WIN95);
-		}
 
 		if (passlen1 > MAX_PASS_LEN) {
 			overflow_attack(passlen1);
@@ -630,16 +615,6 @@ int reply_chkpth(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
-
-#if 0
-    /* Ugly - NT specific hack - maybe not needed ? (JRA) */
-    if((errno == ENOTDIR) && (Protocol >= PROTOCOL_NT1) &&
-       (get_remote_arch() == RA_WINNT))
-    {
-      unix_ERR_class = ERRDOS;
-      unix_ERR_code = ERRbaddirectory;
-    }
-#endif
 
 		return (UNIXERROR(ERRDOS, ERRbadpath));
 	}

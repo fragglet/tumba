@@ -593,8 +593,6 @@ BOOL is_in_path(char *name, name_compare_entry *namelist);
 void set_namearray(name_compare_entry **ppname_array, char *namelist);
 void free_namearray(name_compare_entry *name_array);
 BOOL fcntl_lock(int fd, int op, uint32 offset, uint32 count, int type);
-void set_remote_arch(enum remote_arch_types type);
-enum remote_arch_types get_remote_arch(void);
 char *safe_strcpy(char *dest, char *src, int maxlength);
 char *safe_strcat(char *dest, char *src, int maxlength);
 void print_asc(int level, unsigned char *buf, int len);
