@@ -123,6 +123,15 @@ void *dflt_sig(void)
 }
 
 /****************************************************************************
+  Send a SIGTERM to our process group.
+*****************************************************************************/
+void killkids(void)
+{
+	if (am_parent)
+		kill(0, SIGTERM);
+}
+
+/****************************************************************************
   change a dos mode to a unix mode
     base permission for files:
          everybody gets read bit set
@@ -2325,23 +2334,207 @@ static int sig_pipe(void)
 /****************************************************************************
   open the socket communication
 ****************************************************************************/
-static BOOL open_sockets(int port)
+static BOOL open_sockets(BOOL is_daemon, int port)
 {
 	extern int Client;
 
-	/* Started from inetd. fd 0 is the socket. */
-	/* We will abort gracefully when the client or remote system
-	   goes away */
-#ifndef NO_SIGNAL_TEST
-	signal(SIGPIPE, SIGNAL_CAST sig_pipe);
+	if (is_daemon) {
+		int num_interfaces = iface_count();
+		int fd_listenset[FD_SETSIZE];
+		fd_set listen_set;
+		int s;
+		int i;
+
+		/* Stop zombies */
+#ifdef SIGCLD_IGNORE
+		signal(SIGCLD, SIG_IGN);
+#else
+		signal(SIGCLD, SIGNAL_CAST sig_cld);
 #endif
-	Client = dup(0);
 
-	/* close our standard file descriptors */
-	close_low_fds();
+		if (atexit_set == 0)
+			atexit(killkids);
 
-	set_socket_options(Client, "SO_KEEPALIVE");
-	set_socket_options(Client, user_socket_options);
+		FD_ZERO(&listen_set);
+
+		if (lp_interfaces() && lp_bind_interfaces_only()) {
+			/* We have been given an interfaces line, and been
+			   told to only bind to those interfaces. Create a
+			   socket per interface and bind to only these.
+			 */
+
+			if (num_interfaces > FD_SETSIZE) {
+				DEBUG(
+				    0,
+				    ("open_sockets: Too many interfaces specified to bind to. Number was %d \
+max can be %d\n",
+				     num_interfaces, FD_SETSIZE));
+				return False;
+			}
+
+			/* Now open a listen socket for each of the interfaces.
+			 */
+			for (i = 0; i < num_interfaces; i++) {
+				struct in_addr *ifip = iface_n_ip(i);
+
+				if (ifip == NULL) {
+					DEBUG(0, ("open_sockets: interface %d "
+					          "has NULL IP address !\n",
+					          i));
+					continue;
+				}
+				s = fd_listenset[i] = open_socket_in(
+				    SOCK_STREAM, port, 0, ifip->s_addr);
+				if (s == -1)
+					return False;
+				/* ready to listen */
+				if (listen(s, 5) == -1) {
+					DEBUG(0, ("listen: %s\n",
+					          strerror(errno)));
+					close(s);
+					return False;
+				}
+				FD_SET(s, &listen_set);
+			}
+		} else {
+			/* Just bind to 0.0.0.0 - accept connections from
+			 * anywhere. */
+			num_interfaces = 1;
+
+			/* open an incoming socket */
+			s = open_socket_in(SOCK_STREAM, port, 0,
+			                   interpret_addr(lp_socket_address()));
+			if (s == -1)
+				return (False);
+
+			/* ready to listen */
+			if (listen(s, 5) == -1) {
+				DEBUG(0, ("open_sockets: listen: %s\n",
+				          strerror(errno)));
+				close(s);
+				return False;
+			}
+
+			fd_listenset[0] = s;
+			FD_SET(s, &listen_set);
+		}
+
+		/* now accept incoming connections - forking a new process
+		   for each incoming connection */
+		DEBUG(2, ("waiting for a connection\n"));
+		while (1) {
+			fd_set lfds;
+			int num;
+
+			memcpy((char *) &lfds, (char *) &listen_set,
+			       sizeof(listen_set));
+
+			num = sys_select(&lfds, NULL);
+
+			if (num == -1 && errno == EINTR)
+				continue;
+
+			/* Find the sockets that are read-ready - accept on
+			 * these. */
+			for (; num > 0; num--) {
+				struct sockaddr addr;
+				int in_addrlen = sizeof(addr);
+
+				s = -1;
+				for (i = 0; i < num_interfaces; i++) {
+					if (FD_ISSET(fd_listenset[i], &lfds)) {
+						s = fd_listenset[i];
+						/* Clear this so we don't look
+						 * at it again. */
+						FD_CLR(fd_listenset[i], &lfds);
+						break;
+					}
+				}
+
+				Client = accept(s, &addr, &in_addrlen);
+
+				if (Client == -1 && errno == EINTR)
+					continue;
+
+				if (Client == -1) {
+					DEBUG(0, ("open_sockets: accept: %s\n",
+					          strerror(errno)));
+					continue;
+				}
+
+#ifdef NO_FORK_DEBUG
+#ifndef NO_SIGNAL_TEST
+				signal(SIGPIPE, SIGNAL_CAST sig_pipe);
+				signal(SIGCLD, SIGNAL_CAST SIG_DFL);
+#endif /* NO_SIGNAL_TEST */
+				return True;
+#else /* NO_FORK_DEBUG */
+				if (Client != -1 && fork() == 0) {
+					/* Child code ... */
+
+#ifndef NO_SIGNAL_TEST
+					signal(SIGPIPE, SIGNAL_CAST sig_pipe);
+					signal(SIGCLD, SIGNAL_CAST SIG_DFL);
+#endif /* NO_SIGNAL_TEST */
+					/* close the listening socket(s) */
+					for (i = 0; i < num_interfaces; i++)
+						close(fd_listenset[i]);
+
+					/* close our standard file descriptors
+					 */
+					close_low_fds();
+					am_parent = 0;
+
+					set_socket_options(Client,
+					                   "SO_KEEPALIVE");
+					set_socket_options(Client,
+					                   user_socket_options);
+
+					/* Reset global variables in util.c so
+					   that client substitutions will be
+					   done correctly in the process.
+					 */
+					reset_globals_after_fork();
+					return True;
+				}
+				close(Client); /* The parent doesn't need this
+				                  socket */
+
+				/*
+				 * Force parent to check log size after spawning
+				 * child. Fix from
+				 * klausr@ITAP.Physik.Uni-Stuttgart.De. The
+				 * parent smbd will log to logserver.smb. It
+				 * writes only two messages for each child
+				 * started/finished. But each child writes, say,
+				 * 50 messages also in logserver.smb, begining
+				 * with the debug_count of the parent, before
+				 * the child opens its own log file
+				 * logserver.client. In a worst case scenario
+				 * the size of logserver.smb would be checked
+				 * after about 50*50=2500 messages (ca. 100kb).
+				 */
+				force_check_log_size();
+
+#endif /* NO_FORK_DEBUG */
+			} /* end for num */
+		} /* end while 1 */
+	} /* end if is_daemon */
+	else {
+		/* Started from inetd. fd 0 is the socket. */
+		/* We will abort gracefully when the client or remote system
+		   goes away */
+#ifndef NO_SIGNAL_TEST
+		signal(SIGPIPE, SIGNAL_CAST sig_pipe);
+#endif
+		Client = dup(0);
+
+		/* close our standard file descriptors */
+		close_low_fds();
+
+		set_socket_options(Client, "SO_KEEPALIVE");
+		set_socket_options(Client, user_socket_options);
+	}
 
 	return True;
 }
@@ -4863,6 +5056,8 @@ static void usage(char *pname)
 int main(int argc, char *argv[])
 {
 	extern BOOL append_log;
+	/* shall I run as a daemon */
+	BOOL is_daemon = False;
 	int port = SMB_PORT;
 	int opt;
 	extern char *optarg;
@@ -4914,7 +5109,7 @@ int main(int argc, char *argv[])
 		argc--;
 	}
 
-	while ((opt = getopt(argc, argv, "O:i:l:s:d:p:hPaf:")) != EOF)
+	while ((opt = getopt(argc, argv, "O:i:l:s:d:Dp:hPaf:")) != EOF)
 		switch (opt) {
 		case 'f':
 			strncpy(pidFile, optarg, sizeof(pidFile));
@@ -4939,6 +5134,9 @@ int main(int argc, char *argv[])
 			extern BOOL append_log;
 			append_log = !append_log;
 		} break;
+		case 'D':
+			is_daemon = True;
+			break;
 		case 'd':
 			if (*optarg == 'A')
 				DEBUGLEVEL = 10000;
@@ -5020,6 +5218,17 @@ int main(int argc, char *argv[])
 
 	DEBUG(3, ("%s loaded services\n", timestring()));
 
+	if (!is_daemon && !is_a_socket(0)) {
+		DEBUG(0,
+		      ("standard input is not a socket, assuming -D option\n"));
+		is_daemon = True;
+	}
+
+	if (is_daemon) {
+		DEBUG(3, ("%s becoming a daemon\n", timestring()));
+		become_daemon();
+	}
+
 	if (!directory_exist(lp_lockdir(), NULL)) {
 		mkdir(lp_lockdir(), 0755);
 	}
@@ -5051,7 +5260,7 @@ int main(int argc, char *argv[])
 		/* Leave pid file open & locked for the duration... */
 	}
 
-	if (!open_sockets(port))
+	if (!open_sockets(is_daemon, port))
 		exit(1);
 
 	if (!locking_init(0))

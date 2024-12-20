@@ -364,6 +364,16 @@ char *tmpdir(void)
 	return "/tmp";
 }
 
+/****************************************************************************
+determine if a file descriptor is in fact a socket
+****************************************************************************/
+BOOL is_a_socket(int fd)
+{
+	int v, l;
+	l = sizeof(int);
+	return (getsockopt(fd, SOL_SOCKET, SO_TYPE, (char *) &v, &l) == 0);
+}
+
 static char *last_ptr = NULL;
 
 /****************************************************************************
@@ -2979,6 +2989,35 @@ BOOL mask_match(char *str, char *regexp, int case_sig, BOOL trans2)
 }
 
 /****************************************************************************
+become a daemon, discarding the controlling terminal
+****************************************************************************/
+void become_daemon(void)
+{
+#ifndef NO_FORK_DEBUG
+	if (fork())
+		exit(0);
+
+	/* detach from the terminal */
+#ifdef USE_SETSID
+	setsid();
+#else /* USE_SETSID */
+#ifdef TIOCNOTTY
+	{
+		int i = open("/dev/tty", O_RDWR);
+		if (i >= 0) {
+			ioctl(i, (int) TIOCNOTTY, (char *) 0);
+			close(i);
+		}
+	}
+#endif /* TIOCNOTTY */
+#endif /* USE_SETSID */
+	/* Close fd's 0,1,2. Needed if started by rsh */
+	close_low_fds();
+#endif /* NO_FORK_DEBUG */
+}
+
+
+/****************************************************************************
 read a line from a file with possible \ continuation chars.
 Blanks at the start or end of a line are stripped.
 The string will be allocated if s2 is NULL
@@ -3456,6 +3495,12 @@ static BOOL matchname(char *remotehost, struct in_addr addr)
 
 static BOOL global_client_name_done = False;
 static BOOL global_client_addr_done = False;
+
+void reset_globals_after_fork(void)
+{
+	global_client_name_done = False;
+	global_client_addr_done = False;
+}
 
 /*******************************************************************
  return the DNS name of the client
