@@ -1176,36 +1176,6 @@ BOOL trim_string(char *s, char *front, char *back)
 /*******************************************************************
 reduce a file name, removing .. elements.
 ********************************************************************/
-void dos_clean_name(char *s)
-{
-	char *p = NULL;
-
-	DEBUG(3, ("dos_clean_name [%s]\n", s));
-
-	/* remove any double slashes */
-	string_sub(s, "\\\\", "\\");
-
-	while ((p = strstr(s, "\\..\\")) != NULL) {
-		pstring s1;
-
-		*p = 0;
-		pstrcpy(s1, p + 3);
-
-		if ((p = strrchr(s, '\\')) != NULL)
-			*p = 0;
-		else
-			*s = 0;
-		pstrcat(s, s1);
-	}
-
-	trim_string(s, NULL, "\\..");
-
-	string_sub(s, "\\.\\", "\\");
-}
-
-/*******************************************************************
-reduce a file name, removing .. elements.
-********************************************************************/
 void unix_clean_name(char *s)
 {
 	char *p = NULL;
@@ -4360,23 +4330,6 @@ BOOL fcntl_lock(int fd, int op, uint32 offset, uint32 count, int type)
 }
 
 /*******************************************************************
-is the name specified one of my netbios names
-returns true is it is equal, false otherwise
-********************************************************************/
-BOOL is_myname(char *s)
-{
-	int n;
-	BOOL ret = False;
-
-	for (n = 0; my_netbios_names[n]; n++) {
-		if (strequal(my_netbios_names[n], s))
-			ret = True;
-	}
-	DEBUG(8, ("is_myname(\"%s\") returns %d\n", s, ret));
-	return (ret);
-}
-
-/*******************************************************************
 set the horrid remote_arch string based on an enum.
 ********************************************************************/
 void set_remote_arch(enum remote_arch_types type)
@@ -4413,62 +4366,6 @@ enum remote_arch_types get_remote_arch(void)
 	return ra_type;
 }
 
-/*******************************************************************
-Return a ascii version of a unicode string
-Hack alert: uses fixed buffer(s) and only handles ascii strings
-********************************************************************/
-#define MAXUNI 1024
-char *unistr2(uint16 *buf)
-{
-	static char lbufs[8][MAXUNI];
-	static int nexti;
-	char *lbuf = lbufs[nexti];
-	char *p;
-
-	nexti = (nexti + 1) % 8;
-
-	DEBUG(10, ("unistr2: "));
-
-	for (p = lbuf; *buf && p - lbuf < MAXUNI - 2; p++, buf++) {
-		DEBUG(10, ("%4x ", *buf));
-		*p = *buf;
-	}
-
-	DEBUG(10, ("\n"));
-
-	*p = 0;
-	return lbuf;
-}
-
-/*******************************************************************
-create a null-terminated unicode string from a null-terminated ascii string.
-return number of unicode chars copied, excluding the null character.
-
-only handles ascii strings
-********************************************************************/
-#define MAXUNI 1024
-int struni2(uint16 *p, char *buf)
-{
-	int len = 0;
-
-	if (p == NULL)
-		return 0;
-
-	DEBUG(10, ("struni2: "));
-
-	if (buf != NULL) {
-		for (; *buf && len < MAXUNI - 2; len++, p++, buf++) {
-			DEBUG(10, ("%2x ", *buf));
-			*p = *buf;
-		}
-
-		DEBUG(10, ("\n"));
-	}
-
-	*p = 0;
-
-	return len;
-}
 
 /*******************************************************************
 safe string copy into a known length string. maxlength does not
@@ -4532,19 +4429,6 @@ char *safe_strcat(char *dest, char *src, int maxlength)
 	memcpy(&dest[dest_len], src, src_len);
 	dest[dest_len + src_len] = 0;
 	return dest;
-}
-
-/*******************************************************************
-align a pointer to a multiple of align_offset bytes.  looks like it
-will work for offsets of 0, 2 and 4...
-********************************************************************/
-char *align_offset(char *q, char *base, int align_offset_len)
-{
-	int mod = ((q - base) & (align_offset_len - 1));
-	if (align_offset_len != 0 && mod != 0) {
-		q += align_offset_len - mod;
-	}
-	return q;
 }
 
 void print_asc(int level, unsigned char *buf, int len)
