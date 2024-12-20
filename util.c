@@ -87,8 +87,6 @@ int smb_read_error = 0;
 
 static BOOL stdout_logging = False;
 
-static char *filename_dos(char *path, char *buf);
-
 #if defined(SIGUSR2)
 /**************************************************************************** **
  catch a sigusr2 - decrease the debug log level.
@@ -1444,23 +1442,6 @@ BOOL reduce_name(char *s, char *dir, BOOL widelinks)
 	DEBUG(3, ("reduced to %s\n", s));
 	return (True);
 #endif
-}
-
-/****************************************************************************
-expand some *s
-****************************************************************************/
-static void expand_one(char *Mask, int len)
-{
-	char *p1;
-	while ((p1 = strchr(Mask, '*')) != NULL) {
-		int lfill = (len + 1) - strlen(Mask);
-		int l1 = (p1 - Mask);
-		pstring tmp;
-		pstrcpy(tmp, Mask);
-		memset(tmp + l1, '?', lfill);
-		pstrcpy(tmp + l1 + lfill, Mask + l1 + 1);
-		pstrcpy(Mask, tmp);
-	}
 }
 
 /****************************************************************************
@@ -3118,21 +3099,6 @@ int set_filelen(int fd, long len)
 	lseek(fd, currpos, SEEK_SET);
 	return 0;
 #endif
-}
-
-/****************************************************************************
-parse out a filename from a path name. Assumes dos style filenames.
-****************************************************************************/
-static char *filename_dos(char *path, char *buf)
-{
-	char *p = strrchr(path, '\\');
-
-	if (!p)
-		pstrcpy(buf, path);
-	else
-		pstrcpy(buf, p + 1);
-
-	return (buf);
 }
 
 /****************************************************************************

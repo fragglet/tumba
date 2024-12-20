@@ -303,7 +303,6 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 	pstring mask;
 	pstring pathreal;
 	pstring fname;
-	BOOL matched;
 	char *p, *pdata = *ppdata;
 	uint32 reskey = 0;
 	int prev_dirpos = 0;
@@ -356,8 +355,6 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 
 		if (!dname)
 			return (False);
-
-		matched = False;
 
 		pstrcpy(fname, dname);
 

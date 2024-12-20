@@ -2452,8 +2452,6 @@ int error_packet(char *inbuf, char *outbuf, int error_class, uint32 error_code,
                  int line)
 {
 	int outsize = set_message(outbuf, 0, 0, True);
-	int cmd;
-	cmd = CVAL(inbuf, smb_com);
 
 	CVAL(outbuf, smb_rcls) = error_class;
 	SSVAL(outbuf, smb_err, error_code);

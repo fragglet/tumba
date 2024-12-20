@@ -113,17 +113,6 @@ static int StrlenExpanded(int cnum, int snum, char *s)
 	return strlen(buf) + 1;
 }
 
-static char *Expand(int cnum, int snum, char *s)
-{
-	static pstring buf;
-	if (!s)
-		return (NULL);
-	StrnCpy(buf, s, sizeof(buf) / 2);
-	string_sub(buf, "%S", lp_servicename(snum));
-	standard_sub(cnum, buf);
-	return &buf[0];
-}
-
 /*******************************************************************
   check a API string for validity when we only need to check the prefix
   ******************************************************************/
@@ -278,35 +267,6 @@ static int getlen(char *p)
 	return n;
 }
 
-static BOOL init_package(struct pack_desc *p, int count, int subcount)
-{
-	int n = p->buflen;
-	int i;
-
-	if (!p->format || !p->base)
-		return (False);
-
-	i = count * getlen(p->format);
-	if (p->subformat)
-		i += subcount * getlen(p->subformat);
-	p->structbuf = p->base;
-	p->neededlen = 0;
-	p->usedlen = 0;
-	p->subcount = 0;
-	p->curpos = p->format;
-	if (i > n) {
-		p->neededlen = i;
-		i = n = 0;
-		p->errcode = ERROR_MORE_DATA;
-	} else
-		p->errcode = NERR_Success;
-	p->buflen = i;
-	n -= i;
-	p->stringbuf = p->base + i;
-	p->stringlen = n;
-	return (p->errcode == NERR_Success);
-}
-
 #ifdef __STDC__
 static int package(struct pack_desc *p, ...)
 {
@@ -441,16 +401,6 @@ static int package(va_alist) va_dcl
 #define PACK(desc, t, v) package(desc, v)
 #define PACKl(desc, t, v, l) package(desc, v, l)
 #endif
-
-static void PACKI(struct pack_desc *desc, char *t, int v)
-{
-	PACK(desc, t, v);
-}
-
-static void PACKS(struct pack_desc *desc, char *t, char *v)
-{
-	PACK(desc, t, v);
-}
 
 /****************************************************************************
   get info level for a server list query

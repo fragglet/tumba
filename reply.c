@@ -387,9 +387,6 @@ int reply_sesssetup_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	int gid;
 	int uid;
 	int smb_bufsize;
-	int smb_mpxmax;
-	int smb_vc_num;
-	uint32 smb_sesskey;
 	int smb_apasslen = 0;
 	pstring smb_apasswd;
 	int smb_ntpasslen = 0;
@@ -407,9 +404,6 @@ int reply_sesssetup_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	*smb_ntpasswd = 0;
 
 	smb_bufsize = SVAL(inbuf, smb_vwv2);
-	smb_mpxmax = SVAL(inbuf, smb_vwv3);
-	smb_vc_num = SVAL(inbuf, smb_vwv4);
-	smb_sesskey = IVAL(inbuf, smb_vwv5);
 
 	if (Protocol < PROTOCOL_NT1) {
 		smb_apasslen = SVAL(inbuf, smb_vwv7);
@@ -1884,7 +1878,6 @@ int reply_read_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	int cnum;
 	int nread = -1;
 	char *data;
-	BOOL ok = False;
 
 	cnum = SVAL(inbuf, smb_tid);
 
@@ -1898,7 +1891,6 @@ int reply_read_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	if (is_locked(fnum, cnum, smb_maxcnt, smb_offs, F_RDLCK))
 		return (ERROR(ERRDOS, ERRlock));
 	nread = read_file(fnum, data, smb_offs, smb_maxcnt);
-	ok = True;
 
 	if (nread < 0)
 		return (UNIXERROR(ERRDOS, ERRnoaccess));
@@ -3398,7 +3390,7 @@ int reply_readbmpx(char *inbuf, char *outbuf, int length, int bufsize)
 	int total_read;
 	char *data;
 	uint32 startpos;
-	int outsize, mincount, maxcount;
+	int outsize, maxcount;
 	int max_per_packet;
 	int tcount;
 	int pad;
@@ -3418,7 +3410,6 @@ int reply_readbmpx(char *inbuf, char *outbuf, int length, int bufsize)
 
 	startpos = IVAL(inbuf, smb_vwv1);
 	maxcount = SVAL(inbuf, smb_vwv3);
-	mincount = SVAL(inbuf, smb_vwv4);
 
 	data = smb_buf(outbuf);
 	pad = ((long) data) % 4;

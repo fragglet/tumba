@@ -681,15 +681,6 @@ static void init_globals(void)
 }
 
 /***************************************************************************
-check if a string is initialised and if not then initialise it
-***************************************************************************/
-static void string_initial(char **s, char *v)
-{
-	if (!*s || !**s)
-		string_init(s, v);
-}
-
-/***************************************************************************
 Initialise the sDefault parameter structure.
 ***************************************************************************/
 static void init_locals(void)

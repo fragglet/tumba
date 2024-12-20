@@ -42,35 +42,3 @@ void SMBencrypt(uchar *passwd, uchar *c8, uchar *p24)
 	E_P16(p14, p21);
 	E_P24(p21, c8, p24);
 }
-
-/* Routines for Windows NT MD4 Hash functions. */
-static int _my_wcslen(int16 *str)
-{
-	int len = 0;
-	while (*str++ != 0)
-		len++;
-	return len;
-}
-
-/*
- * Convert a string into an NT UNICODE string.
- * Note that regardless of processor type
- * this must be in intel (little-endian)
- * format.
- */
-
-static int _my_mbstowcs(int16 *dst, uchar *src, int len)
-{
-	int i;
-	int16 val;
-
-	for (i = 0; i < len; i++) {
-		val = *src;
-		SSVAL(dst, 0, val);
-		dst++;
-		src++;
-		if (val == 0)
-			break;
-	}
-	return i;
-}

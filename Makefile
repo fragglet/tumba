@@ -27,7 +27,7 @@ INSTALLPERMS = 0755
 
 # Add any optimisation or debugging flags here
 # add -DSYSLOG for syslog support
-FLAGS1 = -O
+FLAGS1 = -O -Wunused
 LIBS1 = 
 
 # You will need to use a ANSI C compiler. This means under SunOS 4 you can't 
