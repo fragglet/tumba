@@ -646,7 +646,7 @@ INCLUDES2 = $(srcdir)trans2.h
 INCLUDES = $(INCLUDES1) $(INCLUDES2)
 
 SPROGS = smbd
-PROGS1 = testparm smbstatus make_smbcodepage
+PROGS1 = testparm make_smbcodepage
 PROGS = $(PROGS1) $(MOUNT_PROGS)
 
 SCRIPTS = smbtar addtosmbpass
@@ -674,11 +674,8 @@ SMBDOBJ = $(SMBDOBJ1) $(SMBDOBJ2) $(SMBDOBJ3) $(SMBDOBJ4) $(UBIOBJ) $(VTP_OBJ) $
 # object code needed for programs that handle the the locking files
 LOCKOBJ = locking_slow.o locking.o
 
-# object files for smbstatus
-STATUS_OBJ = status.o $(UTILOBJ) $(LOCKOBJ) 
-
 # object files to be auto-prototyped
-PROTOOBJ = $(UTILOBJ) $(SMBDOBJ) $(NMBDOBJ) $(LOCKOBJ) $(CLIENT_OBJ) $(STATUS_OBJ) namequery.o
+PROTOOBJ = $(UTILOBJ) $(SMBDOBJ) $(NMBDOBJ) $(LOCKOBJ) $(CLIENT_OBJ) namequery.o
 
 
 ######################################################################
@@ -708,10 +705,6 @@ smbd: $(SMBDOBJ) $(ARCFOUR_OBJ)
 smbtorture: torture.o clientgen.o getsmbpass.o $(UTILOBJ)
 	@echo Linking smbtorture
 	@$(CC) $(CFLAGS) -o smbtorture torture.o clientgen.o getsmbpass.o $(UTILOBJ) $(LIBS)
-
-smbstatus: $(STATUS_OBJ)
-	@echo Linking smbstatus
-	@$(CC) $(CFLAGS) -o smbstatus $(STATUS_OBJ) $(LIBS)
 
 testparm: testparm.o access.o $(UTILOBJ)
 	@echo Linking testparm
