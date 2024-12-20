@@ -4514,10 +4514,10 @@ struct smb_message_struct {
     {SMBtranss2, "SMBtranss2", reply_transs2, AS_USER},
 
     /* messaging routines */
-    {SMBsends, "SMBsends", reply_sends, AS_GUEST},
-    {SMBsendstrt, "SMBsendstrt", reply_sendstrt, AS_GUEST},
-    {SMBsendend, "SMBsendend", reply_sendend, AS_GUEST},
-    {SMBsendtxt, "SMBsendtxt", reply_sendtxt, AS_GUEST},
+    {SMBsends, "SMBsends", NULL, AS_GUEST},
+    {SMBsendstrt, "SMBsendstrt", NULL, AS_GUEST},
+    {SMBsendend, "SMBsendend", NULL, AS_GUEST},
+    {SMBsendtxt, "SMBsendtxt", NULL, AS_GUEST},
 
     /* NON-IMPLEMENTED PARTS OF THE CORE PROTOCOL */
 

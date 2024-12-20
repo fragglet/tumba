@@ -655,7 +655,7 @@ UTILOBJ2 = $(UTILOBJ1) loadparm.o params.o username.o time.o
 UTILOBJ = $(UTILOBJ2) interface.o replace.o smberr.o slprintf.o
 
 # object code for smbd
-SMBDOBJ1 = $(UTILOBJ) trans2.o message.o dir.o
+SMBDOBJ1 = $(UTILOBJ) trans2.o dir.o
 SMBDOBJ2 = ipc.o reply.o mangle.o password.o uid.o
 SMBDOBJ3 = server.o access.o
 SMBDOBJ = $(SMBDOBJ1) $(SMBDOBJ2) $(SMBDOBJ3) $(UBIOBJ) $(VTP_OBJ) $(LOCKOBJ)

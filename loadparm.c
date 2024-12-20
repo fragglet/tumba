@@ -115,7 +115,6 @@ typedef struct {
 	char *szLockDir;
 	char *szRootdir;
 	char *szDefaultService;
-	char *szMsgCommand;
 	char *szServerString;
 	char *szAutoServices;
 	char *szLogFile;
@@ -378,7 +377,6 @@ static struct parm_struct {
     {"default service", P_STRING, P_GLOBAL, &Globals.szDefaultService, NULL,
      NULL},
     {"default", P_STRING, P_GLOBAL, &Globals.szDefaultService, NULL, NULL},
-    {"message command", P_STRING, P_GLOBAL, &Globals.szMsgCommand, NULL, NULL},
     {"valid chars", P_STRING, P_GLOBAL, &Globals.szValidChars,
      handle_valid_chars, NULL},
     {"workgroup", P_USTRING, P_GLOBAL, &Globals.szWorkGroup, NULL, NULL},
@@ -696,7 +694,6 @@ FN_GLOBAL_STRING(lp_serverstring, &Globals.szServerString)
 FN_GLOBAL_STRING(lp_lockdir, &Globals.szLockDir)
 FN_GLOBAL_STRING(lp_rootdir, &Globals.szRootdir)
 FN_GLOBAL_STRING(lp_defaultservice, &Globals.szDefaultService)
-FN_GLOBAL_STRING(lp_msg_command, &Globals.szMsgCommand)
 FN_GLOBAL_STRING(lp_auto_services, &Globals.szAutoServices)
 FN_GLOBAL_STRING(lp_passwordserver, &Globals.szPasswordServer)
 FN_GLOBAL_STRING(lp_workgroup, &Globals.szWorkGroup)

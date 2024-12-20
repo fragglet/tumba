@@ -77,7 +77,6 @@ char *lp_serverstring(void);
 char *lp_lockdir(void);
 char *lp_rootdir(void);
 char *lp_defaultservice(void);
-char *lp_msg_command(void);
 char *lp_auto_services(void);
 char *lp_passwordserver(void);
 char *lp_workgroup(void);
@@ -238,13 +237,6 @@ void smb_mem_write_verbose(FILE *outfile);
 void smb_mem_write_errors(FILE *outfile);
 void smb_mem_set_multiplier(int multiplier);
 void *smb_mem_resize(void *ptr, size_t newsize);
-
-/*The following definitions come from  message.c  */
-
-int reply_sends(char *inbuf, char *outbuf, int dum_size, int dum_buffsize);
-int reply_sendstrt(char *inbuf, char *outbuf, int dum_size, int dum_buffsize);
-int reply_sendtxt(char *inbuf, char *outbuf, int dum_size, int dum_buffsize);
-int reply_sendend(char *inbuf, char *outbuf, int dum_size, int dum_buffsize);
 
 /*The following definitions come from  params.c  */
 
