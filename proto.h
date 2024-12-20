@@ -82,7 +82,6 @@ char *lp_dfree_command(void);
 char *lp_hosts_equiv(void);
 char *lp_auto_services(void);
 char *lp_passwordserver(void);
-char *lp_name_resolve_order(void);
 char *lp_workgroup(void);
 char *lp_username_map(void);
 char *lp_character_set(void);
@@ -195,7 +194,6 @@ char *volume_label(int snum);
 void lp_rename_service(int snum, char *new_name);
 void lp_remove_service(int snum);
 void lp_copy_service(int snum, char *new_name);
-void lp_set_name_resolve_order(char *new_order);
 
 /*The following definitions come from  locking.c  */
 

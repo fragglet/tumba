@@ -140,7 +140,6 @@ typedef struct {
 	char *szDomainOtherSIDs;
 	char *szDomainGroups;
 	char *szDriverFile;
-	char *szNameResolveOrder;
 	int max_log_size;
 	int mangled_stack;
 	int max_xmit;
@@ -405,8 +404,6 @@ static struct parm_struct {
     {"max mux", P_INTEGER, P_GLOBAL, &Globals.max_mux, NULL, NULL},
     {"max xmit", P_INTEGER, P_GLOBAL, &Globals.max_xmit, NULL, NULL},
     {"max packet", P_INTEGER, P_GLOBAL, &Globals.max_packet, NULL, NULL},
-    {"name resolve order", P_STRING, P_GLOBAL, &Globals.szNameResolveOrder,
-     NULL, NULL},
     {"packet size", P_INTEGER, P_GLOBAL, &Globals.max_packet, NULL, NULL},
     {"username level", P_INTEGER, P_GLOBAL, &Globals.unamelevel, NULL, NULL},
     {"keepalive", P_INTEGER, P_GLOBAL, &keepalive, NULL, NULL},
@@ -552,8 +549,6 @@ static void init_globals(void)
 	string_set(&Globals.szServerString, s);
 	slprintf(s, sizeof(s) - 1, "%d.%d", DEFAULT_MAJOR_VERSION,
 	         DEFAULT_MINOR_VERSION);
-
-	string_set(&Globals.szNameResolveOrder, "lmhosts host wins bcast");
 
 	Globals.bUseRhosts = False;
 	Globals.max_packet = 65535;
@@ -722,7 +717,6 @@ FN_GLOBAL_STRING(lp_dfree_command, &Globals.szDfree)
 FN_GLOBAL_STRING(lp_hosts_equiv, &Globals.szHostsEquiv)
 FN_GLOBAL_STRING(lp_auto_services, &Globals.szAutoServices)
 FN_GLOBAL_STRING(lp_passwordserver, &Globals.szPasswordServer)
-FN_GLOBAL_STRING(lp_name_resolve_order, &Globals.szNameResolveOrder)
 FN_GLOBAL_STRING(lp_workgroup, &Globals.szWorkGroup)
 FN_GLOBAL_STRING(lp_username_map, &Globals.szUsernameMap)
 FN_GLOBAL_STRING(lp_character_set, &Globals.szCharacterSet)
@@ -1918,13 +1912,4 @@ void lp_copy_service(int snum, char *new_name)
 		if (snum >= 0)
 			lp_do_parameter(snum, "copy", oldname);
 	}
-}
-
-/***********************************************************
- Set the global name resolution order (used in smbclient).
-************************************************************/
-
-void lp_set_name_resolve_order(char *new_order)
-{
-	Globals.szNameResolveOrder = new_order;
 }
