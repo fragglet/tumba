@@ -267,32 +267,6 @@ struct smb_passwd {
 	/* Other fields / flags may be added later */
 };
 
-struct cli_state {
-	int fd;
-	int cnum;
-	int pid;
-	int mid;
-	int uid;
-	int protocol;
-	int sec_mode;
-	int error;
-	int privilages;
-	fstring eff_name;
-	fstring desthost;
-	char cryptkey[8];
-	uint32 sesskey;
-	int serverzone;
-	uint32 servertime;
-	int readbraw_supported;
-	int writebraw_supported;
-	int timeout;
-	int max_xmit;
-	char *outbuf;
-	char *inbuf;
-	int bufsize;
-	int initialised;
-};
-
 struct current_user {
 	int cnum, vuid;
 	int uid, gid;

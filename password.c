@@ -245,13 +245,3 @@ BOOL check_hosts_equiv(char *user)
 
 	return (False);
 }
-
-static struct cli_state cli;
-
-/****************************************************************************
-return the client state structure
-****************************************************************************/
-struct cli_state *server_client(void)
-{
-	return &cli;
-}

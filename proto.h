@@ -17,53 +17,6 @@ void charset_initialise(void);
 void codepage_initialise(int client_codepage);
 void add_char_string(char *s);
 
-/*The following definitions come from  clientgen.c  */
-
-BOOL cli_NetWkstaUserLogon(struct cli_state *cli, char *user,
-                           char *workstation);
-BOOL cli_NetServerEnum(struct cli_state *cli, char *workgroup, uint32 stype,
-                       void (*fn)(char *, uint32, char *));
-BOOL cli_session_setup(struct cli_state *cli, char *user, char *pass,
-                       int passlen, char *ntpass, int ntpasslen,
-                       char *workgroup);
-BOOL cli_ulogoff(struct cli_state *cli);
-BOOL cli_send_tconX(struct cli_state *cli, char *share, char *dev, char *pass,
-                    int passlen);
-BOOL cli_tdis(struct cli_state *cli);
-BOOL cli_unlink(struct cli_state *cli, char *fname);
-BOOL cli_mkdir(struct cli_state *cli, char *dname);
-BOOL cli_rmdir(struct cli_state *cli, char *dname);
-int cli_open(struct cli_state *cli, char *fname, int flags, int share_mode);
-BOOL cli_close(struct cli_state *cli, int fnum);
-BOOL cli_lock(struct cli_state *cli, int fnum, uint32 offset, uint32 len,
-              int timeout);
-BOOL cli_unlock(struct cli_state *cli, int fnum, uint32 offset, uint32 len,
-                int timeout);
-int cli_read(struct cli_state *cli, int fnum, char *buf, uint32 offset,
-             uint16 size);
-int cli_write(struct cli_state *cli, int fnum, char *buf, uint32 offset,
-              uint16 size);
-BOOL cli_getatr(struct cli_state *cli, char *fname, int *attr, uint32 *size,
-                time_t *t);
-BOOL cli_setatr(struct cli_state *cli, char *fname, int attr, time_t t);
-BOOL cli_qpathinfo(struct cli_state *cli, char *fname, time_t *c_time,
-                   time_t *a_time, time_t *m_time, uint32 *size);
-BOOL cli_qpathinfo2(struct cli_state *cli, char *fname, time_t *c_time,
-                    time_t *a_time, time_t *m_time, time_t *w_time,
-                    uint32 *size);
-BOOL cli_qfileinfo(struct cli_state *cli, int fnum, time_t *c_time,
-                   time_t *a_time, time_t *m_time, uint32 *size);
-BOOL cli_negprot(struct cli_state *cli);
-BOOL cli_session_request(struct cli_state *cli, char *host, int name_type,
-                         char *myname);
-BOOL cli_connect(struct cli_state *cli, char *host, struct in_addr *ip);
-BOOL cli_initialise(struct cli_state *cli);
-void cli_shutdown(struct cli_state *cli);
-char *cli_errstr(struct cli_state *cli);
-void cli_error(struct cli_state *cli, int *eclass, int *num);
-void cli_sockopt(struct cli_state *cli, char *options);
-int cli_setpid(struct cli_state *cli, int pid);
-
 /*The following definitions come from  dir.c  */
 
 void init_dptrs(void);
@@ -336,7 +289,6 @@ uint16 register_vuid(int uid, int gid, char *unix_name, char *requested_name,
                      BOOL guest);
 void add_session_user(char *user);
 BOOL check_hosts_equiv(char *user);
-struct cli_state *server_client(void);
 
 /*The following definitions come from  predict.c  */
 
