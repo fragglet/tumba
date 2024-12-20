@@ -200,7 +200,7 @@ AWK = awk
 # AXPROC defines DEC Alpha Processor
 #FLAGSM = -DLINUX -DAXPROC -DFAST_SHARE_MODES
 FLAGSM = -DLINUX -DFAST_SHARE_MODES
-LIBSM = -lcrypt
+LIBSM =
 
 # Use this for Linux with shadow passwords and quota - but not using PAM!
 # contributed by xeno@mix.hive.no
