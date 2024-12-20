@@ -356,7 +356,6 @@ BOOL authorise_login(int snum, char *user, char *password, int pwlen,
                      BOOL *guest, BOOL *force, uint16 vuid);
 BOOL check_hosts_equiv(char *user);
 struct cli_state *server_client(void);
-struct cli_state *server_cryptkey(void);
 BOOL server_validate(char *user, char *domain, char *pass, int passlen,
                      char *ntpass, int ntpasslen);
 
