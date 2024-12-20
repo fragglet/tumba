@@ -139,8 +139,6 @@ AWK = awk
 #   -DUFC_CRYPT if you want the fast crypt routine
 #   -DALLOW_CHANGE_PASSWORD if you want users to be able to set their password
 #                           remotely (only works on some systems)
-#   -DQUOTAS for quota support in disk_free(). This probably only works 
-#            on some systems.
 #   -DFAST_SHARE_MODES if you want the fast shared memory instead of the
 #                      slow description files for share mode locking. This
 #                      requires the mmap() and fcntl() system calls.
@@ -658,7 +656,7 @@ UTILOBJ = $(UTILOBJ2) interface.o replace.o smberr.o slprintf.o
 
 # object code for smbd
 SMBDOBJ1 = $(UTILOBJ) trans2.o message.o dir.o
-SMBDOBJ2 = ipc.o reply.o mangle.o password.o quotas.o uid.o
+SMBDOBJ2 = ipc.o reply.o mangle.o password.o uid.o
 SMBDOBJ3 = predict.o server.o access.o
 SMBDOBJ = $(SMBDOBJ1) $(SMBDOBJ2) $(SMBDOBJ3) $(UBIOBJ) $(VTP_OBJ) $(LOCKOBJ)
 

@@ -78,7 +78,6 @@ char *lp_lockdir(void);
 char *lp_rootdir(void);
 char *lp_defaultservice(void);
 char *lp_msg_command(void);
-char *lp_dfree_command(void);
 char *lp_auto_services(void);
 char *lp_passwordserver(void);
 char *lp_workgroup(void);
@@ -279,11 +278,6 @@ void add_session_user(char *user);
 int read_predict(int fd, int offset, char *buf, char **ptr, int num);
 void do_read_prediction(void);
 void invalidate_read_prediction(int fd);
-
-/*The following definitions come from  quotas.c  */
-
-BOOL disk_quotas(char *path, int *bsize, int *dfree, int *dsize);
-BOOL disk_quotas(char *path, int *bsize, int *dfree, int *dsize);
 
 /*The following definitions come from  replace.c  */
 
