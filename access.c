@@ -206,52 +206,8 @@ static int string_match(char *tok, char *s)
 		    strcasecmp(tok, s + str_len - tok_len) == 0)
 			return (YES);
 	} else if (tok[0] == '@') { /* netgroup: look it up */
-#ifdef NETGROUP
-		static char *mydomain = NULL;
-		char *hostname = NULL;
-		BOOL netgroup_ok = False;
-
-		if (!mydomain)
-			yp_get_default_domain(&mydomain);
-
-		if (!mydomain) {
-			DEBUG(0, ("Unable to get default yp domain.\n"));
-			return NO;
-		}
-		if (!(hostname = strdup(s))) {
-			DEBUG(1, ("out of memory for strdup!\n"));
-			return NO;
-		}
-
-		netgroup_ok = innetgr(tok + 1, hostname, (char *) 0, mydomain);
-
-		DEBUG(5,
-		      ("looking for %s of domain %s in netgroup %s gave %s\n",
-		       hostname, mydomain, tok + 1, BOOLSTR(netgroup_ok)));
-
-#ifdef NETGROUP_INSECURE
-		/* if you really want netgroups that match non qualified names
-		   then define NETGROUP_INSECURE. It can, however, be a big
-		   security hole */
-		{
-			char *clnt_domain;
-			if (!netgroup_ok &&
-			    (clnt_domain = strchr(hostname, '.'))) {
-				*clnt_domain++ = '\0';
-				netgroup_ok = innetgr(tok + 1, hostname,
-				                      (char *) 0, mydomain);
-			}
-		}
-#endif
-
-		free(hostname);
-
-		if (netgroup_ok)
-			return (YES);
-#else
 		DEBUG(0, ("access: netgroup support is not configured\n"));
 		return (NO);
-#endif
 	} else if (strcasecmp(tok, "ALL") == 0) { /* all: match any */
 		return (YES);
 	} else if (strcasecmp(tok, "FAIL") == 0) { /* fail: match any */

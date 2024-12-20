@@ -226,32 +226,6 @@ struct passwd *Get_Pwnam(char *user, BOOL allow_change)
 }
 
 /****************************************************************************
-check if a user is in a netgroup user list
-****************************************************************************/
-static BOOL user_in_netgroup_list(char *user, char *ngname)
-{
-#ifdef NETGROUP
-	static char *mydomain = NULL;
-	if (mydomain == NULL)
-		yp_get_default_domain(&mydomain);
-
-	if (mydomain == NULL) {
-		DEBUG(5, ("Unable to get default yp domain\n"));
-	} else {
-		DEBUG(5, ("looking for user %s of domain %s in netgroup %s\n",
-		          user, mydomain, ngname));
-		DEBUG(5, ("innetgr is %s\n",
-		          innetgr(ngname, NULL, user, mydomain) ? "TRUE"
-		                                                : "FALSE"));
-
-		if (innetgr(ngname, NULL, user, mydomain))
-			return (True);
-	}
-#endif /* NETGROUP */
-	return False;
-}
-
-/****************************************************************************
 check if a user is in a UNIX user list
 ****************************************************************************/
 static BOOL user_in_group_list(char *user, char *gname)
@@ -305,8 +279,6 @@ BOOL user_in_list(char *user, char *list)
 			 * Old behaviour. Check netgroup list
 			 * followed by UNIX list.
 			 */
-			if (user_in_netgroup_list(user, &tok[1]))
-				return True;
 			if (user_in_group_list(user, &tok[1]))
 				return True;
 		} else if (*tok == '+') {
@@ -315,8 +287,6 @@ BOOL user_in_list(char *user, char *list)
 				 * Search UNIX list followed by netgroup.
 				 */
 				if (user_in_group_list(user, &tok[2]))
-					return True;
-				if (user_in_netgroup_list(user, &tok[2]))
 					return True;
 			} else {
 				/*
@@ -330,15 +300,7 @@ BOOL user_in_list(char *user, char *list)
 				/*
 				 * Search netgroup list followed by UNIX list.
 				 */
-				if (user_in_netgroup_list(user, &tok[2]))
-					return True;
 				if (user_in_group_list(user, &tok[2]))
-					return True;
-			} else {
-				/*
-				 * Just search netgroup list.
-				 */
-				if (user_in_netgroup_list(user, &tok[1]))
 					return True;
 			}
 		}
