@@ -2519,18 +2519,7 @@ static int sig_cld(void)
   **************************************************************************/
 static int sig_pipe(void)
 {
-	struct cli_state *cli;
 	BlockSignals(True, SIGPIPE);
-
-	if ((cli = server_client()) && cli->initialised) {
-		DEBUG(3, ("lost connection to password server\n"));
-		cli_shutdown(cli);
-#ifndef DONT_REINSTALL_SIG
-		signal(SIGPIPE, SIGNAL_CAST sig_pipe);
-#endif
-		BlockSignals(False, SIGPIPE);
-		return 0;
-	}
 
 	exit_server("Got sigpipe\n");
 	return (0);
@@ -4963,7 +4952,6 @@ static void process(void)
 	while (True) {
 		int deadtime = lp_deadtime() * 60;
 		int counter;
-		int last_keepalive = 0;
 		int service_load_counter = 0;
 		BOOL got_smb = False;
 
@@ -4984,7 +4972,6 @@ static void process(void)
 			int i;
 			time_t t;
 			BOOL allidle = True;
-			extern int keepalive;
 
 			if (counter > 365 * 3600) /* big number of seconds. */
 			{
@@ -5035,23 +5022,6 @@ static void process(void)
 				DEBUG(2, ("%s Closing idle connection\n",
 				          timestring()));
 				return;
-			}
-
-			if (keepalive &&
-			    (counter - last_keepalive) > keepalive) {
-				struct cli_state *cli = server_client();
-				if (!send_keepalive(Client)) {
-					DEBUG(
-					    2,
-					    ("%s Keepalive failed - exiting\n",
-					     timestring()));
-					return;
-				}
-				/* also send a keepalive to the password server
-				   if its still connected */
-				if (cli && cli->initialised)
-					send_keepalive(cli->fd);
-				last_keepalive = counter;
 			}
 
 			/* check for connection timeouts */

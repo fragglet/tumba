@@ -1816,19 +1816,6 @@ int TvalDiff(struct timeval *tvalold, struct timeval *tvalnew)
 }
 
 /****************************************************************************
-send a keepalive packet (rfc1002)
-****************************************************************************/
-BOOL send_keepalive(int client)
-{
-	unsigned char buf[4];
-
-	buf[0] = 0x85;
-	buf[1] = buf[2] = buf[3] = 0;
-
-	return (write_data(client, (char *) buf, 4) == 4);
-}
-
-/****************************************************************************
   read data from the client, reading exactly N bytes.
 ****************************************************************************/
 int read_data(int fd, char *buffer, int N)

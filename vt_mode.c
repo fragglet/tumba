@@ -334,7 +334,6 @@ void VT_Process(void)
 		int msg_type;
 		int msg_flags;
 		int counter;
-		int last_keepalive = 0;
 		struct fd_set si;
 		struct timeval to, *top;
 		int n, ret, t;
@@ -372,13 +371,6 @@ void VT_Process(void)
 			counter += SMBD_SELECT_LOOP;
 
 			t = time(NULL);
-
-			if (keepalive &&
-			    (counter - last_keepalive) > keepalive) {
-				if (!send_keepalive(Client))
-					goto leave_VT_Process;
-				last_keepalive = counter;
-			}
 		} else if (n > 0) {
 			counter = 0;
 

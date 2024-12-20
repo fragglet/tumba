@@ -344,8 +344,6 @@ uint16 register_vuid(int uid, int gid, char *unix_name, char *requested_name,
 void add_session_user(char *user);
 BOOL check_hosts_equiv(char *user);
 struct cli_state *server_client(void);
-BOOL server_validate(char *user, char *domain, char *pass, int passlen,
-                     char *ntpass, int ntpasslen);
 
 /*The following definitions come from  predict.c  */
 
@@ -630,7 +628,6 @@ int write_socket(int fd, char *buf, int len);
 int read_udp_socket(int fd, char *buf, int len);
 int read_with_timeout(int fd, char *buf, int mincnt, int maxcnt, long time_out);
 int TvalDiff(struct timeval *tvalold, struct timeval *tvalnew);
-BOOL send_keepalive(int client);
 int read_data(int fd, char *buffer, int N);
 int write_data(int fd, char *buffer, int N);
 int transfer_file(int infd, int outfd, int n, char *header, int headlen,
