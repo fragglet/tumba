@@ -695,9 +695,11 @@ CHECK :
 .SUFFIXES:
 .SUFFIXES: .c .o .h
 
-.c.o: $(INCLUDES)
+.c.o:
 	@echo Compiling $*.c
 	@$(CC) $(CFLAGS) -c $(srcdir)$*.c -o $(srcdir)$*.o
+
+%.o: $(INCLUDES)
 
 smbd: $(SMBDOBJ) $(ARCFOUR_OBJ)
 	@echo Linking smbd
