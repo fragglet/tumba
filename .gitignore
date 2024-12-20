@@ -1,0 +1,4 @@
+smbd
+smbstatus
+testparm
+*.o
