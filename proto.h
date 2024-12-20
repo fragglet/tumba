@@ -88,7 +88,6 @@ char *lp_socket_address(void);
 char *lp_driverfile(void);
 BOOL lp_preferred_master(void);
 BOOL lp_getwdcache(void);
-BOOL lp_readprediction(void);
 BOOL lp_readbmpx(void);
 BOOL lp_readraw(void);
 BOOL lp_writeraw(void);
@@ -272,12 +271,6 @@ void invalidate_vuid(uint16 vuid);
 uint16 register_vuid(int uid, int gid, char *unix_name, char *requested_name,
                      BOOL guest);
 void add_session_user(char *user);
-
-/*The following definitions come from  predict.c  */
-
-int read_predict(int fd, int offset, char *buf, char **ptr, int num);
-void do_read_prediction(void);
-void invalidate_read_prediction(int fd);
 
 /*The following definitions come from  replace.c  */
 

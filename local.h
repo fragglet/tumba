@@ -168,8 +168,4 @@
 
 #define OPLOCK_BREAK_TIMEOUT_FUDGEFACTOR 2
 
-/* the read preciction code has been disabled until some problems with
-   it are worked out */
-#define USE_READ_PREDICTION 0
-
 #endif

@@ -156,7 +156,6 @@ typedef struct {
 	BOOL bStripDot;
 	BOOL bReadRaw;
 	BOOL bWriteRaw;
-	BOOL bReadPrediction;
 	BOOL bReadbmpx;
 	BOOL bSyslogOnly;
 	BOOL bBrowseList;
@@ -358,7 +357,6 @@ static struct parm_struct {
     {"protocol", P_ENUM, P_GLOBAL, &Globals.maxprotocol, NULL, enum_protocol},
     {"max disk size", P_INTEGER, P_GLOBAL, &Globals.maxdisksize, NULL, NULL},
     {"getwd cache", P_BOOL, P_GLOBAL, &use_getwd_cache, NULL, NULL},
-    {"read prediction", P_BOOL, P_GLOBAL, &Globals.bReadPrediction, NULL, NULL},
     {"read bmpx", P_BOOL, P_GLOBAL, &Globals.bReadbmpx, NULL, NULL},
     {"read raw", P_BOOL, P_GLOBAL, &Globals.bReadRaw, NULL, NULL},
     {"write raw", P_BOOL, P_GLOBAL, &Globals.bWriteRaw, NULL, NULL},
@@ -554,7 +552,6 @@ static void init_globals(void)
 	Globals.maxprotocol = PROTOCOL_NT1;
 	Globals.bReadRaw = True;
 	Globals.bWriteRaw = True;
-	Globals.bReadPrediction = False;
 	Globals.bReadbmpx = True;
 	Globals.bStripDot = False;
 	Globals.syslog = 1;
@@ -717,7 +714,6 @@ FN_GLOBAL_STRING(lp_driverfile, &Globals.szDriverFile)
 
 FN_GLOBAL_BOOL(lp_preferred_master, &Globals.bPreferredMaster)
 FN_GLOBAL_BOOL(lp_getwdcache, &use_getwd_cache)
-FN_GLOBAL_BOOL(lp_readprediction, &Globals.bReadPrediction)
 FN_GLOBAL_BOOL(lp_readbmpx, &Globals.bReadbmpx)
 FN_GLOBAL_BOOL(lp_readraw, &Globals.bReadRaw)
 FN_GLOBAL_BOOL(lp_writeraw, &Globals.bWriteRaw)

@@ -1380,9 +1380,6 @@ void close_file(int fnum, BOOL normal_close)
 
 	Files[fnum].reserved = False;
 
-#if USE_READ_PREDICTION
-	invalidate_read_prediction(fs_p->fd_ptr->fd);
-#endif
 
 	fs_p->open = False;
 	Connections[cnum].num_files_open--;
@@ -2016,15 +2013,6 @@ int read_file(int fnum, char *data, uint32 pos, int n)
 {
 	int ret = 0, readret;
 
-#if USE_READ_PREDICTION
-	if (!Files[fnum].can_write) {
-		ret = read_predict(Files[fnum].fd_ptr->fd, pos, data, NULL, n);
-
-		data += ret;
-		n -= ret;
-		pos += ret;
-	}
-#endif
 
 #if USE_MMAP
 	if (Files[fnum].mmap_ptr) {
@@ -4717,10 +4705,6 @@ static void process(void)
 		if (deadtime <= 0)
 			deadtime = DEFAULT_SMBD_TIMEOUT;
 
-#if USE_READ_PREDICTION
-		if (lp_readprediction())
-			do_read_prediction();
-#endif
 
 		errno = 0;
 
