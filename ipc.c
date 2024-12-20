@@ -1461,7 +1461,6 @@ static BOOL api_RNetUserGetInfo(int cnum, uint16 vuid, char *param, char *data,
 	int uLevel = SVAL(p, 0);
 	char *p2;
 
-	/* get NIS home of a previously validated user - simeon */
 	/* With share level security vuid will always be zero.
 	   Don't depend on vuser being non-null !!. JRA */
 	user_struct *vuser = get_valid_user_struct(vuid);

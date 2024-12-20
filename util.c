@@ -3580,42 +3580,6 @@ char *client_addr(void)
 
 
 /*******************************************************************
- Patch from jkf@soton.ac.uk
- This is Luke's original function with the NIS lookup code
- moved out to a separate function.
-*******************************************************************/
-
-char *automount_server(char *user_name)
-{
-	static pstring server_name;
-
-	/* use the local machine name instead of the auto-map server */
-	pstrcpy(server_name, local_machine);
-
-	DEBUG(4, ("Home server: %s\n", server_name));
-
-	return server_name;
-}
-
-/*******************************************************************
- Patch from jkf@soton.ac.uk
- Added this to implement %p (NIS auto-map version of %H)
-*******************************************************************/
-
-char *automount_path(char *user_name)
-{
-	static pstring server_path;
-
-	/* use the passwd entry instead of the auto-map server entry */
-	/* pstrcpy() copes with get_home_dir() returning NULL */
-	pstrcpy(server_path, get_home_dir(user_name));
-
-	DEBUG(4, ("Home server path: %s\n", server_path));
-
-	return server_path;
-}
-
-/*******************************************************************
 sub strings with useful parameters
 Rewritten by Stefaan A Eeckels <Stefaan.Eeckels@ecc.lu> and
 Paul Rippin <pr3245@nopc.eurostat.cec.be>
@@ -3637,9 +3601,6 @@ void standard_sub_basic(char *str)
 			}
 			break;
 		}
-		case 'N':
-			string_sub(p, "%N", automount_server(username));
-			break;
 		case 'I':
 			string_sub(p, "%I", client_addr());
 			break;

@@ -143,7 +143,6 @@ typedef struct {
 	char *szRemoteAnnounce;
 	char *szRemoteBrowseSync;
 	char *szSocketAddress;
-	char *szNISHomeMapName;
 	char *szAnnounceVersion; /* This is initialised in init_globals */
 	char *szNetbiosAliases;
 	char *szDomainSID;
@@ -186,7 +185,6 @@ typedef struct {
 	BOOL bSyslogOnly;
 	BOOL bBrowseList;
 	BOOL bUnixRealname;
-	BOOL bNISHomeMap;
 	BOOL bTimeServer;
 	BOOL bBindInterfacesOnly;
 	BOOL bNetWkstaUserLogon;
@@ -458,7 +456,6 @@ static struct parm_struct {
      NULL, NULL},
     {"socket address", P_STRING, P_GLOBAL, &Globals.szSocketAddress, NULL,
      NULL},
-    {"homedir map", P_STRING, P_GLOBAL, &Globals.szNISHomeMapName, NULL, NULL},
     {"announce version", P_STRING, P_GLOBAL, &Globals.szAnnounceVersion, NULL,
      NULL},
     {"max log size", P_INTEGER, P_GLOBAL, &Globals.max_log_size, NULL, NULL},
@@ -495,7 +492,6 @@ static struct parm_struct {
     {"local master", P_BOOL, P_GLOBAL, &Globals.bLocalMaster, NULL, NULL},
     {"browse list", P_BOOL, P_GLOBAL, &Globals.bBrowseList, NULL, NULL},
     {"unix realname", P_BOOL, P_GLOBAL, &Globals.bUnixRealname, NULL, NULL},
-    {"NIS homedir", P_BOOL, P_GLOBAL, &Globals.bNISHomeMap, NULL, NULL},
     {"time server", P_BOOL, P_GLOBAL, &Globals.bTimeServer, NULL, NULL},
     {"ole locking compatibility", P_BOOL, P_GLOBAL, &Globals.bOleLockingCompat,
      NULL, NULL},
@@ -839,7 +835,6 @@ FN_GLOBAL_STRING(lp_remote_browse_sync, &Globals.szRemoteBrowseSync)
 FN_GLOBAL_STRING(lp_wins_server, &Globals.szWINSserver)
 FN_GLOBAL_STRING(lp_interfaces, &Globals.szInterfaces)
 FN_GLOBAL_STRING(lp_socket_address, &Globals.szSocketAddress)
-FN_GLOBAL_STRING(lp_nis_home_map_name, &Globals.szNISHomeMapName)
 FN_GLOBAL_STRING(lp_announce_version, &Globals.szAnnounceVersion)
 FN_GLOBAL_STRING(lp_netbios_aliases, &Globals.szNetbiosAliases)
 FN_GLOBAL_STRING(lp_driverfile, &Globals.szDriverFile)
@@ -859,7 +854,6 @@ FN_GLOBAL_BOOL(lp_update_encrypted, &Globals.bUpdateEncrypt)
 FN_GLOBAL_BOOL(lp_syslog_only, &Globals.bSyslogOnly)
 FN_GLOBAL_BOOL(lp_browse_list, &Globals.bBrowseList)
 FN_GLOBAL_BOOL(lp_unix_realname, &Globals.bUnixRealname)
-FN_GLOBAL_BOOL(lp_nis_home_map, &Globals.bNISHomeMap)
 FN_GLOBAL_BOOL(lp_time_server, &Globals.bTimeServer)
 FN_GLOBAL_BOOL(lp_bind_interfaces_only, &Globals.bBindInterfacesOnly)
 FN_GLOBAL_BOOL(lp_net_wksta_user_logon, &Globals.bNetWkstaUserLogon)

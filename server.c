@@ -4555,20 +4555,6 @@ void standard_sub(int cnum, char *str)
 			case 'u':
 				string_sub(p, "%u", Connections[cnum].user);
 				break;
-			/*
-			 * Patch from jkf@soton.ac.uk
-			 * Left the %N (NIS server name) in standard_sub_basic
-			 * as it is a feature for logon servers, hence uses the
-			 * username. The %p (NIS server path) code is here as it
-			 * is used instead of the default "path =" string in
-			 * [homes] and so needs the service name, not the
-			 * username.
-			 */
-			case 'p':
-				string_sub(p, "%p",
-				           automount_path(lp_servicename(
-				               Connections[cnum].service)));
-				break;
 			case '\0':
 				p++;
 				break; /* don't run off the end of the string */
