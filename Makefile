@@ -198,9 +198,9 @@ AWK = awk
 # PAM that is available on your system.
 # contributed by Andrew.Tridgell@anu.edu.au & John.Terpstra@aquasoft.com.au
 # AXPROC defines DEC Alpha Processor
-# FLAGSM = -DLINUX -DAXPROC -DFAST_SHARE_MODES
-# FLAGSM = -DLINUX -DFAST_SHARE_MODES
-# LIBSM = 
+#FLAGSM = -DLINUX -DAXPROC -DFAST_SHARE_MODES
+FLAGSM = -DLINUX -DFAST_SHARE_MODES
+LIBSM = -lcrypt
 
 # Use this for Linux with shadow passwords and quota - but not using PAM!
 # contributed by xeno@mix.hive.no
