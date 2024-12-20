@@ -668,8 +668,7 @@ UTILOBJ = $(UTILOBJ2) interface.o replace.o smberr.o slprintf.o
 SMBDOBJ1 = $(UTILOBJ) trans2.o message.o dir.o
 SMBDOBJ2 = ipc.o reply.o mangle.o password.o quotas.o uid.o
 SMBDOBJ3 = predict.o server.o access.o
-SMBDOBJ4 = ufc.o
-SMBDOBJ = $(SMBDOBJ1) $(SMBDOBJ2) $(SMBDOBJ3) $(SMBDOBJ4) $(UBIOBJ) $(VTP_OBJ) $(LOCKOBJ)
+SMBDOBJ = $(SMBDOBJ1) $(SMBDOBJ2) $(SMBDOBJ3) $(UBIOBJ) $(VTP_OBJ) $(LOCKOBJ)
 
 # object code needed for programs that handle the the locking files
 LOCKOBJ = locking_slow.o locking.o

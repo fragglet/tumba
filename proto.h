@@ -549,10 +549,6 @@ int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize);
 
 /*The following definitions come from  ubiqx/ubi_dLinkList.c  */
 
-/*The following definitions come from  ufc.c  */
-
-char *ufc_crypt(char *key, char *salt);
-
 /*The following definitions come from  uid.c  */
 
 void init_uid(void);

@@ -349,9 +349,6 @@ extern char *sys_errlist[];
 #define S_ISLNK(x) ((S_IFLNK & (x)) != 0)
 #endif
 
-#ifdef UFC_CRYPT
-#define crypt ufc_crypt
-#endif
 
 #ifdef REPLACE_STRLEN
 #define strlen(s) Strlen(s)
