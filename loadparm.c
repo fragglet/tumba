@@ -136,7 +136,6 @@ typedef struct {
 	char *szCodingSystem;
 	char *szInterfaces;
 	char *szSocketAddress;
-	char *szNetbiosAliases;
 	char *szDomainSID;
 	char *szDomainOtherSIDs;
 	char *szDomainGroups;
@@ -154,15 +153,9 @@ typedef struct {
 	int maxdisksize;
 	int syslog;
 	int os_level;
-	int max_ttl;
-	int max_wins_ttl;
-	int min_wins_ttl;
 	int ReadSize;
-	int lm_announce;
-	int lm_interval;
 	int shmem_size;
 	int client_code_page;
-	BOOL bLocalMaster;
 	BOOL bPreferredMaster;
 	BOOL bStripDot;
 	BOOL bUseRhosts;
@@ -358,16 +351,8 @@ static struct enum_list enum_security[] = {{SEC_SHARE, "SHARE"},
                                            {SEC_SERVER, "SERVER"},
                                            {-1, NULL}};
 
-static struct enum_list enum_announce_as[] = {{ANNOUNCE_AS_NT, "NT"},
-                                              {ANNOUNCE_AS_WIN95, "win95"},
-                                              {ANNOUNCE_AS_WFW, "WfW"},
-                                              {-1, NULL}};
-
 static struct enum_list enum_case[] = {
     {CASE_LOWER, "lower"}, {CASE_UPPER, "upper"}, {-1, NULL}};
-
-static struct enum_list enum_lm_announce[] = {
-    {0, "False"}, {1, "True"}, {2, "Auto"}, {-1, NULL}};
 
 static struct parm_struct {
 	char *label;
@@ -400,8 +385,6 @@ static struct parm_struct {
      NULL},
     {"socket options", P_GSTRING, P_GLOBAL, user_socket_options, NULL, NULL},
     {"netbios name", P_UGSTRING, P_GLOBAL, myname, NULL, NULL},
-    {"netbios aliases", P_STRING, P_GLOBAL, &Globals.szNetbiosAliases, NULL,
-     NULL},
     {"smbrun", P_STRING, P_GLOBAL, &Globals.szSmbrun, NULL, NULL},
     {"log file", P_STRING, P_GLOBAL, &Globals.szLogFile, NULL, NULL},
     {"config file", P_STRING, P_GLOBAL, &Globals.szConfigFile, NULL, NULL},
@@ -446,17 +429,10 @@ static struct parm_struct {
     {"client code page", P_INTEGER, P_GLOBAL, &Globals.client_code_page, NULL,
      NULL},
     {"os level", P_INTEGER, P_GLOBAL, &Globals.os_level, NULL, NULL},
-    {"max ttl", P_INTEGER, P_GLOBAL, &Globals.max_ttl, NULL, NULL},
-    {"max wins ttl", P_INTEGER, P_GLOBAL, &Globals.max_wins_ttl, NULL, NULL},
-    {"min wins ttl", P_INTEGER, P_GLOBAL, &Globals.min_wins_ttl, NULL, NULL},
-    {"lm announce", P_ENUM, P_GLOBAL, &Globals.lm_announce, NULL,
-     enum_lm_announce},
-    {"lm interval", P_INTEGER, P_GLOBAL, &Globals.lm_interval, NULL, NULL},
     {"preferred master", P_BOOL, P_GLOBAL, &Globals.bPreferredMaster, NULL,
      NULL},
     {"prefered master", P_BOOL, P_GLOBAL, &Globals.bPreferredMaster, NULL,
      NULL},
-    {"local master", P_BOOL, P_GLOBAL, &Globals.bLocalMaster, NULL, NULL},
     {"browse list", P_BOOL, P_GLOBAL, &Globals.bBrowseList, NULL, NULL},
     {"unix realname", P_BOOL, P_GLOBAL, &Globals.bUnixRealname, NULL, NULL},
     {"ole locking compatibility", P_BOOL, P_GLOBAL, &Globals.bOleLockingCompat,
@@ -607,12 +583,7 @@ static void init_globals(void)
 	Globals.syslog = 1;
 	Globals.bSyslogOnly = False;
 	Globals.os_level = 0;
-	Globals.max_ttl = 60 * 60 * 4;           /* 4 hours default */
-	Globals.max_wins_ttl = 60 * 60 * 24 * 3; /* 3 days default */
-	Globals.min_wins_ttl = 60 * 60 * 6;      /* 6 hours default */
 	Globals.ReadSize = 16 * 1024;
-	Globals.lm_announce = 2; /* = Auto: send only if LM clients found */
-	Globals.lm_interval = 60;
 	Globals.shmem_size = SHMEM_SIZE;
 	Globals.bUnixRealname = False;
 	Globals.client_code_page = DEFAULT_CLIENT_CODE_PAGE;
@@ -636,7 +607,6 @@ static void init_globals(void)
 	*/
 
 	Globals.bPreferredMaster = False;
-	Globals.bLocalMaster = True;
 	Globals.bBrowseList = True;
 
 	/*
@@ -772,10 +742,8 @@ FN_GLOBAL_STRING(lp_username_map, &Globals.szUsernameMap)
 FN_GLOBAL_STRING(lp_character_set, &Globals.szCharacterSet)
 FN_GLOBAL_STRING(lp_interfaces, &Globals.szInterfaces)
 FN_GLOBAL_STRING(lp_socket_address, &Globals.szSocketAddress)
-FN_GLOBAL_STRING(lp_netbios_aliases, &Globals.szNetbiosAliases)
 FN_GLOBAL_STRING(lp_driverfile, &Globals.szDriverFile)
 
-FN_GLOBAL_BOOL(lp_local_master, &Globals.bLocalMaster)
 FN_GLOBAL_BOOL(lp_preferred_master, &Globals.bPreferredMaster)
 FN_GLOBAL_BOOL(lp_use_rhosts, &Globals.bUseRhosts)
 FN_GLOBAL_BOOL(lp_getwdcache, &use_getwd_cache)
@@ -792,9 +760,6 @@ FN_GLOBAL_BOOL(lp_net_wksta_user_logon, &Globals.bNetWkstaUserLogon)
 FN_GLOBAL_BOOL(lp_ole_locking_compat, &Globals.bOleLockingCompat)
 
 FN_GLOBAL_INTEGER(lp_os_level, &Globals.os_level)
-FN_GLOBAL_INTEGER(lp_max_ttl, &Globals.max_ttl)
-FN_GLOBAL_INTEGER(lp_max_wins_ttl, &Globals.max_wins_ttl)
-FN_GLOBAL_INTEGER(lp_min_wins_ttl, &Globals.max_wins_ttl)
 FN_GLOBAL_INTEGER(lp_max_log_size, &Globals.max_log_size)
 FN_GLOBAL_INTEGER(lp_mangledstack, &Globals.mangled_stack)
 FN_GLOBAL_INTEGER(lp_maxxmit, &Globals.max_xmit)
@@ -810,8 +775,6 @@ FN_GLOBAL_INTEGER(lp_security, &Globals.security)
 FN_GLOBAL_INTEGER(lp_maxdisksize, &Globals.maxdisksize)
 FN_GLOBAL_INTEGER(lp_syslog, &Globals.syslog)
 FN_GLOBAL_INTEGER(lp_client_code_page, &Globals.client_code_page)
-FN_GLOBAL_INTEGER(lp_lm_announce, &Globals.lm_announce)
-FN_GLOBAL_INTEGER(lp_lm_interval, &Globals.lm_interval)
 
 FN_LOCAL_STRING(lp_preexec, szPreExec)
 FN_LOCAL_STRING(lp_postexec, szPostExec)
