@@ -279,10 +279,6 @@ BOOL is_mangled(char *s);
 void mangle_name_83(char *s, int s_len);
 BOOL name_map_mangle(char *OutName, BOOL need83, int snum);
 
-/*The following definitions come from  md4.c  */
-
-void mdfour(unsigned char *out, unsigned char *in, int n);
-
 /*The following definitions come from  mem_man/mem_man.c  */
 
 void *smb_mem_malloc(size_t size, char *file, int line);
@@ -334,8 +330,6 @@ BOOL pm_process(char *FileName, BOOL (*sfunc)(char *),
 
 /*The following definitions come from  password.c  */
 
-void generate_next_challenge(char *challenge);
-BOOL set_challenge(char *challenge);
 user_struct *get_valid_user_struct(uint16 vuid);
 void invalidate_vuid(uint16 vuid);
 uint16 register_vuid(int uid, int gid, char *unix_name, char *requested_name,
