@@ -458,8 +458,4 @@ extern int errno;
 #define fstrcpy(d, s) safe_strcpy((d), (s), sizeof(fstring) - 1)
 #define fstrcat(d, s) safe_strcat((d), (s), sizeof(fstring) - 1)
 
-#if MEM_MAN
-#include "mem_man/mem_man.h"
-#endif
-
 #endif

@@ -5406,15 +5406,12 @@ int main(int argc, char *argv[])
 	/* If we are using the malloc debug code we can't use
 	   SIGUSR1 and SIGUSR2 to do debug level changes. */
 
-#ifndef MEM_MAN
 #if defined(SIGUSR1)
 	signal(SIGUSR1, SIGNAL_CAST sig_usr1);
 #endif /* SIGUSR1 */
-
 #if defined(SIGUSR2)
 	signal(SIGUSR2, SIGNAL_CAST sig_usr2);
 #endif /* SIGUSR2 */
-#endif /* MEM_MAN */
 
 	DEBUG(3, ("%s loaded services\n", timestring()));
 

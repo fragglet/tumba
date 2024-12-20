@@ -662,7 +662,7 @@ UBIOBJ = ubiqx/ubi_dLinkList.o
 # general utility object files
 UTILOBJ1 = util.o system.o charset.o kanji.o fault.o smbencrypt.o smbdes.o charcnv.o
 UTILOBJ2 = $(UTILOBJ1) md4.o loadparm.o params.o username.o time.o namequery.o nmblib.o
-UTILOBJ = $(UTILOBJ2) interface.o replace.o smberr.o mem_man/mem_man.o slprintf.o
+UTILOBJ = $(UTILOBJ2) interface.o replace.o smberr.o slprintf.o
 
 # object code for smbd
 SMBDOBJ1 = $(UTILOBJ) trans2.o message.o dir.o
