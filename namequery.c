@@ -352,56 +352,6 @@ BOOL resolve_name(char *name, struct in_addr *return_ip)
 				endlmhosts(fp);
 			}
 
-		} else if (strequal(tok, "wins")) {
-
-			int sock;
-
-			/*
-			 * "wins" means do a unicast lookup to the WINS server.
-			 * Ignore if there is no WINS server specified or if the
-			 * WINS server is one of our interfaces (if we're being
-			 * called from within nmbd - we can't do this call as we
-			 * would then block).
-			 */
-
-			DEBUG(3, ("resolve_name: Attempting wins lookup for "
-			          "name %s<0x20>\n",
-			          name));
-
-			if (*lp_wins_server()) {
-				struct in_addr wins_ip =
-				    *interpret_addr2(lp_wins_server());
-				BOOL wins_ismyip = ismyip(wins_ip);
-
-				if ((wins_ismyip && !global_in_nmbd) ||
-				    !wins_ismyip) {
-					sock = open_socket_in(
-					    SOCK_DGRAM, 0, 3,
-					    interpret_addr(
-					        lp_socket_address()));
-
-					if (sock != -1) {
-						struct in_addr *iplist = NULL;
-						int count;
-						iplist = name_query(
-						    sock, name, 0x20, False,
-						    True, wins_ip, &count,
-						    NULL);
-						if (iplist != NULL) {
-							*return_ip = iplist[0];
-							free((char *) iplist);
-							close(sock);
-							return True;
-						}
-						close(sock);
-					}
-				}
-			} else {
-				DEBUG(
-				    3,
-				    ("resolve_name: WINS server resolution "
-				     "selected and no WINS server present.\n"));
-			}
 		} else if (strequal(tok, "bcast")) {
 
 			int sock;

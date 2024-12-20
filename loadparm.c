@@ -133,7 +133,6 @@ typedef struct {
 	char *szUsernameMap;
 	char *szCharacterSet;
 	char *szSmbrun;
-	char *szWINSserver;
 	char *szCodingSystem;
 	char *szInterfaces;
 	char *szRemoteAnnounce;
@@ -471,7 +470,6 @@ static struct parm_struct {
      enum_lm_announce},
     {"lm interval", P_INTEGER, P_GLOBAL, &Globals.lm_interval, NULL, NULL},
     {"dns proxy", P_BOOL, P_GLOBAL, &Globals.bDNSproxy, NULL, NULL},
-    {"wins server", P_STRING, P_GLOBAL, &Globals.szWINSserver, NULL, NULL},
     {"preferred master", P_BOOL, P_GLOBAL, &Globals.bPreferredMaster, NULL,
      NULL},
     {"prefered master", P_BOOL, P_GLOBAL, &Globals.bPreferredMaster, NULL,
@@ -798,7 +796,6 @@ FN_GLOBAL_STRING(lp_username_map, &Globals.szUsernameMap)
 FN_GLOBAL_STRING(lp_character_set, &Globals.szCharacterSet)
 FN_GLOBAL_STRING(lp_remote_announce, &Globals.szRemoteAnnounce)
 FN_GLOBAL_STRING(lp_remote_browse_sync, &Globals.szRemoteBrowseSync)
-FN_GLOBAL_STRING(lp_wins_server, &Globals.szWINSserver)
 FN_GLOBAL_STRING(lp_interfaces, &Globals.szInterfaces)
 FN_GLOBAL_STRING(lp_socket_address, &Globals.szSocketAddress)
 FN_GLOBAL_STRING(lp_announce_version, &Globals.szAnnounceVersion)

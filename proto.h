@@ -135,7 +135,6 @@ char *lp_username_map(void);
 char *lp_character_set(void);
 char *lp_remote_announce(void);
 char *lp_remote_browse_sync(void);
-char *lp_wins_server(void);
 char *lp_interfaces(void);
 char *lp_socket_address(void);
 char *lp_announce_version(void);
