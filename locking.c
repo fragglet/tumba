@@ -159,13 +159,6 @@ BOOL locking_init(int read_only)
 {
 	if (share_ops) return True;
 
-#ifdef FAST_SHARE_MODES
-	share_ops = locking_shm_init(read_only);
-	if (!share_ops) {
-		DEBUG(0,("ERROR: Failed to initialise fast share modes - trying slow code\n"));
-	}
-	if (share_ops) return True;
-#endif	
 
 	share_ops = locking_slow_init(read_only);
 	if (!share_ops) {
