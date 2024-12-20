@@ -156,37 +156,6 @@ void add_session_user(char *user)
 }
 
 /****************************************************************************
-check for authority to login to a service with a given username/password
-****************************************************************************/
-BOOL authorise_login(int snum, char *user, char *password, int pwlen,
-                     BOOL *guest, BOOL *force, uint16 vuid)
-{
-	BOOL ok = False;
-
-#if DEBUG_PASSWORD
-	DEBUG(100,
-	      ("checking authorisation on user=%s pass=%s\n", user, password));
-#endif
-
-	/* we only support guest */
-	{
-		fstring guestname;
-		StrnCpy(guestname, lp_guestaccount(snum),
-		        sizeof(guestname) - 1);
-		if (Get_Pwnam(guestname, True)) {
-			pstrcpy(user, guestname);
-			ok = True;
-			DEBUG(3, ("ACCEPTED: guest account and guest ok\n"));
-		} else
-			DEBUG(0, ("Invalid guest account %s??\n", guestname));
-		*guest = True;
-		*force = True;
-	}
-
-	return (ok);
-}
-
-/****************************************************************************
 read the a hosts.equiv or .rhosts file and check if it
 allows this user from this machine
 ****************************************************************************/

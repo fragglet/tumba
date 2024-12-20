@@ -342,8 +342,6 @@ void invalidate_vuid(uint16 vuid);
 uint16 register_vuid(int uid, int gid, char *unix_name, char *requested_name,
                      BOOL guest);
 void add_session_user(char *user);
-BOOL authorise_login(int snum, char *user, char *password, int pwlen,
-                     BOOL *guest, BOOL *force, uint16 vuid);
 BOOL check_hosts_equiv(char *user);
 struct cli_state *server_client(void);
 BOOL server_validate(char *user, char *domain, char *pass, int passlen,

