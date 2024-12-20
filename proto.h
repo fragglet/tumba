@@ -374,10 +374,6 @@ struct shmem_ops *smb_shm_open(int ronly);
 
 int vslprintf(char *str, int n, char *format, va_list ap);
 
-/*The following definitions come from  smberr.c  */
-
-char *smb_errstr(char *inbuf);
-
 /*The following definitions come from  status.c  */
 
 void Ucrit_addUsername(pstring username);
