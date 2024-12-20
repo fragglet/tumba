@@ -125,7 +125,6 @@ Here come some platform specific sections
 #include <sys/vfs.h>
 #ifdef GLIBC2
 #define _LINUX_C_LIB_VERSION_MAJOR 6
-#include <crypt.h>
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
 #include <rpcsvc/ypclnt.h>
@@ -146,13 +145,6 @@ Here come some platform specific sections
 /* SETFS disabled until we can check on some bug reports */
 #if _LINUX_C_LIB_VERSION_MAJOR >= 5
 #define USE_SETFS
-#endif
-#endif
-#ifdef SHADOW_PWD
-#if _LINUX_C_LIB_VERSION_MAJOR < 5
-#ifndef crypt
-#define crypt pw_encrypt
-#endif
 #endif
 #endif
 #endif

@@ -410,16 +410,6 @@ struct shmem_ops *smb_shm_open(int ronly);
 
 int vslprintf(char *str, int n, char *format, va_list ap);
 
-/*The following definitions come from  smbdes.c  */
-
-void E_P16(unsigned char *p14, unsigned char *p16);
-void E_P24(unsigned char *p21, unsigned char *c8, unsigned char *p24);
-void cred_hash2(unsigned char *out, unsigned char *in, unsigned char *key);
-
-/*The following definitions come from  smbencrypt.c  */
-
-void SMBencrypt(uchar *passwd, uchar *c8, uchar *p24);
-
 /*The following definitions come from  smberr.c  */
 
 char *smb_errstr(char *inbuf);
