@@ -185,8 +185,6 @@ typedef struct {
 	char *szDontdescend;
 	char *szHostsallow;
 	char *szHostsdeny;
-	char *szMagicScript;
-	char *szMagicOutput;
 	char *szMangledMap;
 	char *szVetoFiles;
 	char *szHideFiles;
@@ -254,8 +252,6 @@ static service sDefault = {
     NULL,       /* szDontdescend */
     NULL,       /* szHostsallow */
     NULL,       /* szHostsdeny */
-    NULL,       /* szMagicScript */
-    NULL,       /* szMagicOutput */
     NULL,       /* szMangledMap */
     NULL,       /* szVetoFiles */
     NULL,       /* szHideFiles */
@@ -486,8 +482,6 @@ static struct parm_struct {
     {"hosts deny", P_STRING, P_LOCAL, &sDefault.szHostsdeny, NULL, NULL},
     {"deny hosts", P_STRING, P_LOCAL, &sDefault.szHostsdeny, NULL, NULL},
     {"dont descend", P_STRING, P_LOCAL, &sDefault.szDontdescend, NULL, NULL},
-    {"magic script", P_STRING, P_LOCAL, &sDefault.szMagicScript, NULL, NULL},
-    {"magic output", P_STRING, P_LOCAL, &sDefault.szMagicOutput, NULL, NULL},
     {"mangled map", P_STRING, P_LOCAL, &sDefault.szMangledMap, NULL, NULL},
     {"delete readonly", P_BOOL, P_LOCAL, &sDefault.bDeleteReadonly, NULL, NULL},
     {"dos filetimes", P_BOOL, P_LOCAL, &sDefault.bDosFiletimes, NULL, NULL},
@@ -744,8 +738,6 @@ FN_LOCAL_STRING(lp_queuepausecommand, szQueuepausecommand)
 FN_LOCAL_STRING(lp_queueresumecommand, szQueueresumecommand)
 FN_LOCAL_STRING(lp_hostsallow, szHostsallow)
 FN_LOCAL_STRING(lp_hostsdeny, szHostsdeny)
-FN_LOCAL_STRING(lp_magicscript, szMagicScript)
-FN_LOCAL_STRING(lp_magicoutput, szMagicOutput)
 FN_LOCAL_STRING(lp_comment, comment)
 FN_LOCAL_STRING(lp_force_user, force_user)
 FN_LOCAL_STRING(lp_force_group, force_group)

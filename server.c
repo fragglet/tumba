@@ -1335,46 +1335,6 @@ void sync_file(int cnum, int fnum)
 }
 
 /****************************************************************************
-run a file if it is a magic script
-****************************************************************************/
-static void check_magic(int fnum, int cnum)
-{
-	if (!*lp_magicscript(SNUM(cnum)))
-		return;
-
-	DEBUG(5, ("checking magic for %s\n", Files[fnum].name));
-
-	{
-		char *p;
-		if (!(p = strrchr(Files[fnum].name, '/')))
-			p = Files[fnum].name;
-		else
-			p++;
-
-		if (!strequal(lp_magicscript(SNUM(cnum)), p))
-			return;
-	}
-
-	{
-		int ret;
-		pstring magic_output;
-		pstring fname;
-		pstrcpy(fname, Files[fnum].name);
-
-		if (*lp_magicoutput(SNUM(cnum)))
-			pstrcpy(magic_output, lp_magicoutput(SNUM(cnum)));
-		else
-			slprintf(magic_output, sizeof(fname) - 1, "%s.out",
-			         fname);
-
-		chmod(fname, 0755);
-		ret = smbrun(fname, magic_output, False);
-		DEBUG(3, ("Invoking magic command %s gave %d\n", fname, ret));
-		unlink(fname);
-	}
-}
-
-/****************************************************************************
 close a file - possibly invalidating the read prediction
 
 If normal_close is 1 then this came from a normal SMBclose (or equivalent)
@@ -1416,10 +1376,6 @@ void close_file(int fnum, BOOL normal_close)
 
 	if (lp_share_modes(SNUM(cnum)))
 		unlock_share_entry(cnum, dev, inode, token);
-
-	/* check for magic scripts */
-	if (normal_close)
-		check_magic(fnum, cnum);
 
 	if (fs_p->granted_oplock == True)
 		global_oplocks_open--;

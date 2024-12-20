@@ -123,8 +123,6 @@ char *lp_queuepausecommand(int);
 char *lp_queueresumecommand(int);
 char *lp_hostsallow(int);
 char *lp_hostsdeny(int);
-char *lp_magicscript(int);
-char *lp_magicoutput(int);
 char *lp_comment(int);
 char *lp_force_user(int);
 char *lp_force_group(int);
