@@ -2582,13 +2582,6 @@ static void process_smb(char *inbuf, char *outbuf)
 	DEBUG(3, ("%s Transaction %d of length %d\n", timestring(), trans_num,
 	          nread));
 
-#ifdef WITH_VTP
-	if (trans_num == 1 && VT_Check(inbuf)) {
-		VT_Process();
-		return;
-	}
-#endif
-
 	if (msg_type == 0)
 		show_msg(inbuf);
 	else if (msg_type == 0x85)

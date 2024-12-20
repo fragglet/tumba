@@ -115,14 +115,6 @@ GUESTACCOUNT = nobody
 # KRB4_LIBS = -L$(KRB4_BASE)/lib -lkrb -ldes -lresolv
 
 ######################################
-# VTP-Support
-#
-# uncomment the following two lines to enable VTP-Support
-#VTP_FLAGS = -DWITH_VTP
-#VTP_OBJ = vt_mode.o
-######################################
-
-######################################
 # WHICH AWK? awk is used for automatic prototype generation. GNU awk works
 # where inferior awks don't. Sun is one manufacturer who supplies both
 # a broken awk called 'awk' and a fixed one called 'nawk'. mkproto.awk will
