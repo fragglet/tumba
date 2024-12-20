@@ -53,8 +53,6 @@ BOOL cli_qpathinfo2(struct cli_state *cli, char *fname, time_t *c_time,
                     uint32 *size);
 BOOL cli_qfileinfo(struct cli_state *cli, int fnum, time_t *c_time,
                    time_t *a_time, time_t *m_time, uint32 *size);
-BOOL cli_oem_change_password(struct cli_state *cli, char *user,
-                             char *new_password, char *old_password);
 BOOL cli_negprot(struct cli_state *cli);
 BOOL cli_session_request(struct cli_state *cli, char *host, int name_type,
                          char *myname);
@@ -65,20 +63,6 @@ char *cli_errstr(struct cli_state *cli);
 void cli_error(struct cli_state *cli, int *eclass, int *num);
 void cli_sockopt(struct cli_state *cli, char *options);
 int cli_setpid(struct cli_state *cli, int pid);
-
-/*The following definitions come from  credentials.c  */
-
-char *credstr(uchar *cred);
-void cred_session_key(DOM_CHAL *clnt_chal, DOM_CHAL *srv_chal, char *pass,
-                      uchar session_key[8]);
-void cred_create(uchar session_key[8], DOM_CHAL *stor_cred, UTIME timestamp,
-                 DOM_CHAL *cred);
-int cred_assert(DOM_CHAL *cred, uchar session_key[8], DOM_CHAL *stored_cred,
-                UTIME timestamp);
-BOOL clnt_deal_with_creds(uchar sess_key[8], DOM_CRED *sto_clnt_cred,
-                          DOM_CRED *rcv_srv_cred);
-BOOL deal_with_creds(uchar sess_key[8], DOM_CRED *sto_clnt_cred,
-                     DOM_CRED *rcv_clnt_cred, DOM_CRED *rtn_srv_cred);
 
 /*The following definitions come from  dir.c  */
 
