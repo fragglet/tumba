@@ -663,14 +663,6 @@ static void init_globals(void)
 	Globals.shmem_size = SHMEM_SIZE;
 	Globals.announce_as = ANNOUNCE_AS_NT;
 	Globals.bUnixRealname = False;
-#if (defined(NETGROUP) && defined(AUTOMOUNT))
-	Globals.bNISHomeMap = False;
-#ifdef NISPLUS
-	string_set(&Globals.szNISHomeMapName, "auto_home.org_dir");
-#else
-	string_set(&Globals.szNISHomeMapName, "auto.home");
-#endif
-#endif
 	Globals.client_code_page = DEFAULT_CLIENT_CODE_PAGE;
 	Globals.bTimeServer = False;
 	Globals.bBindInterfacesOnly = False;

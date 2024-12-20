@@ -21,9 +21,6 @@
 
 #include "includes.h"
 
-#if (defined(NETGROUP) && defined(AUTOMOUNT))
-#include "rpcsvc/ypclnt.h"
-#endif
 
 extern int DEBUGLEVEL;
 extern int Protocol;

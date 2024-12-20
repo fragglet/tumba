@@ -21,13 +21,6 @@
 
 #include "includes.h"
 
-#if (defined(NETGROUP) && defined(AUTOMOUNT))
-#ifdef NISPLUS
-#include <rpcsvc/nis.h>
-#else
-#include "rpcsvc/ypclnt.h"
-#endif
-#endif
 
 pstring scope = "";
 
@@ -3585,139 +3578,6 @@ char *client_addr(void)
 	return addr_buf;
 }
 
-#if (defined(NETGROUP) && defined(AUTOMOUNT))
-/******************************************************************
- Remove any mount options such as -rsize=2048,wsize=2048 etc.
- Based on a fix from <Thomas.Hepper@icem.de>.
-*******************************************************************/
-
-static void strip_mount_options(pstring *str)
-{
-	if (**str == '-') {
-		char *p = *str;
-		while (*p && !isspace(*p))
-			p++;
-		while (*p && isspace(*p))
-			p++;
-		if (*p) {
-			pstring tmp_str;
-
-			pstrcpy(tmp_str, p);
-			pstrcpy(*str, tmp_str);
-		}
-	}
-}
-
-/*******************************************************************
- Patch from jkf@soton.ac.uk
- Split Luke's automount_server into YP lookup and string splitter
- so can easily implement automount_path().
- As we may end up doing both, cache the last YP result.
-*******************************************************************/
-
-#ifdef NISPLUS
-static char *automount_lookup(char *user_name)
-{
-	static fstring last_key = "";
-	static pstring last_value = "";
-
-	char *nis_map = (char *) lp_nis_home_map_name();
-
-	char nis_domain[NIS_MAXNAMELEN + 1];
-	char buffer[NIS_MAXATTRVAL + 1];
-	nis_result *result;
-	nis_object *object;
-	entry_obj *entry;
-
-	strncpy(nis_domain, (char *) nis_local_directory(), NIS_MAXNAMELEN);
-	nis_domain[NIS_MAXNAMELEN] = '\0';
-
-	DEBUG(5, ("NIS+ Domain: %s\n", nis_domain));
-
-	if (strcmp(user_name, last_key)) {
-		slprintf(buffer, sizeof(buffer) - 1, "[%s=%s]%s.%s", "key",
-		         user_name, nis_map, nis_domain);
-		DEBUG(5, ("NIS+ querystring: %s\n", buffer));
-
-		if (result = nis_list(buffer, RETURN_RESULT, NULL, NULL)) {
-			if (result->status != NIS_SUCCESS) {
-				DEBUG(3, ("NIS+ query failed: %s\n",
-				          nis_sperrno(result->status)));
-				fstrcpy(last_key, "");
-				pstrcpy(last_value, "");
-			} else {
-				object = result->objects.objects_val;
-				if (object->zo_data.zo_type == ENTRY_OBJ) {
-					entry =
-					    &object->zo_data.objdata_u.en_data;
-					DEBUG(5, ("NIS+ entry type: %s\n",
-					          entry->en_type));
-					DEBUG(3, ("NIS+ result: %s\n",
-					          entry->en_cols.en_cols_val[1]
-					              .ec_value.ec_value_val));
-
-					pstrcpy(last_value,
-					        entry->en_cols.en_cols_val[1]
-					            .ec_value.ec_value_val);
-					string_sub(last_value, "&", user_name);
-					fstrcpy(last_key, user_name);
-				}
-			}
-		}
-		nis_freeresult(result);
-	}
-
-	strip_mount_options(&last_value);
-
-	DEBUG(4, ("NIS+ Lookup: %s resulted in %s\n", user_name, last_value));
-	return last_value;
-}
-#else  /* NISPLUS */
-static char *automount_lookup(char *user_name)
-{
-	static fstring last_key = "";
-	static pstring last_value = "";
-
-	int nis_error;      /* returned by yp all functions */
-	char *nis_result;   /* yp_match inits this */
-	int nis_result_len; /* and set this */
-	char *nis_domain;   /* yp_get_default_domain inits this */
-	char *nis_map = (char *) lp_nis_home_map_name();
-
-	if ((nis_error = yp_get_default_domain(&nis_domain)) != 0) {
-		DEBUG(3, ("YP Error: %s\n", yperr_string(nis_error)));
-		return last_value;
-	}
-
-	DEBUG(5, ("NIS Domain: %s\n", nis_domain));
-
-	if (!strcmp(user_name, last_key)) {
-		nis_result = last_value;
-		nis_result_len = strlen(last_value);
-		nis_error = 0;
-	} else {
-		if ((nis_error = yp_match(nis_domain, nis_map, user_name,
-		                          strlen(user_name), &nis_result,
-		                          &nis_result_len)) != 0) {
-			DEBUG(3, ("YP Error: \"%s\" while looking up \"%s\" in "
-			          "map \"%s\"\n",
-			          yperr_string(nis_error), user_name, nis_map));
-		}
-		if (!nis_error && nis_result_len >= sizeof(pstring)) {
-			nis_result_len = sizeof(pstring) - 1;
-		}
-		fstrcpy(last_key, user_name);
-		strncpy(last_value, nis_result, nis_result_len);
-		last_value[nis_result_len] = '\0';
-	}
-
-	strip_mount_options(&last_value);
-
-	DEBUG(4, ("YP Lookup: %s resulted in %s\n", user_name, last_value));
-	return last_value;
-}
-#endif /* NISPLUS */
-#endif
 
 /*******************************************************************
  Patch from jkf@soton.ac.uk
@@ -3729,27 +3589,8 @@ char *automount_server(char *user_name)
 {
 	static pstring server_name;
 
-#if (defined(NETGROUP) && defined(AUTOMOUNT))
-	int home_server_len;
-
-	/* set to default of local machine */
-	pstrcpy(server_name, local_machine);
-
-	if (lp_nis_home_map()) {
-		char *automount_value = automount_lookup(user_name);
-		home_server_len = strcspn(automount_value, ":");
-		DEBUG(5, ("NIS lookup succeeded.  Home server length: %d\n",
-		          home_server_len));
-		if (home_server_len > sizeof(pstring)) {
-			home_server_len = sizeof(pstring);
-		}
-		strncpy(server_name, automount_value, home_server_len);
-		server_name[home_server_len] = '\0';
-	}
-#else
 	/* use the local machine name instead of the auto-map server */
 	pstrcpy(server_name, local_machine);
-#endif
 
 	DEBUG(4, ("Home server: %s\n", server_name));
 
@@ -3765,27 +3606,9 @@ char *automount_path(char *user_name)
 {
 	static pstring server_path;
 
-#if (defined(NETGROUP) && defined(AUTOMOUNT))
-	char *home_path_start;
-
-	/* set to default of no string */
-	server_path[0] = 0;
-
-	if (lp_nis_home_map()) {
-		char *automount_value = automount_lookup(user_name);
-		home_path_start = strchr(automount_value, ':');
-		if (home_path_start != NULL) {
-			DEBUG(5,
-			      ("NIS lookup succeeded.  Home path is: %s\n",
-			       home_path_start ? (home_path_start + 1) : ""));
-			pstrcpy(server_path, home_path_start + 1);
-		}
-	}
-#else
 	/* use the passwd entry instead of the auto-map server entry */
 	/* pstrcpy() copes with get_home_dir() returning NULL */
 	pstrcpy(server_path, get_home_dir(user_name));
-#endif
 
 	DEBUG(4, ("Home server path: %s\n", server_path));
 
