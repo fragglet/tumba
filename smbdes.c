@@ -291,20 +291,6 @@ void E_P24(unsigned char *p21, unsigned char *c8, unsigned char *p24)
 	smbhash(p24 + 16, c8, p21 + 14, 1);
 }
 
-void E_old_pw_hash(unsigned char *p14, unsigned char *in, unsigned char *out)
-{
-	smbhash(out, in, p14, 1);
-	smbhash(out + 8, in + 8, p14 + 7, 1);
-}
-
-void cred_hash1(unsigned char *out, unsigned char *in, unsigned char *key)
-{
-	unsigned char buf[8];
-
-	smbhash(buf, in, key, 1);
-	smbhash(out, buf, key + 9, 1);
-}
-
 void cred_hash2(unsigned char *out, unsigned char *in, unsigned char *key)
 {
 	unsigned char buf[8];
@@ -313,42 +299,4 @@ void cred_hash2(unsigned char *out, unsigned char *in, unsigned char *key)
 	smbhash(buf, in, key, 1);
 	key2[0] = key[7];
 	smbhash(out, buf, key2, 1);
-}
-
-void SamOEMhash(unsigned char *data, unsigned char *key, int val)
-{
-	unsigned char s_box[256];
-	unsigned char index_i = 0;
-	unsigned char index_j = 0;
-	unsigned char j = 0;
-	int ind;
-
-	for (ind = 0; ind < 256; ind++) {
-		s_box[ind] = (unsigned char) ind;
-	}
-
-	for (ind = 0; ind < 256; ind++) {
-		unsigned char tc;
-
-		j += (s_box[ind] + key[ind % 16]);
-
-		tc = s_box[ind];
-		s_box[ind] = s_box[j];
-		s_box[j] = tc;
-	}
-
-	for (ind = 0; ind < (val ? 516 : 16); ind++) {
-		unsigned char tc;
-		unsigned char t;
-
-		index_i++;
-		index_j += s_box[index_i];
-
-		tc = s_box[index_i];
-		s_box[index_i] = s_box[index_j];
-		s_box[index_j] = tc;
-
-		t = s_box[index_i] + s_box[index_j];
-		data[ind] = data[ind] ^ s_box[t];
-	}
 }
