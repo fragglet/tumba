@@ -136,7 +136,6 @@ typedef struct {
 	char *szCodingSystem;
 	char *szInterfaces;
 	char *szSocketAddress;
-	char *szAnnounceVersion; /* This is initialised in init_globals */
 	char *szNetbiosAliases;
 	char *szDomainSID;
 	char *szDomainOtherSIDs;
@@ -331,7 +330,6 @@ static int iNumServices = 0;
 static int iServiceIndex = 0;
 static BOOL bInGlobalSection = True;
 static BOOL bGlobalOnly = False;
-static int default_server_announce;
 
 #define NUMPARAMETERS (sizeof(parm_table) / sizeof(struct parm_struct))
 
@@ -341,8 +339,6 @@ static BOOL handle_include(char *pszParmValue, char **ptr);
 static BOOL handle_copy(char *pszParmValue, char **ptr);
 static BOOL handle_character_set(char *pszParmValue, char **ptr);
 static BOOL handle_coding_system(char *pszParmValue, char **ptr);
-
-static void set_default_server_announce_type(void);
 
 struct enum_list {
 	int value;
@@ -430,8 +426,6 @@ static struct parm_struct {
     {"character set", P_STRING, P_GLOBAL, &Globals.szCharacterSet,
      handle_character_set, NULL},
     {"socket address", P_STRING, P_GLOBAL, &Globals.szSocketAddress, NULL,
-     NULL},
-    {"announce version", P_STRING, P_GLOBAL, &Globals.szAnnounceVersion, NULL,
      NULL},
     {"max log size", P_INTEGER, P_GLOBAL, &Globals.max_log_size, NULL, NULL},
     {"mangled stack", P_INTEGER, P_GLOBAL, &Globals.mangled_stack, NULL, NULL},
@@ -592,7 +586,6 @@ static void init_globals(void)
 	string_set(&Globals.szServerString, s);
 	slprintf(s, sizeof(s) - 1, "%d.%d", DEFAULT_MAJOR_VERSION,
 	         DEFAULT_MINOR_VERSION);
-	string_set(&Globals.szAnnounceVersion, s);
 
 	string_set(&Globals.szNameResolveOrder, "lmhosts host wins bcast");
 
@@ -779,7 +772,6 @@ FN_GLOBAL_STRING(lp_username_map, &Globals.szUsernameMap)
 FN_GLOBAL_STRING(lp_character_set, &Globals.szCharacterSet)
 FN_GLOBAL_STRING(lp_interfaces, &Globals.szInterfaces)
 FN_GLOBAL_STRING(lp_socket_address, &Globals.szSocketAddress)
-FN_GLOBAL_STRING(lp_announce_version, &Globals.szAnnounceVersion)
 FN_GLOBAL_STRING(lp_netbios_aliases, &Globals.szNetbiosAliases)
 FN_GLOBAL_STRING(lp_driverfile, &Globals.szDriverFile)
 
@@ -1885,8 +1877,6 @@ BOOL lp_load(char *pszFname, BOOL global_only)
 
 	lp_add_ipc();
 
-	set_default_server_announce_type();
-
 	bLoaded = True;
 
 	return (bRetval);
@@ -1954,22 +1944,6 @@ char *volume_label(int snum)
 }
 
 /*******************************************************************
- Set the server type we will announce as via nmbd.
-********************************************************************/
-static void set_default_server_announce_type()
-{
-	default_server_announce = (SV_TYPE_WORKSTATION | SV_TYPE_SERVER |
-	                           SV_TYPE_SERVER_UNIX | SV_TYPE_PRINTQ_SERVER);
-	if (lp_announce_as() == ANNOUNCE_AS_NT)
-		default_server_announce |= (SV_TYPE_SERVER_NT | SV_TYPE_NT);
-	else if (lp_announce_as() == ANNOUNCE_AS_WIN95)
-		default_server_announce |= SV_TYPE_WIN95_PLUS;
-	else if (lp_announce_as() == ANNOUNCE_AS_WFW)
-		default_server_announce |= SV_TYPE_WFW;
-	default_server_announce |= (lp_time_server() ? SV_TYPE_TIME_SOURCE : 0);
-}
-
-/*******************************************************************
 rename a service
 ********************************************************************/
 void lp_rename_service(int snum, char *new_name)
@@ -1997,61 +1971,6 @@ void lp_copy_service(int snum, char *new_name)
 		if (snum >= 0)
 			lp_do_parameter(snum, "copy", oldname);
 	}
-}
-
-/*******************************************************************
- Get the default server type we will announce as via nmbd.
-********************************************************************/
-int lp_default_server_announce(void)
-{
-	return default_server_announce;
-}
-
-/*******************************************************************
- Split the announce version into major and minor numbers.
-********************************************************************/
-int lp_major_announce_version(void)
-{
-	static BOOL got_major = False;
-	static int major_version = DEFAULT_MAJOR_VERSION;
-	char *vers;
-	char *p;
-
-	if (got_major)
-		return major_version;
-
-	got_major = True;
-	if ((vers = lp_announce_version()) == NULL)
-		return major_version;
-
-	if ((p = strchr(vers, '.')) == 0)
-		return major_version;
-
-	*p = '\0';
-	major_version = atoi(vers);
-	return major_version;
-}
-
-int lp_minor_announce_version(void)
-{
-	static BOOL got_minor = False;
-	static int minor_version = DEFAULT_MINOR_VERSION;
-	char *vers;
-	char *p;
-
-	if (got_minor)
-		return minor_version;
-
-	got_minor = True;
-	if ((vers = lp_announce_version()) == NULL)
-		return minor_version;
-
-	if ((p = strchr(vers, '.')) == 0)
-		return minor_version;
-
-	p++;
-	minor_version = atoi(p);
-	return minor_version;
 }
 
 /***********************************************************

@@ -135,7 +135,6 @@ char *lp_username_map(void);
 char *lp_character_set(void);
 char *lp_interfaces(void);
 char *lp_socket_address(void);
-char *lp_announce_version(void);
 char *lp_netbios_aliases(void);
 char *lp_driverfile(void);
 BOOL lp_local_master(void);
@@ -252,9 +251,6 @@ char *volume_label(int snum);
 void lp_rename_service(int snum, char *new_name);
 void lp_remove_service(int snum);
 void lp_copy_service(int snum, char *new_name);
-int lp_default_server_announce(void);
-int lp_major_announce_version(void);
-int lp_minor_announce_version(void);
 void lp_set_name_resolve_order(char *new_order);
 
 /*The following definitions come from  locking.c  */

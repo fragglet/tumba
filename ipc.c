@@ -237,36 +237,6 @@ static int get_counter(char **p)
 	}
 }
 
-static int getlen(char *p)
-{
-	int n = 0;
-	if (!p)
-		return (0);
-	while (*p) {
-		switch (*p++) {
-		case 'W': /* word (2 byte) */
-			n += 2;
-			break;
-		case 'N': /* count of substructures (word) at end */
-			n += 2;
-			break;
-		case 'D': /* double word (4 byte) */
-		case 'z': /* offset to zero terminated string (4 byte) */
-		case 'l': /* offset to user data (4 byte) */
-			n += 4;
-			break;
-		case 'b': /* offset to data (with counter) (4 byte) */
-			n += 4;
-			get_counter(&p);
-			break;
-		case 'B': /* byte (with optional counter) */
-			n += get_counter(&p);
-			break;
-		}
-	}
-	return n;
-}
-
 #ifdef __STDC__
 static int package(struct pack_desc *p, ...)
 {
@@ -1117,7 +1087,7 @@ static BOOL api_RNetServerGetInfo(int cnum, uint16 vuid, char *param,
 		struct srv_info_struct *servers = NULL;
 		int i, count;
 		pstring comment;
-		uint32 servertype = lp_default_server_announce();
+		uint32 servertype = SV_TYPE_WIN95_PLUS;
 
 		pstrcpy(comment, lp_serverstring());
 
@@ -1132,8 +1102,8 @@ static BOOL api_RNetServerGetInfo(int cnum, uint16 vuid, char *param,
 		if (servers)
 			free(servers);
 
-		SCVAL(p, 0, lp_major_announce_version());
-		SCVAL(p, 1, lp_minor_announce_version());
+		SCVAL(p, 0, DEFAULT_MAJOR_VERSION);
+		SCVAL(p, 1, DEFAULT_MINOR_VERSION);
 		SIVAL(p, 2, servertype);
 
 		if (mdrcnt == struct_len) {
@@ -1211,9 +1181,9 @@ static BOOL api_NetWkstaGetInfo(int cnum, uint16 vuid, char *param, char *data,
 	p += 4;
 
 	SCVAL(p, 0,
-	      lp_major_announce_version()); /* system version - e.g 4 in 4.1 */
+	      DEFAULT_MAJOR_VERSION); /* system version - e.g 4 in 4.1 */
 	SCVAL(p, 1,
-	      lp_minor_announce_version()); /* system version - e.g .1 in 4.1 */
+	      DEFAULT_MINOR_VERSION); /* system version - e.g .1 in 4.1 */
 	p += 2;
 
 	SIVAL(p, 0, PTR_DIFF(p2, *rdata));
