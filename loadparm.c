@@ -135,8 +135,6 @@ typedef struct {
 	char *szSmbrun;
 	char *szCodingSystem;
 	char *szInterfaces;
-	char *szRemoteAnnounce;
-	char *szRemoteBrowseSync;
 	char *szSocketAddress;
 	char *szAnnounceVersion; /* This is initialised in init_globals */
 	char *szNetbiosAliases;
@@ -165,8 +163,6 @@ typedef struct {
 	int lm_interval;
 	int shmem_size;
 	int client_code_page;
-	int announce_as; /* This is initialised in init_globals */
-	BOOL bDNSproxy;
 	BOOL bLocalMaster;
 	BOOL bPreferredMaster;
 	BOOL bStripDot;
@@ -178,7 +174,6 @@ typedef struct {
 	BOOL bSyslogOnly;
 	BOOL bBrowseList;
 	BOOL bUnixRealname;
-	BOOL bTimeServer;
 	BOOL bBindInterfacesOnly;
 	BOOL bNetWkstaUserLogon;
 	BOOL bOleLockingCompat;
@@ -393,8 +388,6 @@ static struct parm_struct {
     {"protocol", P_ENUM, P_GLOBAL, &Globals.maxprotocol, NULL, enum_protocol},
     {"security", P_ENUM, P_GLOBAL, &Globals.security, NULL, enum_security},
     {"max disk size", P_INTEGER, P_GLOBAL, &Globals.maxdisksize, NULL, NULL},
-    {"announce as", P_ENUM, P_GLOBAL, &Globals.announce_as, NULL,
-     enum_announce_as},
     {"getwd cache", P_BOOL, P_GLOBAL, &use_getwd_cache, NULL, NULL},
     {"read prediction", P_BOOL, P_GLOBAL, &Globals.bReadPrediction, NULL, NULL},
     {"read bmpx", P_BOOL, P_GLOBAL, &Globals.bReadbmpx, NULL, NULL},
@@ -436,10 +429,6 @@ static struct parm_struct {
     {"username map", P_STRING, P_GLOBAL, &Globals.szUsernameMap, NULL, NULL},
     {"character set", P_STRING, P_GLOBAL, &Globals.szCharacterSet,
      handle_character_set, NULL},
-    {"remote announce", P_STRING, P_GLOBAL, &Globals.szRemoteAnnounce, NULL,
-     NULL},
-    {"remote browse sync", P_STRING, P_GLOBAL, &Globals.szRemoteBrowseSync,
-     NULL, NULL},
     {"socket address", P_STRING, P_GLOBAL, &Globals.szSocketAddress, NULL,
      NULL},
     {"announce version", P_STRING, P_GLOBAL, &Globals.szAnnounceVersion, NULL,
@@ -469,7 +458,6 @@ static struct parm_struct {
     {"lm announce", P_ENUM, P_GLOBAL, &Globals.lm_announce, NULL,
      enum_lm_announce},
     {"lm interval", P_INTEGER, P_GLOBAL, &Globals.lm_interval, NULL, NULL},
-    {"dns proxy", P_BOOL, P_GLOBAL, &Globals.bDNSproxy, NULL, NULL},
     {"preferred master", P_BOOL, P_GLOBAL, &Globals.bPreferredMaster, NULL,
      NULL},
     {"prefered master", P_BOOL, P_GLOBAL, &Globals.bPreferredMaster, NULL,
@@ -477,7 +465,6 @@ static struct parm_struct {
     {"local master", P_BOOL, P_GLOBAL, &Globals.bLocalMaster, NULL, NULL},
     {"browse list", P_BOOL, P_GLOBAL, &Globals.bBrowseList, NULL, NULL},
     {"unix realname", P_BOOL, P_GLOBAL, &Globals.bUnixRealname, NULL, NULL},
-    {"time server", P_BOOL, P_GLOBAL, &Globals.bTimeServer, NULL, NULL},
     {"ole locking compatibility", P_BOOL, P_GLOBAL, &Globals.bOleLockingCompat,
      NULL, NULL},
     {"-valid", P_BOOL, P_LOCAL, &sDefault.valid, NULL, NULL},
@@ -634,10 +621,8 @@ static void init_globals(void)
 	Globals.lm_announce = 2; /* = Auto: send only if LM clients found */
 	Globals.lm_interval = 60;
 	Globals.shmem_size = SHMEM_SIZE;
-	Globals.announce_as = ANNOUNCE_AS_NT;
 	Globals.bUnixRealname = False;
 	Globals.client_code_page = DEFAULT_CLIENT_CODE_PAGE;
-	Globals.bTimeServer = False;
 	Globals.bBindInterfacesOnly = False;
 	Globals.bNetWkstaUserLogon =
 	    False; /* This is now set to false by default as
@@ -660,8 +645,6 @@ static void init_globals(void)
 	Globals.bPreferredMaster = False;
 	Globals.bLocalMaster = True;
 	Globals.bBrowseList = True;
-
-	Globals.bDNSproxy = True;
 
 	/*
 	 * This must be done last as it checks the value in
@@ -794,15 +777,12 @@ FN_GLOBAL_STRING(lp_name_resolve_order, &Globals.szNameResolveOrder)
 FN_GLOBAL_STRING(lp_workgroup, &Globals.szWorkGroup)
 FN_GLOBAL_STRING(lp_username_map, &Globals.szUsernameMap)
 FN_GLOBAL_STRING(lp_character_set, &Globals.szCharacterSet)
-FN_GLOBAL_STRING(lp_remote_announce, &Globals.szRemoteAnnounce)
-FN_GLOBAL_STRING(lp_remote_browse_sync, &Globals.szRemoteBrowseSync)
 FN_GLOBAL_STRING(lp_interfaces, &Globals.szInterfaces)
 FN_GLOBAL_STRING(lp_socket_address, &Globals.szSocketAddress)
 FN_GLOBAL_STRING(lp_announce_version, &Globals.szAnnounceVersion)
 FN_GLOBAL_STRING(lp_netbios_aliases, &Globals.szNetbiosAliases)
 FN_GLOBAL_STRING(lp_driverfile, &Globals.szDriverFile)
 
-FN_GLOBAL_BOOL(lp_dns_proxy, &Globals.bDNSproxy)
 FN_GLOBAL_BOOL(lp_local_master, &Globals.bLocalMaster)
 FN_GLOBAL_BOOL(lp_preferred_master, &Globals.bPreferredMaster)
 FN_GLOBAL_BOOL(lp_use_rhosts, &Globals.bUseRhosts)
@@ -815,7 +795,6 @@ FN_GLOBAL_BOOL(lp_strip_dot, &Globals.bStripDot)
 FN_GLOBAL_BOOL(lp_syslog_only, &Globals.bSyslogOnly)
 FN_GLOBAL_BOOL(lp_browse_list, &Globals.bBrowseList)
 FN_GLOBAL_BOOL(lp_unix_realname, &Globals.bUnixRealname)
-FN_GLOBAL_BOOL(lp_time_server, &Globals.bTimeServer)
 FN_GLOBAL_BOOL(lp_bind_interfaces_only, &Globals.bBindInterfacesOnly)
 FN_GLOBAL_BOOL(lp_net_wksta_user_logon, &Globals.bNetWkstaUserLogon)
 FN_GLOBAL_BOOL(lp_ole_locking_compat, &Globals.bOleLockingCompat)
@@ -839,7 +818,6 @@ FN_GLOBAL_INTEGER(lp_security, &Globals.security)
 FN_GLOBAL_INTEGER(lp_maxdisksize, &Globals.maxdisksize)
 FN_GLOBAL_INTEGER(lp_syslog, &Globals.syslog)
 FN_GLOBAL_INTEGER(lp_client_code_page, &Globals.client_code_page)
-FN_GLOBAL_INTEGER(lp_announce_as, &Globals.announce_as)
 FN_GLOBAL_INTEGER(lp_lm_announce, &Globals.lm_announce)
 FN_GLOBAL_INTEGER(lp_lm_interval, &Globals.lm_interval)
 
