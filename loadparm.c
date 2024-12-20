@@ -166,7 +166,6 @@ typedef struct {
 	BOOL bBrowseList;
 	BOOL bUnixRealname;
 	BOOL bBindInterfacesOnly;
-	BOOL bNetWkstaUserLogon;
 	BOOL bOleLockingCompat;
 } global;
 
@@ -371,8 +370,6 @@ static struct parm_struct {
     {"strip dot", P_BOOL, P_GLOBAL, &Globals.bStripDot, NULL, NULL},
     {"interfaces", P_STRING, P_GLOBAL, &Globals.szInterfaces, NULL, NULL},
     {"bind interfaces only", P_BOOL, P_GLOBAL, &Globals.bBindInterfacesOnly,
-     NULL, NULL},
-    {"networkstation user login", P_BOOL, P_GLOBAL, &Globals.bNetWkstaUserLogon,
      NULL, NULL},
     {"password server", P_STRING, P_GLOBAL, &Globals.szPasswordServer, NULL,
      NULL},
@@ -580,9 +577,6 @@ static void init_globals(void)
 	Globals.bUnixRealname = False;
 	Globals.client_code_page = DEFAULT_CLIENT_CODE_PAGE;
 	Globals.bBindInterfacesOnly = False;
-	Globals.bNetWkstaUserLogon =
-	    False; /* This is now set to false by default as
-	              the code in password.c protects us from this bug. */
 	Globals.bOleLockingCompat = True;
 
 	/* these parameters are set to defaults that are more appropriate
@@ -748,7 +742,6 @@ FN_GLOBAL_BOOL(lp_syslog_only, &Globals.bSyslogOnly)
 FN_GLOBAL_BOOL(lp_browse_list, &Globals.bBrowseList)
 FN_GLOBAL_BOOL(lp_unix_realname, &Globals.bUnixRealname)
 FN_GLOBAL_BOOL(lp_bind_interfaces_only, &Globals.bBindInterfacesOnly)
-FN_GLOBAL_BOOL(lp_net_wksta_user_logon, &Globals.bNetWkstaUserLogon)
 FN_GLOBAL_BOOL(lp_ole_locking_compat, &Globals.bOleLockingCompat)
 
 FN_GLOBAL_INTEGER(lp_os_level, &Globals.os_level)

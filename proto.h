@@ -149,7 +149,6 @@ BOOL lp_browse_list(void);
 BOOL lp_unix_realname(void);
 BOOL lp_time_server(void);
 BOOL lp_bind_interfaces_only(void);
-BOOL lp_net_wksta_user_logon(void);
 BOOL lp_ole_locking_compat(void);
 int lp_os_level(void);
 int lp_max_log_size(void);
