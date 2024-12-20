@@ -1,21 +1,21 @@
-/* 
+/*
    Unix SMB/Netbios implementation.
    Version 1.9.
    Test validity of smb.conf
    Copyright (C) Karl Auer 1993, 1994-1998
 
    Extensively modified by Andrew Tridgell, 1995
-   
+
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -47,91 +47,89 @@ extern pstring myhostname;
 
 void do_global_checks(void)
 {
-  if(lp_security() > SEC_SHARE && lp_revalidate(-1))
-    printf("WARNING: the 'revalidate' parameter is ignored in all but \
+	if (lp_security() > SEC_SHARE && lp_revalidate(-1))
+		printf(
+		    "WARNING: the 'revalidate' parameter is ignored in all but \
 'security=share' mode.\n");
 }
 
- int main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
-  pstring configfile;
-  int s;
+	pstring configfile;
+	int s;
 
-  TimeInit();
+	TimeInit();
 
-  setup_logging(argv[0],True);
-  
-  charset_initialise();
+	setup_logging(argv[0], True);
 
-  if (argc < 2)
-    pstrcpy(configfile,CONFIGFILE);
-  else
-    pstrcpy(configfile,argv[1]);
+	charset_initialise();
 
-  dbf = stdout;
-  DEBUGLEVEL = 2;
+	if (argc < 2)
+		pstrcpy(configfile, CONFIGFILE);
+	else
+		pstrcpy(configfile, argv[1]);
 
-  printf("Load smb config files from %s\n",configfile);
+	dbf = stdout;
+	DEBUGLEVEL = 2;
 
-  if(!get_myname(myhostname,NULL))
-  {
-    printf("Failed to get my hostname.\n");
-    return(1);
-  }
+	printf("Load smb config files from %s\n", configfile);
 
-  if (!lp_load(configfile,False))
-    {
-      printf("Error loading services.\n");
-      return(1);
-    }
+	if (!get_myname(myhostname, NULL)) {
+		printf("Failed to get my hostname.\n");
+		return (1);
+	}
 
+	if (!lp_load(configfile, False)) {
+		printf("Error loading services.\n");
+		return (1);
+	}
 
-  printf("Loaded services file OK.\n");
+	printf("Loaded services file OK.\n");
 
-  /*
-   * Global settings checks.
-   */
+	/*
+	 * Global settings checks.
+	 */
 
-  do_global_checks();
+	do_global_checks();
 
-  for (s=0;s<1000;s++)
-    if (VALID_SNUM(s))
-      if (strlen(lp_servicename(s)) > 8) {
-	printf("WARNING: You have some share names that are longer than 8 chars\n");
-	printf("These may give errors while browsing or may not be accessible\nto some older clients\n");
-	break;
-      }
+	for (s = 0; s < 1000; s++)
+		if (VALID_SNUM(s))
+			if (strlen(lp_servicename(s)) > 8) {
+				printf("WARNING: You have some share names "
+				       "that are longer than 8 chars\n");
+				printf("These may give errors while browsing "
+				       "or may not be accessible\nto some "
+				       "older clients\n");
+				break;
+			}
 
-  if (argc < 4)
-    {
-      printf("Press enter to see a dump of your service definitions\n");
-      fflush(stdout);
-      getc(stdin);
-      lp_dump(stdout);      
-    }
-  
-  if (argc == 4)
-    {
-      char *cname = argv[2];
-      char *caddr = argv[3];
-      
-      /* this is totally ugly, a real `quick' hack */
-      for (s=0;s<1000;s++)
-	if (VALID_SNUM(s))
-	  {		 
-	    if (allow_access(lp_hostsdeny(s),lp_hostsallow(s),cname,caddr))
-	      {
-		printf("Allow connection from %s (%s) to %s\n",
-		       cname,caddr,lp_servicename(s));
-	      }
-	    else
-	      {
-		printf("Deny connection from %s (%s) to %s\n",
-		       cname,caddr,lp_servicename(s));
-	      }
-	  }
-    }
-  return(0);
+	if (argc < 4) {
+		printf(
+		    "Press enter to see a dump of your service definitions\n");
+		fflush(stdout);
+		getc(stdin);
+		lp_dump(stdout);
+	}
+
+	if (argc == 4) {
+		char *cname = argv[2];
+		char *caddr = argv[3];
+
+		/* this is totally ugly, a real `quick' hack */
+		for (s = 0; s < 1000; s++)
+			if (VALID_SNUM(s)) {
+				if (allow_access(lp_hostsdeny(s),
+				                 lp_hostsallow(s), cname,
+				                 caddr)) {
+					printf("Allow connection from %s (%s) "
+					       "to %s\n",
+					       cname, caddr, lp_servicename(s));
+				} else {
+					printf("Deny connection from %s (%s) "
+					       "to %s\n",
+					       cname, caddr, lp_servicename(s));
+				}
+			}
+	}
+	return (0);
 }
-
-

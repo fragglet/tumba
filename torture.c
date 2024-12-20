@@ -1,19 +1,19 @@
-/* 
+/*
    Unix SMB/Netbios implementation.
    Version 1.9.
    SMB torture tester
    Copyright (C) Andrew Tridgell 1997-1998
-   
+
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -27,23 +27,21 @@
 
 static fstring host, workgroup, share, password, username, myname;
 static int max_protocol = PROTOCOL_NT1;
-static char *sockops="";
+static char *sockops = "";
 
-
-static struct timeval tp1,tp2;
+static struct timeval tp1, tp2;
 
 static void start_timer()
 {
-	gettimeofday(&tp1,NULL);
+	gettimeofday(&tp1, NULL);
 }
 
 static double end_timer()
 {
-	gettimeofday(&tp2,NULL);
-	return((tp2.tv_sec - tp1.tv_sec) + 
-	       (tp2.tv_usec - tp1.tv_usec)*1.0e-6);
+	gettimeofday(&tp2, NULL);
+	return ((tp2.tv_sec - tp1.tv_sec) +
+	        (tp2.tv_usec - tp1.tv_usec) * 1.0e-6);
 }
-
 
 static BOOL open_connection(struct cli_state *c)
 {
@@ -53,7 +51,7 @@ static BOOL open_connection(struct cli_state *c)
 	}
 
 	if (!cli_session_request(c, host, 0x20, myname)) {
-		printf("%s rejected the session\n",host);
+		printf("%s rejected the session\n", host);
 		cli_shutdown(c);
 		return False;
 	}
@@ -61,19 +59,20 @@ static BOOL open_connection(struct cli_state *c)
 	c->protocol = max_protocol;
 
 	if (!cli_negprot(c)) {
-		printf("%s rejected the negprot (%s)\n",host, cli_errstr(c));
+		printf("%s rejected the negprot (%s)\n", host, cli_errstr(c));
 		cli_shutdown(c);
 		return False;
 	}
 
-	if (!cli_session_setup(c, username, password, strlen(password),
-			       "", 0, workgroup)) {
-		printf("%s rejected the sessionsetup (%s)\n", host, cli_errstr(c));
+	if (!cli_session_setup(c, username, password, strlen(password), "", 0,
+	                       workgroup)) {
+		printf("%s rejected the sessionsetup (%s)\n", host,
+		       cli_errstr(c));
 		cli_shutdown(c);
 		return False;
 	}
 
-	if (!cli_send_tconX(c, share, "A:", password, strlen(password)+1)) {
+	if (!cli_send_tconX(c, share, "A:", password, strlen(password) + 1)) {
 		printf("%s refused tree connect (%s)\n", host, cli_errstr(c));
 		cli_shutdown(c);
 		return False;
@@ -81,8 +80,6 @@ static BOOL open_connection(struct cli_state *c)
 
 	return True;
 }
-
-
 
 static void close_connection(struct cli_state *c)
 {
@@ -93,21 +90,18 @@ static void close_connection(struct cli_state *c)
 	cli_shutdown(c);
 }
 
-
 static BOOL wait_lock(struct cli_state *c, int fnum, uint32 offset, uint32 len)
 {
 	while (!cli_lock(c, fnum, offset, len, -1)) {
 		int eclass, num;
 		cli_error(c, &eclass, &num);
 		if (eclass != ERRDOS || num != ERRlock) {
-			printf("lock failed (%s)\n", 
-			       cli_errstr(c));
+			printf("lock failed (%s)\n", cli_errstr(c));
 			return False;
 		}
 	}
 	return True;
 }
-
 
 static BOOL rw_torture(struct cli_state *c, int numops)
 {
@@ -118,8 +112,7 @@ static BOOL rw_torture(struct cli_state *c, int numops)
 	int pid2, pid = getpid();
 	int i;
 
-	fnum2 = cli_open(c, lockfname, O_RDWR | O_CREAT | O_EXCL, 
-			 DENY_NONE);
+	fnum2 = cli_open(c, lockfname, O_RDWR | O_CREAT | O_EXCL, DENY_NONE);
 	if (fnum2 == -1)
 		fnum2 = cli_open(c, lockfname, O_RDWR, DENY_NONE);
 	if (fnum2 == -1) {
@@ -127,15 +120,15 @@ static BOOL rw_torture(struct cli_state *c, int numops)
 		return False;
 	}
 
-
-	for (i=0;i<numops;i++) {
-		unsigned n = (unsigned)random()%10;
+	for (i = 0; i < numops; i++) {
+		unsigned n = (unsigned) random() % 10;
 		if (i % 10 == 0) {
-			printf("%d\r", i); fflush(stdout);
+			printf("%d\r", i);
+			fflush(stdout);
 		}
-		slprintf(fname,sizeof(fstring)-1,"\\torture.%u", n);
+		slprintf(fname, sizeof(fstring) - 1, "\\torture.%u", n);
 
-		if (!wait_lock(c, fnum2, n*sizeof(int), sizeof(int))) {
+		if (!wait_lock(c, fnum2, n * sizeof(int), sizeof(int))) {
 			return False;
 		}
 
@@ -145,13 +138,15 @@ static BOOL rw_torture(struct cli_state *c, int numops)
 			break;
 		}
 
-		if (cli_write(c, fnum, (char *)&pid, 0, sizeof(pid)) != sizeof(pid)) {
+		if (cli_write(c, fnum, (char *) &pid, 0, sizeof(pid)) !=
+		    sizeof(pid)) {
 			printf("write failed (%s)\n", cli_errstr(c));
 		}
 
 		pid2 = 0;
 
-		if (cli_read(c, fnum, (char *)&pid2, 0, sizeof(pid)) != sizeof(pid)) {
+		if (cli_read(c, fnum, (char *) &pid2, 0, sizeof(pid)) !=
+		    sizeof(pid)) {
 			printf("read failed (%s)\n", cli_errstr(c));
 		}
 
@@ -167,7 +162,7 @@ static BOOL rw_torture(struct cli_state *c, int numops)
 			printf("unlink failed (%s)\n", cli_errstr(c));
 		}
 
-		if (!cli_unlock(c, fnum2, n*sizeof(int), sizeof(int), -1)) {
+		if (!cli_unlock(c, fnum2, n * sizeof(int), sizeof(int), -1)) {
 			printf("unlock failed (%s)\n", cli_errstr(c));
 		}
 	}
@@ -195,8 +190,6 @@ static void usage(void)
 
 	exit(1);
 }
-
-
 
 static void run_torture(int numops)
 {
@@ -237,7 +230,7 @@ static void run_locktest1(void)
 
 	cli_unlink(&cli1, fname);
 
-	fnum1 = cli_open(&cli1, fname, O_RDWR|O_CREAT|O_EXCL, DENY_NONE);
+	fnum1 = cli_open(&cli1, fname, O_RDWR | O_CREAT | O_EXCL, DENY_NONE);
 	if (fnum1 == -1) {
 		printf("open of %s failed (%s)\n", fname, cli_errstr(&cli1));
 		return;
@@ -258,7 +251,6 @@ static void run_locktest1(void)
 		return;
 	}
 
-
 	if (cli_lock(&cli2, fnum3, 0, 4, 0)) {
 		printf("lock2 succeeded! This is a locking bug\n");
 		return;
@@ -266,23 +258,22 @@ static void run_locktest1(void)
 		int eclass, num;
 		cli_error(&cli2, &eclass, &num);
 		if (eclass != ERRDOS || num != ERRlock) {
-			printf("error should have been ERRDOS/ERRlock (%s)\n", 
+			printf("error should have been ERRDOS/ERRlock (%s)\n",
 			       cli_errstr(&cli2));
 			return;
 		}
 	}
 
-
 	printf("Testing lock timeouts\n");
 	t1 = time(NULL);
-	if (cli_lock(&cli2, fnum3, 0, 4, 10*1000)) {
+	if (cli_lock(&cli2, fnum3, 0, 4, 10 * 1000)) {
 		printf("lock3 succeeded! This is a locking bug\n");
 		return;
 	} else {
 		int eclass, num;
 		cli_error(&cli2, &eclass, &num);
 		if (eclass != ERRDOS || num != ERRlock) {
-			printf("error should have been ERRDOS/ERRlock (%s)\n", 
+			printf("error should have been ERRDOS/ERRlock (%s)\n",
 			       cli_errstr(&cli2));
 			return;
 		}
@@ -290,7 +281,8 @@ static void run_locktest1(void)
 	t2 = time(NULL);
 
 	if (t2 - t1 < 5) {
-		printf("error: This server appears not to support timed lock requests\n");
+		printf("error: This server appears not to support timed lock "
+		       "requests\n");
 	}
 
 	if (!cli_close(&cli1, fnum2)) {
@@ -305,7 +297,7 @@ static void run_locktest1(void)
 		int eclass, num;
 		cli_error(&cli2, &eclass, &num);
 		if (eclass != ERRDOS || num != ERRlock) {
-			printf("error should have been ERRDOS/ERRlock (%s)\n", 
+			printf("error should have been ERRDOS/ERRlock (%s)\n",
 			       cli_errstr(&cli2));
 			return;
 		}
@@ -326,19 +318,17 @@ static void run_locktest1(void)
 		return;
 	}
 
-
 	close_connection(&cli1);
 	close_connection(&cli2);
 
 	printf("Passed locktest1\n");
 }
 
-
 /*
-  This test checks that 
+  This test checks that
 
   1) the server supports multiple locking contexts on the one SMB
-  connection, distinguished by PID.  
+  connection, distinguished by PID.
 
   2) the server correctly fails overlapping locks made by the same PID (this
      goes against POSIX behaviour, which is why it is tricky to implement)
@@ -363,7 +353,7 @@ static void run_locktest2(void)
 
 	cli_setpid(&cli, 1);
 
-	fnum1 = cli_open(&cli, fname, O_RDWR|O_CREAT|O_EXCL, DENY_NONE);
+	fnum1 = cli_open(&cli, fname, O_RDWR | O_CREAT | O_EXCL, DENY_NONE);
 	if (fnum1 == -1) {
 		printf("open of %s failed (%s)\n", fname, cli_errstr(&cli));
 		return;
@@ -396,7 +386,7 @@ static void run_locktest2(void)
 		int eclass, num;
 		cli_error(&cli, &eclass, &num);
 		if (eclass != ERRDOS || num != ERRlock) {
-			printf("error should have been ERRDOS/ERRlock (%s)\n", 
+			printf("error should have been ERRDOS/ERRlock (%s)\n",
 			       cli_errstr(&cli));
 			return;
 		}
@@ -414,7 +404,7 @@ static void run_locktest2(void)
 		int eclass, num;
 		cli_error(&cli, &eclass, &num);
 		if (eclass != ERRDOS || num != ERRlock) {
-			printf("error should have been ERRDOS/ERRlock (%s)\n", 
+			printf("error should have been ERRDOS/ERRlock (%s)\n",
 			       cli_errstr(&cli));
 			return;
 		}
@@ -442,9 +432,8 @@ static void run_locktest2(void)
 	printf("locktest2 finished\n");
 }
 
-
 /*
-  This test checks that 
+  This test checks that
 
   1) the server supports the full offset range in lock requests
 */
@@ -455,7 +444,7 @@ static void run_locktest3(int numops)
 	int fnum1, fnum2, i;
 	uint32 offset;
 
-#define NEXT_OFFSET offset += (~(uint32)0) / numops
+#define NEXT_OFFSET offset += (~(uint32) 0) / numops
 
 	if (!open_connection(&cli1) || !open_connection(&cli2)) {
 		return;
@@ -467,7 +456,7 @@ static void run_locktest3(int numops)
 
 	cli_unlink(&cli1, fname);
 
-	fnum1 = cli_open(&cli1, fname, O_RDWR|O_CREAT|O_EXCL, DENY_NONE);
+	fnum1 = cli_open(&cli1, fname, O_RDWR | O_CREAT | O_EXCL, DENY_NONE);
 	if (fnum1 == -1) {
 		printf("open of %s failed (%s)\n", fname, cli_errstr(&cli1));
 		return;
@@ -478,60 +467,54 @@ static void run_locktest3(int numops)
 		return;
 	}
 
-	for (offset=i=0;i<numops;i++) {
+	for (offset = i = 0; i < numops; i++) {
 		NEXT_OFFSET;
-		if (!cli_lock(&cli1, fnum1, offset-1, 1, 0)) {
-			printf("lock1 %d failed (%s)\n", 
-			       i,
-			       cli_errstr(&cli1));
+		if (!cli_lock(&cli1, fnum1, offset - 1, 1, 0)) {
+			printf("lock1 %d failed (%s)\n", i, cli_errstr(&cli1));
 			return;
 		}
 
-		if (!cli_lock(&cli2, fnum2, offset-2, 1, 0)) {
-			printf("lock2 %d failed (%s)\n", 
-			       i,
-			       cli_errstr(&cli1));
+		if (!cli_lock(&cli2, fnum2, offset - 2, 1, 0)) {
+			printf("lock2 %d failed (%s)\n", i, cli_errstr(&cli1));
 			return;
 		}
 	}
 
-	for (offset=i=0;i<numops;i++) {
+	for (offset = i = 0; i < numops; i++) {
 		NEXT_OFFSET;
 
-		if (cli_lock(&cli1, fnum1, offset-2, 1, 0)) {
+		if (cli_lock(&cli1, fnum1, offset - 2, 1, 0)) {
 			printf("error: lock1 %d succeeded!\n", i);
 			return;
 		}
 
-		if (cli_lock(&cli2, fnum2, offset-1, 1, 0)) {
+		if (cli_lock(&cli2, fnum2, offset - 1, 1, 0)) {
 			printf("error: lock2 %d succeeded!\n", i);
 			return;
 		}
 
-		if (cli_lock(&cli1, fnum1, offset-1, 1, 0)) {
+		if (cli_lock(&cli1, fnum1, offset - 1, 1, 0)) {
 			printf("error: lock3 %d succeeded!\n", i);
 			return;
 		}
 
-		if (cli_lock(&cli2, fnum2, offset-2, 1, 0)) {
+		if (cli_lock(&cli2, fnum2, offset - 2, 1, 0)) {
 			printf("error: lock4 %d succeeded!\n", i);
 			return;
 		}
 	}
 
-	for (offset=i=0;i<numops;i++) {
+	for (offset = i = 0; i < numops; i++) {
 		NEXT_OFFSET;
 
-		if (!cli_unlock(&cli1, fnum1, offset-1, 1, 0)) {
-			printf("unlock1 %d failed (%s)\n", 
-			       i,
+		if (!cli_unlock(&cli1, fnum1, offset - 1, 1, 0)) {
+			printf("unlock1 %d failed (%s)\n", i,
 			       cli_errstr(&cli1));
 			return;
 		}
 
-		if (!cli_unlock(&cli2, fnum2, offset-2, 1, 0)) {
-			printf("unlock2 %d failed (%s)\n", 
-			       i,
+		if (!cli_unlock(&cli2, fnum2, offset - 2, 1, 0)) {
+			printf("unlock2 %d failed (%s)\n", i,
 			       cli_errstr(&cli1));
 			return;
 		}
@@ -556,9 +539,8 @@ static void run_locktest3(int numops)
 	printf("finished locktest3\n");
 }
 
-
 /*
-  This test checks that 
+  This test checks that
 
   1) the server does not allow an unlink on a file that is open
 */
@@ -580,7 +562,7 @@ static void run_unlinktest(void)
 
 	cli_setpid(&cli, 1);
 
-	fnum = cli_open(&cli, fname, O_RDWR|O_CREAT|O_EXCL, DENY_NONE);
+	fnum = cli_open(&cli, fname, O_RDWR | O_CREAT | O_EXCL, DENY_NONE);
 	if (fnum == -1) {
 		printf("open of %s failed (%s)\n", fname, cli_errstr(&cli));
 		return;
@@ -598,13 +580,10 @@ static void run_unlinktest(void)
 	printf("unlink test finished\n");
 }
 
-
-
 static void browse_callback(char *sname, uint32 stype, char *comment)
 {
 	printf("\t%20.20s %08x %s\n", sname, stype, comment);
 }
-
 
 /*
   This test checks the browse list code
@@ -621,20 +600,16 @@ static void run_browsetest(void)
 	}
 
 	printf("domain list:\n");
-	cli_NetServerEnum(&cli, workgroup, 
-			  SV_TYPE_DOMAIN_ENUM,
-			  browse_callback);
+	cli_NetServerEnum(&cli, workgroup, SV_TYPE_DOMAIN_ENUM,
+	                  browse_callback);
 
 	printf("machine list:\n");
-	cli_NetServerEnum(&cli, workgroup, 
-			  SV_TYPE_ALL,
-			  browse_callback);
+	cli_NetServerEnum(&cli, workgroup, SV_TYPE_ALL, browse_callback);
 
 	close_connection(&cli);
 
 	printf("browse test finished\n");
 }
-
 
 /*
   This checks how the getatr calls works
@@ -653,20 +628,18 @@ static void run_attrtest(void)
 	}
 
 	cli_unlink(&cli, fname);
-	fnum = cli_open(&cli, fname, 
-			O_RDWR | O_CREAT | O_TRUNC, DENY_NONE);
+	fnum = cli_open(&cli, fname, O_RDWR | O_CREAT | O_TRUNC, DENY_NONE);
 	cli_close(&cli, fnum);
 	if (!cli_getatr(&cli, fname, NULL, NULL, &t)) {
 		printf("getatr failed (%s)\n", cli_errstr(&cli));
 	}
 
 	if (abs(t - time(NULL)) > 2) {
-		printf("ERROR: SMBgetatr bug. time is %s",
-		       ctime(&t));
+		printf("ERROR: SMBgetatr bug. time is %s", ctime(&t));
 		t = time(NULL);
 	}
 
-	t2 = t-60*60*24; /* 1 day ago */
+	t2 = t - 60 * 60 * 24; /* 1 day ago */
 
 	if (!cli_setatr(&cli, fname, 0, t2)) {
 		printf("setatr failed (%s)\n", cli_errstr(&cli));
@@ -677,8 +650,7 @@ static void run_attrtest(void)
 	}
 
 	if (t != t2) {
-		printf("ERROR: getatr/setatr bug. times are\n%s",
-		       ctime(&t));
+		printf("ERROR: getatr/setatr bug. times are\n%s", ctime(&t));
 		printf("%s", ctime(&t2));
 	}
 
@@ -688,7 +660,6 @@ static void run_attrtest(void)
 
 	printf("attrib test finished\n");
 }
-
 
 /*
   This checks a couple of trans2 calls
@@ -710,8 +681,7 @@ static void run_trans2test(void)
 	}
 
 	cli_unlink(&cli, fname);
-	fnum = cli_open(&cli, fname, 
-			O_RDWR | O_CREAT | O_TRUNC, DENY_NONE);
+	fnum = cli_open(&cli, fname, O_RDWR | O_CREAT | O_TRUNC, DENY_NONE);
 	if (!cli_qfileinfo(&cli, fnum, &c_time, &a_time, &m_time, &size)) {
 		printf("ERROR: qfileinfo failed (%s)\n", cli_errstr(&cli));
 	}
@@ -720,8 +690,7 @@ static void run_trans2test(void)
 	sleep(2);
 
 	cli_unlink(&cli, fname);
-	fnum = cli_open(&cli, fname, 
-			O_RDWR | O_CREAT | O_TRUNC, DENY_NONE);
+	fnum = cli_open(&cli, fname, O_RDWR | O_CREAT | O_TRUNC, DENY_NONE);
 	cli_close(&cli, fnum);
 
 	if (!cli_qpathinfo(&cli, fname, &c_time, &a_time, &m_time, &size)) {
@@ -730,73 +699,72 @@ static void run_trans2test(void)
 		if (c_time != m_time) {
 			printf("create time=%s", ctime(&c_time));
 			printf("modify time=%s", ctime(&m_time));
-			printf("This system appears to have sticky create times\n");
+			printf("This system appears to have sticky create "
+			       "times\n");
 		}
-		if (a_time % (60*60) == 0) {
+		if (a_time % (60 * 60) == 0) {
 			printf("access time=%s", ctime(&a_time));
-			printf("This system appears to set a midnight access time\n");
+			printf("This system appears to set a midnight access "
+			       "time\n");
 		}
 
-		if (abs(m_time - time(NULL)) > 60*60*24*7) {
-			printf("ERROR: totally incorrect times - maybe word reversed?\n");
+		if (abs(m_time - time(NULL)) > 60 * 60 * 24 * 7) {
+			printf("ERROR: totally incorrect times - maybe word "
+			       "reversed?\n");
 		}
 	}
 
-
 	cli_unlink(&cli, fname);
-	fnum = cli_open(&cli, fname, 
-			O_RDWR | O_CREAT | O_TRUNC, DENY_NONE);
+	fnum = cli_open(&cli, fname, O_RDWR | O_CREAT | O_TRUNC, DENY_NONE);
 	cli_close(&cli, fnum);
-	if (!cli_qpathinfo2(&cli, fname, &c_time, &a_time, &m_time, 
-			    &w_time, &size)) {
+	if (!cli_qpathinfo2(&cli, fname, &c_time, &a_time, &m_time, &w_time,
+	                    &size)) {
 		printf("ERROR: qpathinfo2 failed (%s)\n", cli_errstr(&cli));
 	} else {
-		if (w_time < 60*60*24*2) {
+		if (w_time < 60 * 60 * 24 * 2) {
 			printf("write time=%s", ctime(&w_time));
-			printf("This system appears to set a initial 0 write time\n");
+			printf("This system appears to set a initial 0 write "
+			       "time\n");
 		}
 	}
 
 	cli_unlink(&cli, fname);
 
-
 	/* check if the server updates the directory modification time
-           when creating a new file */
+	   when creating a new file */
 	if (!cli_mkdir(&cli, dname)) {
 		printf("ERROR: mkdir failed (%s)\n", cli_errstr(&cli));
 	}
 	sleep(3);
-	if (!cli_qpathinfo2(&cli, "\\trans2\\", &c_time, &a_time, &m_time, 
-			    &w_time, &size)) {
+	if (!cli_qpathinfo2(&cli, "\\trans2\\", &c_time, &a_time, &m_time,
+	                    &w_time, &size)) {
 		printf("ERROR: qpathinfo2 failed (%s)\n", cli_errstr(&cli));
 	}
 
-	fnum = cli_open(&cli, fname2, 
-			O_RDWR | O_CREAT | O_TRUNC, DENY_NONE);
-	cli_write(&cli, fnum,  (char *)&fnum, 0, sizeof(fnum));
+	fnum = cli_open(&cli, fname2, O_RDWR | O_CREAT | O_TRUNC, DENY_NONE);
+	cli_write(&cli, fnum, (char *) &fnum, 0, sizeof(fnum));
 	cli_close(&cli, fnum);
-	if (!cli_qpathinfo2(&cli, "\\trans2\\", &c_time, &a_time, &m_time2, 
-			    &w_time, &size)) {
+	if (!cli_qpathinfo2(&cli, "\\trans2\\", &c_time, &a_time, &m_time2,
+	                    &w_time, &size)) {
 		printf("ERROR: qpathinfo2 failed (%s)\n", cli_errstr(&cli));
 	} else {
 		if (m_time2 == m_time)
-			printf("This system does not update directory modification times\n");
+			printf("This system does not update directory "
+			       "modification times\n");
 	}
 	cli_unlink(&cli, fname2);
 	cli_rmdir(&cli, dname);
-
 
 	close_connection(&cli);
 
 	printf("trans2 test finished\n");
 }
 
-
 static void create_procs(int nprocs, int numops)
 {
 	int i, status;
 
-	for (i=0;i<nprocs;i++) {
+	for (i = 0; i < nprocs; i++) {
 		if (fork() == 0) {
 			int mypid = getpid();
 			srandom(mypid ^ time(NULL));
@@ -805,18 +773,16 @@ static void create_procs(int nprocs, int numops)
 		}
 	}
 
-	for (i=0;i<nprocs;i++)
+	for (i = 0; i < nprocs; i++)
 		waitpid(0, &status, 0);
 }
-
-
 
 /****************************************************************************
   main program
 ****************************************************************************/
- int main(int argc,char *argv[])
+int main(int argc, char *argv[])
 {
-	int nprocs=1, numops=100;
+	int nprocs = 1, numops = 100;
 	int opt;
 	char *p;
 	int gotpass = 0;
@@ -837,27 +803,26 @@ static void create_procs(int nprocs, int numops)
 	}
 
 	fstrcpy(host, &argv[1][2]);
-	p = strchr(&host[2],'\\');
+	p = strchr(&host[2], '\\');
 	if (!p) {
 		usage();
 	}
 	*p = 0;
-	fstrcpy(share, p+1);
+	fstrcpy(share, p + 1);
 
-	get_myname(myname,NULL);
+	get_myname(myname, NULL);
 
 	if (*username == 0 && getenv("LOGNAME")) {
-	  pstrcpy(username,getenv("LOGNAME"));
+		pstrcpy(username, getenv("LOGNAME"));
 	}
 
 	argc--;
 	argv++;
 
-
 	while ((opt = getopt(argc, argv, "hW:U:n:N:O:o:m:")) != EOF) {
 		switch (opt) {
 		case 'W':
-			fstrcpy(workgroup,optarg);
+			fstrcpy(workgroup, optarg);
 			break;
 		case 'm':
 			max_protocol = interpret_protocol(optarg, max_protocol);
@@ -875,20 +840,19 @@ static void create_procs(int nprocs, int numops)
 			fstrcpy(myname, optarg);
 			break;
 		case 'U':
-			pstrcpy(username,optarg);
-			p = strchr(username,'%');
+			pstrcpy(username, optarg);
+			p = strchr(username, '%');
 			if (p) {
 				*p = 0;
-				pstrcpy(password, p+1);
+				pstrcpy(password, p + 1);
 				gotpass = 1;
 			}
 			break;
 		default:
-			printf("Unknown option %c (%d)\n", (char)opt, opt);
+			printf("Unknown option %c (%d)\n", (char) opt, opt);
 			usage();
 		}
 	}
-
 
 	while (!gotpass) {
 		p = getpass("Password:");
@@ -898,8 +862,8 @@ static void create_procs(int nprocs, int numops)
 		}
 	}
 
-	printf("host=%s share=%s user=%s myname=%s\n", 
-	       host, share, username, myname);
+	printf("host=%s share=%s user=%s myname=%s\n", host, share, username,
+	       myname);
 
 	start_timer();
 	create_procs(nprocs, numops);
@@ -913,7 +877,5 @@ static void create_procs(int nprocs, int numops)
 	run_attrtest();
 	run_trans2test();
 
-	return(0);
+	return (0);
 }
-
-

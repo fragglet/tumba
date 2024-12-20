@@ -1,21 +1,21 @@
 #ifndef _INCLUDES_H
 #define _INCLUDES_H
-/* 
+/*
    Unix SMB/Netbios implementation.
    Version 1.9.
    Machine customisation and include handling
    Copyright (C) Andrew Tridgell 1994-1998
-   
+
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -26,34 +26,17 @@
    and add a section for the new unix below.
 */
 
-
-
 /* the first OS dependent section is to setup what includes will be used.
-   the main OS dependent section comes later on 
+   the main OS dependent section comes later on
 */
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#if (defined(SHADOW_PWD)||defined(OSF1_ENH_SEC)||defined(SecureWare)||defined(PWDAUTH))
+#if (defined(SHADOW_PWD) || defined(OSF1_ENH_SEC) || defined(SecureWare) ||    \
+     defined(PWDAUTH))
 #define PASSWORD_LENGTH 16
 #endif
 
-/* here is the general includes section - with some ifdefs generated 
-   by the previous section 
+/* here is the general includes section - with some ifdefs generated
+   by the previous section
 */
 #include "local.h"
 #include <stdio.h>
@@ -69,25 +52,24 @@
 #endif
 #include <sys/types.h>
 
-
-#include <sys/socket.h>
-#include <sys/ioctl.h>
 #include <stddef.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
 #ifdef POSIX_H
-#include <posix/utime.h>
-#include <bsd/sys/time.h>
 #include <bsd/netinet/in.h>
+#include <bsd/sys/time.h>
+#include <posix/utime.h>
 #else
-#include <sys/time.h>
 #include <netinet/in.h>
-#endif 
+#include <sys/time.h>
+#endif
+#include <errno.h>
+#include <grp.h>
 #include <netdb.h>
 #include <signal.h>
-#include <errno.h>
 #include <sys/file.h>
-#include <sys/stat.h>
 #include <sys/param.h>
-#include <grp.h>
+#include <sys/stat.h>
 #ifndef NO_RESOURCEH
 #include <sys/resource.h>
 #endif
@@ -116,13 +98,14 @@
 #endif
 
 #if defined(GETPWANAM)
-#include <sys/types.h>
-#include <sys/label.h>
-#include <sys/audit.h>
 #include <pwdadj.h>
+#include <sys/audit.h>
+#include <sys/label.h>
+#include <sys/types.h>
 #endif
 
-#if defined(SHADOW_PWD) && !defined(NETBSD) && !defined(FreeBSD) && !defined(CONVEX) && !defined(__OpenBSD__)
+#if defined(SHADOW_PWD) && !defined(NETBSD) && !defined(FreeBSD) &&            \
+    !defined(CONVEX) && !defined(__OpenBSD__)
 #include <shadow.h>
 #endif
 
@@ -130,26 +113,23 @@
 #include <syslog.h>
 #endif
 
-
-
 /***************************************************************************
 Here come some platform specific sections
 ***************************************************************************/
 
-
 #ifdef LINUX
 #include <arpa/inet.h>
 #include <dirent.h>
+#include <netinet/in.h>
 #include <string.h>
 #include <sys/vfs.h>
-#include <netinet/in.h>
 #ifdef GLIBC2
-#define _LINUX_C_LIB_VERSION_MAJOR     6
-#include <termios.h>
-#include <rpcsvc/ypclnt.h>
+#define _LINUX_C_LIB_VERSION_MAJOR 6
 #include <crypt.h>
-#include <netinet/tcp.h>
 #include <netinet/ip.h>
+#include <netinet/tcp.h>
+#include <rpcsvc/ypclnt.h>
+#include <termios.h>
 #endif
 #ifndef QSORT_CAST
 #define QSORT_CAST (int (*)(const void *, const void *))
@@ -177,55 +157,31 @@ Here come some platform specific sections
 #endif
 #endif
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#ifdef NETBSD 
+#ifdef NETBSD
 #ifdef NetBSD1_3
 #include <string.h>
 #ifdef ALLOW_CHANGE_PASSWORD
 #include <termios.h>
 #endif /* ALLOW_CHANGE_PASSWORD */
-#else /* NetBSD1_3 */
+#else  /* NetBSD1_3 */
 #include <strings.h>
 #endif /* NetBSD1_3 */
+#include <netinet/in_systm.h>
+#include <netinet/ip.h>
 #include <netinet/tcp.h>
-#include <netinet/in_systm.h> 
-#include <netinet/ip.h> 
 /* you may not need this */
 #define NO_GETSPNAM
 #define SIGNAL_CAST (void (*)())
 #define USE_DIRECT
 #define REPLACE_INNETGR
-#endif 
-
-
+#endif
 
 #ifdef FreeBSD
 #include <arpa/inet.h>
-#include <strings.h>
-#include <netinet/tcp.h>
 #include <netinet/in_systm.h>
 #include <netinet/ip.h>
+#include <netinet/tcp.h>
+#include <strings.h>
 #include <termios.h>
 #if __FreeBSD__ >= 3
 #include <dirent.h>
@@ -256,8 +212,8 @@ Here come some platform specific sections
 #endif /* FreeBSD */
 
 #ifdef __OpenBSD__
-#include <strings.h>
 #include <netinet/tcp.h>
+#include <strings.h>
 #define NO_GETSPNAM
 #define SIGNAL_CAST (void (*)())
 #define USE_DIRECT
@@ -269,56 +225,11 @@ Here come some platform specific sections
 #define HAVE_MEMMOVE
 #define USE_GETCWD
 #define USE_SETSID
-#endif 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#endif
 
 /* Definitions for RiscIX */
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* For UnixWare 2.x's ia_uinfo routines. (tangent@cyberport.com) */
-
 
 /*******************************************************************
 end of the platform specific sections
@@ -328,14 +239,13 @@ end of the platform specific sections
 #include <sys/mman.h>
 #endif
 
-
 #ifdef REPLACE_GETPASS
-extern char    *getsmbpass(char *);
+extern char *getsmbpass(char *);
 #define getpass(s) getsmbpass(s)
 #endif
 
 #ifdef REPLACE_INNETGR
-#define innetgr(group,host,user,dom) InNetGr(group,host,user,dom)
+#define innetgr(group, host, user, dom) InNetGr(group, host, user, dom)
 #endif
 
 #ifndef FD_SETSIZE
@@ -349,11 +259,9 @@ extern char    *getsmbpass(char *);
 /* Now for some other grungy stuff */
 #if defined(NO_GETSPNAM) && !defined(QNX)
 struct spwd { /* fake shadow password structure */
-       char *sp_pwdp;
+	char *sp_pwdp;
 };
 #endif
-
-
 
 #ifdef USE_DIRECT
 #include <sys/dir.h>
@@ -377,7 +285,7 @@ struct spwd { /* fake shadow password structure */
 
 /* This defines the name of the printcap file. It is MOST UNLIKELY that
    this will change BUT! Specifying a file with the format of a printcap
-   file but containing only a subset of the printers actually in your real 
+   file but containing only a subset of the printers actually in your real
    printcap file is a quick-n-dirty way to allow dynamic access to a subset
    of available printers.
 */
@@ -385,11 +293,10 @@ struct spwd { /* fake shadow password structure */
 #define PRINTCAP_NAME "/etc/printcap"
 #endif
 
-
 #ifdef NO_UTIMBUF
 struct utimbuf {
-  time_t actime;
-  time_t modtime;
+	time_t actime;
+	time_t modtime;
 };
 #endif
 
@@ -401,22 +308,23 @@ extern char *sys_errlist[];
 #endif
 
 #ifndef perror
-#define perror(m) printf("%s: %s\n",m,strerror(errno))
+#define perror(m) printf("%s: %s\n", m, strerror(errno))
 #endif
 
 #ifndef MAXHOSTNAMELEN
 #define MAXHOSTNAMELEN 255
 #endif
 
-#include "version.h"
 #include "smb.h"
+#include "version.h"
+
 #include "nameserv.h"
 #include "ubiqx/ubi_dLinkList.h"
 
 #include "byteorder.h"
 
-#include "kanji.h"
 #include "charset.h"
+#include "kanji.h"
 
 #ifndef MAXCODEPAGELINES
 #define MAXCODEPAGELINES 256
@@ -425,22 +333,20 @@ extern char *sys_errlist[];
 /***** automatically generated prototypes *****/
 #include "proto.h"
 
-
-
 #ifndef S_IFREG
 #define S_IFREG 0100000
 #endif
 
 #ifndef S_ISREG
-#define S_ISREG(x) ((S_IFREG & (x))!=0)
+#define S_ISREG(x) ((S_IFREG & (x)) != 0)
 #endif
 
 #ifndef S_ISDIR
-#define S_ISDIR(x) ((S_IFDIR & (x))!=0)
+#define S_ISDIR(x) ((S_IFDIR & (x)) != 0)
 #endif
 
 #if !defined(S_ISLNK) && defined(S_IFLNK)
-#define S_ISLNK(x) ((S_IFLNK & (x))!=0)
+#define S_ISLNK(x) ((S_IFLNK & (x)) != 0)
 #endif
 
 #ifdef UFC_CRYPT
@@ -452,7 +358,7 @@ extern char *sys_errlist[];
 #endif
 
 #ifdef REPLACE_STRSTR
-#define strstr(s,p) Strstr(s,p)
+#define strstr(s, p) Strstr(s, p)
 #endif
 
 #ifdef REPLACE_MKTIME
@@ -466,7 +372,6 @@ extern char *sys_errlist[];
 #ifndef EDQUOT
 #define EDQUOT ENOSPC
 #endif
-
 
 #ifndef SOL_TCP
 #define SOL_TCP 6
@@ -489,12 +394,11 @@ it works and getting lots of bug reports */
 
 #ifndef SIGCLD
 #define SIGCLD SIGCHLD
-#endif 
+#endif
 
 #ifndef MAP_FILE
 #define MAP_FILE 0
 #endif
-
 
 #ifndef WAIT3_CAST2
 #define WAIT3_CAST2 (struct rusage *)
@@ -521,8 +425,7 @@ it works and getting lots of bug reports */
 /* Not all systems declare ERRNO in errno.h... and some systems #define it! */
 #ifndef errno
 extern int errno;
-#endif 
-
+#endif
 
 #ifdef NO_EID
 #define geteuid() getuid()
@@ -531,31 +434,29 @@ extern int errno;
 #define setegid(x) setgid(x)
 #endif
 
-
-
 #ifdef NOSTRCASECMP
-#define strcasecmp(s1,s2) StrCaseCmp(s1,s2)
+#define strcasecmp(s1, s2) StrCaseCmp(s1, s2)
 #endif
 
 #ifdef strcpy
 #undef strcpy
 #endif /* strcpy */
-#define strcpy(dest,src) __ERROR__XX__NEVER_USE_STRCPY___;
-   
+#define strcpy(dest, src) __ERROR__XX__NEVER_USE_STRCPY___;
+
 #ifdef strcat
 #undef strcat
 #endif /* strcat */
-#define strcat(dest,src) __ERROR__XX__NEVER_USE_STRCAT___;
-   
+#define strcat(dest, src) __ERROR__XX__NEVER_USE_STRCAT___;
+
 #ifdef sprintf
 #undef sprintf
 #endif /* sprintf */
 #define sprintf __ERROR__XX__NEVER_USE_SPRINTF__;
 
-#define pstrcpy(d,s) safe_strcpy((d),(s),sizeof(pstring)-1)
-#define pstrcat(d,s) safe_strcat((d),(s),sizeof(pstring)-1)
-#define fstrcpy(d,s) safe_strcpy((d),(s),sizeof(fstring)-1)
-#define fstrcat(d,s) safe_strcat((d),(s),sizeof(fstring)-1)
+#define pstrcpy(d, s) safe_strcpy((d), (s), sizeof(pstring) - 1)
+#define pstrcat(d, s) safe_strcat((d), (s), sizeof(pstring) - 1)
+#define fstrcpy(d, s) safe_strcpy((d), (s), sizeof(fstring) - 1)
+#define fstrcat(d, s) safe_strcat((d), (s), sizeof(fstring) - 1)
 
 #if MEM_MAN
 #include "mem_man/mem_man.h"

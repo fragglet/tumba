@@ -1,19 +1,19 @@
-/* 
+/*
    Unix SMB/Netbios implementation.
    Version 1.9.
    Kanji Extensions
    Copyright (C) Andrew Tridgell 1992-1998
-   
+
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -28,35 +28,36 @@
 #define _KANJI_H_
 
 /* FOR SHIFT JIS CODE */
-#define is_shift_jis(c) \
-    ((0x81 <= ((unsigned char) (c)) && ((unsigned char) (c)) <= 0x9f) \
-     || (0xe0 <= ((unsigned char) (c)) && ((unsigned char) (c)) <= 0xef))
-#define is_shift_jis2(c) \
-    (0x40 <= ((unsigned char) (c)) && ((unsigned char) (c)) <= 0xfc \
-    && ((unsigned char) (c)) != 0x7f)
-#define is_kana(c) ((0xa0 <= ((unsigned char) (c)) && ((unsigned char) (c)) <= 0xdf))
+#define is_shift_jis(c)                                                        \
+	((0x81 <= ((unsigned char) (c)) && ((unsigned char) (c)) <= 0x9f) ||   \
+	 (0xe0 <= ((unsigned char) (c)) && ((unsigned char) (c)) <= 0xef))
+#define is_shift_jis2(c)                                                       \
+	(0x40 <= ((unsigned char) (c)) && ((unsigned char) (c)) <= 0xfc &&     \
+	 ((unsigned char) (c)) != 0x7f)
+#define is_kana(c)                                                             \
+	((0xa0 <= ((unsigned char) (c)) && ((unsigned char) (c)) <= 0xdf))
 
 /* case conversion */
-#define is_sj_upper2(c) \
-  ((0x60 <= (unsigned char) (c)) && ((unsigned char) (c) <= 0x79))
-#define is_sj_lower2(c) \
-  ((0x81 <= (unsigned char) (c)) && ((unsigned char) (c) <= 0x9A))
+#define is_sj_upper2(c)                                                        \
+	((0x60 <= (unsigned char) (c)) && ((unsigned char) (c) <= 0x79))
+#define is_sj_lower2(c)                                                        \
+	((0x81 <= (unsigned char) (c)) && ((unsigned char) (c) <= 0x9A))
 #define sjis_alph 0x82
 #define is_sj_alph(c) (sjis_alph == (unsigned char) (c))
-#define is_sj_upper(c1, c2) (is_sj_alph (c1) && is_sj_upper2 (c2))
-#define is_sj_lower(c1, c2) (is_sj_alph (c1) && is_sj_lower2 (c2))
-#define sj_toupper2(c) \
-    (is_sj_lower2 (c) ? ((int) ((unsigned char) (c) - 0x81 + 0x60)) : \
-     ((int) (unsigned char) (c)))
-#define sj_tolower2(c) \
-    (is_sj_upper2 (c) ? ((int) ((unsigned char) (c) - 0x60 + 0x81)) : \
-     ((int) (unsigned char) (c)))
+#define is_sj_upper(c1, c2) (is_sj_alph(c1) && is_sj_upper2(c2))
+#define is_sj_lower(c1, c2) (is_sj_alph(c1) && is_sj_lower2(c2))
+#define sj_toupper2(c)                                                         \
+	(is_sj_lower2(c) ? ((int) ((unsigned char) (c) - 0x81 + 0x60))         \
+	                 : ((int) (unsigned char) (c)))
+#define sj_tolower2(c)                                                         \
+	(is_sj_upper2(c) ? ((int) ((unsigned char) (c) - 0x60 + 0x81))         \
+	                 : ((int) (unsigned char) (c)))
 
 #ifdef _KANJI_C_
 /* FOR EUC CODE */
 #define euc_kana (0x8e)
 #define is_euc_kana(c) (((unsigned char) (c)) == euc_kana)
-#define is_euc(c)  (0xa0 < ((unsigned char) (c)) && ((unsigned char) (c)) < 0xff)
+#define is_euc(c) (0xa0 < ((unsigned char) (c)) && ((unsigned char) (c)) < 0xff)
 
 /* FOR JIS CODE */
 /* default jis third shift code, use for output */
@@ -77,10 +78,12 @@
 #define jis_si2 ('J')
 #define is_esc(c) (((unsigned char) (c)) == jis_esc)
 #define is_so1(c) (((unsigned char) (c)) == jis_so1)
-#define is_so2(c) (((unsigned char) (c)) == jis_so2 || ((unsigned char) (c)) == '@')
+#define is_so2(c)                                                              \
+	(((unsigned char) (c)) == jis_so2 || ((unsigned char) (c)) == '@')
 #define is_si1(c) (((unsigned char) (c)) == jis_si1)
-#define is_si2(c) (((unsigned char) (c)) == jis_si2 || ((unsigned char) (c)) == 'B' \
-    || ((unsigned char) (c)) == 'H')
+#define is_si2(c)                                                              \
+	(((unsigned char) (c)) == jis_si2 || ((unsigned char) (c)) == 'B' ||   \
+	 ((unsigned char) (c)) == 'H')
 #define is_so(c) (((unsigned char) (c)) == jis_so)
 #define is_si(c) (((unsigned char) (c)) == jis_si)
 #define junet_kana1 ('(')
@@ -94,23 +97,27 @@
 
 /* FOR HEX */
 #define HEXTAG ':'
-#define hex2bin(x)						      \
-    ( ((int) '0' <= ((int) (x)) && ((int) (x)) <= (int)'9')?	      \
-        (((int) (x))-(int)'0'):					      \
-      ((int) 'a'<= ((int) (x)) && ((int) (x))<= (int) 'f')?	      \
-        (((int) (x)) - (int)'a'+10):				      \
-      (((int) (x)) - (int)'A'+10) )
-#define bin2hex(x)						      \
-    ( (((int) (x)) >= 10)? (((int) (x))-10 + (int) 'a'): (((int) (x)) + (int) '0') )
+#define hex2bin(x)                                                             \
+	(((int) '0' <= ((int) (x)) && ((int) (x)) <= (int) '9')                \
+	     ? (((int) (x)) - (int) '0')                                       \
+	 : ((int) 'a' <= ((int) (x)) && ((int) (x)) <= (int) 'f')              \
+	     ? (((int) (x)) - (int) 'a' + 10)                                  \
+	     : (((int) (x)) - (int) 'A' + 10))
+#define bin2hex(x)                                                             \
+	((((int) (x)) >= 10) ? (((int) (x)) - 10 + (int) 'a')                  \
+	                     : (((int) (x)) + (int) '0'))
 
 /* For Hangul (Korean - code page 949). */
-#define is_hangul(c) ((0x81 <= ((unsigned char) (c)) && ((unsigned char) (c)) <= 0xfd))
+#define is_hangul(c)                                                           \
+	((0x81 <= ((unsigned char) (c)) && ((unsigned char) (c)) <= 0xfd))
 
 /* For traditional Chinese (known as Big5 encoding - code page 950). */
-#define is_big5_c1(c) ((0xa1 <= ((unsigned char) (c)) && ((unsigned char) (c)) <= 0xf9)) 
+#define is_big5_c1(c)                                                          \
+	((0xa1 <= ((unsigned char) (c)) && ((unsigned char) (c)) <= 0xf9))
 
 /* For simplified Chinese (code page - 936). */
-#define is_simpch_c1(c) ((0xa1 <= ((unsigned char) (c)) && ((unsigned char) (c)) <= 0xf7))
+#define is_simpch_c1(c)                                                        \
+	((0xa1 <= ((unsigned char) (c)) && ((unsigned char) (c)) <= 0xf7))
 
 #else /* not _KANJI_C_ */
 
@@ -152,8 +159,8 @@ extern int (*_skip_multibyte_char)(char c);
 #define strrchr(s1, c) ((*multibyte_strrchr)((s1), (c)))
 #define strstr(s1, s2) ((*multibyte_strstr)((s1), (s2)))
 #define strtok(s1, s2) ((*multibyte_strtok)((s1), (s2)))
-#define dos_to_unix(x,y) ((*_dos_to_unix)((x), (y)))
-#define unix_to_dos(x,y) ((*_unix_to_dos)((x), (y)))
+#define dos_to_unix(x, y) ((*_dos_to_unix)((x), (y)))
+#define unix_to_dos(x, y) ((*_unix_to_dos)((x), (y)))
 #define skip_multibyte_char(c) ((*_skip_multibyte_char)((c)))
 
 #endif /* _KANJI_C_ */

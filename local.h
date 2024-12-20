@@ -34,7 +34,7 @@
 
 /* Default size of shared memory used for share mode locking */
 #ifndef SHMEM_SIZE
-#define SHMEM_SIZE (1024*MAX_OPEN_FILES)
+#define SHMEM_SIZE (1024 * MAX_OPEN_FILES)
 #endif
 
 /* the max number of connections that the smbstatus program will show */
@@ -63,7 +63,7 @@
 
 /* shall filenames with illegal chars in them get mangled in long
    filename listings? */
-#define MANGLE_LONG_FILENAMES 
+#define MANGLE_LONG_FILENAMES
 
 /* define this if you want to stop spoofing with .. and soft links
    NOTE: This also slows down the server considerably */
@@ -76,13 +76,12 @@
    manager window? */
 #define FSTYPE_STRING "Samba"
 
-
 /* the default guest account - normally set in the Makefile or smb.conf */
 #ifndef GUEST_ACCOUNT
 #define GUEST_ACCOUNT "nobody"
 #endif
 
-/* do you want smbd to send a 1 byte packet to nmbd to trigger it to start 
+/* do you want smbd to send a 1 byte packet to nmbd to trigger it to start
    when smbd starts? */
 #ifndef PRIME_NMBD
 #define PRIME_NMBD 1
@@ -90,7 +89,7 @@
 
 /* do you want session setups at user level security with a invalid
    password to be rejected or allowed in as guest? WinNT rejects them
-   but it can be a pain as it means "net view" needs to use a password 
+   but it can be a pain as it means "net view" needs to use a password
 
    You have 3 choices:
 
@@ -120,18 +119,18 @@
 /* the size of the uid cache used to reduce valid user checks */
 #define UID_CACHE_SIZE 4
 
-/* the following control timings of various actions. Don't change 
+/* the following control timings of various actions. Don't change
    them unless you know what you are doing. These are all in seconds */
-#define DEFAULT_SMBD_TIMEOUT (60*60*24*7)
+#define DEFAULT_SMBD_TIMEOUT (60 * 60 * 24 * 7)
 #define SMBD_RELOAD_CHECK (60)
 #define IDLE_CLOSED_TIMEOUT (60)
 #define DPTR_IDLE_TIMEOUT (120)
 #define SMBD_SELECT_LOOP (10)
 #define NMBD_SELECT_LOOP (10)
 #define BROWSE_INTERVAL (60)
-#define REGISTRATION_INTERVAL (10*60)
+#define REGISTRATION_INTERVAL (10 * 60)
 #define NMBD_INETD_TIMEOUT (120)
-#define NMBD_MAX_TTL (24*60*60)
+#define NMBD_MAX_TTL (24 * 60 * 60)
 
 /* the following are in milliseconds */
 #define LOCK_RETRY_TIMEOUT (100)
@@ -141,7 +140,7 @@
    accessible to root */
 #define DUMP_CORE 1
 
-/* what is the longest significant password available on your system? 
+/* what is the longest significant password available on your system?
  Knowing this speeds up password searches a lot */
 #ifndef PASSWORD_LENGTH
 #define PASSWORD_LENGTH 8
@@ -149,14 +148,12 @@
 
 #define SMB_ALIGNMENT 1
 
-
 /* shall we support browse requests via a FIFO to nmbd? */
 #define ENABLE_FIFO 1
 
 /* how long to wait for a socket connect to happen */
 #define LONG_CONNECT_TIMEOUT 30
 #define SHORT_CONNECT_TIMEOUT 5
-
 
 /* the directory to sit in when idle */
 /* #define IDLE_DIR "/" */
