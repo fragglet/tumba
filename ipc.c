@@ -1836,6 +1836,29 @@ static int api_reply(int cnum,uint16 vuid,char *outbuf,char *data,char *params,
 }
 
 /****************************************************************************
+  handle named pipe commands
+  ****************************************************************************/
+static int named_pipe(int cnum,uint16 vuid, char *outbuf,char *name,
+		      uint16 *setup,char *data,char *params,
+		      int suwcnt,int tdscnt,int tpscnt,
+		      int msrcnt,int mdrcnt,int mprcnt)
+{
+	DEBUG(3,("named pipe command on <%s> name\n", name));
+
+	if (strequal(name,"LANMAN"))
+	{
+		return api_reply(cnum,vuid,outbuf,data,params,tdscnt,tpscnt,mdrcnt,mprcnt);
+	}
+	if (setup)
+	{
+		DEBUG(3,("unknown named pipe: setup 0x%X setup1=%d\n", (int)setup[0],(int)setup[1]));
+	}
+
+	return 0;
+}
+
+
+/****************************************************************************
   reply to a SMBtrans
   ****************************************************************************/
 int reply_trans(char *inbuf,char *outbuf, int size, int bufsize)
@@ -1947,8 +1970,18 @@ int reply_trans(char *inbuf,char *outbuf, int size, int bufsize)
 
 
   DEBUG(3,("trans <%s> data=%d params=%d setup=%d\n",name,tdscnt,tpscnt,suwcnt));
-  DEBUG(3,("invalid pipe name\n"));
-  outsize = 0;
+
+  if (strncmp(name,"\\PIPE\\",strlen("\\PIPE\\")) == 0)
+  {
+    DEBUG(5,("calling named_pipe\n"));
+    outsize = named_pipe(cnum,vuid,outbuf,name+strlen("\\PIPE\\"),setup,data,params,
+			 suwcnt,tdscnt,tpscnt,msrcnt,mdrcnt,mprcnt);
+  }
+  else
+  {
+    DEBUG(3,("invalid pipe name\n"));
+    outsize = 0;
+  }
 
 
   if (data) free(data);
