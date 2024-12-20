@@ -121,14 +121,6 @@ void *dflt_sig(void)
 	exit_server("caught signal");
 	return 0; /* Keep -Wall happy :-) */
 }
-/****************************************************************************
-  Send a SIGTERM to our process group.
-*****************************************************************************/
-void killkids(void)
-{
-	if (am_parent)
-		kill(0, SIGTERM);
-}
 
 /****************************************************************************
   change a dos mode to a unix mode

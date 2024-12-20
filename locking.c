@@ -236,22 +236,3 @@ BOOL remove_share_oplock(int fnum, int token)
 {
 	return share_ops->remove_oplock(fnum, token);
 }
-
-/*******************************************************************
- Call the specified function on each entry under management by the
- share mode system.
-********************************************************************/
-
-int share_mode_forall(void (*fn)(share_mode_entry *, char *))
-{
-	return share_ops->forall(fn);
-}
-
-/*******************************************************************
- Dump the state of the system.
-********************************************************************/
-
-void share_status(FILE *f)
-{
-	share_ops->status(f);
-}

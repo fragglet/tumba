@@ -302,8 +302,6 @@ int get_share_modes(int cnum, int token, uint32 dev, uint32 inode,
 void del_share_mode(int token, int fnum);
 BOOL set_share_mode(int token, int fnum, uint16 port, uint16 op_type);
 BOOL remove_share_oplock(int fnum, int token);
-int share_mode_forall(void (*fn)(share_mode_entry *, char *));
-void share_status(FILE *f);
 
 /*The following definitions come from  locking_shm.c  */
 
@@ -382,7 +380,6 @@ void generate_next_challenge(char *challenge);
 BOOL set_challenge(char *challenge);
 user_struct *get_valid_user_struct(uint16 vuid);
 void invalidate_vuid(uint16 vuid);
-char *validated_username(uint16 vuid);
 uint16 register_vuid(int uid, int gid, char *unix_name, char *requested_name,
                      BOOL guest);
 void add_session_user(char *user);
@@ -471,7 +468,6 @@ int reply_getattrE(char *inbuf, char *outbuf, int dum_size, int dum_buffsize);
 /*The following definitions come from  server.c  */
 
 void *dflt_sig(void);
-void killkids(void);
 mode_t unix_mode(int cnum, int dosmode);
 int dos_mode(int cnum, char *path, struct stat *sbuf);
 int dos_chmod(int cnum, char *fname, int dosmode, struct stat *st);
@@ -634,7 +630,6 @@ void setup_logging(char *pname, BOOL interactive);
 void reopen_logs(void);
 void force_check_log_size(void);
 char *tmpdir(void);
-BOOL is_a_socket(int fd);
 BOOL next_token(char **ptr, char *buff, char *sep);
 void array_promote(char *array, int elsize, int element);
 void set_socket_options(int fd, char *options);
@@ -721,7 +716,6 @@ int interpret_protocol(char *str, int def);
 uint32 interpret_addr(char *str);
 struct in_addr *interpret_addr2(char *str);
 BOOL zero_ip(struct in_addr ip);
-void reset_globals_after_fork(void);
 char *client_name(void);
 char *client_addr(void);
 char *automount_server(char *user_name);
@@ -731,7 +725,6 @@ BOOL same_net(struct in_addr ip1, struct in_addr ip2, struct in_addr mask);
 int PutUniCode(char *dst, char *src);
 struct hostent *Get_Hostbyname(char *name);
 BOOL process_exists(int pid);
-char *uidtoname(int uid);
 char *gidtoname(int gid);
 void BlockSignals(BOOL block, int signum);
 void ajt_panic(void);

@@ -1019,96 +1019,10 @@ mode file %s (%s)\n",
 	return True;
 }
 
-/*******************************************************************
-call the specified function on each entry under management by the
-share ode system
-********************************************************************/
-static int slow_share_forall(void (*fn)(share_mode_entry *, char *))
-{
-	int i, count = 0;
-	void *dir;
-	char *s;
-	share_mode_entry e;
-
-	dir = opendir(lp_lockdir());
-	if (!dir) {
-		return (0);
-	}
-
-	while ((s = readdirname(dir))) {
-		char *buf;
-		char *base;
-		int fd;
-		pstring lname;
-		uint32 dev, inode;
-		BOOL new_file;
-		pstring fname;
-
-		if (sscanf(s, "share.%u.%u", &dev, &inode) != 2)
-			continue;
-
-		pstrcpy(lname, lp_lockdir());
-		trim_string(lname, NULL, "/");
-		pstrcat(lname, "/");
-		pstrcat(lname, s);
-
-		fd = open(lname, read_only ? O_RDONLY : O_RDWR, 0);
-		if (fd < 0) {
-			continue;
-		}
-
-		/* Lock the share mode file while we read it. */
-		if (!read_only &&
-		    fcntl_lock(fd, F_SETLKW, 0, 1, F_WRLCK) == False) {
-			close(fd);
-			continue;
-		}
-
-		if (read_share_file(0, fd, lname, &buf, &new_file)) {
-			close(fd);
-			continue;
-		}
-		pstrcpy(fname, &buf[10]);
-		close(fd);
-
-		base = buf + SMF_HEADER_LENGTH +
-		       SVAL(buf, SMF_FILENAME_LEN_OFFSET);
-		for (i = 0; i < IVAL(buf, SMF_NUM_ENTRIES_OFFSET); i++) {
-			char *p = base + (i * SMF_ENTRY_LENGTH);
-			e.pid = IVAL(p, SME_PID_OFFSET);
-			e.share_mode = IVAL(p, SME_SHAREMODE_OFFSET);
-			e.time.tv_sec = IVAL(p, SME_SEC_OFFSET);
-			e.time.tv_usec = IVAL(p, SME_USEC_OFFSET);
-			e.op_port = SVAL(p, SME_PORT_OFFSET);
-			e.pid = SVAL(p, SME_PID_OFFSET);
-			e.op_type = SVAL(p, SME_OPLOCK_TYPE_OFFSET);
-
-			if (process_exists(e.pid)) {
-				fn(&e, fname);
-				count++;
-			}
-		} /* end for i */
-
-		if (buf)
-			free(buf);
-		base = 0;
-	} /* end while */
-	closedir(dir);
-
-	return count;
-}
-
-/*******************************************************************
-dump the state of the system
-********************************************************************/
-static void slow_share_status(FILE *f)
-{
-}
-
 static struct share_ops share_ops = {
     slow_stop_share_mode_mgmt, slow_lock_share_entry, slow_unlock_share_entry,
     slow_get_share_modes,      slow_del_share_mode,   slow_set_share_mode,
-    slow_remove_share_oplock,  slow_share_forall,     slow_share_status,
+    slow_remove_share_oplock,
 };
 
 /*******************************************************************

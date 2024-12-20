@@ -375,16 +375,6 @@ char *tmpdir(void)
 	return "/tmp";
 }
 
-/****************************************************************************
-determine if a file descriptor is in fact a socket
-****************************************************************************/
-BOOL is_a_socket(int fd)
-{
-	int v, l;
-	l = sizeof(int);
-	return (getsockopt(fd, SOL_SOCKET, SO_TYPE, (char *) &v, &l) == 0);
-}
-
 static char *last_ptr = NULL;
 
 /****************************************************************************
@@ -3550,20 +3540,8 @@ static BOOL matchname(char *remotehost, struct in_addr addr)
 	return False;
 }
 
-/*******************************************************************
- Reset the 'done' variables so after a client process is created
- from a fork call these calls will be re-done. This should be
- expanded if more variables need reseting.
- ******************************************************************/
-
 static BOOL global_client_name_done = False;
 static BOOL global_client_addr_done = False;
-
-void reset_globals_after_fork(void)
-{
-	global_client_name_done = False;
-	global_client_addr_done = False;
-}
 
 /*******************************************************************
  return the DNS name of the client
@@ -4048,19 +4026,6 @@ check if a process exists. Does this work on all unixes?
 BOOL process_exists(int pid)
 {
 	return (kill(pid, 0) == 0 || errno != ESRCH);
-}
-
-/*******************************************************************
-turn a uid into a user name
-********************************************************************/
-char *uidtoname(int uid)
-{
-	static char name[40];
-	struct passwd *pass = getpwuid(uid);
-	if (pass)
-		return (pass->pw_name);
-	slprintf(name, sizeof(name) - 1, "%d", uid);
-	return (name);
 }
 
 /*******************************************************************

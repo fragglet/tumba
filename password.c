@@ -126,17 +126,6 @@ void invalidate_vuid(uint16 vuid)
 }
 
 /****************************************************************************
-return a validated username
-****************************************************************************/
-char *validated_username(uint16 vuid)
-{
-	user_struct *vuser = get_valid_user_struct(vuid);
-	if (vuser == NULL)
-		return 0;
-	return (vuser->name);
-}
-
-/****************************************************************************
 register a uid/name pair as being valid and that a valid password
 has been given. vuid is biased by an offset. This allows us to
 tell random client vuid's (normally zero) from valid vuids.

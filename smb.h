@@ -497,8 +497,6 @@ struct share_ops {
 	void (*del_entry)(int, int);
 	BOOL (*set_entry)(int, int, uint16, uint16);
 	BOOL (*remove_oplock)(int, int);
-	int (*forall)(void (*)(share_mode_entry *, char *));
-	void (*status)(FILE *);
 };
 
 /* each implementation of the shared memory code needs
