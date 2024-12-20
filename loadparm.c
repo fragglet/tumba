@@ -132,10 +132,6 @@ typedef struct {
 	char *szDomainHostsdeny;
 	char *szUsernameMap;
 	char *szCharacterSet;
-	char *szLogonScript;
-	char *szLogonPath;
-	char *szLogonDrive;
-	char *szLogonHome;
 	char *szSmbrun;
 	char *szWINSserver;
 	char *szCodingSystem;
@@ -446,10 +442,6 @@ static struct parm_struct {
     {"username map", P_STRING, P_GLOBAL, &Globals.szUsernameMap, NULL, NULL},
     {"character set", P_STRING, P_GLOBAL, &Globals.szCharacterSet,
      handle_character_set, NULL},
-    {"logon script", P_STRING, P_GLOBAL, &Globals.szLogonScript, NULL, NULL},
-    {"logon path", P_STRING, P_GLOBAL, &Globals.szLogonPath, NULL, NULL},
-    {"logon drive", P_STRING, P_GLOBAL, &Globals.szLogonDrive, NULL, NULL},
-    {"logon home", P_STRING, P_GLOBAL, &Globals.szLogonHome, NULL, NULL},
     {"remote announce", P_STRING, P_GLOBAL, &Globals.szRemoteAnnounce, NULL,
      NULL},
     {"remote browse sync", P_STRING, P_GLOBAL, &Globals.szRemoteBrowseSync,
@@ -621,12 +613,6 @@ static void init_globals(void)
 	slprintf(s, sizeof(s) - 1, "%d.%d", DEFAULT_MAJOR_VERSION,
 	         DEFAULT_MINOR_VERSION);
 	string_set(&Globals.szAnnounceVersion, s);
-
-	string_set(&Globals.szLogonDrive, "");
-	/* %N is the NIS auto.home server if -DAUTOHOME is used, else same as %L
-	 */
-	string_set(&Globals.szLogonHome, "\\\\%N\\%U");
-	string_set(&Globals.szLogonPath, "\\\\%N\\%U\\profile");
 
 	string_set(&Globals.szNameResolveOrder, "lmhosts host wins bcast");
 
@@ -826,10 +812,6 @@ FN_GLOBAL_STRING(lp_name_resolve_order, &Globals.szNameResolveOrder)
 FN_GLOBAL_STRING(lp_workgroup, &Globals.szWorkGroup)
 FN_GLOBAL_STRING(lp_username_map, &Globals.szUsernameMap)
 FN_GLOBAL_STRING(lp_character_set, &Globals.szCharacterSet)
-FN_GLOBAL_STRING(lp_logon_script, &Globals.szLogonScript)
-FN_GLOBAL_STRING(lp_logon_path, &Globals.szLogonPath)
-FN_GLOBAL_STRING(lp_logon_drive, &Globals.szLogonDrive)
-FN_GLOBAL_STRING(lp_logon_home, &Globals.szLogonHome)
 FN_GLOBAL_STRING(lp_remote_announce, &Globals.szRemoteAnnounce)
 FN_GLOBAL_STRING(lp_remote_browse_sync, &Globals.szRemoteBrowseSync)
 FN_GLOBAL_STRING(lp_wins_server, &Globals.szWINSserver)
