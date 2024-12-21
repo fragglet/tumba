@@ -1322,17 +1322,6 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 #endif
 }
 
-/*******************************************************************
-sync a file
-********************************************************************/
-void sync_file(int cnum, int fnum)
-{
-#ifndef NO_FSYNC
-	if (lp_strict_sync(SNUM(cnum)))
-		fsync(Files[fnum].fd_ptr->fd);
-#endif
-}
-
 /****************************************************************************
 close a file - possibly invalidating the read prediction
 

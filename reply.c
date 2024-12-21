@@ -1854,9 +1854,6 @@ int reply_writebraw(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		SSVAL(outbuf, smb_err, ERRdiskfull);
 	}
 
-	if (lp_syncalways(SNUM(cnum)) || write_through)
-		sync_file(cnum, fnum);
-
 	DEBUG(3,
 	      ("%s writebraw2 fnum=%d cnum=%d start=%d num=%d wrote=%d\n",
 	       timestring(), fnum, cnum, startpos, numtowrite, total_written));
@@ -1905,9 +1902,6 @@ int reply_writeunlock(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		nwritten = 0;
 	else
 		nwritten = write_file(fnum, data, numtowrite);
-
-	if (lp_syncalways(SNUM(cnum)))
-		sync_file(cnum, fnum);
 
 	if (((nwritten == 0) && (numtowrite != 0)) || (nwritten < 0))
 		return (UNIXERROR(ERRDOS, ERRnoaccess));
@@ -1962,9 +1956,6 @@ int reply_write(char *inbuf, char *outbuf, int dum1, int dum2)
 	else
 		nwritten = write_file(fnum, data, numtowrite);
 
-	if (lp_syncalways(SNUM(cnum)))
-		sync_file(cnum, fnum);
-
 	if (((nwritten == 0) && (numtowrite != 0)) || (nwritten < 0))
 		return (UNIXERROR(ERRDOS, ERRnoaccess));
 
@@ -1992,7 +1983,6 @@ int reply_write_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	uint32 smb_offs = IVAL(inbuf, smb_vwv3);
 	int smb_dsize = SVAL(inbuf, smb_vwv10);
 	int smb_doff = SVAL(inbuf, smb_vwv11);
-	BOOL write_through = BITSETW(inbuf + smb_vwv7, 0);
 	int cnum;
 	int nwritten = -1;
 	char *data;
@@ -2035,9 +2025,6 @@ int reply_write_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	          fnum, cnum, smb_dsize, nwritten));
 
 	chain_fnum = fnum;
-
-	if (lp_syncalways(SNUM(cnum)) || write_through)
-		sync_file(cnum, fnum);
 
 	return chain_reply(inbuf, outbuf, length, bufsize);
 }
@@ -2104,14 +2091,6 @@ int reply_flush(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		CHECK_FNUM(fnum, cnum);
 		CHECK_ERROR(fnum);
 	}
-
-	if (fnum == 0xFFFF) {
-		int i;
-		for (i = 0; i < MAX_OPEN_FILES; i++)
-			if (OPEN_FNUM(i))
-				sync_file(cnum, i);
-	} else
-		sync_file(cnum, fnum);
 
 	DEBUG(3, ("%s flush fnum=%d\n", timestring(), fnum));
 	return (outsize);
@@ -3338,9 +3317,6 @@ int reply_writebmpx(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	seek_file(fnum, startpos);
 	nwritten = write_file(fnum, data, numtowrite);
 
-	if (lp_syncalways(SNUM(cnum)) || write_through)
-		sync_file(cnum, fnum);
-
 	if (nwritten < numtowrite)
 		return (UNIXERROR(ERRHRD, ERRdiskfull));
 
@@ -3438,9 +3414,6 @@ int reply_writebs(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	seek_file(fnum, startpos);
 	nwritten = write_file(fnum, data, numtowrite);
-
-	if (lp_syncalways(SNUM(cnum)) || write_through)
-		sync_file(cnum, fnum);
 
 	if (nwritten < numtowrite) {
 		if (write_through) {

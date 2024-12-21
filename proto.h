@@ -137,8 +137,6 @@ BOOL lp_oplocks(int);
 BOOL lp_manglednames(int);
 BOOL lp_widelinks(int);
 BOOL lp_symlinks(int);
-BOOL lp_syncalways(int);
-BOOL lp_strict_sync(int);
 BOOL lp_map_system(int);
 BOOL lp_delete_readonly(int);
 BOOL lp_fake_oplocks(int);
@@ -307,7 +305,6 @@ BOOL unix_convert(char *name, int cnum, pstring saved_last_component,
 int disk_free(char *path, int *bsize, int *dfree, int *dsize);
 int sys_disk_free(char *path, int *bsize, int *dfree, int *dsize);
 BOOL check_name(char *name, int cnum);
-void sync_file(int cnum, int fnum);
 void close_file(int fnum, BOOL normal_close);
 BOOL check_file_sharing(int cnum, char *fname, BOOL rename_op);
 int check_share_mode(share_mode_entry *share, int deny_mode, char *fname,

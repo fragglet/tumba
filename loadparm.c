@@ -211,8 +211,6 @@ typedef struct {
 	BOOL bMangledNames;
 	BOOL bWidelinks;
 	BOOL bSymlinks;
-	BOOL bSyncAlways;
-	BOOL bStrictSync;
 	char magic_char;
 	BOOL *copymap;
 	BOOL bDeleteReadonly;
@@ -270,8 +268,6 @@ static service sDefault = {
     True,       /* bMangledNames */
     True,       /* bWidelinks */
     True,       /* bSymlinks */
-    False,      /* bSyncAlways */
-    False,      /* bStrictSync */
     '~',        /* magic char */
     NULL,       /* copymap */
     False,      /* bDeleteReadonly */
@@ -440,8 +436,6 @@ static struct parm_struct {
     {"oplocks", P_BOOL, P_LOCAL, &sDefault.bOpLocks, NULL, NULL},
     {"wide links", P_BOOL, P_LOCAL, &sDefault.bWidelinks, NULL, NULL},
     {"follow symlinks", P_BOOL, P_LOCAL, &sDefault.bSymlinks, NULL, NULL},
-    {"sync always", P_BOOL, P_LOCAL, &sDefault.bSyncAlways, NULL, NULL},
-    {"strict sync", P_BOOL, P_LOCAL, &sDefault.bStrictSync, NULL, NULL},
     {"mangled names", P_BOOL, P_LOCAL, &sDefault.bMangledNames, NULL, NULL},
     {"fake oplocks", P_BOOL, P_LOCAL, &sDefault.bFakeOplocks, NULL, NULL},
     {"queuepause command", P_STRING, P_LOCAL, &sDefault.szQueuepausecommand,
@@ -723,8 +717,6 @@ FN_LOCAL_BOOL(lp_oplocks, bOpLocks)
 FN_LOCAL_BOOL(lp_manglednames, bMangledNames)
 FN_LOCAL_BOOL(lp_widelinks, bWidelinks)
 FN_LOCAL_BOOL(lp_symlinks, bSymlinks)
-FN_LOCAL_BOOL(lp_syncalways, bSyncAlways)
-FN_LOCAL_BOOL(lp_strict_sync, bStrictSync)
 FN_LOCAL_BOOL(lp_map_system, bMap_system)
 FN_LOCAL_BOOL(lp_delete_readonly, bDeleteReadonly)
 FN_LOCAL_BOOL(lp_fake_oplocks, bFakeOplocks)
