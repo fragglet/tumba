@@ -2092,20 +2092,6 @@ int find_service(char *service)
 
 	iService = lp_servicenumber(service);
 
-	/* now handle the special case of a home directory */
-	if (iService < 0) {
-		char *phome_dir = get_home_dir(service);
-
-		if (!phome_dir) {
-			/*
-			 * Try mapping the servicename, it may
-			 * be a Windows to unix mapped user name.
-			 */
-			if (map_username(service))
-				phome_dir = get_home_dir(service);
-		}
-	}
-
 	/* just possibly it's a default service? */
 	if (iService < 0) {
 		char *pdefservice = lp_defaultservice();
@@ -4299,16 +4285,12 @@ do some standard substitutions in a string
 void standard_sub(int cnum, char *str)
 {
 	if (VALID_CNUM(cnum)) {
-		char *p, *s, *home;
+		char *p, *s;
 
 		for (s = str; (p = strchr(s, '%')) != NULL; s = p) {
 			switch (*(p + 1)) {
 			case 'H':
-				if ((home = get_home_dir(
-				         Connections[cnum].user)) != NULL)
-					string_sub(p, "%H", home);
-				else
-					p += 2;
+				string_sub(p, "%H", "/");
 				break;
 			case 'P':
 				string_sub(p, "%P",
