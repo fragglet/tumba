@@ -148,7 +148,6 @@ typedef struct {
 	int syslog;
 	int os_level;
 	int ReadSize;
-	int shmem_size;
 	int client_code_page;
 	BOOL bPreferredMaster;
 	BOOL bStripDot;
@@ -376,7 +375,6 @@ static struct parm_struct {
     {"deadtime", P_INTEGER, P_GLOBAL, &Globals.deadtime, NULL, NULL},
     {"time offset", P_INTEGER, P_GLOBAL, &extra_time_offset, NULL, NULL},
     {"read size", P_INTEGER, P_GLOBAL, &Globals.ReadSize, NULL, NULL},
-    {"shared mem size", P_INTEGER, P_GLOBAL, &Globals.shmem_size, NULL, NULL},
     {"coding system", P_STRING, P_GLOBAL, &Globals.szCodingSystem,
      handle_coding_system, NULL},
     {"client code page", P_INTEGER, P_GLOBAL, &Globals.client_code_page, NULL,
@@ -515,7 +513,6 @@ static void init_globals(void)
 	Globals.bSyslogOnly = False;
 	Globals.os_level = 0;
 	Globals.ReadSize = 16 * 1024;
-	Globals.shmem_size = SHMEM_SIZE;
 	Globals.bUnixRealname = False;
 	Globals.client_code_page = DEFAULT_CLIENT_CODE_PAGE;
 	Globals.bBindInterfacesOnly = False;
@@ -688,7 +685,6 @@ FN_GLOBAL_INTEGER(lp_maxpacket, &Globals.max_packet)
 FN_GLOBAL_INTEGER(lp_keepalive, &keepalive)
 FN_GLOBAL_INTEGER(lp_usernamelevel, &Globals.unamelevel)
 FN_GLOBAL_INTEGER(lp_readsize, &Globals.ReadSize)
-FN_GLOBAL_INTEGER(lp_shmem_size, &Globals.shmem_size)
 FN_GLOBAL_INTEGER(lp_deadtime, &Globals.deadtime)
 FN_GLOBAL_INTEGER(lp_maxprotocol, &Globals.maxprotocol)
 FN_GLOBAL_INTEGER(lp_maxdisksize, &Globals.maxdisksize)

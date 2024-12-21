@@ -102,7 +102,6 @@ int lp_maxpacket(void);
 int lp_keepalive(void);
 int lp_usernamelevel(void);
 int lp_readsize(void);
-int lp_shmem_size(void);
 int lp_deadtime(void);
 int lp_maxprotocol(void);
 int lp_maxdisksize(void);
