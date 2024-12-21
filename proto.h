@@ -496,10 +496,8 @@ int count_chars(char *s, char c);
 void make_dir_struct(char *buf, char *mask, char *fname, unsigned int size,
                      int mode, time_t date);
 void close_low_fds(void);
-int set_blocking(int fd, BOOL set);
 int write_socket(int fd, char *buf, int len);
 int read_with_timeout(int fd, char *buf, int mincnt, int maxcnt, long time_out);
-int TvalDiff(struct timeval *tvalold, struct timeval *tvalnew);
 int read_data(int fd, char *buffer, int N);
 int write_data(int fd, char *buffer, int N);
 int transfer_file(int infd, int outfd, int n, char *header, int headlen,
@@ -515,7 +513,6 @@ char *name_ptr(char *buf, int ofs);
 int name_extract(char *buf, int ofs, char *name);
 int name_len(char *s);
 BOOL send_one_packet(char *buf, int len, struct in_addr ip, int port, int type);
-void msleep(int t);
 BOOL in_list(char *s, char *list, BOOL casesensitive);
 BOOL string_init(char **dest, char *src);
 void string_free(char **s);
@@ -537,7 +534,6 @@ void reset_globals_after_fork(void);
 char *client_name(void);
 char *client_addr(void);
 void standard_sub_basic(char *str);
-BOOL same_net(struct in_addr ip1, struct in_addr ip2, struct in_addr mask);
 int PutUniCode(char *dst, char *src);
 struct hostent *Get_Hostbyname(char *name);
 BOOL process_exists(int pid);

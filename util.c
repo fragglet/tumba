@@ -1596,31 +1596,6 @@ void close_low_fds(void)
 }
 
 /****************************************************************************
-Set a fd into blocking/nonblocking mode. Uses POSIX O_NONBLOCK if available,
-else
-if SYSV use O_NDELAY
-if BSD use FNDELAY
-****************************************************************************/
-int set_blocking(int fd, BOOL set)
-{
-	int val;
-#ifdef O_NONBLOCK
-#define FLAG_TO_SET O_NONBLOCK
-#else
-#define FLAG_TO_SET FNDELAY
-#endif
-
-	if ((val = fcntl(fd, F_GETFL, 0)) == -1)
-		return -1;
-	if (set) /* Turn blocking on - ie. clear nonblock flag */
-		val &= ~FLAG_TO_SET;
-	else
-		val |= FLAG_TO_SET;
-	return fcntl(fd, F_SETFL, val);
-#undef FLAG_TO_SET
-}
-
-/****************************************************************************
 write to a socket
 ****************************************************************************/
 int write_socket(int fd, char *buf, int len)
@@ -1637,33 +1612,6 @@ int write_socket(int fd, char *buf, int len)
 		DEBUG(0, ("write_socket: Error writing %d bytes to socket %d: "
 		          "ERRNO = %s\n",
 		          len, fd, strerror(errno)));
-
-	return (ret);
-}
-
-/****************************************************************************
-read from a socket
-****************************************************************************/
-int read_udp_socket(int fd, char *buf, int len)
-{
-	int ret;
-	struct sockaddr_in sock;
-	int socklen;
-
-	socklen = sizeof(sock);
-	bzero((char *) &sock, socklen);
-	bzero((char *) &lastip, sizeof(lastip));
-	ret = recvfrom(fd, buf, len, 0, (struct sockaddr *) &sock, &socklen);
-	if (ret <= 0) {
-		DEBUG(2, ("read socket failed. ERRNO=%s\n", strerror(errno)));
-		return (0);
-	}
-
-	lastip = sock.sin_addr;
-	lastport = ntohs(sock.sin_port);
-
-	DEBUG(10, ("read_udp_socket: lastip %s lastport %d read: %d\n",
-	           inet_ntoa(lastip), lastport, ret));
 
 	return (ret);
 }
@@ -1755,16 +1703,6 @@ int read_with_timeout(int fd, char *buf, int mincnt, int maxcnt, long time_out)
 
 	/* Return the number we got */
 	return (nread);
-}
-
-/*******************************************************************
-find the difference in milliseconds between two struct timeval
-values
-********************************************************************/
-int TvalDiff(struct timeval *tvalold, struct timeval *tvalnew)
-{
-	return ((tvalnew->tv_sec - tvalold->tv_sec) * 1000 +
-	        ((int) tvalnew->tv_usec - (int) tvalold->tv_usec) / 1000);
 }
 
 /****************************************************************************
@@ -2312,31 +2250,6 @@ BOOL send_one_packet(char *buf, int len, struct in_addr ip, int port, int type)
 
 	close(out_fd);
 	return (ret);
-}
-
-/*******************************************************************
-sleep for a specified number of milliseconds
-********************************************************************/
-void msleep(int t)
-{
-	int tdiff = 0;
-	struct timeval tval, t1, t2;
-	fd_set fds;
-
-	GetTimeOfDay(&t1);
-	GetTimeOfDay(&t2);
-
-	while (tdiff < t) {
-		tval.tv_sec = (t - tdiff) / 1000;
-		tval.tv_usec = 1000 * ((t - tdiff) % 1000);
-
-		FD_ZERO(&fds);
-		errno = 0;
-		sys_select(&fds, &tval);
-
-		GetTimeOfDay(&t2);
-		tdiff = TvalDiff(&t1, &t2);
-	}
 }
 
 /****************************************************************************
@@ -3495,20 +3408,6 @@ variable [%s]\n",
 		}
 	}
 	return;
-}
-
-/*******************************************************************
-are two IPs on the same subnet?
-********************************************************************/
-BOOL same_net(struct in_addr ip1, struct in_addr ip2, struct in_addr mask)
-{
-	uint32 net1, net2, nmask;
-
-	nmask = ntohl(mask.s_addr);
-	net1 = ntohl(ip1.s_addr);
-	net2 = ntohl(ip2.s_addr);
-
-	return ((net1 & nmask) == (net2 & nmask));
 }
 
 /*******************************************************************
