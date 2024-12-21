@@ -690,9 +690,9 @@ smbd: $(SMBDOBJ) $(ARCFOUR_OBJ)
 	@echo Linking smbd
 	@$(CC) $(CFLAGS) -o smbd $(SMBDOBJ) $(ARCFOUR_OBJ) $(LIBS) $(AFS_LIBS)
 
-testparm: testparm.o access.o $(UTILOBJ)
+testparm: testparm.o $(UTILOBJ)
 	@echo Linking testparm
-	@$(CC) $(CFLAGS) -o testparm testparm.o access.o $(UTILOBJ) $(LIBS)
+	@$(CC) $(CFLAGS) -o testparm testparm.o $(UTILOBJ) $(LIBS)
 
 make_smbcodepage: make_smbcodepage.o $(UTILOBJ) 
 	@echo Linking make_smbcodepage
