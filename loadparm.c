@@ -119,7 +119,6 @@ typedef struct {
 	char *szAutoServices;
 	char *szLogFile;
 	char *szConfigFile;
-	char *szPasswordServer;
 	char *szSocketOptions;
 	char *szValidChars;
 	char *szWorkGroup;
@@ -127,7 +126,6 @@ typedef struct {
 	char *szDomainGuestUsers;
 	char *szDomainHostsallow;
 	char *szDomainHostsdeny;
-	char *szUsernameMap;
 	char *szCharacterSet;
 	char *szCodingSystem;
 	char *szInterfaces;
@@ -135,7 +133,6 @@ typedef struct {
 	char *szDomainSID;
 	char *szDomainOtherSIDs;
 	char *szDomainGroups;
-	char *szDriverFile;
 	int max_log_size;
 	int mangled_stack;
 	int max_xmit;
@@ -144,7 +141,6 @@ typedef struct {
 	int unamelevel;
 	int deadtime;
 	int maxprotocol;
-	int maxdisksize;
 	int syslog;
 	int os_level;
 	int ReadSize;
@@ -156,7 +152,6 @@ typedef struct {
 	BOOL bReadbmpx;
 	BOOL bSyslogOnly;
 	BOOL bBrowseList;
-	BOOL bUnixRealname;
 	BOOL bBindInterfacesOnly;
 	BOOL bOleLockingCompat;
 } global;
@@ -173,8 +168,6 @@ typedef struct {
 	char *szGuestaccount;
 	char *szCopy;
 	char *szInclude;
-	char *szQueuepausecommand;
-	char *szQueueresumecommand;
 	char *szDontdescend;
 	char *szMangledMap;
 	char *szVetoFiles;
@@ -229,8 +222,6 @@ static service sDefault = {
     NULL,       /* szGuestAccount  - this is set in init_globals() */
     NULL,       /* szCopy */
     NULL,       /* szInclude */
-    NULL,       /* szQueuepausecommand */
-    NULL,       /* szQueueresumecommand */
     NULL,       /* szDontdescend */
     NULL,       /* szMangledMap */
     NULL,       /* szVetoFiles */
@@ -322,7 +313,6 @@ static struct parm_struct {
     {"syslog", P_INTEGER, P_GLOBAL, &Globals.syslog, NULL, NULL},
     {"syslog only", P_BOOL, P_GLOBAL, &Globals.bSyslogOnly, NULL, NULL},
     {"protocol", P_ENUM, P_GLOBAL, &Globals.maxprotocol, NULL, enum_protocol},
-    {"max disk size", P_INTEGER, P_GLOBAL, &Globals.maxdisksize, NULL, NULL},
     {"getwd cache", P_BOOL, P_GLOBAL, &use_getwd_cache, NULL, NULL},
     {"read bmpx", P_BOOL, P_GLOBAL, &Globals.bReadbmpx, NULL, NULL},
     {"read raw", P_BOOL, P_GLOBAL, &Globals.bReadRaw, NULL, NULL},
@@ -331,8 +321,6 @@ static struct parm_struct {
     {"interfaces", P_STRING, P_GLOBAL, &Globals.szInterfaces, NULL, NULL},
     {"bind interfaces only", P_BOOL, P_GLOBAL, &Globals.bBindInterfacesOnly,
      NULL, NULL},
-    {"password server", P_STRING, P_GLOBAL, &Globals.szPasswordServer, NULL,
-     NULL},
     {"socket options", P_GSTRING, P_GLOBAL, user_socket_options, NULL, NULL},
     {"netbios name", P_UGSTRING, P_GLOBAL, myname, NULL, NULL},
     {"log file", P_STRING, P_GLOBAL, &Globals.szLogFile, NULL, NULL},
@@ -351,7 +339,6 @@ static struct parm_struct {
     {"valid chars", P_STRING, P_GLOBAL, &Globals.szValidChars,
      handle_valid_chars, NULL},
     {"workgroup", P_USTRING, P_GLOBAL, &Globals.szWorkGroup, NULL, NULL},
-    {"username map", P_STRING, P_GLOBAL, &Globals.szUsernameMap, NULL, NULL},
     {"character set", P_STRING, P_GLOBAL, &Globals.szCharacterSet,
      handle_character_set, NULL},
     {"socket address", P_STRING, P_GLOBAL, &Globals.szSocketAddress, NULL,
@@ -377,7 +364,6 @@ static struct parm_struct {
     {"prefered master", P_BOOL, P_GLOBAL, &Globals.bPreferredMaster, NULL,
      NULL},
     {"browse list", P_BOOL, P_GLOBAL, &Globals.bBrowseList, NULL, NULL},
-    {"unix realname", P_BOOL, P_GLOBAL, &Globals.bUnixRealname, NULL, NULL},
     {"ole locking compatibility", P_BOOL, P_GLOBAL, &Globals.bOleLockingCompat,
      NULL, NULL},
     {"-valid", P_BOOL, P_LOCAL, &sDefault.valid, NULL, NULL},
@@ -435,10 +421,6 @@ static struct parm_struct {
     {"follow symlinks", P_BOOL, P_LOCAL, &sDefault.bSymlinks, NULL, NULL},
     {"mangled names", P_BOOL, P_LOCAL, &sDefault.bMangledNames, NULL, NULL},
     {"fake oplocks", P_BOOL, P_LOCAL, &sDefault.bFakeOplocks, NULL, NULL},
-    {"queuepause command", P_STRING, P_LOCAL, &sDefault.szQueuepausecommand,
-     NULL, NULL},
-    {"queueresume command", P_STRING, P_LOCAL, &sDefault.szQueueresumecommand,
-     NULL, NULL},
     {"dont descend", P_STRING, P_LOCAL, &sDefault.szDontdescend, NULL, NULL},
     {"mangled map", P_STRING, P_LOCAL, &sDefault.szMangledMap, NULL, NULL},
     {"delete readonly", P_BOOL, P_LOCAL, &sDefault.bDeleteReadonly, NULL, NULL},
@@ -476,7 +458,6 @@ static void init_globals(void)
 	DEBUG(3, ("Initialising global parameters\n"));
 
 	string_set(&Globals.szWorkGroup, WORKGROUP);
-	string_set(&Globals.szDriverFile, DRIVERFILE);
 	string_set(&Globals.szLockDir, LOCKDIR);
 	string_set(&Globals.szRootdir, "/");
 	string_set(&Globals.szSocketAddress, "0.0.0.0");
@@ -501,7 +482,6 @@ static void init_globals(void)
 	Globals.bSyslogOnly = False;
 	Globals.os_level = 0;
 	Globals.ReadSize = 16 * 1024;
-	Globals.bUnixRealname = False;
 	Globals.client_code_page = DEFAULT_CLIENT_CODE_PAGE;
 	Globals.bBindInterfacesOnly = False;
 	Globals.bOleLockingCompat = True;
@@ -644,13 +624,10 @@ FN_GLOBAL_STRING(lp_lockdir, &Globals.szLockDir)
 FN_GLOBAL_STRING(lp_rootdir, &Globals.szRootdir)
 FN_GLOBAL_STRING(lp_defaultservice, &Globals.szDefaultService)
 FN_GLOBAL_STRING(lp_auto_services, &Globals.szAutoServices)
-FN_GLOBAL_STRING(lp_passwordserver, &Globals.szPasswordServer)
 FN_GLOBAL_STRING(lp_workgroup, &Globals.szWorkGroup)
-FN_GLOBAL_STRING(lp_username_map, &Globals.szUsernameMap)
 FN_GLOBAL_STRING(lp_character_set, &Globals.szCharacterSet)
 FN_GLOBAL_STRING(lp_interfaces, &Globals.szInterfaces)
 FN_GLOBAL_STRING(lp_socket_address, &Globals.szSocketAddress)
-FN_GLOBAL_STRING(lp_driverfile, &Globals.szDriverFile)
 
 FN_GLOBAL_BOOL(lp_preferred_master, &Globals.bPreferredMaster)
 FN_GLOBAL_BOOL(lp_getwdcache, &use_getwd_cache)
@@ -660,7 +637,6 @@ FN_GLOBAL_BOOL(lp_writeraw, &Globals.bWriteRaw)
 FN_GLOBAL_BOOL(lp_strip_dot, &Globals.bStripDot)
 FN_GLOBAL_BOOL(lp_syslog_only, &Globals.bSyslogOnly)
 FN_GLOBAL_BOOL(lp_browse_list, &Globals.bBrowseList)
-FN_GLOBAL_BOOL(lp_unix_realname, &Globals.bUnixRealname)
 FN_GLOBAL_BOOL(lp_bind_interfaces_only, &Globals.bBindInterfacesOnly)
 FN_GLOBAL_BOOL(lp_ole_locking_compat, &Globals.bOleLockingCompat)
 
@@ -675,7 +651,6 @@ FN_GLOBAL_INTEGER(lp_usernamelevel, &Globals.unamelevel)
 FN_GLOBAL_INTEGER(lp_readsize, &Globals.ReadSize)
 FN_GLOBAL_INTEGER(lp_deadtime, &Globals.deadtime)
 FN_GLOBAL_INTEGER(lp_maxprotocol, &Globals.maxprotocol)
-FN_GLOBAL_INTEGER(lp_maxdisksize, &Globals.maxdisksize)
 FN_GLOBAL_INTEGER(lp_syslog, &Globals.syslog)
 FN_GLOBAL_INTEGER(lp_client_code_page, &Globals.client_code_page)
 
@@ -683,8 +658,6 @@ FN_LOCAL_STRING(lp_servicename, szService)
 FN_LOCAL_STRING(lp_pathname, szPath)
 FN_LOCAL_STRING(lp_dontdescend, szDontdescend)
 FN_LOCAL_STRING(lp_guestaccount, szGuestaccount)
-FN_LOCAL_STRING(lp_queuepausecommand, szQueuepausecommand)
-FN_LOCAL_STRING(lp_queueresumecommand, szQueueresumecommand)
 FN_LOCAL_STRING(lp_comment, comment)
 FN_LOCAL_STRING(lp_force_user, force_user)
 FN_LOCAL_STRING(lp_force_group, force_group)
