@@ -3781,8 +3781,6 @@ void exit_server(char *reason)
 #endif
 	}
 
-	locking_end();
-
 	DEBUG(3,
 	      ("%s Server exit  (%s)\n", timestring(), reason ? reason : ""));
 	exit(0);

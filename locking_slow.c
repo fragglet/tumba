@@ -68,14 +68,6 @@ extern files_struct Files[];
 static int read_only;
 
 /*******************************************************************
-  deinitialize share_mode management
-  ******************************************************************/
-static BOOL slow_stop_share_mode_mgmt(void)
-{
-	return True;
-}
-
-/*******************************************************************
   name a share file
   ******************************************************************/
 static BOOL share_name(int cnum, uint32 dev, uint32 inode, char *name)
@@ -477,7 +469,7 @@ mode file %s (%s)\n",
 }
 
 static struct share_ops share_ops = {
-    slow_stop_share_mode_mgmt, slow_lock_share_entry, slow_unlock_share_entry,
+    slow_lock_share_entry, slow_unlock_share_entry,
     slow_remove_share_oplock,
 };
 
