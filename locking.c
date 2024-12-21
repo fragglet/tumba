@@ -201,34 +201,6 @@ BOOL unlock_share_entry(int cnum, uint32 dev, uint32 inode, int token)
 }
 
 /*******************************************************************
- Get all share mode entries for a dev/inode pair.
-********************************************************************/
-
-int get_share_modes(int cnum, int token, uint32 dev, uint32 inode,
-                    share_mode_entry **shares)
-{
-	return share_ops->get_entries(cnum, token, dev, inode, shares);
-}
-
-/*******************************************************************
- Del the share mode of a file.
-********************************************************************/
-
-void del_share_mode(int token, int fnum)
-{
-	share_ops->del_entry(token, fnum);
-}
-
-/*******************************************************************
- Set the share mode of a file. Return False on fail, True on success.
-********************************************************************/
-
-BOOL set_share_mode(int token, int fnum, uint16 port, uint16 op_type)
-{
-	return share_ops->set_entry(token, fnum, port, op_type);
-}
-
-/*******************************************************************
  Remove an oplock port and mode entry from a share mode.
 ********************************************************************/
 

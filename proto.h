@@ -178,10 +178,6 @@ BOOL locking_init(int read_only);
 BOOL locking_end(void);
 BOOL lock_share_entry(int cnum, uint32 dev, uint32 inode, int *ptok);
 BOOL unlock_share_entry(int cnum, uint32 dev, uint32 inode, int token);
-int get_share_modes(int cnum, int token, uint32 dev, uint32 inode,
-                    share_mode_entry **shares);
-void del_share_mode(int token, int fnum);
-BOOL set_share_mode(int token, int fnum, uint16 port, uint16 op_type);
 BOOL remove_share_oplock(int fnum, int token);
 
 /*The following definitions come from  locking_shm.c  */

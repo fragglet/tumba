@@ -466,9 +466,6 @@ struct share_ops {
 	BOOL (*stop_mgmt)(void);
 	BOOL (*lock_entry)(int, uint32, uint32, int *);
 	BOOL (*unlock_entry)(int, uint32, uint32, int);
-	int (*get_entries)(int, int, uint32, uint32, share_mode_entry **);
-	void (*del_entry)(int, int);
-	BOOL (*set_entry)(int, int, uint16, uint16);
 	BOOL (*remove_oplock)(int, int);
 };
 
