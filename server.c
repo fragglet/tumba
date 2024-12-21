@@ -2496,22 +2496,6 @@ static void process_smb(char *inbuf, char *outbuf)
 	int32 len = smb_len(inbuf);
 	int nread = len + 4;
 
-	if (trans_num == 0) {
-		/* on the first packet, check the global hosts allow/ hosts
-		   deny parameters before doing any parsing of the packet
-		   passed to us by the client.  This prevents attacks on our
-		   parsing code from hosts not in the hosts allow list */
-		if (!check_access(-1)) {
-			/* send a negative session response "not listining on
-			 calling name" */
-			static unsigned char buf[5] = {0x83, 0, 0, 1, 0x81};
-			DEBUG(1, ("%s Connection denied from %s\n",
-			          timestring(), client_addr()));
-			send_smb(Client, (char *) buf);
-			exit_server("connection denied");
-		}
-	}
-
 	DEBUG(6, ("got message type 0x%x of len 0x%x\n", msg_type, len));
 	DEBUG(3, ("%s Transaction %d of length %d\n", timestring(), trans_num,
 	          nread));
@@ -3358,7 +3342,7 @@ int make_connection(char *service, char *user, char *password, int pwlen,
 		          remote_machine, client_addr(), service));
 		return (-2);
 	}
-	if (!lp_snum_ok(snum) || !check_access(snum)) {
+	if (!lp_snum_ok(snum)) {
 		return (-4);
 	}
 
@@ -4555,8 +4539,7 @@ static int switch_message(int type, char *inbuf, char *outbuf, int size,
 				return (ERROR(ERRSRV, ERRaccess));
 
 			/* does this protocol need to be run as guest? */
-			if ((flags & AS_GUEST) &&
-			    (!become_guest() || !check_access(-1)))
+			if ((flags & AS_GUEST) && !become_guest())
 				return (ERROR(ERRSRV, ERRaccess));
 
 			last_inbuf = inbuf;
