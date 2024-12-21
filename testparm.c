@@ -106,26 +106,5 @@ int main(int argc, char *argv[])
 		getc(stdin);
 		lp_dump(stdout);
 	}
-
-	if (argc == 4) {
-		char *cname = argv[2];
-		char *caddr = argv[3];
-
-		/* this is totally ugly, a real `quick' hack */
-		for (s = 0; s < 1000; s++)
-			if (VALID_SNUM(s)) {
-				if (allow_access(lp_hostsdeny(s),
-				                 lp_hostsallow(s), cname,
-				                 caddr)) {
-					printf("Allow connection from %s (%s) "
-					       "to %s\n",
-					       cname, caddr, lp_servicename(s));
-				} else {
-					printf("Deny connection from %s (%s) "
-					       "to %s\n",
-					       cname, caddr, lp_servicename(s));
-				}
-			}
-	}
 	return (0);
 }

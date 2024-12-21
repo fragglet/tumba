@@ -177,8 +177,6 @@ typedef struct {
 	char *szQueuepausecommand;
 	char *szQueueresumecommand;
 	char *szDontdescend;
-	char *szHostsallow;
-	char *szHostsdeny;
 	char *szMangledMap;
 	char *szVetoFiles;
 	char *szHideFiles;
@@ -239,8 +237,6 @@ static service sDefault = {
     NULL,       /* szQueuepausecommand */
     NULL,       /* szQueueresumecommand */
     NULL,       /* szDontdescend */
-    NULL,       /* szHostsallow */
-    NULL,       /* szHostsdeny */
     NULL,       /* szMangledMap */
     NULL,       /* szVetoFiles */
     NULL,       /* szHideFiles */
@@ -457,10 +453,6 @@ static struct parm_struct {
      NULL, NULL},
     {"queueresume command", P_STRING, P_LOCAL, &sDefault.szQueueresumecommand,
      NULL, NULL},
-    {"hosts allow", P_STRING, P_LOCAL, &sDefault.szHostsallow, NULL, NULL},
-    {"allow hosts", P_STRING, P_LOCAL, &sDefault.szHostsallow, NULL, NULL},
-    {"hosts deny", P_STRING, P_LOCAL, &sDefault.szHostsdeny, NULL, NULL},
-    {"deny hosts", P_STRING, P_LOCAL, &sDefault.szHostsdeny, NULL, NULL},
     {"dont descend", P_STRING, P_LOCAL, &sDefault.szDontdescend, NULL, NULL},
     {"mangled map", P_STRING, P_LOCAL, &sDefault.szMangledMap, NULL, NULL},
     {"delete readonly", P_BOOL, P_LOCAL, &sDefault.bDeleteReadonly, NULL, NULL},
@@ -709,8 +701,6 @@ FN_LOCAL_STRING(lp_dontdescend, szDontdescend)
 FN_LOCAL_STRING(lp_guestaccount, szGuestaccount)
 FN_LOCAL_STRING(lp_queuepausecommand, szQueuepausecommand)
 FN_LOCAL_STRING(lp_queueresumecommand, szQueueresumecommand)
-FN_LOCAL_STRING(lp_hostsallow, szHostsallow)
-FN_LOCAL_STRING(lp_hostsdeny, szHostsdeny)
 FN_LOCAL_STRING(lp_comment, comment)
 FN_LOCAL_STRING(lp_force_user, force_user)
 FN_LOCAL_STRING(lp_force_group, force_group)

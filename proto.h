@@ -3,7 +3,6 @@
 /*The following definitions come from  access.c  */
 
 BOOL check_access(int snum);
-BOOL allow_access(char *deny_list, char *allow_list, char *cname, char *caddr);
 
 /*The following definitions come from  charcnv.c  */
 
@@ -115,8 +114,6 @@ char *lp_dontdescend(int);
 char *lp_guestaccount(int);
 char *lp_queuepausecommand(int);
 char *lp_queueresumecommand(int);
-char *lp_hostsallow(int);
-char *lp_hostsdeny(int);
 char *lp_comment(int);
 char *lp_force_user(int);
 char *lp_force_group(int);
