@@ -684,13 +684,13 @@ BOOL unix_convert(char *name, int cnum, pstring saved_last_component,
 ****************************************************************************/
 int disk_free(char *path, int *bsize, int *dfree, int *dsize)
 {
-	/* Don't bother. We always say there is always 1GiB free.
+	/* Don't bother. We always say it's a 1GiB disk with 512MiB free.
 	   Disks nowadays are so large that it would probably overflow the
 	   value anyway. */
-	*bsize = 512;
-	*dfree = 1024 * 1024;
-	*dsize = 2 * 1024 * 1024;
-	return 1024 * 1024;
+	*bsize = 32768;
+	*dfree = (512 * 1024 * 1024) / *bsize;
+	*dsize = (1024 * 1024 * 1024) / *bsize;
+	return 0;
 }
 
 /****************************************************************************
