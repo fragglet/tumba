@@ -469,21 +469,6 @@ struct share_ops {
 	BOOL (*remove_oplock)(int, int);
 };
 
-/* each implementation of the shared memory code needs
-   to support the following operations */
-struct shmem_ops {
-	BOOL (*shm_close)(void);
-	int (*shm_alloc)(int);
-	BOOL (*shm_free)(int);
-	int (*get_userdef_off)(void);
-	void *(*offset2addr)(int);
-	int (*addr2offset)(void *addr);
-	BOOL (*lock_hash_entry)(unsigned int);
-	BOOL (*unlock_hash_entry)(unsigned int);
-	BOOL (*get_usage)(int *, int *, int *);
-	unsigned (*hash_size)(void);
-};
-
 /* this is used for smbstatus */
 struct connect_record {
 	int magic;

@@ -173,10 +173,6 @@ BOOL lock_share_entry(int cnum, uint32 dev, uint32 inode, int *ptok);
 BOOL unlock_share_entry(int cnum, uint32 dev, uint32 inode, int token);
 BOOL remove_share_oplock(int fnum, int token);
 
-/*The following definitions come from  locking_shm.c  */
-
-struct share_ops *locking_shm_init(int ronly);
-
 /*The following definitions come from  locking_slow.c  */
 
 struct share_ops *locking_slow_init(int ronly);
@@ -331,10 +327,6 @@ void standard_sub(int cnum, char *str);
 char *smb_fn_name(int type);
 int chain_reply(char *inbuf, char *outbuf, int size, int bufsize);
 int construct_reply(char *inbuf, char *outbuf, int size, int bufsize);
-
-/*The following definitions come from  shmem.c  */
-
-struct shmem_ops *smb_shm_open(int ronly);
 
 /*The following definitions come from  slprintf.c  */
 
