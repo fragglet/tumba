@@ -674,7 +674,6 @@ PROTOOBJ = $(UTILOBJ) $(SMBDOBJ) $(NMBDOBJ) $(LOCKOBJ) $(CLIENT_OBJ)
 all : CHECK $(SPROGS) $(PROGS) 
 
 CHECK :
-	@$(SHELL) $(srcdir)checkos.sh $(FLAGSM)
 	@echo "Using CFLAGS = $(CFLAGS)"
 	@echo "Using LIBS = $(LIBS)"
 
@@ -741,7 +740,6 @@ cleandir:  clean
 	rm -f .depend tags
 
 proto:
-	@$(SHELL) $(srcdir)checkos.sh $(FLAGSM)
 	$(AWK) -f mkproto.awk `echo $(PROTOOBJ) | sed -e 's/\.o/\.c/g' | tr ' ' '\n' | sort | uniq` > proto.h
 
 tags:
