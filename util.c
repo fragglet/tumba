@@ -2824,69 +2824,6 @@ void become_daemon(void)
 #endif /* NO_FORK_DEBUG */
 }
 
-
-/****************************************************************************
-read a line from a file with possible \ continuation chars.
-Blanks at the start or end of a line are stripped.
-The string will be allocated if s2 is NULL
-****************************************************************************/
-char *fgets_slash(char *s2, int maxlen, FILE *f)
-{
-	char *s = s2;
-	int len = 0;
-	int c;
-	BOOL start_of_line = True;
-
-	if (feof(f))
-		return (NULL);
-
-	if (!s2) {
-		maxlen = MIN(maxlen, 8);
-		s = (char *) Realloc(s, maxlen);
-	}
-
-	if (!s || maxlen < 2)
-		return (NULL);
-
-	*s = 0;
-
-	while (len < maxlen - 1) {
-		c = getc(f);
-		switch (c) {
-		case '\r':
-			break;
-		case '\n':
-			while (len > 0 && s[len - 1] == ' ') {
-				s[--len] = 0;
-			}
-			if (len > 0 && s[len - 1] == '\\') {
-				s[--len] = 0;
-				start_of_line = True;
-				break;
-			}
-			return (s);
-		case EOF:
-			if (len <= 0 && !s2)
-				free(s);
-			return (len > 0 ? s : NULL);
-		case ' ':
-			if (start_of_line)
-				break;
-		default:
-			start_of_line = False;
-			s[len++] = c;
-			s[len] = 0;
-		}
-		if (!s2 && len > maxlen - 3) {
-			maxlen *= 2;
-			s = (char *) Realloc(s, maxlen);
-			if (!s)
-				return (NULL);
-		}
-	}
-	return (s);
-}
-
 /****************************************************************************
 set the length of a file from a filedescriptor.
 Returns 0 on success, -1 on failure.

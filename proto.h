@@ -500,7 +500,6 @@ BOOL string_sub(char *s, char *pattern, char *insert);
 BOOL do_match(char *str, char *regexp, int case_sig);
 BOOL mask_match(char *str, char *regexp, int case_sig, BOOL trans2);
 void become_daemon(void);
-char *fgets_slash(char *s2, int maxlen, FILE *f);
 int set_filelen(int fd, long len);
 void *Realloc(void *p, int size);
 BOOL get_myname(char *my_name, struct in_addr *ip);
