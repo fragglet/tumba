@@ -36,8 +36,6 @@ extern int DEBUGLEVEL;
 extern connection_struct Connections[];
 extern files_struct Files[];
 
-static struct share_ops *share_ops;
-
 /****************************************************************************
  Utility function to map a lock type correctly depending on the real open
  mode of a file.
@@ -151,49 +149,4 @@ BOOL do_unlock(int fnum, int cnum, uint32 count, uint32 offset, int *eclass,
 		return False;
 	}
 	return True; /* Did unlock */
-}
-
-/****************************************************************************
- Initialise the locking functions.
-****************************************************************************/
-
-BOOL locking_init(int read_only)
-{
-	if (share_ops)
-		return True;
-
-	share_ops = locking_slow_init(read_only);
-	if (!share_ops) {
-		DEBUG(0, ("ERROR: Failed to initialise share modes!\n"));
-		return False;
-	}
-
-	return True;
-}
-
-/*******************************************************************
- Lock a hash bucket entry.
-********************************************************************/
-
-BOOL lock_share_entry(int cnum, uint32 dev, uint32 inode, int *ptok)
-{
-	return share_ops->lock_entry(cnum, dev, inode, ptok);
-}
-
-/*******************************************************************
- Unlock a hash bucket entry.
-********************************************************************/
-
-BOOL unlock_share_entry(int cnum, uint32 dev, uint32 inode, int token)
-{
-	return share_ops->unlock_entry(cnum, dev, inode, token);
-}
-
-/*******************************************************************
- Remove an oplock port and mode entry from a share mode.
-********************************************************************/
-
-BOOL remove_share_oplock(int fnum, int token)
-{
-	return share_ops->remove_oplock(fnum, token);
 }

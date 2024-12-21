@@ -112,7 +112,7 @@ static int delete_share_file(int cnum, char *fname)
 /*******************************************************************
   lock a share mode file.
   ******************************************************************/
-static BOOL slow_lock_share_entry(int cnum, uint32 dev, uint32 inode, int *ptok)
+BOOL lock_share_entry(int cnum, uint32 dev, uint32 inode, int *ptok)
 {
 	pstring fname;
 	int fd;
@@ -206,8 +206,7 @@ static BOOL slow_lock_share_entry(int cnum, uint32 dev, uint32 inode, int *ptok)
 /*******************************************************************
   unlock a share mode file.
   ******************************************************************/
-static BOOL slow_unlock_share_entry(int cnum, uint32 dev, uint32 inode,
-                                    int token)
+BOOL unlock_share_entry(int cnum, uint32 dev, uint32 inode, int token)
 {
 	int fd = (int) token;
 	int ret = True;
@@ -343,7 +342,7 @@ deleting it.\n",
 /*******************************************************************
 Remove an oplock port and mode entry from a share mode.
 ********************************************************************/
-static BOOL slow_remove_share_oplock(int fnum, int token)
+BOOL remove_share_oplock(int fnum, int token)
 {
 	pstring fname;
 	int fd = (int) token;
@@ -468,25 +467,19 @@ mode file %s (%s)\n",
 	return True;
 }
 
-static struct share_ops share_ops = {
-    slow_lock_share_entry, slow_unlock_share_entry,
-    slow_remove_share_oplock,
-};
-
 /*******************************************************************
   initialize the slow share_mode management
   ******************************************************************/
-struct share_ops *locking_slow_init(int ronly)
+BOOL locking_init(int ronly)
 {
-
 	read_only = ronly;
 
 	if (!directory_exist(lp_lockdir(), NULL)) {
 		if (!read_only)
 			mkdir(lp_lockdir(), 0755);
 		if (!directory_exist(lp_lockdir(), NULL))
-			return NULL;
+			return False;
 	}
 
-	return &share_ops;
+	return True;
 }

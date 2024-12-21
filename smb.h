@@ -460,14 +460,6 @@ typedef struct {
 	struct timeval time;
 } share_mode_entry;
 
-/* each implementation of the share mode code needs
-   to support the following operations */
-struct share_ops {
-	BOOL (*lock_entry)(int, uint32, uint32, int *);
-	BOOL (*unlock_entry)(int, uint32, uint32, int);
-	BOOL (*remove_oplock)(int, int);
-};
-
 /* this is used for smbstatus */
 struct connect_record {
 	int magic;
