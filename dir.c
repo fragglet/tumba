@@ -753,13 +753,8 @@ void DirCacheFlush(int snum)
 
 #include <unistd.h>
 
-#if defined(__STDC__)
 #define CONST const
 #define PTR void *
-#else /* !__STDC__ */
-#define CONST
-#define PTR char *
-#endif /* !__STDC__ */
 
 #if !defined(PATH_MAX)
 #if defined(MAXPATHLEN)
@@ -794,13 +789,7 @@ extern char *alloca();
    an array is allocated with `malloc'; the array is SIZE
    bytes long, unless SIZE <= 0, in which case it is as
    big as necessary.  */
-#if defined(__STDC__)
 char *getcwd(char *buf, size_t size)
-#else  /* !__STDC__ */
-char *getcwd(buf, size)
-char *buf;
-int size;
-#endif /* !__STDC__ */
 {
 	static CONST char dots[] =
 	    "../../../../../../../../../../../../../../../../../../../../../../../\

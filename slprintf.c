@@ -37,26 +37,12 @@ int vslprintf(char *str, int n, char *format, va_list ap)
 	return ret;
 }
 
-#ifdef __STDC__
 int slprintf(char *str, int n, char *format, ...)
 {
-#else
-int slprintf(va_alist) va_dcl
-{
-	char *str, *format;
-	int n;
-#endif
 	va_list ap;
 	int ret;
 
-#ifdef __STDC__
 	va_start(ap, format);
-#else
-	va_start(ap);
-	str = va_arg(ap, char *);
-	n = va_arg(ap, int);
-	format = va_arg(ap, char *);
-#endif
 
 	ret = vslprintf(str, n, format, ap);
 	va_end(ap);

@@ -237,26 +237,15 @@ static int get_counter(char **p)
 	}
 }
 
-#ifdef __STDC__
 static int package(struct pack_desc *p, ...)
 {
-#else
-static int package(va_alist) va_dcl
-{
-	struct pack_desc *p;
-#endif
 	va_list args;
 	int needed = 0, stringneeded;
 	char *str = NULL;
 	int is_string = 0, stringused;
 	int32 temp;
 
-#ifdef __STDC__
 	va_start(args, p);
-#else
-	va_start(args);
-	p = va_arg(args, struct pack_desc *);
-#endif
 
 	if (!*p->curpos) {
 		if (!p->subcount)

@@ -77,11 +77,7 @@
 #include <sys/mount.h>
 #endif
 #include <pwd.h>
-#ifdef __STDC__
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 #ifndef NO_UNISTDH
 #include <unistd.h>
 #endif
@@ -244,9 +240,6 @@ extern char *getsmbpass(char *);
 #define FD_SETSIZE 255
 #endif
 
-#ifndef __STDC__
-#define const
-#endif
 
 /* Now for some other grungy stuff */
 #if defined(NO_GETSPNAM) && !defined(QNX)

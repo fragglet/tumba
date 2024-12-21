@@ -759,13 +759,8 @@ struct connection_options {
 #define ERRHRD 0x03 /* Error is an hardware error. */
 #define ERRCMD 0xFF /* Command was not in the "SMB" format. */
 
-#ifdef __STDC__
 int Debug1(char *, ...);
 int slprintf(char *str, int n, char *format, ...);
-#else
-int Debug1();
-int slprintf();
-#endif
 
 #if AJT
 void ajt_panic(void);

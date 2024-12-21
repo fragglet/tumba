@@ -248,24 +248,13 @@ static void check_log_size(void)
 write an debug message on the debugfile. This is called by the DEBUG
 macro
 ********************************************************************/
-#ifdef __STDC__
 int Debug1(char *format_str, ...)
 {
-#else
-int Debug1(va_alist) va_dcl
-{
-	char *format_str;
-#endif
 	va_list ap;
 	int old_errno = errno;
 
 	if (stdout_logging) {
-#ifdef __STDC__
 		va_start(ap, format_str);
-#else
-		va_start(ap);
-		format_str = va_arg(ap, char *);
-#endif
 		vfprintf(dbf, format_str, ap);
 		va_end(ap);
 		errno = old_errno;
@@ -315,12 +304,7 @@ int Debug1(va_alist) va_dcl
 		else
 			priority = priority_map[syslog_level];
 
-#ifdef __STDC__
 		va_start(ap, format_str);
-#else
-		va_start(ap);
-		format_str = va_arg(ap, char *);
-#endif
 		vslprintf(msgbuf, sizeof(msgbuf) - 1, format_str, ap);
 		va_end(ap);
 
@@ -333,12 +317,7 @@ int Debug1(va_alist) va_dcl
 	if (!lp_syslog_only())
 #endif
 	{
-#ifdef __STDC__
 		va_start(ap, format_str);
-#else
-		va_start(ap);
-		format_str = va_arg(ap, char *);
-#endif
 		vfprintf(dbf, format_str, ap);
 		va_end(ap);
 		fflush(dbf);
