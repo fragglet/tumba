@@ -199,7 +199,6 @@ typedef struct {
 	BOOL status;
 	BOOL bHideDotFiles;
 	BOOL bBrowseable;
-	BOOL bAvailable;
 	BOOL bRead_only;
 	BOOL bNo_set_dir;
 	BOOL bMap_system;
@@ -259,7 +258,6 @@ static service sDefault = {
     True,       /* status */
     True,       /* bHideDotFiles */
     True,       /* bBrowseable */
-    True,       /* bAvailable */
     True,       /* bRead_only */
     True,       /* bNo_set_dir */
     False,      /* bMap_system */
@@ -403,7 +401,6 @@ static struct parm_struct {
     {"mangling char", P_CHAR, P_LOCAL, &sDefault.magic_char, NULL, NULL},
     {"browseable", P_BOOL, P_LOCAL, &sDefault.bBrowseable, NULL, NULL},
     {"browsable", P_BOOL, P_LOCAL, &sDefault.bBrowseable, NULL, NULL},
-    {"available", P_BOOL, P_LOCAL, &sDefault.bAvailable, NULL, NULL},
     {"path", P_STRING, P_LOCAL, &sDefault.szPath, NULL, NULL},
     {"directory", P_STRING, P_LOCAL, &sDefault.szPath, NULL, NULL},
     {"guest account", P_STRING, P_LOCAL, &sDefault.szGuestaccount, NULL, NULL},
@@ -869,7 +866,6 @@ static BOOL lp_add_ipc(void)
 	string_set(&iSERVICE(i).comment, comment);
 	iSERVICE(i).status = False;
 	iSERVICE(i).iMaxConnections = 0;
-	iSERVICE(i).bAvailable = True;
 	iSERVICE(i).bRead_only = True;
 	iSERVICE(i).bBrowseable = sDefault.bBrowseable;
 
@@ -1051,11 +1047,6 @@ static BOOL service_ok(int iService)
 		          iSERVICE(iService).szService, tmpdir()));
 		string_set(&iSERVICE(iService).szPath, tmpdir());
 	}
-
-	/* If a service is flagged unavailable, log the fact at level 0. */
-	if (!iSERVICE(iService).bAvailable)
-		DEBUG(1, ("NOTE: Service %s is flagged unavailable.\n",
-		          iSERVICE(iService).szService));
 
 	return (bRetval);
 }
@@ -1687,7 +1678,7 @@ Return TRUE if the passed service number is within range.
 ***************************************************************************/
 BOOL lp_snum_ok(int iService)
 {
-	return (LP_SNUM_OK(iService) && iSERVICE(iService).bAvailable);
+	return LP_SNUM_OK(iService);
 }
 
 /***************************************************************************
