@@ -206,7 +206,6 @@ typedef struct {
 	BOOL bMap_archive;
 	BOOL bLocking;
 	BOOL bStrictLocking;
-	BOOL bShareModes;
 	BOOL bOpLocks;
 	BOOL bMangledNames;
 	BOOL bWidelinks;
@@ -263,7 +262,6 @@ static service sDefault = {
     True,       /* bMap_archive */
     True,       /* bLocking */
     False,      /* bStrictLocking */
-    True,       /* bShareModes */
     True,       /* bOpLocks */
     True,       /* bMangledNames */
     True,       /* bWidelinks */
@@ -432,7 +430,6 @@ static struct parm_struct {
     {"map archive", P_BOOL, P_LOCAL, &sDefault.bMap_archive, NULL, NULL},
     {"locking", P_BOOL, P_LOCAL, &sDefault.bLocking, NULL, NULL},
     {"strict locking", P_BOOL, P_LOCAL, &sDefault.bStrictLocking, NULL, NULL},
-    {"share modes", P_BOOL, P_LOCAL, &sDefault.bShareModes, NULL, NULL},
     {"oplocks", P_BOOL, P_LOCAL, &sDefault.bOpLocks, NULL, NULL},
     {"wide links", P_BOOL, P_LOCAL, &sDefault.bWidelinks, NULL, NULL},
     {"follow symlinks", P_BOOL, P_LOCAL, &sDefault.bSymlinks, NULL, NULL},
@@ -712,7 +709,6 @@ FN_LOCAL_BOOL(lp_map_hidden, bMap_hidden)
 FN_LOCAL_BOOL(lp_map_archive, bMap_archive)
 FN_LOCAL_BOOL(lp_locking, bLocking)
 FN_LOCAL_BOOL(lp_strict_locking, bStrictLocking)
-FN_LOCAL_BOOL(lp_share_modes, bShareModes)
 FN_LOCAL_BOOL(lp_oplocks, bOpLocks)
 FN_LOCAL_BOOL(lp_manglednames, bMangledNames)
 FN_LOCAL_BOOL(lp_widelinks, bWidelinks)

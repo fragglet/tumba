@@ -132,7 +132,6 @@ BOOL lp_map_hidden(int);
 BOOL lp_map_archive(int);
 BOOL lp_locking(int);
 BOOL lp_strict_locking(int);
-BOOL lp_share_modes(int);
 BOOL lp_oplocks(int);
 BOOL lp_manglednames(int);
 BOOL lp_widelinks(int);
@@ -306,9 +305,6 @@ int disk_free(char *path, int *bsize, int *dfree, int *dsize);
 int sys_disk_free(char *path, int *bsize, int *dfree, int *dsize);
 BOOL check_name(char *name, int cnum);
 void close_file(int fnum, BOOL normal_close);
-BOOL check_file_sharing(int cnum, char *fname, BOOL rename_op);
-int check_share_mode(share_mode_entry *share, int deny_mode, char *fname,
-                     BOOL fcbopen, int *flags);
 void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
                       int mode, int oplock_request, int *Access, int *action);
 int seek_file(int fnum, uint32 pos);

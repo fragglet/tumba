@@ -1334,9 +1334,6 @@ void close_file(int fnum, BOOL normal_close)
 {
 	files_struct *fs_p = &Files[fnum];
 	int cnum = fs_p->cnum;
-	uint32 dev = fs_p->fd_ptr->dev;
-	uint32 inode = fs_p->fd_ptr->inode;
-	int token;
 
 	Files[fnum].reserved = False;
 
@@ -1355,15 +1352,7 @@ void close_file(int fnum, BOOL normal_close)
 	}
 #endif
 
-	if (lp_share_modes(SNUM(cnum))) {
-		lock_share_entry(cnum, dev, inode, &token);
-		del_share_mode(token, fnum);
-	}
-
 	fd_attempt_close(fs_p->fd_ptr);
-
-	if (lp_share_modes(SNUM(cnum)))
-		unlock_share_entry(cnum, dev, inode, token);
 
 	if (fs_p->granted_oplock == True)
 		global_oplocks_open--;
@@ -1382,224 +1371,6 @@ void close_file(int fnum, BOOL normal_close)
 	memset(fs_p, 0, sizeof(*fs_p));
 }
 
-enum {
-	AFAIL,
-	AREAD,
-	AWRITE,
-	AALL
-};
-
-/*******************************************************************
-reproduce the share mode access table
-********************************************************************/
-static int access_table(int new_deny, int old_deny, int old_mode, int share_pid,
-                        char *fname)
-{
-	if (new_deny == DENY_ALL || old_deny == DENY_ALL)
-		return (AFAIL);
-
-	if (new_deny == DENY_DOS || old_deny == DENY_DOS) {
-		int pid = getpid();
-		if (old_deny == new_deny && share_pid == pid)
-			return (AALL);
-
-		if (old_mode == 0)
-			return (AREAD);
-
-		/* the new smbpub.zip spec says that if the file extension is
-		   .com, .dll, .exe or .sym then allow the open. I will force
-		   it to read-only as this seems sensible although the spec is
-		   a little unclear on this. */
-		if ((fname = strrchr(fname, '.'))) {
-			if (strequal(fname, ".com") ||
-			    strequal(fname, ".dll") ||
-			    strequal(fname, ".exe") || strequal(fname, ".sym"))
-				return (AREAD);
-		}
-
-		return (AFAIL);
-	}
-
-	switch (new_deny) {
-	case DENY_WRITE:
-		if (old_deny == DENY_WRITE && old_mode == 0)
-			return (AREAD);
-		if (old_deny == DENY_READ && old_mode == 0)
-			return (AWRITE);
-		if (old_deny == DENY_NONE && old_mode == 0)
-			return (AALL);
-		return (AFAIL);
-	case DENY_READ:
-		if (old_deny == DENY_WRITE && old_mode == 1)
-			return (AREAD);
-		if (old_deny == DENY_READ && old_mode == 1)
-			return (AWRITE);
-		if (old_deny == DENY_NONE && old_mode == 1)
-			return (AALL);
-		return (AFAIL);
-	case DENY_NONE:
-		if (old_deny == DENY_WRITE)
-			return (AREAD);
-		if (old_deny == DENY_READ)
-			return (AWRITE);
-		if (old_deny == DENY_NONE)
-			return (AALL);
-		return (AFAIL);
-	}
-	return (AFAIL);
-}
-
-/*******************************************************************
-check if the share mode on a file allows it to be deleted or unlinked
-return True if sharing doesn't prevent the operation
-********************************************************************/
-BOOL check_file_sharing(int cnum, char *fname, BOOL rename_op)
-{
-	int i;
-	int ret = False;
-	share_mode_entry *old_shares = 0;
-	int num_share_modes;
-	struct stat sbuf;
-	int token;
-	int pid = getpid();
-	uint32 dev, inode;
-
-	if (!lp_share_modes(SNUM(cnum)))
-		return True;
-
-	if (sys_stat(fname, &sbuf) == -1)
-		return (True);
-
-	dev = (uint32) sbuf.st_dev;
-	inode = (uint32) sbuf.st_ino;
-
-	lock_share_entry(cnum, dev, inode, &token);
-	num_share_modes = get_share_modes(cnum, token, dev, inode, &old_shares);
-
-	/*
-	 * Check if the share modes will give us access.
-	 */
-
-	if (num_share_modes != 0) {
-		BOOL broke_oplock;
-
-		do {
-
-			broke_oplock = False;
-			for (i = 0; i < num_share_modes; i++) {
-				share_mode_entry *share_entry = &old_shares[i];
-
-				/*
-				 * Break oplocks before checking share modes.
-				 * See comment in open_file_shared for details.
-				 * Check if someone has an oplock on this file.
-				 * If so we must break it before continuing.
-				 */
-				if (share_entry->op_type & BATCH_OPLOCK) {
-
-					/*
-					 * It appears that the NT redirector may
-					 * have a bug, in that it tries to do an
-					 * SMBmv on a file that it has open with
-					 * a batch oplock, and then fails to
-					 * respond to the oplock break request.
-					 * This only seems to occur when the
-					 * client is doing an SMBmv to the smbd
-					 * it is using - thus we try and detect
-					 * this condition by checking if the
-					 * file being moved is open and oplocked
-					 * by this smbd process, and then not
-					 * sending the oplock break in this
-					 * special case. If the file was open
-					 * with a deny mode that prevents the
-					 * move the SMBmv will fail anyway with
-					 * a share violation error. JRA.
-					 */
-					if (rename_op &&
-					    (share_entry->pid == pid)) {
-						DEBUG(
-						    0,
-						    ("check_file_sharing: NT redirector workaround - rename attempted on \
-batch oplocked file %s, dev = %x, inode = %x\n",
-						     fname, dev, inode));
-						/*
-						 * This next line is a test that
-						 * allows the deny-mode
-						 * processing to be skipped.
-						 * This seems to be needed as NT
-						 * insists on the rename
-						 * succeeding (in Office 9x no
-						 * less !). This should be
-						 * removed as soon as (a) MS fix
-						 * the redirector bug or (b) NT
-						 * SMB support in Samba makes NT
-						 * not issue the call (as is my
-						 * fervent hope). JRA.
-						 */
-						continue;
-					} else {
-						DEBUG(
-						    5,
-						    ("check_file_sharing: breaking oplock (%x) on file %s, \
-dev = %x, inode = %x\n",
-						     share_entry->op_type,
-						     fname, dev, inode));
-
-						/* Oplock break.... */
-						unlock_share_entry(
-						    cnum, dev, inode, token);
-						if (request_oplock_break(
-						        share_entry, dev,
-						        inode) == False) {
-							free((
-							    char *) old_shares);
-							DEBUG(
-							    0,
-							    ("check_file_sharing: FAILED when breaking oplock (%x) on file %s, \
-dev = %x, inode = %x\n",
-							     old_shares[i]
-							         .op_type,
-							     fname, dev,
-							     inode));
-							return False;
-						}
-						lock_share_entry(cnum, dev,
-						                 inode, &token);
-						broke_oplock = True;
-						break;
-					}
-				}
-
-				/* someone else has a share lock on it, check to
-				   see if we can too */
-				if ((share_entry->share_mode != DENY_DOS) ||
-				    (share_entry->pid != pid))
-					goto free_and_exit;
-
-			} /* end for */
-
-			if (broke_oplock) {
-				free((char *) old_shares);
-				num_share_modes = get_share_modes(
-				    cnum, token, dev, inode, &old_shares);
-			}
-		} while (broke_oplock);
-	}
-
-	/* XXXX exactly what share mode combinations should be allowed for
-	   deleting/renaming? */
-	/* If we got here then either there were no share modes or
-	   all share modes were DENY_DOS and the pid == getpid() */
-	ret = True;
-
-free_and_exit:
-
-	unlock_share_entry(cnum, dev, inode, token);
-	if (old_shares != NULL)
-		free((char *) old_shares);
-	return (ret);
-}
-
 /****************************************************************************
   C. Hoch 11/22/95
   Helper for open_file_shared.
@@ -1610,13 +1381,6 @@ static void truncate_unless_locked(int fnum, int cnum, int token,
 {
 	if (Files[fnum].can_write) {
 		if (is_locked(fnum, cnum, 0x3FFFFFFF, 0, F_WRLCK)) {
-			/* If share modes are in force for this connection we
-			   have the share entry locked. Unlock it before
-			   closing. */
-			if (*share_locked && lp_share_modes(SNUM(cnum)))
-				unlock_share_entry(
-				    cnum, Files[fnum].fd_ptr->dev,
-				    Files[fnum].fd_ptr->inode, token);
 			close_file(fnum, False);
 			/* Share mode no longer locked. */
 			*share_locked = False;
@@ -1626,49 +1390,6 @@ static void truncate_unless_locked(int fnum, int cnum, int token,
 		} else
 			ftruncate(Files[fnum].fd_ptr->fd, 0);
 	}
-}
-
-/****************************************************************************
-check if we can open a file with a share mode
-****************************************************************************/
-int check_share_mode(share_mode_entry *share, int deny_mode, char *fname,
-                     BOOL fcbopen, int *flags)
-{
-	int old_open_mode = share->share_mode & 0xF;
-	int old_deny_mode = (share->share_mode >> 4) & 7;
-
-	if (old_deny_mode > 4 || old_open_mode > 2) {
-		DEBUG(0, ("Invalid share mode found (%d,%d,%d) on file %s\n",
-		          deny_mode, old_deny_mode, old_open_mode, fname));
-		return False;
-	}
-
-	{
-		int access_allowed = access_table(
-		    deny_mode, old_deny_mode, old_open_mode, share->pid, fname);
-
-		if ((access_allowed == AFAIL) ||
-		    (!fcbopen &&
-		     (access_allowed == AREAD && *flags == O_RDWR)) ||
-		    (access_allowed == AREAD && *flags == O_WRONLY) ||
-		    (access_allowed == AWRITE && *flags == O_RDONLY)) {
-			DEBUG(
-			    2,
-			    ("Share violation on file (%d,%d,%d,%d,%s,fcbopen "
-			     "= %d, flags = %d) = %d\n",
-			     deny_mode, old_deny_mode, old_open_mode,
-			     share->pid, fname, fcbopen, *flags,
-			     access_allowed));
-			return False;
-		}
-
-		if (access_allowed == AREAD)
-			*flags = O_RDONLY;
-
-		if (access_allowed == AWRITE)
-			*flags = O_WRONLY;
-	}
-	return True;
 }
 
 /****************************************************************************
@@ -1686,9 +1407,6 @@ void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
 	BOOL share_locked = False;
 	BOOL fcbopen = False;
 	int token;
-	uint32 dev = 0;
-	uint32 inode = 0;
-	int num_share_modes = 0;
 
 	fs_p->open = False;
 	fs_p->fd_ptr = 0;
@@ -1756,110 +1474,6 @@ void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
 	if (deny_mode == DENY_FCB)
 		deny_mode = DENY_DOS;
 
-	if (lp_share_modes(SNUM(cnum))) {
-		int i;
-		share_mode_entry *old_shares = 0;
-
-		if (file_existed) {
-			dev = (uint32) sbuf.st_dev;
-			inode = (uint32) sbuf.st_ino;
-			lock_share_entry(cnum, dev, inode, &token);
-			share_locked = True;
-			num_share_modes = get_share_modes(cnum, token, dev,
-			                                  inode, &old_shares);
-		}
-
-		/*
-		 * Check if the share modes will give us access.
-		 */
-
-		if (share_locked && (num_share_modes != 0)) {
-			BOOL broke_oplock;
-
-			do {
-
-				broke_oplock = False;
-				for (i = 0; i < num_share_modes; i++) {
-					share_mode_entry *share_entry =
-					    &old_shares[i];
-
-					/*
-					 * By observation of NetBench, oplocks
-					 * are broken *before* share modes are
-					 * checked. This allows a file to be
-					 * closed by the client if the share
-					 * mode would deny access and the client
-					 * has an oplock. Check if someone has
-					 * an oplock on this file. If so we must
-					 * break it before continuing.
-					 */
-					if (share_entry->op_type &
-					    (EXCLUSIVE_OPLOCK | BATCH_OPLOCK)) {
-
-						DEBUG(
-						    5,
-						    ("open_file_shared: breaking oplock (%x) on file %s, \
-dev = %x, inode = %x\n",
-						     share_entry->op_type,
-						     fname, dev, inode));
-
-						/* Oplock break.... */
-						unlock_share_entry(
-						    cnum, dev, inode, token);
-						if (request_oplock_break(
-						        share_entry, dev,
-						        inode) == False) {
-							free((
-							    char *) old_shares);
-							DEBUG(
-							    0,
-							    ("open_file_shared: FAILED when breaking oplock (%x) on file %s, \
-dev = %x, inode = %x\n",
-							     old_shares[i]
-							         .op_type,
-							     fname, dev,
-							     inode));
-							errno = EACCES;
-							unix_ERR_class = ERRDOS;
-							unix_ERR_code =
-							    ERRbadshare;
-							return;
-						}
-						lock_share_entry(cnum, dev,
-						                 inode, &token);
-						broke_oplock = True;
-						break;
-					}
-
-					/* someone else has a share lock on it,
-					   check to see if we can too */
-					if (check_share_mode(
-					        share_entry, deny_mode, fname,
-					        fcbopen, &flags) == False) {
-						free((char *) old_shares);
-						unlock_share_entry(
-						    cnum, dev, inode, token);
-						errno = EACCES;
-						unix_ERR_class = ERRDOS;
-						unix_ERR_code = ERRbadshare;
-						return;
-					}
-
-				} /* end for */
-
-				if (broke_oplock) {
-					free((char *) old_shares);
-					num_share_modes =
-					    get_share_modes(cnum, token, dev,
-					                    inode, &old_shares);
-				}
-			} while (broke_oplock);
-		}
-
-		if (old_shares != 0)
-			free((char *) old_shares);
-	}
-
 	DEBUG(4, ("calling open_file with flags=0x%X flags2=0x%X mode=0%o\n",
 	          flags, flags2, mode));
 
@@ -1873,28 +1487,6 @@ dev = %x, inode = %x\n",
 
 	if (fs_p->open) {
 		int open_mode = 0;
-
-		if ((share_locked == False) && lp_share_modes(SNUM(cnum))) {
-			/* We created the file - thus we must now lock the share
-			 * entry before creating it. */
-			dev = fs_p->fd_ptr->dev;
-			inode = fs_p->fd_ptr->inode;
-			lock_share_entry(cnum, dev, inode, &token);
-			share_locked = True;
-		}
-
-		switch (flags) {
-		case O_RDONLY:
-			open_mode = 0;
-			break;
-		case O_RDWR:
-			open_mode = 2;
-			break;
-		case O_WRONLY:
-			open_mode = 1;
-			break;
-		}
-
 		fs_p->share_mode = (deny_mode << 4) | open_mode;
 
 		if (Access)
@@ -1908,45 +1500,11 @@ dev = %x, inode = %x\n",
 			if (file_existed && (flags2 & O_TRUNC))
 				*action = 3;
 		}
-		/* We must create the share mode entry before truncate as
-		   truncate can fail due to locking and have to close the
-		   file (which expects the share_mode_entry to be there).
-		 */
-		if (lp_share_modes(SNUM(cnum))) {
-			uint16 port = 0;
-			/* JRA. Currently this only services Exlcusive and batch
-			   oplocks (no other opens on this file). This needs to
-			   be extended to level II oplocks (multiple reader
-			   oplocks). */
-
-			if (oplock_request && (num_share_modes == 0) &&
-			    lp_oplocks(SNUM(cnum)) &&
-			    !IS_VETO_OPLOCK_PATH(cnum, fname)) {
-				fs_p->granted_oplock = True;
-				fs_p->sent_oplock_break = False;
-				global_oplocks_open++;
-				port = oplock_port;
-
-				DEBUG(
-				    5,
-				    ("open_file_shared: granted oplock (%x) on file %s, \
-dev = %x, inode = %x\n",
-				     oplock_request, fname, dev, inode));
-
-			} else {
-				port = 0;
-				oplock_request = 0;
-			}
-			set_share_mode(token, fnum, port, oplock_request);
-		}
 
 		if ((flags2 & O_TRUNC) && file_existed)
 			truncate_unless_locked(fnum, cnum, token,
 			                       &share_locked);
 	}
-
-	if (share_locked && lp_share_modes(SNUM(cnum)))
-		unlock_share_entry(cnum, dev, inode, token);
 }
 
 /****************************************************************************
