@@ -231,7 +231,7 @@ BOOL become_user(connection_struct *conn, int cnum, uint16 vuid)
 		if (!become_gid(gid))
 			return (False);
 
-		if (!conn->admin_user && !become_uid(uid))
+		if (!become_uid(uid))
 			return (False);
 	}
 

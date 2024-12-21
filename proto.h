@@ -118,7 +118,6 @@ char *lp_servicename(int);
 char *lp_pathname(int);
 char *lp_dontdescend(int);
 char *lp_guestaccount(int);
-char *lp_admin_users(int);
 char *lp_queuepausecommand(int);
 char *lp_queueresumecommand(int);
 char *lp_hostsallow(int);

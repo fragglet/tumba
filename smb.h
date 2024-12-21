@@ -357,7 +357,6 @@ typedef struct {
 	void *dirptr;
 	BOOL open;
 	BOOL read_only;
-	BOOL admin_user;
 	char *dirpath;
 	char *connectpath;
 	char *origpath;

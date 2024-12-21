@@ -192,7 +192,6 @@ int dos_mode(int cnum, char *path, struct stat *sbuf)
 
 	if (CAN_WRITE(cnum) && !lp_alternate_permissions(SNUM(cnum))) {
 		if (!((sbuf->st_mode & S_IWOTH) ||
-		      Connections[cnum].admin_user ||
 		      ((sbuf->st_mode & S_IWUSR) &&
 		       current_user.uid == sbuf->st_uid) ||
 		      ((sbuf->st_mode & S_IWGRP) &&
@@ -351,7 +350,7 @@ int file_utime(int cnum, char *fname, struct utimbuf *times)
 
 	/* Check if we have write access. */
 	if (CAN_WRITE(cnum)) {
-		if (((sb.st_mode & S_IWOTH) || Connections[cnum].admin_user ||
+		if (((sb.st_mode & S_IWOTH) ||
 		     ((sb.st_mode & S_IWUSR) &&
 		      current_user.uid == sb.st_uid) ||
 		     ((sb.st_mode & S_IWGRP) &&
@@ -3412,21 +3411,6 @@ int make_connection(char *service, char *user, char *password, int pwlen,
 	}
 
 	pcon->read_only = lp_readonly(snum);
-
-	/* admin user check */
-
-	/* JRA - original code denied admin user if the share was
-	   marked read_only. Changed as I don't think this is needed,
-	   but old code left in case there is a problem here.
-	 */
-	if (user_in_list(user, lp_admin_users(snum)))
-	{
-		pcon->admin_user = True;
-		DEBUG(0,
-		      ("%s logged in as admin user (root privileges)\n", user));
-	} else
-		pcon->admin_user = False;
-
 	pcon->force_user = force;
 	pcon->vuid = vuid;
 	pcon->uid = pass->pw_uid;

@@ -173,7 +173,6 @@ typedef struct {
 	char *szService;
 	char *szPath;
 	char *szGuestaccount;
-	char *szAdminUsers;
 	char *szCopy;
 	char *szInclude;
 	char *szPreExec;
@@ -240,7 +239,6 @@ static service sDefault = {
     NULL,       /* szService */
     NULL,       /* szPath */
     NULL,       /* szGuestAccount  - this is set in init_globals() */
-    NULL,       /* szAdminUsers */
     NULL,       /* szCopy */
     NULL,       /* szInclude */
     NULL,       /* szPreExec */
@@ -432,7 +430,6 @@ static struct parm_struct {
     {"path", P_STRING, P_LOCAL, &sDefault.szPath, NULL, NULL},
     {"directory", P_STRING, P_LOCAL, &sDefault.szPath, NULL, NULL},
     {"guest account", P_STRING, P_LOCAL, &sDefault.szGuestaccount, NULL, NULL},
-    {"admin users", P_STRING, P_LOCAL, &sDefault.szAdminUsers, NULL, NULL},
     {"volume", P_STRING, P_LOCAL, &sDefault.volume, NULL, NULL},
     {"force user", P_STRING, P_LOCAL, &sDefault.force_user, NULL, NULL},
     {"force group", P_STRING, P_LOCAL, &sDefault.force_group, NULL, NULL},
@@ -733,7 +730,6 @@ FN_LOCAL_STRING(lp_servicename, szService)
 FN_LOCAL_STRING(lp_pathname, szPath)
 FN_LOCAL_STRING(lp_dontdescend, szDontdescend)
 FN_LOCAL_STRING(lp_guestaccount, szGuestaccount)
-FN_LOCAL_STRING(lp_admin_users, szAdminUsers)
 FN_LOCAL_STRING(lp_queuepausecommand, szQueuepausecommand)
 FN_LOCAL_STRING(lp_queueresumecommand, szQueueresumecommand)
 FN_LOCAL_STRING(lp_hostsallow, szHostsallow)
