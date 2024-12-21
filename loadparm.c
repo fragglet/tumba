@@ -129,7 +129,6 @@ typedef struct {
 	char *szDomainHostsdeny;
 	char *szUsernameMap;
 	char *szCharacterSet;
-	char *szSmbrun;
 	char *szCodingSystem;
 	char *szInterfaces;
 	char *szSocketAddress;
@@ -175,10 +174,6 @@ typedef struct {
 	char *szGuestaccount;
 	char *szCopy;
 	char *szInclude;
-	char *szPreExec;
-	char *szPostExec;
-	char *szRootPreExec;
-	char *szRootPostExec;
 	char *szQueuepausecommand;
 	char *szQueueresumecommand;
 	char *szDontdescend;
@@ -241,10 +236,6 @@ static service sDefault = {
     NULL,       /* szGuestAccount  - this is set in init_globals() */
     NULL,       /* szCopy */
     NULL,       /* szInclude */
-    NULL,       /* szPreExec */
-    NULL,       /* szPostExec */
-    NULL,       /* szRootPreExec */
-    NULL,       /* szRootPostExec */
     NULL,       /* szQueuepausecommand */
     NULL,       /* szQueueresumecommand */
     NULL,       /* szDontdescend */
@@ -357,7 +348,6 @@ static struct parm_struct {
      NULL},
     {"socket options", P_GSTRING, P_GLOBAL, user_socket_options, NULL, NULL},
     {"netbios name", P_UGSTRING, P_GLOBAL, myname, NULL, NULL},
-    {"smbrun", P_STRING, P_GLOBAL, &Globals.szSmbrun, NULL, NULL},
     {"log file", P_STRING, P_GLOBAL, &Globals.szLogFile, NULL, NULL},
     {"config file", P_STRING, P_GLOBAL, &Globals.szConfigFile, NULL, NULL},
     {"preload", P_STRING, P_GLOBAL, &Globals.szAutoServices, NULL, NULL},
@@ -408,13 +398,6 @@ static struct parm_struct {
     {"comment", P_STRING, P_LOCAL, &sDefault.comment, NULL, NULL},
     {"copy", P_STRING, P_LOCAL, &sDefault.szCopy, handle_copy, NULL},
     {"include", P_STRING, P_LOCAL, &sDefault.szInclude, handle_include, NULL},
-    {"exec", P_STRING, P_LOCAL, &sDefault.szPreExec, NULL, NULL},
-    {"preexec", P_STRING, P_LOCAL, &sDefault.szPreExec, NULL, NULL},
-    {"postexec", P_STRING, P_LOCAL, &sDefault.szPostExec, NULL, NULL},
-    {"root preexec", P_STRING, P_LOCAL, &sDefault.szRootPreExec, NULL, NULL},
-    {"root postexec", P_STRING, P_LOCAL, &sDefault.szRootPostExec, NULL, NULL},
-    {"alternate permissions", P_BOOL, P_LOCAL, &sDefault.bAlternatePerm, NULL,
-     NULL},
     {"revalidate", P_BOOL, P_LOCAL, &sDefault.bRevalidate, NULL, NULL},
     {"default case", P_ENUM, P_LOCAL, &sDefault.iDefaultCase, NULL, enum_case},
     {"case sensitive", P_BOOL, P_LOCAL, &sDefault.bCaseSensitive, NULL, NULL},
@@ -518,7 +501,6 @@ static void init_globals(void)
 	string_set(&Globals.szDriverFile, DRIVERFILE);
 	string_set(&Globals.szLockDir, LOCKDIR);
 	string_set(&Globals.szRootdir, "/");
-	string_set(&Globals.szSmbrun, SMBRUN);
 	string_set(&Globals.szSocketAddress, "0.0.0.0");
 	slprintf(s, sizeof(s) - 1, "Samba %s", VERSION);
 	string_set(&Globals.szServerString, s);
@@ -679,7 +661,6 @@ char *lp_string(char *s)
 	}
 
 FN_GLOBAL_STRING(lp_logfile, &Globals.szLogFile)
-FN_GLOBAL_STRING(lp_smbrun, &Globals.szSmbrun)
 FN_GLOBAL_STRING(lp_configfile, &Globals.szConfigFile)
 FN_GLOBAL_STRING(lp_serverstring, &Globals.szServerString)
 FN_GLOBAL_STRING(lp_lockdir, &Globals.szLockDir)
@@ -722,10 +703,6 @@ FN_GLOBAL_INTEGER(lp_maxdisksize, &Globals.maxdisksize)
 FN_GLOBAL_INTEGER(lp_syslog, &Globals.syslog)
 FN_GLOBAL_INTEGER(lp_client_code_page, &Globals.client_code_page)
 
-FN_LOCAL_STRING(lp_preexec, szPreExec)
-FN_LOCAL_STRING(lp_postexec, szPostExec)
-FN_LOCAL_STRING(lp_rootpreexec, szRootPreExec)
-FN_LOCAL_STRING(lp_rootpostexec, szRootPostExec)
 FN_LOCAL_STRING(lp_servicename, szService)
 FN_LOCAL_STRING(lp_pathname, szPath)
 FN_LOCAL_STRING(lp_dontdescend, szDontdescend)

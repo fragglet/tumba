@@ -3476,15 +3476,6 @@ int make_connection(char *service, char *user, char *password, int pwlen,
 
 	pcon->open = True;
 
-	/* execute any "root preexec = " line */
-	if (*lp_rootpreexec(SNUM(cnum))) {
-		pstring cmd;
-		pstrcpy(cmd, lp_rootpreexec(SNUM(cnum)));
-		standard_sub(cnum, cmd);
-		DEBUG(5, ("cmd=%s\n", cmd));
-		smbrun(cmd, NULL, False);
-	}
-
 	if (!become_user(&Connections[cnum], cnum, pcon->vuid)) {
 		DEBUG(0, ("Can't become connected user!\n"));
 		pcon->open = False;
@@ -3522,14 +3513,6 @@ int make_connection(char *service, char *user, char *password, int pwlen,
 
 	num_connections_open++;
 	add_session_user(user);
-
-	/* execute any "preexec = " line */
-	if (*lp_preexec(SNUM(cnum))) {
-		pstring cmd;
-		pstrcpy(cmd, lp_preexec(SNUM(cnum)));
-		standard_sub(cnum, cmd);
-		smbrun(cmd, NULL, False);
-	}
 
 	/* we've finished with the sensitive stuff */
 	unbecome_user();
@@ -3991,24 +3974,7 @@ void close_cnum(int cnum, uint16 vuid)
 	close_open_files(cnum);
 	dptr_closecnum(cnum);
 
-	/* execute any "postexec = " line */
-	if (*lp_postexec(SNUM(cnum)) &&
-	    become_user(&Connections[cnum], cnum, vuid)) {
-		pstring cmd;
-		pstrcpy(cmd, lp_postexec(SNUM(cnum)));
-		standard_sub(cnum, cmd);
-		smbrun(cmd, NULL, False);
-		unbecome_user();
-	}
-
 	unbecome_user();
-	/* execute any "root postexec = " line */
-	if (*lp_rootpostexec(SNUM(cnum))) {
-		pstring cmd;
-		pstrcpy(cmd, lp_rootpostexec(SNUM(cnum)));
-		standard_sub(cnum, cmd);
-		smbrun(cmd, NULL, False);
-	}
 
 	Connections[cnum].open = False;
 	num_connections_open--;

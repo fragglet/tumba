@@ -69,7 +69,6 @@ void initialize_multibyte_vectors(int client_codepage);
 
 char *lp_string(char *s);
 char *lp_logfile(void);
-char *lp_smbrun(void);
 char *lp_configfile(void);
 char *lp_serverstring(void);
 char *lp_lockdir(void);
@@ -110,10 +109,6 @@ int lp_maxprotocol(void);
 int lp_maxdisksize(void);
 int lp_syslog(void);
 int lp_client_code_page(void);
-char *lp_preexec(int);
-char *lp_postexec(int);
-char *lp_rootpreexec(int);
-char *lp_rootpostexec(int);
 char *lp_servicename(int);
 char *lp_pathname(int);
 char *lp_dontdescend(int);
@@ -432,7 +427,6 @@ void init_uid(void);
 BOOL become_guest(void);
 BOOL become_user(connection_struct *conn, int cnum, uint16 vuid);
 BOOL unbecome_user(void);
-int smbrun(char *cmd, char *outfile, BOOL shared);
 void become_root(BOOL save_dir);
 void unbecome_root(BOOL restore_dir);
 
