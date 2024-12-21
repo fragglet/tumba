@@ -1487,6 +1487,18 @@ void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
 
 	if (fs_p->open) {
 		int open_mode = 0;
+		switch (flags) {
+			case O_RDWR:
+				open_mode = 2;
+				break;
+			case O_WRONLY:
+				open_mode = 1;
+				break;
+			default:
+				open_mode = 0;
+				break;
+		}
+
 		fs_p->share_mode = (deny_mode << 4) | open_mode;
 
 		if (Access)
