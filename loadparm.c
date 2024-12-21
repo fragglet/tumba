@@ -240,7 +240,7 @@ static service sDefault = {
     False,      /* bAlternatePerm */
     False,      /* revalidate */
     False,      /* case sensitive */
-    False,      /* case preserve */
+    True,       /* case preserve */
     False,      /* short case preserve */
     False,      /* case mangle */
     True,       /* status */
