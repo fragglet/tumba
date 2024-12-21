@@ -26,25 +26,9 @@
    and add a section for the new unix below.
 */
 
-/* the first OS dependent section is to setup what includes will be used.
-   the main OS dependent section comes later on
-*/
-
-#if (defined(SHADOW_PWD) || defined(OSF1_ENH_SEC) || defined(SecureWare) ||    \
-     defined(PWDAUTH))
-#define PASSWORD_LENGTH 16
-#endif
-
-/* here is the general includes section - with some ifdefs generated
-   by the previous section
-*/
 #include "local.h"
 #include <stdio.h>
-#ifdef POSIX_STDLIBH
-#include <posix/stdlib.h>
-#else
 #include <stdlib.h>
-#endif
 #include <ctype.h>
 #include <time.h>
 #ifndef NO_UTIMEH
@@ -55,14 +39,8 @@
 #include <stddef.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
-#ifdef POSIX_H
-#include <bsd/netinet/in.h>
-#include <bsd/sys/time.h>
-#include <posix/utime.h>
-#else
 #include <netinet/in.h>
 #include <sys/time.h>
-#endif
 #include <errno.h>
 #include <grp.h>
 #include <netdb.h>
@@ -70,182 +48,32 @@
 #include <sys/file.h>
 #include <sys/param.h>
 #include <sys/stat.h>
-#ifndef NO_RESOURCEH
-#include <sys/resource.h>
-#endif
-#ifndef NO_SYSMOUNTH
-#include <sys/mount.h>
-#endif
 #include <pwd.h>
 #include <stdarg.h>
-#ifndef NO_UNISTDH
 #include <unistd.h>
-#endif
 #include <sys/wait.h>
-#ifdef SYSSTREAMH
-#include <sys/stream.h>
-#endif
-#ifndef NO_NETIFH
-#ifdef POSIX_H
-#include <bsd/net/if.h>
-#else
 #include <net/if.h>
-#endif
-#endif
-
-#if defined(GETPWANAM)
-#include <pwdadj.h>
-#include <sys/audit.h>
-#include <sys/label.h>
-#include <sys/types.h>
-#endif
-
-#if defined(SHADOW_PWD) && !defined(NETBSD) && !defined(FreeBSD) &&            \
-    !defined(CONVEX) && !defined(__OpenBSD__)
-#include <shadow.h>
-#endif
 
 #ifdef SYSLOG
 #include <syslog.h>
 #endif
 
-/***************************************************************************
-Here come some platform specific sections
-***************************************************************************/
-
-#ifdef LINUX
 #include <arpa/inet.h>
 #include <dirent.h>
 #include <netinet/in.h>
 #include <string.h>
 #include <sys/vfs.h>
-#ifdef GLIBC2
-#define _LINUX_C_LIB_VERSION_MAJOR 6
-#include <netinet/ip.h>
-#include <netinet/tcp.h>
-#include <rpcsvc/ypclnt.h>
-#include <termios.h>
-#endif
 #ifndef QSORT_CAST
 #define QSORT_CAST (int (*)(const void *, const void *))
 #endif /* QSORT_CAST */
 #define SIGNAL_CAST (__sighandler_t)
 #define USE_GETCWD
 #define USE_SETSID
-#define HAVE_BZERO
-#define HAVE_MEMMOVE
-#define HAVE_VSNPRINTF
 #define USE_SIGPROCMASK
 #define USE_WAITPID
-#if 0
-/* SETFS disabled until we can check on some bug reports */
-#if _LINUX_C_LIB_VERSION_MAJOR >= 5
-#define USE_SETFS
-#endif
-#endif
-#endif
-
-#ifdef NETBSD
-#ifdef NetBSD1_3
-#include <string.h>
-#ifdef ALLOW_CHANGE_PASSWORD
-#include <termios.h>
-#endif /* ALLOW_CHANGE_PASSWORD */
-#else  /* NetBSD1_3 */
-#include <strings.h>
-#endif /* NetBSD1_3 */
-#include <netinet/in_systm.h>
-#include <netinet/ip.h>
-#include <netinet/tcp.h>
-/* you may not need this */
-#define NO_GETSPNAM
-#define SIGNAL_CAST (void (*)())
-#define USE_DIRECT
-#define REPLACE_INNETGR
-#endif
-
-#ifdef FreeBSD
-#include <arpa/inet.h>
-#include <netinet/in_systm.h>
-#include <netinet/ip.h>
-#include <netinet/tcp.h>
-#include <strings.h>
-#include <termios.h>
-#if __FreeBSD__ >= 3
-#include <dirent.h>
-#else
-#define USE_DIRECT
-#endif
-#define SIGNAL_CAST (void (*)(int))
-#define USE_SETVBUF
-#define USE_SETSID
-#define USE_GETCWD
-#define USE_WAITPID
-#define HAVE_MEMMOVE
-#define HAVE_BZERO
-#define HAVE_GETTIMEOFDAY
-#define HAVE_PATHCONF
-#define HAVE_GETGRNAM 1
-#ifndef QSORT_CAST
-#define QSORT_CAST (int (*)(const void *, const void *))
-#endif /* QSORT_CAST */
-#if !defined(O_SYNC)
-#if defined(O_FSYNC)
-#define O_SYNC O_FSYNC
-#else /* defined(O_FSYNC) */
-#define O_SYNC 0
-#endif /* defined(O_FSYNC) */
-#endif /* !defined(O_SYNC) */
-#define HAVE_VSNPRINTF
-#endif /* FreeBSD */
-
-#ifdef __OpenBSD__
-#include <netinet/tcp.h>
-#include <strings.h>
-#define NO_GETSPNAM
-#define SIGNAL_CAST (void (*)())
-#define USE_DIRECT
-#define REPLACE_INNETGR
-#define HAVE_BZERO
-#define HAVE_PATHCONF
-#define HAVE_GETGRNAM 1
-#define HAVE_GETTIMEOFDAY
-#define HAVE_MEMMOVE
-#define USE_GETCWD
-#define USE_SETSID
-#endif
-
-/* Definitions for RiscIX */
-
-/* For UnixWare 2.x's ia_uinfo routines. (tangent@cyberport.com) */
-
-/*******************************************************************
-end of the platform specific sections
-********************************************************************/
-
-#if defined(USE_MMAP) || defined(FAST_SHARE_MODES)
-#include <sys/mman.h>
-#endif
-
-#ifdef REPLACE_GETPASS
-extern char *getsmbpass(char *);
-#define getpass(s) getsmbpass(s)
-#endif
-
-#ifdef REPLACE_INNETGR
-#define innetgr(group, host, user, dom) InNetGr(group, host, user, dom)
-#endif
 
 #ifndef FD_SETSIZE
 #define FD_SETSIZE 255
-#endif
-
-
-/* Now for some other grungy stuff */
-#if defined(NO_GETSPNAM) && !defined(QNX)
-struct spwd { /* fake shadow password structure */
-	char *sp_pwdp;
-};
 #endif
 
 #ifdef USE_DIRECT
@@ -257,43 +85,6 @@ struct spwd { /* fake shadow password structure */
 #ifdef ENOTTY
 #define TIOCNOTTY ENOTTY
 #endif
-#endif
-
-#ifndef SIGHUP
-#define SIGHUP 1
-#endif
-
-/* if undefined then use bsd or sysv printing */
-#ifndef DEFAULT_PRINTING
-#define DEFAULT_PRINTING PRINT_BSD
-#endif
-
-/* This defines the name of the printcap file. It is MOST UNLIKELY that
-   this will change BUT! Specifying a file with the format of a printcap
-   file but containing only a subset of the printers actually in your real
-   printcap file is a quick-n-dirty way to allow dynamic access to a subset
-   of available printers.
-*/
-#ifndef PRINTCAP_NAME
-#define PRINTCAP_NAME "/etc/printcap"
-#endif
-
-#ifdef NO_UTIMBUF
-struct utimbuf {
-	time_t actime;
-	time_t modtime;
-};
-#endif
-
-#ifdef NO_STRERROR
-#ifndef strerror
-extern char *sys_errlist[];
-#define strerror(i) sys_errlist[i]
-#endif
-#endif
-
-#ifndef perror
-#define perror(m) printf("%s: %s\n", m, strerror(errno))
 #endif
 
 #ifndef MAXHOSTNAMELEN
@@ -316,35 +107,6 @@ extern char *sys_errlist[];
 
 /***** automatically generated prototypes *****/
 #include "proto.h"
-
-#ifndef S_IFREG
-#define S_IFREG 0100000
-#endif
-
-#ifndef S_ISREG
-#define S_ISREG(x) ((S_IFREG & (x)) != 0)
-#endif
-
-#ifndef S_ISDIR
-#define S_ISDIR(x) ((S_IFDIR & (x)) != 0)
-#endif
-
-#if !defined(S_ISLNK) && defined(S_IFLNK)
-#define S_ISLNK(x) ((S_IFLNK & (x)) != 0)
-#endif
-
-
-#ifdef REPLACE_STRLEN
-#define strlen(s) Strlen(s)
-#endif
-
-#ifdef REPLACE_STRSTR
-#define strstr(s, p) Strstr(s, p)
-#endif
-
-#ifdef REPLACE_MKTIME
-#define mktime(t) Mktime(t)
-#endif
 
 #ifndef NGROUPS_MAX
 #define NGROUPS_MAX 128
@@ -369,16 +131,8 @@ it works and getting lots of bug reports */
 #define F_RDLCK F_WRLCK
 #endif
 
-#ifndef ENOTSOCK
-#define ENOTSOCK EINVAL
-#endif
-
 #ifndef SIGCLD
 #define SIGCLD SIGCHLD
-#endif
-
-#ifndef MAP_FILE
-#define MAP_FILE 0
 #endif
 
 #ifndef WAIT3_CAST2
@@ -391,21 +145,6 @@ it works and getting lots of bug reports */
 
 #ifndef QSORT_CAST
 #define QSORT_CAST (int (*)(void *, void *))
-#endif
-
-#ifndef INADDR_LOOPBACK
-#define INADDR_LOOPBACK 0x7f000001
-#endif /* INADDR_LOOPBACK */
-
-/* this is a rough check to see if this machine has a lstat() call.
-   it is not guaranteed to work */
-#if !defined(S_ISLNK)
-#define lstat stat
-#endif
-
-/* Not all systems declare ERRNO in errno.h... and some systems #define it! */
-#ifndef errno
-extern int errno;
 #endif
 
 #ifdef NO_EID
