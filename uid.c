@@ -166,8 +166,7 @@ BOOL become_user(connection_struct *conn, int cnum)
 	int snum, gid;
 	int uid;
 
-	if ((current_user.cnum == cnum) &&
-	    (current_user.uid == conn->uid)) {
+	if ((current_user.cnum == cnum) && (current_user.uid == conn->uid)) {
 		DEBUG(4, ("Skipping become_user - already user\n"));
 		return (True);
 	}

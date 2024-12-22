@@ -27,30 +27,30 @@
 */
 
 #include "local.h"
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
+#include <sys/types.h>
 #include <time.h>
 #include <utime.h>
-#include <sys/types.h>
 
-#include <stddef.h>
-#include <sys/ioctl.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <sys/time.h>
 #include <errno.h>
 #include <grp.h>
-#include <netdb.h>
-#include <signal.h>
-#include <sys/file.h>
-#include <sys/param.h>
-#include <sys/stat.h>
-#include <pwd.h>
-#include <stdarg.h>
-#include <unistd.h>
-#include <sys/wait.h>
 #include <net/if.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <pwd.h>
+#include <signal.h>
+#include <stdarg.h>
+#include <stddef.h>
+#include <sys/file.h>
+#include <sys/ioctl.h>
+#include <sys/param.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 #ifdef SYSLOG
 #include <syslog.h>

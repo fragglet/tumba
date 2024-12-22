@@ -462,8 +462,8 @@ BOOL get_dir_entry(int cnum, char *mask, int dirtype, char *fname, int *size,
 			}
 		}
 
-		if (isrootdir && (strequal(filename, "..") ||
-		                  strequal(filename, "."))) {
+		if (isrootdir &&
+		    (strequal(filename, "..") || strequal(filename, "."))) {
 			continue;
 		}
 
@@ -487,16 +487,16 @@ BOOL get_dir_entry(int cnum, char *mask, int dirtype, char *fname, int *size,
 		*mode = dos_mode(cnum, pathreal, &sbuf);
 
 		if (!dir_check_ftype(cnum, *mode, &sbuf, dirtype)) {
-			DEBUG(5, ("[%s] attribs didn't match %x\n",
-			          filename, dirtype));
+			DEBUG(5, ("[%s] attribs didn't match %x\n", filename,
+			          dirtype));
 			continue;
 		}
 
 		*size = sbuf.st_size;
 		*date = sbuf.st_mtime;
 
-		DEBUG(5, ("get_dir_entry found %s fname=%s\n", pathreal,
-		          fname));
+		DEBUG(5,
+		      ("get_dir_entry found %s fname=%s\n", pathreal, fname));
 
 		found = True;
 	}

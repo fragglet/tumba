@@ -1103,14 +1103,11 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 		string_set(&fsp->name, fname);
 		fsp->wbmpx_ptr = NULL;
 
-		DEBUG(
-		    2,
-		    ("%s %s opened file %s read=%s write=%s (numopen=%d "
-		     "fnum=%d)\n",
-		     timestring(),
-		     Connections[cnum].user,
-		     fname, BOOLSTR(fsp->can_read), BOOLSTR(fsp->can_write),
-		     Connections[cnum].num_files_open, fnum));
+		DEBUG(2, ("%s %s opened file %s read=%s write=%s (numopen=%d "
+		          "fnum=%d)\n",
+		          timestring(), Connections[cnum].user, fname,
+		          BOOLSTR(fsp->can_read), BOOLSTR(fsp->can_write),
+		          Connections[cnum].num_files_open, fnum));
 	}
 
 #if USE_MMAP
@@ -1143,7 +1140,6 @@ void close_file(int fnum, BOOL normal_close)
 	int cnum = fs_p->cnum;
 
 	Files[fnum].reserved = False;
-
 
 	fs_p->open = False;
 	Connections[cnum].num_files_open--;
@@ -1289,15 +1285,15 @@ void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
 	if (fs_p->open) {
 		int open_mode = 0;
 		switch (flags) {
-			case O_RDWR:
-				open_mode = 2;
-				break;
-			case O_WRONLY:
-				open_mode = 1;
-				break;
-			default:
-				open_mode = 0;
-				break;
+		case O_RDWR:
+			open_mode = 2;
+			break;
+		case O_WRONLY:
+			open_mode = 1;
+			break;
+		default:
+			open_mode = 0;
+			break;
 		}
 
 		fs_p->share_mode = (deny_mode << 4) | open_mode;
@@ -1339,7 +1335,6 @@ read from a file
 int read_file(int fnum, char *data, uint32 pos, int n)
 {
 	int ret = 0, readret;
-
 
 #if USE_MMAP
 	if (Files[fnum].mmap_ptr) {
@@ -4041,7 +4036,6 @@ static void process(void)
 
 		if (deadtime <= 0)
 			deadtime = DEFAULT_SMBD_TIMEOUT;
-
 
 		errno = 0;
 

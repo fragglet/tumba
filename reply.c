@@ -216,8 +216,7 @@ int reply_tcon(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	parse_connect(smb_buf(inbuf) + 1, service, user, password, &pwlen, dev);
 
-	connection_num =
-	    make_connection(service, user, password, pwlen, dev);
+	connection_num = make_connection(service, user, password, pwlen, dev);
 
 	if (connection_num < 0)
 		return (connection_error(inbuf, outbuf, connection_num));
@@ -1543,7 +1542,6 @@ int reply_readbraw(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	{
 		int predict = 0;
 		_smb_setlen(header, nread);
-
 
 		if ((nread - predict) > 0)
 			seek_file(fnum, startpos + predict);

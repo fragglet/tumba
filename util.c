@@ -21,7 +21,6 @@
 
 #include "includes.h"
 
-
 pstring scope = "";
 
 int DEBUGLEVEL = 1;
@@ -3143,7 +3142,6 @@ char *client_addr(void)
 	global_client_addr_done = True;
 	return addr_buf;
 }
-
 
 /*******************************************************************
 sub strings with useful parameters

@@ -1291,7 +1291,7 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
 
 	case SMB_INFO_QUERY_EAS_FROM_LIST:
 		data_size = 24;
-		put_dos_date2(pdata, 0, get_create_time( &sbuf));
+		put_dos_date2(pdata, 0, get_create_time(&sbuf));
 		put_dos_date2(pdata, 4, sbuf.st_atime);
 		put_dos_date2(pdata, 8, sbuf.st_mtime);
 		SIVAL(pdata, 12, size);
