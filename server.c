@@ -215,13 +215,6 @@ int dos_mode(int cnum, char *path, struct stat *sbuf)
 	if (S_ISDIR(sbuf->st_mode))
 		result = aDIR | (result & aRONLY);
 
-#ifdef S_ISLNK
-#if LINKS_READ_ONLY
-	if (S_ISLNK(sbuf->st_mode) && S_ISDIR(sbuf->st_mode))
-		result |= aRONLY;
-#endif
-#endif
-
 	/* hide files with a name starting with a . */
 	if (lp_hide_dot_files(SNUM(cnum))) {
 		char *p = strrchr(path, '/');
@@ -714,8 +707,6 @@ BOOL check_name(char *name, int cnum)
 	/* Check if we are allowing users to follow symlinks */
 	/* Patch from David Clerc <David.Clerc@cui.unige.ch>
 	   University of Geneva */
-
-#ifdef S_ISLNK
 	if (!lp_symlinks(SNUM(cnum))) {
 		struct stat statbuf;
 		if ((sys_lstat(name, &statbuf) != -1) &&
@@ -726,7 +717,6 @@ BOOL check_name(char *name, int cnum)
 			ret = 0;
 		}
 	}
-#endif
 
 	if (!ret)
 		DEBUG(5, ("check_name on %s failed\n", name));

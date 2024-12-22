@@ -147,17 +147,6 @@ it works and getting lots of bug reports */
 #define QSORT_CAST (int (*)(void *, void *))
 #endif
 
-#ifdef NO_EID
-#define geteuid() getuid()
-#define getegid() getgid()
-#define seteuid(x) setuid(x)
-#define setegid(x) setgid(x)
-#endif
-
-#ifdef NOSTRCASECMP
-#define strcasecmp(s1, s2) StrCaseCmp(s1, s2)
-#endif
-
 #ifdef strcpy
 #undef strcpy
 #endif /* strcpy */
