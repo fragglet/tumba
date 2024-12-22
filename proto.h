@@ -256,8 +256,7 @@ BOOL snum_used(int snum);
 BOOL reload_services(BOOL test);
 int setup_groups(char *user, int uid, int gid, int *p_ngroups, int **p_igroups,
                  gid_t **p_groups, int **p_attrs);
-int make_connection(char *service, char *user, char *password, int pwlen,
-                    char *dev);
+int make_connection(char *service, char *dev);
 int find_free_file(void);
 int reply_corep(char *outbuf);
 int reply_coreplus(char *outbuf);

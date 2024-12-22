@@ -2666,9 +2666,9 @@ int setup_groups(char *user, int uid, int gid, int *p_ngroups, int **p_igroups,
 /****************************************************************************
   make a connection to a service
 ****************************************************************************/
-int make_connection(char *service, char *user, char *password, int pwlen,
-                    char *dev)
+int make_connection(char *service, char *dev)
 {
+	char *user = lp_guestaccount(-1);
 	int cnum;
 	int snum;
 	struct passwd *pass = NULL;
@@ -2677,7 +2677,6 @@ int make_connection(char *service, char *user, char *password, int pwlen,
 	BOOL force = False;
 	static BOOL first_connection = True;
 
-	user = lp_guestaccount(-1);
 	strlower(service);
 
 	snum = find_service(service);

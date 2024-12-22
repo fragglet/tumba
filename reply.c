@@ -203,7 +203,7 @@ int reply_tcon(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	parse_connect(smb_buf(inbuf) + 1, service, user, password, &pwlen, dev);
 
-	connection_num = make_connection(service, user, password, pwlen, dev);
+	connection_num = make_connection(service, dev);
 
 	if (connection_num < 0)
 		return (connection_error(inbuf, outbuf, connection_num));
@@ -238,17 +238,8 @@ int reply_tcon_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 		close_cnum(SVAL(inbuf, smb_tid));
 
 	{
-		char *path;
+		char *path = smb_buf(inbuf) + passlen;
 		char *p;
-		memcpy(password, smb_buf(inbuf), passlen);
-		password[passlen] = 0;
-		path = smb_buf(inbuf) + passlen;
-
-		if (passlen != 24) {
-			if (strequal(password, " "))
-				*password = 0;
-			passlen = strlen(password);
-		}
 
 		fstrcpy(service, path + 2);
 		p = strchr(service, '\\');
@@ -265,8 +256,7 @@ int reply_tcon_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 		DEBUG(4, ("Got device type %s\n", devicename));
 	}
 
-	connection_num =
-	    make_connection(service, user, password, passlen, devicename);
+	connection_num = make_connection(service, devicename);
 
 	if (connection_num < 0)
 		return (connection_error(inbuf, outbuf, connection_num));
@@ -332,7 +322,6 @@ reply to a session setup command
 int reply_sesssetup_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 {
 	int smb_bufsize;
-	int smb_apasslen = 0;
 	pstring smb_apasswd;
 	pstring smb_ntpasswd;
 	pstring user;
@@ -347,13 +336,11 @@ int reply_sesssetup_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	smb_bufsize = SVAL(inbuf, smb_vwv2);
 
 	if (Protocol < PROTOCOL_NT1) {
-		smb_apasslen = SVAL(inbuf, smb_vwv7);
+		int smb_apasslen = SVAL(inbuf, smb_vwv7);
 
 		memcpy(smb_apasswd, smb_buf(inbuf), smb_apasslen);
 		smb_apasswd[smb_apasslen] = 0;
 		pstrcpy(user, smb_buf(inbuf) + smb_apasslen);
-
-		smb_apasslen = strlen(smb_apasswd);
 	} else {
 		uint16 passlen1 = SVAL(inbuf, smb_vwv7);
 		uint16 passlen2 = SVAL(inbuf, smb_vwv8);
@@ -378,19 +365,6 @@ int reply_sesssetup_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 		if (passlen1 > 0 && passlen2 > 0 && passlen2 != 24 &&
 		    passlen2 != 1)
 			passlen2 = 0;
-
-		/* we use the first password that they gave */
-		smb_apasslen = passlen1;
-		StrnCpy(smb_apasswd, p, smb_apasslen);
-
-		/* trim the password */
-		smb_apasslen = strlen(smb_apasswd);
-
-		/* wfwg sometimes uses a space instead of a null */
-		if (strequal(smb_apasswd, " ")) {
-			smb_apasslen = 0;
-			*smb_apasswd = 0;
-		}
 
 		p += passlen1 + passlen2;
 		fstrcpy(user, p);
@@ -433,7 +407,6 @@ int reply_sesssetup_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 
 	add_session_user(user);
 
-	pstrcpy(user, lp_guestaccount(-1));
 	guest = True;
 
 	/* it's ok - setup a reply */
