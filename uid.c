@@ -48,7 +48,6 @@ void init_uid(void)
 	initial_gid = getegid();
 
 	current_user.cnum = -1;
-	current_user.vuid = UID_FIELD_INVALID;
 
 	ChDir(OriginalDir);
 }
@@ -155,7 +154,6 @@ BOOL become_guest(void)
 		DEBUG(1, ("Failed to become guest. Invalid guest account?\n"));
 
 	current_user.cnum = -2;
-	current_user.vuid = UID_FIELD_INVALID;
 
 	return (ret);
 }
@@ -163,26 +161,13 @@ BOOL become_guest(void)
 /****************************************************************************
   become the user of a connection number
 ****************************************************************************/
-BOOL become_user(connection_struct *conn, int cnum, uint16 vuid)
+BOOL become_user(connection_struct *conn, int cnum)
 {
-	user_struct *vuser = get_valid_user_struct(vuid);
 	int snum, gid;
 	int uid;
 
-	/*
-	 * We need a separate check in security=share mode due to vuid
-	 * always being UID_FIELD_INVALID. If we don't do this then
-	 * in share mode security we are *always* changing uid's between
-	 * SMB's - this hurts performance - Badly.
-	 */
-
 	if ((current_user.cnum == cnum) &&
 	    (current_user.uid == conn->uid)) {
-		DEBUG(4, ("Skipping become_user - already user\n"));
-		return (True);
-	} else if ((current_user.cnum == cnum) && (vuser != 0) &&
-	           (current_user.vuid == vuid) &&
-	           (current_user.uid == vuser->uid)) {
 		DEBUG(4, ("Skipping become_user - already user\n"));
 		return (True);
 	}
@@ -214,7 +199,6 @@ BOOL become_user(connection_struct *conn, int cnum, uint16 vuid)
 	}
 
 	current_user.cnum = cnum;
-	current_user.vuid = vuid;
 
 	DEBUG(5, ("become_user uid=(%d,%d) gid=(%d,%d)\n", getuid(), geteuid(),
 	          getgid(), getegid()));
@@ -274,7 +258,6 @@ BOOL unbecome_user(void)
 	          geteuid(), getgid(), getegid()));
 
 	current_user.cnum = -1;
-	current_user.vuid = UID_FIELD_INVALID;
 
 	return (True);
 }

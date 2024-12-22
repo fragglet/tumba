@@ -24,7 +24,6 @@
 
 pstring servicesf = CONFIGFILE;
 extern pstring debugf;
-extern pstring sesssetup_user;
 extern fstring myworkgroup;
 
 char *InBuffer = NULL;
@@ -1081,7 +1080,6 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 		Connections[cnum].num_files_open++;
 		fsp->mode = sbuf->st_mode;
 		GetTimeOfDay(&fsp->open_time);
-		fsp->vuid = current_user.vuid;
 		fsp->size = 0;
 		fsp->pos = -1;
 		fsp->open = True;
@@ -1110,7 +1108,7 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 		    ("%s %s opened file %s read=%s write=%s (numopen=%d "
 		     "fnum=%d)\n",
 		     timestring(),
-		     *sesssetup_user ? sesssetup_user : Connections[cnum].user,
+		     Connections[cnum].user,
 		     fname, BOOLSTR(fsp->can_read), BOOLSTR(fsp->can_write),
 		     Connections[cnum].num_files_open, fnum));
 	}
@@ -2078,7 +2076,6 @@ BOOL oplock_break(uint32 dev, uint32 inode, struct timeval *tval)
 	time_t start_time;
 	BOOL shutdown_server = False;
 	int saved_cnum;
-	int saved_vuid;
 	pstring saved_dir;
 
 	DEBUG(3, ("%s oplock_break: called for dev = %x, inode = %x. Current \
@@ -2195,7 +2192,6 @@ allowing break to succeed.\n",
 	 * user, then unbecome the user whilst we're doing this.
 	 */
 	saved_cnum = fsp->cnum;
-	saved_vuid = current_user.vuid;
 	GetWd(saved_dir);
 	unbecome_user();
 
@@ -2265,7 +2261,7 @@ inode = %x).\n",
 	 * Go back to being the user who requested the oplock
 	 * break.
 	 */
-	if (!become_user(&Connections[saved_cnum], saved_cnum, saved_vuid)) {
+	if (!become_user(&Connections[saved_cnum], saved_cnum)) {
 		DEBUG(0, ("%s oplock_break: unable to re-become user ! "
 		          "Shutting down server\n",
 		          timestring()));
@@ -2682,7 +2678,7 @@ int setup_groups(char *user, int uid, int gid, int *p_ngroups, int **p_igroups,
   make a connection to a service
 ****************************************************************************/
 int make_connection(char *service, char *user, char *password, int pwlen,
-                    char *dev, uint16 vuid)
+                    char *dev)
 {
 	int cnum;
 	int snum;
@@ -2746,7 +2742,6 @@ int make_connection(char *service, char *user, char *password, int pwlen,
 	}
 
 	pcon->read_only = lp_readonly(snum);
-	pcon->vuid = vuid;
 	pcon->uid = pass->pw_uid;
 	pcon->gid = pass->pw_gid;
 	pcon->num_files_open = 0;
@@ -2791,7 +2786,7 @@ int make_connection(char *service, char *user, char *password, int pwlen,
 
 	pcon->open = True;
 
-	if (!become_user(&Connections[cnum], cnum, pcon->vuid)) {
+	if (!become_user(&Connections[cnum], cnum)) {
 		DEBUG(0, ("Can't become connected user!\n"));
 		pcon->open = False;
 		yield_connection(cnum, lp_servicename(SNUM(cnum)),
@@ -3264,7 +3259,7 @@ static void close_open_files(int cnum)
 /****************************************************************************
 close a cnum
 ****************************************************************************/
-void close_cnum(int cnum, uint16 vuid)
+void close_cnum(int cnum)
 {
 	DirCacheFlush(SNUM(cnum));
 
@@ -3533,7 +3528,7 @@ void exit_server(char *reason)
 	DEBUG(2, ("Closing connections\n"));
 	for (i = 0; i < MAX_CONNECTIONS; i++)
 		if (Connections[i].open)
-			close_cnum(i, (uint16) -1);
+			close_cnum(i);
 	if (!reason) {
 		int oldlevel = DEBUGLEVEL;
 		DEBUGLEVEL = 10;
@@ -3804,33 +3799,9 @@ static int switch_message(int type, char *inbuf, char *outbuf, int size,
 		if (smb_messages[match].fn) {
 			int cnum = SVAL(inbuf, smb_tid);
 			int flags = smb_messages[match].flags;
-			static uint16 last_session_tag = UID_FIELD_INVALID;
-			/* In share mode security we must ignore the vuid. */
-			uint16 session_tag = UID_FIELD_INVALID;
 			/* Ensure this value is replaced in the incoming packet.
 			 */
-			SSVAL(inbuf, smb_uid, session_tag);
-
-			/*
-			 * Ensure the correct username is in sesssetup_user.
-			 * This is a really ugly bugfix for problems with
-			 * multiple session_setup_and_X's being done and
-			 * allowing %U and %G substitutions to work correctly.
-			 * There is a reason this code is done here, don't
-			 * move it unless you know what you're doing... :-).
-			 * JRA.
-			 */
-			if (session_tag != last_session_tag) {
-				user_struct *vuser = NULL;
-
-				last_session_tag = session_tag;
-				if (session_tag != UID_FIELD_INVALID)
-					vuser =
-					    get_valid_user_struct(session_tag);
-				if (vuser != NULL)
-					pstrcpy(sesssetup_user,
-					        vuser->requested_name);
-			}
+			SSVAL(inbuf, smb_uid, UID_FIELD_INVALID);
 
 			/* does this protocol need to be run as root? */
 			if (!(flags & AS_USER))
@@ -3839,8 +3810,7 @@ static int switch_message(int type, char *inbuf, char *outbuf, int size,
 			/* does this protocol need to be run as the connected
 			 * user? */
 			if ((flags & AS_USER) &&
-			    !become_user(&Connections[cnum], cnum,
-			                 session_tag)) {
+			    !become_user(&Connections[cnum], cnum)) {
 				if (flags & AS_GUEST)
 					flags &= ~AS_USER;
 				else

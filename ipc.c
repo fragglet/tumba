@@ -65,10 +65,10 @@ extern int Client;
 extern int oplock_sock;
 extern int smb_read_error;
 
-static BOOL api_Unsupported(int cnum, uint16 vuid, char *param, char *data,
+static BOOL api_Unsupported(int cnum, char *param, char *data,
                             int mdrcnt, int mprcnt, char **rdata, char **rparam,
                             int *rdata_len, int *rparam_len);
-static BOOL api_TooSmall(int cnum, uint16 vuid, char *param, char *data,
+static BOOL api_TooSmall(int cnum, char *param, char *data,
                          int mdrcnt, int mprcnt, char **rdata, char **rparam,
                          int *rdata_len, int *rparam_len);
 
@@ -438,7 +438,7 @@ static BOOL srv_comp(struct srv_info_struct *s1, struct srv_info_struct *s2)
   view list of servers available (or possibly domains). The info is
   extracted from lists saved by nmbd on the local host
   ****************************************************************************/
-static BOOL api_RNetServerEnum(int cnum, uint16 vuid, char *param, char *data,
+static BOOL api_RNetServerEnum(int cnum, char *param, char *data,
                                int mdrcnt, int mprcnt, char **rdata,
                                char **rparam, int *rdata_len, int *rparam_len)
 {
@@ -696,7 +696,7 @@ static int fill_share_info(int cnum, int snum, int uLevel, char **buf,
 	return len;
 }
 
-static BOOL api_RNetShareGetInfo(int cnum, uint16 vuid, char *param, char *data,
+static BOOL api_RNetShareGetInfo(int cnum, char *param, char *data,
                                  int mdrcnt, int mprcnt, char **rdata,
                                  char **rparam, int *rdata_len, int *rparam_len)
 {
@@ -734,7 +734,7 @@ static BOOL api_RNetShareGetInfo(int cnum, uint16 vuid, char *param, char *data,
 /****************************************************************************
   view list of shares available
   ****************************************************************************/
-static BOOL api_RNetShareEnum(int cnum, uint16 vuid, char *param, char *data,
+static BOOL api_RNetShareEnum(int cnum, char *param, char *data,
                               int mdrcnt, int mprcnt, char **rdata,
                               char **rparam, int *rdata_len, int *rparam_len)
 {
@@ -798,7 +798,7 @@ static BOOL api_RNetShareEnum(int cnum, uint16 vuid, char *param, char *data,
 /****************************************************************************
   get the time of day info
   ****************************************************************************/
-static BOOL api_NetRemoteTOD(int cnum, uint16 vuid, char *param, char *data,
+static BOOL api_NetRemoteTOD(int cnum, char *param, char *data,
                              int mdrcnt, int mprcnt, char **rdata,
                              char **rparam, int *rdata_len, int *rparam_len)
 {
@@ -848,7 +848,7 @@ static BOOL api_NetRemoteTOD(int cnum, uint16 vuid, char *param, char *data,
 /****************************************************************************
   get info about the server
   ****************************************************************************/
-static BOOL api_RNetServerGetInfo(int cnum, uint16 vuid, char *param,
+static BOOL api_RNetServerGetInfo(int cnum, char *param,
                                   char *data, int mdrcnt, int mprcnt,
                                   char **rdata, char **rparam, int *rdata_len,
                                   int *rparam_len)
@@ -964,7 +964,7 @@ static BOOL api_RNetServerGetInfo(int cnum, uint16 vuid, char *param,
 /****************************************************************************
   get info about the server
   ****************************************************************************/
-static BOOL api_NetWkstaGetInfo(int cnum, uint16 vuid, char *param, char *data,
+static BOOL api_NetWkstaGetInfo(int cnum, char *param, char *data,
                                 int mdrcnt, int mprcnt, char **rdata,
                                 char **rparam, int *rdata_len, int *rparam_len)
 {
@@ -1037,7 +1037,7 @@ static BOOL api_NetWkstaGetInfo(int cnum, uint16 vuid, char *param, char *data,
 /****************************************************************************
   the buffer was too small
   ****************************************************************************/
-static BOOL api_TooSmall(int cnum, uint16 vuid, char *param, char *data,
+static BOOL api_TooSmall(int cnum, char *param, char *data,
                          int mdrcnt, int mprcnt, char **rdata, char **rparam,
                          int *rdata_len, int *rparam_len)
 {
@@ -1056,7 +1056,7 @@ static BOOL api_TooSmall(int cnum, uint16 vuid, char *param, char *data,
 /****************************************************************************
   the request is not supported
   ****************************************************************************/
-static BOOL api_Unsupported(int cnum, uint16 vuid, char *param, char *data,
+static BOOL api_Unsupported(int cnum, char *param, char *data,
                             int mdrcnt, int mprcnt, char **rdata, char **rparam,
                             int *rdata_len, int *rparam_len)
 {
@@ -1076,7 +1076,7 @@ static BOOL api_Unsupported(int cnum, uint16 vuid, char *param, char *data,
 struct {
 	char *name;
 	int id;
-	BOOL (*fn)(int, uint16, char *, char *, int, int, char **, char **,
+	BOOL (*fn)(int, char *, char *, int, int, char **, char **,
 	           int *, int *);
 	int flags;
 } api_commands[] = {{"RNetShareEnum", 0, api_RNetShareEnum, 0},
@@ -1090,7 +1090,7 @@ struct {
 /****************************************************************************
   handle remote api calls
   ****************************************************************************/
-static int api_reply(int cnum, uint16 vuid, char *outbuf, char *data,
+static int api_reply(int cnum, char *outbuf, char *data,
                      char *params, int tdscnt, int tpscnt, int mdrcnt,
                      int mprcnt)
 {
@@ -1120,17 +1120,17 @@ static int api_reply(int cnum, uint16 vuid, char *outbuf, char *data,
 	if (rparam)
 		bzero(rparam, 1024);
 
-	reply = api_commands[i].fn(cnum, vuid, params, data, mdrcnt, mprcnt,
+	reply = api_commands[i].fn(cnum, params, data, mdrcnt, mprcnt,
 	                           &rdata, &rparam, &rdata_len, &rparam_len);
 
 	if (rdata_len > mdrcnt || rparam_len > mprcnt) {
-		reply = api_TooSmall(cnum, vuid, params, data, mdrcnt, mprcnt,
+		reply = api_TooSmall(cnum, params, data, mdrcnt, mprcnt,
 		                     &rdata, &rparam, &rdata_len, &rparam_len);
 	}
 
 	/* if we get False back then it's actually unsupported */
 	if (!reply)
-		api_Unsupported(cnum, vuid, params, data, mdrcnt, mprcnt,
+		api_Unsupported(cnum, params, data, mdrcnt, mprcnt,
 		                &rdata, &rparam, &rdata_len, &rparam_len);
 
 	/* now send the reply */
@@ -1147,7 +1147,7 @@ static int api_reply(int cnum, uint16 vuid, char *outbuf, char *data,
 /****************************************************************************
   handle named pipe commands
   ****************************************************************************/
-static int named_pipe(int cnum, uint16 vuid, char *outbuf, char *name,
+static int named_pipe(int cnum, char *outbuf, char *name,
                       uint16 *setup, char *data, char *params, int suwcnt,
                       int tdscnt, int tpscnt, int msrcnt, int mdrcnt,
                       int mprcnt)
@@ -1155,7 +1155,7 @@ static int named_pipe(int cnum, uint16 vuid, char *outbuf, char *name,
 	DEBUG(3, ("named pipe command on <%s> name\n", name));
 
 	if (strequal(name, "LANMAN")) {
-		return api_reply(cnum, vuid, outbuf, data, params, tdscnt,
+		return api_reply(cnum, outbuf, data, params, tdscnt,
 		                 tpscnt, mdrcnt, mprcnt);
 	}
 	if (setup) {
@@ -1178,8 +1178,6 @@ int reply_trans(char *inbuf, char *outbuf, int size, int bufsize)
 
 	int outsize = 0;
 	int cnum = SVAL(inbuf, smb_tid);
-	uint16 vuid = SVAL(inbuf, smb_uid);
-
 	int tpscnt = SVAL(inbuf, smb_vwv0);
 	int tdscnt = SVAL(inbuf, smb_vwv1);
 	int mprcnt = SVAL(inbuf, smb_vwv2);
@@ -1283,7 +1281,7 @@ int reply_trans(char *inbuf, char *outbuf, int size, int bufsize)
 	if (strncmp(name, "\\PIPE\\", strlen("\\PIPE\\")) == 0) {
 		DEBUG(5, ("calling named_pipe\n"));
 		outsize = named_pipe(
-		    cnum, vuid, outbuf, name + strlen("\\PIPE\\"), setup, data,
+		    cnum, outbuf, name + strlen("\\PIPE\\"), setup, data,
 		    params, suwcnt, tdscnt, tpscnt, msrcnt, mdrcnt, mprcnt);
 	} else {
 		DEBUG(3, ("invalid pipe name\n"));
@@ -1298,7 +1296,7 @@ int reply_trans(char *inbuf, char *outbuf, int size, int bufsize)
 		free(setup);
 
 	if (close_on_completion)
-		close_cnum(cnum, vuid);
+		close_cnum(cnum);
 
 	if (one_way)
 		return (-1);

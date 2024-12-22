@@ -173,8 +173,6 @@ BOOL pm_process(char *FileName, BOOL (*sfunc)(char *),
 
 /*The following definitions come from  password.c  */
 
-user_struct *get_valid_user_struct(uint16 vuid);
-void invalidate_vuid(uint16 vuid);
 void add_session_user(char *user);
 
 /*The following definitions come from  reply.c  */
@@ -267,14 +265,14 @@ BOOL reload_services(BOOL test);
 int setup_groups(char *user, int uid, int gid, int *p_ngroups, int **p_igroups,
                  gid_t **p_groups, int **p_attrs);
 int make_connection(char *service, char *user, char *password, int pwlen,
-                    char *dev, uint16 vuid);
+                    char *dev);
 int find_free_file(void);
 int reply_corep(char *outbuf);
 int reply_coreplus(char *outbuf);
 int reply_lanman1(char *outbuf);
 int reply_lanman2(char *outbuf);
 int reply_nt1(char *outbuf);
-void close_cnum(int cnum, uint16 vuid);
+void close_cnum(int cnum);
 BOOL yield_connection(int cnum, char *name, int max_connections);
 BOOL claim_connection(int cnum, char *name, int max_connections, BOOL Clear);
 void exit_server(char *reason);
@@ -338,7 +336,7 @@ int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize);
 
 void init_uid(void);
 BOOL become_guest(void);
-BOOL become_user(connection_struct *conn, int cnum, uint16 vuid);
+BOOL become_user(connection_struct *conn, int cnum);
 BOOL unbecome_user(void);
 void become_root(BOOL save_dir);
 void unbecome_root(BOOL restore_dir);

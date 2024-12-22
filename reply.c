@@ -210,7 +210,6 @@ int reply_tcon(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	pstring dev;
 	int connection_num;
 	int outsize = 0;
-	uint16 vuid = SVAL(inbuf, smb_uid);
 	int pwlen = 0;
 
 	*service = *user = *password = *dev = 0;
@@ -218,7 +217,7 @@ int reply_tcon(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	parse_connect(smb_buf(inbuf) + 1, service, user, password, &pwlen, dev);
 
 	connection_num =
-	    make_connection(service, user, password, pwlen, dev, vuid);
+	    make_connection(service, user, password, pwlen, dev);
 
 	if (connection_num < 0)
 		return (connection_error(inbuf, outbuf, connection_num));
@@ -244,14 +243,13 @@ int reply_tcon_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	pstring password;
 	pstring devicename;
 	int connection_num;
-	uint16 vuid = SVAL(inbuf, smb_uid);
 	int passlen = SVAL(inbuf, smb_vwv3);
 
 	*service = *user = *password = *devicename = 0;
 
 	/* we might have to close an old one */
 	if ((SVAL(inbuf, smb_vwv2) & 0x1) != 0)
-		close_cnum(SVAL(inbuf, smb_tid), vuid);
+		close_cnum(SVAL(inbuf, smb_tid));
 
 	if (passlen > MAX_PASS_LEN) {
 		overflow_attack(passlen);
@@ -286,7 +284,7 @@ int reply_tcon_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	}
 
 	connection_num =
-	    make_connection(service, user, password, passlen, devicename, vuid);
+	    make_connection(service, user, password, passlen, devicename);
 
 	if (connection_num < 0)
 		return (connection_error(inbuf, outbuf, connection_num));
@@ -1180,19 +1178,9 @@ int reply_open_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 ****************************************************************************/
 int reply_ulogoffX(char *inbuf, char *outbuf, int length, int bufsize)
 {
-	uint16 vuid = SVAL(inbuf, smb_uid);
-	user_struct *vuser = get_valid_user_struct(vuid);
-
-	if (vuser == 0) {
-		DEBUG(3,
-		      ("ulogoff, vuser id %d does not map to user.\n", vuid));
-	}
-
-	invalidate_vuid(vuid);
-
 	set_message(outbuf, 2, 0, True);
 
-	DEBUG(3, ("%s ulogoffX vuid=%d\n", timestring(), vuid));
+	DEBUG(3, ("%s ulogoffX\n", timestring()));
 
 	return chain_reply(inbuf, outbuf, length, bufsize);
 }
@@ -2232,10 +2220,8 @@ int reply_tdis(char *inbuf, char *outbuf, int size, int bufsize)
 {
 	int cnum;
 	int outsize = set_message(outbuf, 0, 0, True);
-	uint16 vuid;
 
 	cnum = SVAL(inbuf, smb_tid);
-	vuid = SVAL(inbuf, smb_uid);
 
 	if (!OPEN_CNUM(cnum)) {
 		DEBUG(4, ("Invalid cnum in tdis (%d)\n", cnum));
@@ -2244,7 +2230,7 @@ int reply_tdis(char *inbuf, char *outbuf, int size, int bufsize)
 
 	Connections[cnum].used = False;
 
-	close_cnum(cnum, vuid);
+	close_cnum(cnum);
 
 	DEBUG(3, ("%s tdis cnum=%d\n", timestring(), cnum));
 

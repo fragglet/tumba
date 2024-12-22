@@ -268,7 +268,7 @@ struct smb_passwd {
 };
 
 struct current_user {
-	int cnum, vuid;
+	int cnum;
 	int uid, gid;
 	int ngroups;
 	gid_t *groups;
@@ -321,7 +321,6 @@ typedef struct {
 	int pos;
 	uint32 size;
 	int mode;
-	int vuid;
 	char *mmap_ptr;
 	uint32 mmap_size;
 	write_bmpx_struct *wbmpx_ptr;
@@ -354,9 +353,6 @@ typedef struct {
 	char *user; /* name of user who *opened* this connection */
 	int uid;    /* uid of user who *opened* this connection */
 	int gid;    /* gid of user who *opened* this connection */
-
-	uint16 vuid; /* vuid of user who *opened* this connection, or
-	                UID_FIELD_INVALID */
 
 	/* following groups stuff added by ih */
 
@@ -858,7 +854,6 @@ enum case_handling {
  */
 
 #define UID_FIELD_INVALID 0
-#define VUID_OFFSET 100 /* Amount to bias returned vuid numbers */
 
 /* Defines needed for multi-codepage support. */
 #define MSDOS_LATIN_1_CODEPAGE 850
