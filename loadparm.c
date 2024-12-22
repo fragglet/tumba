@@ -363,7 +363,7 @@ static void init_globals(void)
 	slprintf(s, sizeof(s) - 1, "%d.%d", DEFAULT_MAJOR_VERSION,
 	         DEFAULT_MINOR_VERSION);
 
-	Globals.mangled_stack = 50;
+	Globals.mangled_stack = 200;
 	Globals.max_xmit = 65535;
 	Globals.deadtime = 0;
 	Globals.max_log_size = 5000;
