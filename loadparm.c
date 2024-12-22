@@ -169,7 +169,6 @@ typedef struct {
 	BOOL bHideDotFiles;
 	BOOL bBrowseable;
 	BOOL bRead_only;
-	BOOL bNo_set_dir;
 	BOOL bMap_system;
 	BOOL bMap_hidden;
 	BOOL bMap_archive;
@@ -211,7 +210,6 @@ static service sDefault = {
     True,       /* bHideDotFiles */
     True,       /* bBrowseable */
     True,       /* bRead_only */
-    True,       /* bNo_set_dir */
     False,      /* bMap_system */
     False,      /* bMap_hidden */
     True,       /* bMap_archive */
@@ -343,7 +341,6 @@ static struct parm_struct {
     {"directory mode", P_OCTAL, P_LOCAL, &sDefault.iDir_mask, NULL, NULL},
     {"force directory mode", P_OCTAL, P_LOCAL, &sDefault.iDir_force_mode, NULL,
      NULL},
-    {"set directory", P_BOOLREV, P_LOCAL, &sDefault.bNo_set_dir, NULL, NULL},
     {"status", P_BOOL, P_LOCAL, &sDefault.status, NULL, NULL},
     {"hide dot files", P_BOOL, P_LOCAL, &sDefault.bHideDotFiles, NULL, NULL},
     {"veto oplock files", P_STRING, P_LOCAL, &sDefault.szVetoOplockFiles, NULL,
@@ -575,7 +572,6 @@ FN_LOCAL_BOOL(lp_status, status)
 FN_LOCAL_BOOL(lp_hide_dot_files, bHideDotFiles)
 FN_LOCAL_BOOL(lp_browseable, bBrowseable)
 FN_LOCAL_BOOL(lp_readonly, bRead_only)
-FN_LOCAL_BOOL(lp_no_set_dir, bNo_set_dir)
 FN_LOCAL_BOOL(lp_map_hidden, bMap_hidden)
 FN_LOCAL_BOOL(lp_map_archive, bMap_archive)
 FN_LOCAL_BOOL(lp_locking, bLocking)

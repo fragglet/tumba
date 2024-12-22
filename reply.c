@@ -2860,37 +2860,11 @@ int reply_copy(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 ****************************************************************************/
 int reply_setdir(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 {
-	int cnum, snum;
-	int outsize = 0;
-	BOOL ok = False;
-	pstring newdir;
+	int cnum = SVAL(inbuf, smb_tid);
 
-	cnum = SVAL(inbuf, smb_tid);
+	DEBUG(3, ("%s setdir not supported cnum=%d\n", timestring(), cnum));
 
-	snum = Connections[cnum].service;
-	if (!CAN_SETDIR(snum))
-		return (ERROR(ERRDOS, ERRnoaccess));
-
-	pstrcpy(newdir, smb_buf(inbuf) + 1);
-	strlower(newdir);
-
-	if (strlen(newdir) == 0)
-		ok = True;
-	else {
-		ok = directory_exist(newdir, NULL);
-		if (ok)
-			string_set(&Connections[cnum].connectpath, newdir);
-	}
-
-	if (!ok)
-		return (ERROR(ERRDOS, ERRbadpath));
-
-	outsize = set_message(outbuf, 0, 0, True);
-	CVAL(outbuf, smb_reh) = CVAL(inbuf, smb_reh);
-
-	DEBUG(3, ("%s setdir %s cnum=%d\n", timestring(), newdir, cnum));
-
-	return (outsize);
+	return (ERROR(ERRDOS, ERRnoaccess));
 }
 
 /****************************************************************************

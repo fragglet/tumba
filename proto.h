@@ -105,7 +105,6 @@ BOOL lp_status(int);
 BOOL lp_hide_dot_files(int);
 BOOL lp_browseable(int);
 BOOL lp_readonly(int);
-BOOL lp_no_set_dir(int);
 BOOL lp_map_hidden(int);
 BOOL lp_map_archive(int);
 BOOL lp_locking(int);
