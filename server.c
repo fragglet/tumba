@@ -45,7 +45,6 @@ extern int DEBUGLEVEL;
 extern int case_default;
 extern BOOL case_sensitive;
 extern BOOL case_preserve;
-extern BOOL use_mangled_map;
 extern BOOL short_case_preserve;
 extern BOOL case_mangle;
 time_t smb_last_time = (time_t) 0;
@@ -557,7 +556,7 @@ BOOL unix_convert(char *name, int cnum, pstring saved_last_component,
 	/* a special case - if we don't have any mangling chars and are case
 	   sensitive then searching won't help */
 	if (case_sensitive && !is_mangled(name) && !lp_strip_dot() &&
-	    !use_mangled_map && (saved_errno != ENOENT))
+	    saved_errno != ENOENT)
 		return (False);
 
 	/* now we need to recursively match the name against the real
@@ -1612,7 +1611,6 @@ BOOL become_service(int cnum, BOOL do_chdir)
 	short_case_preserve = lp_shortpreservecase(snum);
 	case_mangle = lp_casemangle(snum);
 	case_sensitive = lp_casesensitive(snum);
-	use_mangled_map = (*lp_mangled_map(snum) ? True : False);
 	return (True);
 }
 

@@ -161,7 +161,6 @@ typedef struct {
 	char *szCopy;
 	char *szInclude;
 	char *szDontdescend;
-	char *szMangledMap;
 	char *szVetoOplockFiles;
 	char *comment;
 	char *volume;
@@ -205,7 +204,6 @@ static service sDefault = {
     NULL,       /* szCopy */
     NULL,       /* szInclude */
     NULL,       /* szDontdescend */
-    NULL,       /* szMangledMap */
     NULL,       /* szVetoOplockFiles */
     NULL,       /* comment */
     NULL,       /* volume */
@@ -373,7 +371,6 @@ static struct parm_struct {
     {"mangled names", P_BOOL, P_LOCAL, &sDefault.bMangledNames, NULL, NULL},
     {"fake oplocks", P_BOOL, P_LOCAL, &sDefault.bFakeOplocks, NULL, NULL},
     {"dont descend", P_STRING, P_LOCAL, &sDefault.szDontdescend, NULL, NULL},
-    {"mangled map", P_STRING, P_LOCAL, &sDefault.szMangledMap, NULL, NULL},
     {"delete readonly", P_BOOL, P_LOCAL, &sDefault.bDeleteReadonly, NULL, NULL},
     {"dos filetimes", P_BOOL, P_LOCAL, &sDefault.bDosFiletimes, NULL, NULL},
     {"dos filetime resolution", P_BOOL, P_LOCAL,
@@ -584,7 +581,6 @@ FN_LOCAL_STRING(lp_dontdescend, szDontdescend)
 FN_LOCAL_STRING(lp_guestaccount, szGuestaccount)
 FN_LOCAL_STRING(lp_comment, comment)
 FN_LOCAL_STRING(lp_volume, volume)
-FN_LOCAL_STRING(lp_mangled_map, szMangledMap)
 FN_LOCAL_STRING(lp_veto_oplocks, szVetoOplockFiles)
 
 FN_LOCAL_BOOL(lp_casesensitive, bCaseSensitive)

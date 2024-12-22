@@ -62,7 +62,6 @@ int syslog_level;
    client can link easily */
 BOOL case_sensitive;
 BOOL case_preserve;
-BOOL use_mangled_map = False;
 BOOL short_case_preserve;
 BOOL case_mangle;
 

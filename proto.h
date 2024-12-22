@@ -97,7 +97,6 @@ char *lp_dontdescend(int);
 char *lp_guestaccount(int);
 char *lp_comment(int);
 char *lp_volume(int);
-char *lp_mangled_map(int);
 char *lp_veto_oplocks(int);
 BOOL lp_casesensitive(int);
 BOOL lp_preservecase(int);
