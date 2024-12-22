@@ -84,17 +84,6 @@ void invalidate_vuid(uint16 vuid)
 }
 
 /****************************************************************************
-register a uid/name pair as being valid and that a valid password
-has been given. vuid is biased by an offset. This allows us to
-tell random client vuid's (normally zero) from valid vuids.
-****************************************************************************/
-uint16 register_vuid(int uid, int gid, char *unix_name, char *requested_name,
-                     BOOL guest)
-{
-	return UID_FIELD_INVALID;
-}
-
-/****************************************************************************
 add a name to the session users list
 ****************************************************************************/
 void add_session_user(char *user)

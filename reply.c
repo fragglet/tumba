@@ -357,9 +357,6 @@ reply to a session setup command
 ****************************************************************************/
 int reply_sesssetup_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 {
-	uint16 sess_vuid;
-	int gid;
-	int uid;
 	int smb_bufsize;
 	int smb_apasslen = 0;
 	pstring smb_apasswd;
@@ -490,30 +487,11 @@ int reply_sesssetup_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 		/* perhaps grab OS version here?? */
 	}
 
-	/* Set the correct uid in the outgoing and incoming packets
-	   We will use this on future requests to determine which
-	   user we should become.
-	   */
-	{
-		struct passwd *pw = Get_Pwnam(user, False);
-		if (!pw) {
-			DEBUG(1, ("Username %s is invalid on this system\n",
-			          user));
-			return (ERROR(ERRSRV, ERRbadpw));
-		}
-		gid = pw->pw_gid;
-		uid = pw->pw_uid;
-	}
-
 	if (guest && !computer_id)
 		SSVAL(outbuf, smb_vwv2, 1);
 
-	/* register the name and uid as being validated, so further connections
-	   to a uid can get through without a password, on the same VC */
-	sess_vuid = register_vuid(uid, gid, user, sesssetup_user, guest);
-
-	SSVAL(outbuf, smb_uid, sess_vuid);
-	SSVAL(inbuf, smb_uid, sess_vuid);
+	SSVAL(outbuf, smb_uid, UID_FIELD_INVALID);
+	SSVAL(inbuf, smb_uid, UID_FIELD_INVALID);
 
 	if (!done_sesssetup)
 		max_send = MIN(max_send, smb_bufsize);

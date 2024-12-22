@@ -175,8 +175,6 @@ BOOL pm_process(char *FileName, BOOL (*sfunc)(char *),
 
 user_struct *get_valid_user_struct(uint16 vuid);
 void invalidate_vuid(uint16 vuid);
-uint16 register_vuid(int uid, int gid, char *unix_name, char *requested_name,
-                     BOOL guest);
 void add_session_user(char *user);
 
 /*The following definitions come from  reply.c  */
