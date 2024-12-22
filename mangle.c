@@ -472,7 +472,7 @@ static BOOL illegal_name(char *name)
 /****************************************************************************
 convert a filename to DOS format. return True if successful.
 ****************************************************************************/
-BOOL name_map_mangle(char *OutName, BOOL need83, int snum)
+void name_map_mangle(char *OutName, BOOL need83, int snum)
 {
 #ifdef MANGLE_LONG_FILENAMES
 	if (!need83 && illegal_name(OutName))
@@ -481,13 +481,8 @@ BOOL name_map_mangle(char *OutName, BOOL need83, int snum)
 
 	/* check if it's already in 8.3 format */
 	if (need83 && !is_8_3(OutName, True)) {
-		if (!lp_manglednames(snum))
-			return (False);
-
 		/* mangle it into 8.3 */
 		push_mangled_name(OutName);
 		mangle_name_83(OutName, sizeof(pstring) - 1);
 	}
-
-	return (True);
-} /* name_map_mangle */
+}

@@ -505,8 +505,7 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 		p += 4;
 		if (!was_8_3) {
 			pstrcpy(p + 2, fname);
-			if (!name_map_mangle(p + 2, True, SNUM(cnum)))
-				(p + 2)[12] = 0;
+			name_map_mangle(p + 2, True, SNUM(cnum));
 		} else
 			*(p + 2) = 0;
 		strupper(p + 2);
@@ -1367,8 +1366,7 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
 		pstrcpy(short_name, fname);
 		/* Mangle if not already 8.3 */
 		if (!is_8_3(short_name, True)) {
-			if (!name_map_mangle(short_name, True, SNUM(cnum)))
-				*short_name = '\0';
+			name_map_mangle(short_name, True, SNUM(cnum));
 		}
 		strncpy(pdata + 4, short_name, 12);
 		(pdata + 4)[12] = 0;

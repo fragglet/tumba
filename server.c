@@ -469,8 +469,7 @@ static BOOL scan_directory(char *path, char *name, int cnum, BOOL docache)
 			continue;
 
 		pstrcpy(name2, dname);
-		if (!name_map_mangle(name2, False, SNUM(cnum)))
-			continue;
+		name_map_mangle(name2, False, SNUM(cnum));
 
 		if ((mangled && mangled_equal(name, name2)) ||
 		    fname_equal(name, name2)) {

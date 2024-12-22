@@ -455,46 +455,50 @@ BOOL get_dir_entry(int cnum, char *mask, int dirtype, char *fname, int *size,
 
 		pstrcpy(filename, dname);
 
-		if ((strcmp(filename, mask) == 0) ||
-		    (name_map_mangle(filename, True, SNUM(cnum)) &&
-		     mask_match(filename, mask, False, False))) {
-			if (isrootdir && (strequal(filename, "..") ||
-			                  strequal(filename, ".")))
-				continue;
-
-			pstrcpy(fname, filename);
-			*path = 0;
-			pstrcpy(path, Connections[cnum].dirpath);
-			if (needslash)
-				pstrcat(path, "/");
-			pstrcpy(pathreal, path);
-			pstrcat(path, fname);
-			pstrcat(pathreal, dname);
-			if (sys_stat(pathreal, &sbuf) != 0) {
-				DEBUG(5, ("Couldn't stat 1 [%s]\n", path));
+		if (strcmp(filename, mask) != 0) {
+			name_map_mangle(filename, True, SNUM(cnum));
+			if (!mask_match(filename, mask, False, False)) {
 				continue;
 			}
-
-			if (check_descend && !strequal(fname, ".") &&
-			    !strequal(fname, ".."))
-				continue;
-
-			*mode = dos_mode(cnum, pathreal, &sbuf);
-
-			if (!dir_check_ftype(cnum, *mode, &sbuf, dirtype)) {
-				DEBUG(5, ("[%s] attribs didn't match %x\n",
-				          filename, dirtype));
-				continue;
-			}
-
-			*size = sbuf.st_size;
-			*date = sbuf.st_mtime;
-
-			DEBUG(5, ("get_dir_entry found %s fname=%s\n", pathreal,
-			          fname));
-
-			found = True;
 		}
+
+		if (isrootdir && (strequal(filename, "..") ||
+		                  strequal(filename, "."))) {
+			continue;
+		}
+
+		pstrcpy(fname, filename);
+		*path = 0;
+		pstrcpy(path, Connections[cnum].dirpath);
+		if (needslash)
+			pstrcat(path, "/");
+		pstrcpy(pathreal, path);
+		pstrcat(path, fname);
+		pstrcat(pathreal, dname);
+		if (sys_stat(pathreal, &sbuf) != 0) {
+			DEBUG(5, ("Couldn't stat 1 [%s]\n", path));
+			continue;
+		}
+
+		if (check_descend && !strequal(fname, ".") &&
+		    !strequal(fname, ".."))
+			continue;
+
+		*mode = dos_mode(cnum, pathreal, &sbuf);
+
+		if (!dir_check_ftype(cnum, *mode, &sbuf, dirtype)) {
+			DEBUG(5, ("[%s] attribs didn't match %x\n",
+			          filename, dirtype));
+			continue;
+		}
+
+		*size = sbuf.st_size;
+		*date = sbuf.st_mtime;
+
+		DEBUG(5, ("get_dir_entry found %s fname=%s\n", pathreal,
+		          fname));
+
+		found = True;
 	}
 
 	return (found);

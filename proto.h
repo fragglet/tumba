@@ -111,7 +111,6 @@ BOOL lp_map_hidden(int);
 BOOL lp_map_archive(int);
 BOOL lp_locking(int);
 BOOL lp_strict_locking(int);
-BOOL lp_manglednames(int);
 BOOL lp_widelinks(int);
 BOOL lp_symlinks(int);
 BOOL lp_map_system(int);
@@ -167,7 +166,7 @@ void reset_mangled_stack(int size);
 BOOL check_mangled_stack(char *s);
 BOOL is_mangled(char *s);
 void mangle_name_83(char *s, int s_len);
-BOOL name_map_mangle(char *OutName, BOOL need83, int snum);
+void name_map_mangle(char *OutName, BOOL need83, int snum);
 
 /*The following definitions come from  mem_man/mem_man.c  */
 
