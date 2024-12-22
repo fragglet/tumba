@@ -178,7 +178,6 @@ typedef struct {
 	BOOL bDeleteReadonly;
 	BOOL bFakeOplocks;
 	BOOL bDosFiletimes;
-	BOOL bDosFiletimeResolution;
 	char dummy[3]; /* for alignment */
 } service;
 
@@ -217,7 +216,6 @@ static service sDefault = {
     False,      /* bDeleteReadonly */
     False,      /* bFakeOplocks */
     False,      /* bDosFiletimes */
-    False,      /* bDosFiletimeResolution */
     ""          /* dummy */
 };
 
@@ -349,8 +347,6 @@ static struct parm_struct {
     {"dont descend", P_STRING, P_LOCAL, &sDefault.szDontdescend, NULL, NULL},
     {"delete readonly", P_BOOL, P_LOCAL, &sDefault.bDeleteReadonly, NULL, NULL},
     {"dos filetimes", P_BOOL, P_LOCAL, &sDefault.bDosFiletimes, NULL, NULL},
-    {"dos filetime resolution", P_BOOL, P_LOCAL,
-     &sDefault.bDosFiletimeResolution, NULL, NULL},
 
     {NULL, P_BOOL, P_NONE, NULL, NULL, NULL}};
 
@@ -573,7 +569,6 @@ FN_LOCAL_BOOL(lp_map_system, bMap_system)
 FN_LOCAL_BOOL(lp_delete_readonly, bDeleteReadonly)
 FN_LOCAL_BOOL(lp_fake_oplocks, bFakeOplocks)
 FN_LOCAL_BOOL(lp_dos_filetimes, bDosFiletimes)
-FN_LOCAL_BOOL(lp_dos_filetime_resolution, bDosFiletimeResolution)
 
 FN_LOCAL_INTEGER(lp_create_mode, iCreate_mask)
 FN_LOCAL_INTEGER(lp_force_create_mode, iCreate_force_mode)

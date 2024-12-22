@@ -113,7 +113,6 @@ BOOL lp_map_system(int);
 BOOL lp_delete_readonly(int);
 BOOL lp_fake_oplocks(int);
 BOOL lp_dos_filetimes(int);
-BOOL lp_dos_filetime_resolution(int);
 int lp_create_mode(int);
 int lp_force_create_mode(int);
 int lp_dir_mode(int);

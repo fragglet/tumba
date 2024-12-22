@@ -591,10 +591,7 @@ int reply_getatr(char *inbuf, char *outbuf, int in_size, int buffsize)
 	outsize = set_message(outbuf, 10, 0, True);
 
 	SSVAL(outbuf, smb_vwv0, mode);
-	if (lp_dos_filetime_resolution(SNUM(cnum)))
-		put_dos_date3(outbuf, smb_vwv1, mtime & ~1);
-	else
-		put_dos_date3(outbuf, smb_vwv1, mtime);
+	put_dos_date3(outbuf, smb_vwv1, mtime);
 	SIVAL(outbuf, smb_vwv3, size);
 
 	if (Protocol >= PROTOCOL_NT1) {
@@ -1033,10 +1030,7 @@ int reply_open(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	outsize = set_message(outbuf, 7, 0, True);
 	SSVAL(outbuf, smb_vwv0, fnum);
 	SSVAL(outbuf, smb_vwv1, fmode);
-	if (lp_dos_filetime_resolution(SNUM(cnum)))
-		put_dos_date3(outbuf, smb_vwv2, mtime & ~1);
-	else
-		put_dos_date3(outbuf, smb_vwv2, mtime);
+	put_dos_date3(outbuf, smb_vwv2, mtime);
 	SIVAL(outbuf, smb_vwv4, size);
 	SSVAL(outbuf, smb_vwv6, rmode);
 
@@ -1148,10 +1142,7 @@ int reply_open_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	set_message(outbuf, 15, 0, True);
 	SSVAL(outbuf, smb_vwv2, fnum);
 	SSVAL(outbuf, smb_vwv3, fmode);
-	if (lp_dos_filetime_resolution(SNUM(cnum)))
-		put_dos_date3(outbuf, smb_vwv4, mtime & ~1);
-	else
-		put_dos_date3(outbuf, smb_vwv4, mtime);
+	put_dos_date3(outbuf, smb_vwv4, mtime);
 	SIVAL(outbuf, smb_vwv6, size);
 	SSVAL(outbuf, smb_vwv8, rmode);
 	SSVAL(outbuf, smb_vwv11, smb_action);
