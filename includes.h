@@ -122,11 +122,6 @@ it works and getting lots of bug reports */
 #define FTRUNCATE_CAN_EXTEND 0
 #endif
 
-/* maybe this unix doesn't separate RD and WR locks? */
-#ifndef F_RDLCK
-#define F_RDLCK F_WRLCK
-#endif
-
 #ifndef SIGCLD
 #define SIGCLD SIGCHLD
 #endif
