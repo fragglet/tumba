@@ -201,13 +201,6 @@ uint16 register_vuid(int uid, int gid, char *unix_name, char *requested_name,
                      BOOL guest);
 void add_session_user(char *user);
 
-/*The following definitions come from  replace.c  */
-
-char *Strstr(char *s, char *p);
-time_t Mktime(struct tm *t);
-int InNetGr(char *group, char *host, char *user, char *dom);
-void *memcpy_wrapped(void *d, void *s, int l, char *fname, int line);
-
 /*The following definitions come from  reply.c  */
 
 int reply_special(char *inbuf, char *outbuf);

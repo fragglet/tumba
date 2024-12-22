@@ -734,14 +734,6 @@ void ajt_panic(void);
 char *strdup(char *s);
 #endif
 
-#ifdef REPLACE_STRLEN
-int Strlen(char *);
-#endif
-
-#ifdef REPLACE_STRSTR
-char *Strstr(char *s, char *p);
-#endif
-
 #ifndef MIN
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #endif
