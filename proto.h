@@ -78,7 +78,6 @@ BOOL lp_readraw(void);
 BOOL lp_writeraw(void);
 BOOL lp_strip_dot(void);
 BOOL lp_syslog_only(void);
-BOOL lp_browse_list(void);
 BOOL lp_time_server(void);
 BOOL lp_bind_interfaces_only(void);
 BOOL lp_ole_locking_compat(void);

@@ -495,8 +495,7 @@ static BOOL api_RNetServerEnum(int cnum, uint16 vuid, char *param, char *data,
 		StrnCpy(domain, myworkgroup, sizeof(fstring) - 1);
 	}
 
-	if (lp_browse_list())
-		total = get_server_info(servertype, &servers, domain);
+	total = get_server_info(servertype, &servers, domain);
 
 	data_len = fixed_len = string_len = 0;
 	missed = 0;

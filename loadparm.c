@@ -144,7 +144,6 @@ typedef struct {
 	BOOL bWriteRaw;
 	BOOL bReadbmpx;
 	BOOL bSyslogOnly;
-	BOOL bBrowseList;
 	BOOL bBindInterfacesOnly;
 	BOOL bOleLockingCompat;
 } global;
@@ -326,7 +325,6 @@ static struct parm_struct {
      handle_coding_system, NULL},
     {"client code page", P_INTEGER, P_GLOBAL, &Globals.client_code_page, NULL,
      NULL},
-    {"browse list", P_BOOL, P_GLOBAL, &Globals.bBrowseList, NULL, NULL},
     {"ole locking compatibility", P_BOOL, P_GLOBAL, &Globals.bOleLockingCompat,
      NULL, NULL},
     {"-valid", P_BOOL, P_LOCAL, &sDefault.valid, NULL, NULL},
@@ -434,21 +432,6 @@ static void init_globals(void)
 	Globals.client_code_page = DEFAULT_CLIENT_CODE_PAGE;
 	Globals.bBindInterfacesOnly = False;
 	Globals.bOleLockingCompat = True;
-
-	/* these parameters are set to defaults that are more appropriate
-	   for the increasing samba install base:
-
-	   as a member of the workgroup, that will possibly become a
-	   _local_ master browser (lm = True).  this is opposed to a forced
-	   local master browser startup (pm = True).
-
-	   doesn't provide WINS server service by default (wsupp = False),
-	   and doesn't provide domain master browser services by default,
-	   either.
-
-	*/
-
-	Globals.bBrowseList = True;
 
 	/*
 	 * This must be done last as it checks the value in
@@ -581,7 +564,6 @@ FN_GLOBAL_BOOL(lp_readraw, &Globals.bReadRaw)
 FN_GLOBAL_BOOL(lp_writeraw, &Globals.bWriteRaw)
 FN_GLOBAL_BOOL(lp_strip_dot, &Globals.bStripDot)
 FN_GLOBAL_BOOL(lp_syslog_only, &Globals.bSyslogOnly)
-FN_GLOBAL_BOOL(lp_browse_list, &Globals.bBrowseList)
 FN_GLOBAL_BOOL(lp_bind_interfaces_only, &Globals.bBindInterfacesOnly)
 FN_GLOBAL_BOOL(lp_ole_locking_compat, &Globals.bOleLockingCompat)
 
