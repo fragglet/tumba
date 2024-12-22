@@ -103,9 +103,6 @@ typedef enum {
 	P_NONE
 } parm_class;
 
-int keepalive = 0;
-extern BOOL use_getwd_cache;
-
 extern int extra_time_offset;
 
 /*
@@ -137,14 +134,11 @@ typedef struct {
 	int max_xmit;
 	int max_mux;
 	int max_packet;
-	int unamelevel;
 	int deadtime;
 	int maxprotocol;
 	int syslog;
-	int os_level;
 	int ReadSize;
 	int client_code_page;
-	BOOL bPreferredMaster;
 	BOOL bStripDot;
 	BOOL bReadRaw;
 	BOOL bWriteRaw;
@@ -193,7 +187,6 @@ typedef struct {
 	BOOL bMap_archive;
 	BOOL bLocking;
 	BOOL bStrictLocking;
-	BOOL bOpLocks;
 	BOOL bMangledNames;
 	BOOL bWidelinks;
 	BOOL bSymlinks;
@@ -240,7 +233,6 @@ static service sDefault = {
     True,       /* bMap_archive */
     True,       /* bLocking */
     False,      /* bStrictLocking */
-    True,       /* bOpLocks */
     True,       /* bMangledNames */
     True,       /* bWidelinks */
     True,       /* bSymlinks */
@@ -298,7 +290,6 @@ static struct parm_struct {
     {"syslog", P_INTEGER, P_GLOBAL, &Globals.syslog, NULL, NULL},
     {"syslog only", P_BOOL, P_GLOBAL, &Globals.bSyslogOnly, NULL, NULL},
     {"protocol", P_ENUM, P_GLOBAL, &Globals.maxprotocol, NULL, enum_protocol},
-    {"getwd cache", P_BOOL, P_GLOBAL, &use_getwd_cache, NULL, NULL},
     {"read bmpx", P_BOOL, P_GLOBAL, &Globals.bReadbmpx, NULL, NULL},
     {"read raw", P_BOOL, P_GLOBAL, &Globals.bReadRaw, NULL, NULL},
     {"write raw", P_BOOL, P_GLOBAL, &Globals.bWriteRaw, NULL, NULL},
@@ -332,19 +323,12 @@ static struct parm_struct {
     {"max xmit", P_INTEGER, P_GLOBAL, &Globals.max_xmit, NULL, NULL},
     {"max packet", P_INTEGER, P_GLOBAL, &Globals.max_packet, NULL, NULL},
     {"packet size", P_INTEGER, P_GLOBAL, &Globals.max_packet, NULL, NULL},
-    {"username level", P_INTEGER, P_GLOBAL, &Globals.unamelevel, NULL, NULL},
-    {"keepalive", P_INTEGER, P_GLOBAL, &keepalive, NULL, NULL},
     {"deadtime", P_INTEGER, P_GLOBAL, &Globals.deadtime, NULL, NULL},
     {"time offset", P_INTEGER, P_GLOBAL, &extra_time_offset, NULL, NULL},
     {"read size", P_INTEGER, P_GLOBAL, &Globals.ReadSize, NULL, NULL},
     {"coding system", P_STRING, P_GLOBAL, &Globals.szCodingSystem,
      handle_coding_system, NULL},
     {"client code page", P_INTEGER, P_GLOBAL, &Globals.client_code_page, NULL,
-     NULL},
-    {"os level", P_INTEGER, P_GLOBAL, &Globals.os_level, NULL, NULL},
-    {"preferred master", P_BOOL, P_GLOBAL, &Globals.bPreferredMaster, NULL,
-     NULL},
-    {"prefered master", P_BOOL, P_GLOBAL, &Globals.bPreferredMaster, NULL,
      NULL},
     {"browse list", P_BOOL, P_GLOBAL, &Globals.bBrowseList, NULL, NULL},
     {"ole locking compatibility", P_BOOL, P_GLOBAL, &Globals.bOleLockingCompat,
@@ -390,7 +374,6 @@ static struct parm_struct {
     {"map archive", P_BOOL, P_LOCAL, &sDefault.bMap_archive, NULL, NULL},
     {"locking", P_BOOL, P_LOCAL, &sDefault.bLocking, NULL, NULL},
     {"strict locking", P_BOOL, P_LOCAL, &sDefault.bStrictLocking, NULL, NULL},
-    {"oplocks", P_BOOL, P_LOCAL, &sDefault.bOpLocks, NULL, NULL},
     {"wide links", P_BOOL, P_LOCAL, &sDefault.bWidelinks, NULL, NULL},
     {"follow symlinks", P_BOOL, P_LOCAL, &sDefault.bSymlinks, NULL, NULL},
     {"mangled names", P_BOOL, P_LOCAL, &sDefault.bMangledNames, NULL, NULL},
@@ -444,7 +427,6 @@ static void init_globals(void)
 	Globals.mangled_stack = 50;
 	Globals.max_xmit = 65535;
 	Globals.max_mux = 50; /* This is *needed* for profile support. */
-	Globals.unamelevel = 0;
 	Globals.deadtime = 0;
 	Globals.max_log_size = 5000;
 	Globals.maxprotocol = PROTOCOL_NT1;
@@ -454,7 +436,6 @@ static void init_globals(void)
 	Globals.bStripDot = False;
 	Globals.syslog = 1;
 	Globals.bSyslogOnly = False;
-	Globals.os_level = 0;
 	Globals.ReadSize = 16 * 1024;
 	Globals.client_code_page = DEFAULT_CLIENT_CODE_PAGE;
 	Globals.bBindInterfacesOnly = False;
@@ -473,7 +454,6 @@ static void init_globals(void)
 
 	*/
 
-	Globals.bPreferredMaster = False;
 	Globals.bBrowseList = True;
 
 	/*
@@ -602,8 +582,6 @@ FN_GLOBAL_STRING(lp_character_set, &Globals.szCharacterSet)
 FN_GLOBAL_STRING(lp_interfaces, &Globals.szInterfaces)
 FN_GLOBAL_STRING(lp_socket_address, &Globals.szSocketAddress)
 
-FN_GLOBAL_BOOL(lp_preferred_master, &Globals.bPreferredMaster)
-FN_GLOBAL_BOOL(lp_getwdcache, &use_getwd_cache)
 FN_GLOBAL_BOOL(lp_readbmpx, &Globals.bReadbmpx)
 FN_GLOBAL_BOOL(lp_readraw, &Globals.bReadRaw)
 FN_GLOBAL_BOOL(lp_writeraw, &Globals.bWriteRaw)
@@ -613,14 +591,11 @@ FN_GLOBAL_BOOL(lp_browse_list, &Globals.bBrowseList)
 FN_GLOBAL_BOOL(lp_bind_interfaces_only, &Globals.bBindInterfacesOnly)
 FN_GLOBAL_BOOL(lp_ole_locking_compat, &Globals.bOleLockingCompat)
 
-FN_GLOBAL_INTEGER(lp_os_level, &Globals.os_level)
 FN_GLOBAL_INTEGER(lp_max_log_size, &Globals.max_log_size)
 FN_GLOBAL_INTEGER(lp_mangledstack, &Globals.mangled_stack)
 FN_GLOBAL_INTEGER(lp_maxxmit, &Globals.max_xmit)
 FN_GLOBAL_INTEGER(lp_maxmux, &Globals.max_mux)
 FN_GLOBAL_INTEGER(lp_maxpacket, &Globals.max_packet)
-FN_GLOBAL_INTEGER(lp_keepalive, &keepalive)
-FN_GLOBAL_INTEGER(lp_usernamelevel, &Globals.unamelevel)
 FN_GLOBAL_INTEGER(lp_readsize, &Globals.ReadSize)
 FN_GLOBAL_INTEGER(lp_deadtime, &Globals.deadtime)
 FN_GLOBAL_INTEGER(lp_maxprotocol, &Globals.maxprotocol)
@@ -650,7 +625,6 @@ FN_LOCAL_BOOL(lp_map_hidden, bMap_hidden)
 FN_LOCAL_BOOL(lp_map_archive, bMap_archive)
 FN_LOCAL_BOOL(lp_locking, bLocking)
 FN_LOCAL_BOOL(lp_strict_locking, bStrictLocking)
-FN_LOCAL_BOOL(lp_oplocks, bOpLocks)
 FN_LOCAL_BOOL(lp_manglednames, bMangledNames)
 FN_LOCAL_BOOL(lp_widelinks, bWidelinks)
 FN_LOCAL_BOOL(lp_symlinks, bSymlinks)
