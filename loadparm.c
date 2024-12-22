@@ -1513,27 +1513,6 @@ int lp_next_parameter(int snum, int *i, char *label, char *value,
 	return 0;
 }
 
-#if 0
-/***************************************************************************
-Display the contents of a single copy structure.
-***************************************************************************/
-static void dump_copy_map(BOOL *pcopymap)
-{
-  int i;
-  if (!pcopymap) return;
-
-  printf("\n\tNon-Copied parameters:\n");
-
-  for (i=0;parm_table[i].label;i++)
-    if (parm_table[i].class == P_LOCAL &&
-	parm_table[i].ptr && !pcopymap[i] &&
-	(i == 0 || (parm_table[i].ptr != parm_table[i-1].ptr)))
-      {
-	printf("\t\t%s\n",parm_table[i].label);
-      }
-}
-#endif
-
 /***************************************************************************
 Return TRUE if the passed service number is within range.
 ***************************************************************************/

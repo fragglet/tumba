@@ -194,11 +194,6 @@ static int call_trans2open(char *inbuf, char *outbuf, int bufsize, int cnum,
 	int16 open_attr = SVAL(params, 6);
 	BOOL oplock_request = (((SVAL(params, 0) | (1 << 1)) >> 1) |
 	                       ((SVAL(params, 0) | (1 << 2)) >> 1));
-#if 0
-  BOOL return_additional_info = BITSETW(params,0);
-  int16 open_sattr = SVAL(params, 4);
-  time_t open_time = make_unix_date3(params+8);
-#endif
 	int16 open_ofun = SVAL(params, 12);
 	int32 open_size = IVAL(params, 14);
 	char *pname = &params[28];
@@ -732,21 +727,6 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 
 	/* convert the formatted masks */
 	mask_convert(mask);
-
-#if 0  /* JRA */
-  /*
-   * Now we have a working mask_match in util.c, I believe 
-   * we no longer need these hacks (in fact they break
-   * things). JRA.
-   */
-
-  /* a special case for 16 bit apps */
-  if (strequal(mask,"????????.???")) pstrcpy(mask,"*");
-
-  /* handle broken clients that send us old 8.3 format */
-  string_sub(mask,"????????","*");
-  string_sub(mask,".???",".*");
-#endif /* JRA */
 
 	/* Save the wildcard match and attribs we are using on this directory -
 	   needed as lanman2 assumes these are being saved between calls */
@@ -1564,14 +1544,6 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 		tvs.modtime = MAX(interpret_long_date(pdata + 16),
 		                  interpret_long_date(pdata + 24));
 
-#if 0  /* Needs more testing... */
-      /* Test from Luke to prevent Win95 from
-         setting incorrect values here.
-       */
-      if (tvs.actime < tvs.modtime)
-        return(ERROR(ERRDOS,ERRnoaccess));
-#endif /* Needs more testing... */
-
 		/* attributes */
 		mode = IVAL(pdata, 32);
 		break;
@@ -1818,14 +1790,6 @@ int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize)
 	int cnum = SVAL(inbuf, smb_tid);
 	unsigned int total_params = SVAL(inbuf, smb_tpscnt);
 	unsigned int total_data = SVAL(inbuf, smb_tdscnt);
-#if 0
-  unsigned int max_param_reply = SVAL(inbuf, smb_mprcnt);
-  unsigned int max_data_reply = SVAL(inbuf, smb_mdrcnt);
-  unsigned int max_setup_fields = SVAL(inbuf, smb_msrcnt);
-  BOOL close_tid = BITSETW(inbuf+smb_flags,0);
-  BOOL no_final_response = BITSETW(inbuf+smb_flags,1);
-  int32 timeout = IVALS(inbuf,smb_timeout);
-#endif
 	unsigned int suwcnt = SVAL(inbuf, smb_suwcnt);
 	unsigned int tran_call = SVAL(inbuf, smb_setup0);
 	char *params = NULL, *data = NULL;

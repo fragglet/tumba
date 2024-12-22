@@ -2532,20 +2532,6 @@ BOOL mask_match(char *str, char *regexp, int case_sig, BOOL trans2)
 	pstrcpy(t_pattern, regexp);
 	pstrcpy(t_filename, str);
 
-#if 0
-  /* 
-   * Not sure if this is a good idea. JRA.
-   */
-  if(trans2 && is_8_3(t_pattern,False) && is_8_3(t_filename,False))
-    trans2 = False;
-#endif
-
-#if 0
-  if (!strchr(t_filename,'.')) {
-    pstrcat(t_filename,".");
-  }
-#endif
-
 	/* Remove any *? and ** as they are meaningless */
 	string_sub(t_pattern, "*?", "*");
 	string_sub(t_pattern, "**", "*");
@@ -3307,20 +3293,6 @@ struct hostent *Get_Hostbyname(char *name)
 		      ("Memory allocation error in Get_Hostbyname! panic\n"));
 		exit(0);
 	}
-
-	/*
-	 * This next test is redundent and causes some systems (with
-	 * broken isalnum() calls) problems.
-	 * JRA.
-	 */
-
-#if 0
-  if (!isalnum(*name2))
-    {
-      free(name2);
-      return(NULL);
-    }
-#endif /* 0 */
 
 	ret = sys_gethostbyname(name2);
 	if (ret != NULL) {

@@ -187,12 +187,6 @@ static int TimeZoneFaster(time_t t)
 				else
 					high = t;
 			}
-#if 0
-      DEBUG(1,("Added DST entry from %s ",
-	       asctime(localtime(&dst_table[i].start))));
-      DEBUG(1,("to %s (%d)\n",asctime(localtime(&dst_table[i].end)),
-	       dst_table[i].zone));
-#endif
 		}
 	}
 	return zone;

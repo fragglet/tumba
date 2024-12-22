@@ -341,13 +341,7 @@ int reply_unknown(char *inbuf, char *outbuf)
 int reply_ioctl(char *inbuf, char *outbuf, int size, int bufsize)
 {
 	DEBUG(3, ("ignoring ioctl\n"));
-#if 0
-  /* we just say it succeeds and hope its all OK. 
-     some day it would be nice to interpret them individually */
-  return set_message(outbuf,1,0,True);
-#else
 	return (ERROR(ERRSRV, ERRnosupport));
-#endif
 }
 
 /****************************************************************************
@@ -1071,11 +1065,6 @@ int reply_open_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	BOOL ex_oplock_request = EXTENDED_OPLOCK_REQUEST(inbuf);
 	BOOL core_oplock_request = CORE_OPLOCK_REQUEST(inbuf);
 	BOOL oplock_request = ex_oplock_request | core_oplock_request;
-#if 0
-  int open_flags = SVAL(inbuf,smb_vwv2);
-  int smb_sattr = SVAL(inbuf,smb_vwv4); 
-  uint32 smb_time = make_unix_date3(inbuf+smb_vwv6);
-#endif
 	int smb_ofun = SVAL(inbuf, smb_vwv8);
 	int unixmode;
 	int size = 0, fmode = 0, mtime = 0, rmode = 0;
@@ -2254,14 +2243,6 @@ int reply_echo(char *inbuf, char *outbuf, int size, int bufsize)
 	   care what the TID is.
 	 */
 
-#if 0
-  if (cnum != 0xFFFF && !OPEN_CNUM(cnum))
-    {
-      DEBUG(4,("Invalid cnum in echo (%d)\n",cnum));
-      return(ERROR(ERRSRV,ERRinvnid));
-    }
-#endif
-
 	/* copy any incoming data back out */
 	if (data_len > 0)
 		memcpy(smb_buf(outbuf), smb_buf(inbuf), data_len);
@@ -2921,9 +2902,6 @@ int reply_lockingX(char *inbuf, char *outbuf, int length, int bufsize)
 {
 	int fnum = GETFNUM(inbuf, smb_vwv2);
 	unsigned char locktype = CVAL(inbuf, smb_vwv3);
-#if 0
-  unsigned char oplocklevel = CVAL(inbuf,smb_vwv3+1);
-#endif
 	uint16 num_ulocks = SVAL(inbuf, smb_vwv6);
 	uint16 num_locks = SVAL(inbuf, smb_vwv7);
 	uint32 count, offset;
