@@ -224,219 +224,9 @@ static BOOL check_server_info(int uLevel, char *id)
 	return True;
 }
 
-struct srv_info_struct {
-	fstring name;
-	uint32 type;
-	fstring comment;
-	fstring domain;
-	BOOL server_added;
-};
-
-/*******************************************************************
-  get server info lists from the files saved by nmbd. Return the
-  number of entries
-  ******************************************************************/
-static int get_server_info(uint32 servertype, struct srv_info_struct **servers,
-                           char *domain)
-{
-	FILE *f;
-	pstring fname;
-	int count = 0;
-	int alloced = 0;
-	pstring line;
-	BOOL local_list_only;
-
-	pstrcpy(fname, lp_lockdir());
-	trim_string(fname, NULL, "/");
-	pstrcat(fname, "/");
-	pstrcat(fname, SERVER_LIST);
-
-	f = fopen(fname, "r");
-
-	if (!f) {
-		DEBUG(4, ("Can't open %s - %s\n", fname, strerror(errno)));
-		return (0);
-	}
-
-	/* request for everything is code for request all servers */
-	if (servertype == SV_TYPE_ALL)
-		servertype &= ~(SV_TYPE_DOMAIN_ENUM | SV_TYPE_LOCAL_LIST_ONLY);
-
-	local_list_only = (servertype & SV_TYPE_LOCAL_LIST_ONLY);
-
-	DEBUG(4, ("Servertype search: %8x\n", servertype));
-
-	while (!feof(f)) {
-		fstring stype;
-		struct srv_info_struct *s;
-		char *ptr = line;
-		BOOL ok = True;
-		*ptr = 0;
-
-		fgets(line, sizeof(line) - 1, f);
-		if (!*line)
-			continue;
-
-		if (count == alloced) {
-			alloced += 10;
-			(*servers) = (struct srv_info_struct *) Realloc(
-			    *servers, sizeof(**servers) * alloced);
-			if (!(*servers))
-				return (0);
-			bzero((char *) ((*servers) + count),
-			      sizeof(**servers) * (alloced - count));
-		}
-		s = &(*servers)[count];
-
-		if (!next_token(&ptr, s->name, NULL))
-			continue;
-		if (!next_token(&ptr, stype, NULL))
-			continue;
-		if (!next_token(&ptr, s->comment, NULL))
-			continue;
-		if (!next_token(&ptr, s->domain, NULL)) {
-			/* this allows us to cope with an old nmbd */
-			pstrcpy(s->domain, myworkgroup);
-		}
-
-		if (sscanf(stype, "%X", &s->type) != 1) {
-			DEBUG(4, ("r:host file "));
-			ok = False;
-		}
-
-		/* Filter the servers/domains we return based on what was asked
-		 * for. */
-
-		/* Check to see if we are being asked for a local list only. */
-		if (local_list_only &&
-		    ((s->type & SV_TYPE_LOCAL_LIST_ONLY) == 0)) {
-			DEBUG(4, ("r: local list only"));
-			ok = False;
-		}
-
-		/* doesn't match up: don't want it */
-		if (!(servertype & s->type)) {
-			DEBUG(4, ("r:serv type "));
-			ok = False;
-		}
-
-		if ((servertype & SV_TYPE_DOMAIN_ENUM) !=
-		    (s->type & SV_TYPE_DOMAIN_ENUM)) {
-			DEBUG(4, ("s: dom mismatch "));
-			ok = False;
-		}
-
-		if (!strequal(domain, s->domain) &&
-		    !(servertype & SV_TYPE_DOMAIN_ENUM)) {
-			ok = False;
-		}
-
-		/* We should never return a server type with a
-		 * SV_TYPE_LOCAL_LIST_ONLY set. */
-		s->type &= ~SV_TYPE_LOCAL_LIST_ONLY;
-
-		if (ok) {
-			DEBUG(4, ("**SV** %20s %8x %25s %15s\n", s->name,
-			          s->type, s->comment, s->domain));
-
-			s->server_added = True;
-			count++;
-		} else {
-			DEBUG(4, ("%20s %8x %25s %15s\n", s->name, s->type,
-			          s->comment, s->domain));
-		}
-	}
-
-	fclose(f);
-	return (count);
-}
-
-/*******************************************************************
-  fill in a server info structure
-  ******************************************************************/
-static int fill_srv_info(struct srv_info_struct *service, int uLevel,
-                         char **buf, int *buflen, char **stringbuf,
-                         int *stringspace, char *baseaddr)
-{
-	int struct_len;
-	char *p;
-	char *p2;
-	int l2;
-	int len;
-
-	switch (uLevel) {
-	case 0:
-		struct_len = 16;
-		break;
-	case 1:
-		struct_len = 26;
-		break;
-	default:
-		return -1;
-	}
-
-	if (!buf) {
-		len = 0;
-		switch (uLevel) {
-		case 1:
-			len = strlen(service->comment) + 1;
-			break;
-		}
-
-		if (buflen)
-			*buflen = struct_len;
-		if (stringspace)
-			*stringspace = len;
-		return struct_len + len;
-	}
-
-	len = struct_len;
-	p = *buf;
-	if (*buflen < struct_len)
-		return -1;
-	if (stringbuf) {
-		p2 = *stringbuf;
-		l2 = *stringspace;
-	} else {
-		p2 = p + struct_len;
-		l2 = *buflen - struct_len;
-	}
-	if (!baseaddr)
-		baseaddr = p;
-
-	switch (uLevel) {
-	case 0:
-		StrnCpy(p, service->name, 15);
-		break;
-
-	case 1:
-		StrnCpy(p, service->name, 15);
-		SIVAL(p, 18, service->type);
-		SIVAL(p, 22, PTR_DIFF(p2, baseaddr));
-		len += CopyAndAdvance(&p2, service->comment, &l2);
-		break;
-	}
-
-	if (stringbuf) {
-		*buf = p + struct_len;
-		*buflen -= struct_len;
-		*stringbuf = p2;
-		*stringspace = l2;
-	} else {
-		*buf = p2;
-		*buflen -= len;
-	}
-	return len;
-}
-
-static BOOL srv_comp(struct srv_info_struct *s1, struct srv_info_struct *s2)
-{
-	return (strcmp(s1->name, s2->name));
-}
 
 /****************************************************************************
-  view list of servers available (or possibly domains). The info is
-  extracted from lists saved by nmbd on the local host
+  view list of servers available (or possibly domains).
   ****************************************************************************/
 static BOOL api_RNetServerEnum(int cnum, char *param, char *data, int mdrcnt,
                                int mprcnt, char **rdata, char **rparam,
@@ -446,37 +236,7 @@ static BOOL api_RNetServerEnum(int cnum, char *param, char *data, int mdrcnt,
 	char *str2 = skip_string(str1, 1);
 	char *p = skip_string(str2, 1);
 	int uLevel = SVAL(p, 0);
-	int buf_len = SVAL(p, 2);
-	uint32 servertype = IVAL(p, 4);
-	char *p2;
-	int data_len, fixed_len, string_len;
-	int f_len = 0, s_len = 0;
-	struct srv_info_struct *servers = NULL;
-	int counted = 0, total = 0;
-	int i, missed;
-	fstring domain;
-	BOOL domain_request;
-	BOOL local_request;
-
-	/* If someone sets all the bits they don't really mean to set
-	   DOMAIN_ENUM and LOCAL_LIST_ONLY, they just want all the
-	   known servers. */
-
-	if (servertype == SV_TYPE_ALL)
-		servertype &= ~(SV_TYPE_DOMAIN_ENUM | SV_TYPE_LOCAL_LIST_ONLY);
-
-	/* If someone sets SV_TYPE_LOCAL_LIST_ONLY but hasn't set
-	   any other bit (they may just set this bit on it's own) they
-	   want all the locally seen servers. However this bit can be
-	   set on its own so set the requested servers to be
-	   ALL - DOMAIN_ENUM. */
-
-	if ((servertype & SV_TYPE_LOCAL_LIST_ONLY) &&
-	    !(servertype & SV_TYPE_DOMAIN_ENUM))
-		servertype = SV_TYPE_ALL & ~(SV_TYPE_DOMAIN_ENUM);
-
-	domain_request = ((servertype & SV_TYPE_DOMAIN_ENUM) != 0);
-	local_request = ((servertype & SV_TYPE_LOCAL_LIST_ONLY) != 0);
+	int fixed_len, string_len;
 
 	p += 8;
 
@@ -485,83 +245,19 @@ static BOOL api_RNetServerEnum(int cnum, char *param, char *data, int mdrcnt,
 	if (!check_server_info(uLevel, str2))
 		return False;
 
-	DEBUG(4, ("server request level: %s %8x ", str2, servertype));
-	DEBUG(4, ("domains_req:%s ", BOOLSTR(domain_request)));
-	DEBUG(4, ("local_only:%s\n", BOOLSTR(local_request)));
-
-	if (strcmp(str1, "WrLehDz") == 0) {
-		StrnCpy(domain, p, sizeof(fstring) - 1);
-	} else {
-		StrnCpy(domain, myworkgroup, sizeof(fstring) - 1);
-	}
-
-	total = get_server_info(servertype, &servers, domain);
-
-	data_len = fixed_len = string_len = 0;
-	missed = 0;
-
-	qsort(servers, total, sizeof(servers[0]), QSORT_CAST srv_comp);
-
-	{
-		char *lastname = NULL;
-
-		for (i = 0; i < total; i++) {
-			struct srv_info_struct *s = &servers[i];
-			if (lastname && strequal(lastname, s->name))
-				continue;
-			lastname = s->name;
-			data_len +=
-			    fill_srv_info(s, uLevel, 0, &f_len, 0, &s_len, 0);
-			DEBUG(4, ("fill_srv_info %20s %8x %25s %15s\n", s->name,
-			          s->type, s->comment, s->domain));
-
-			if (data_len <= buf_len) {
-				counted++;
-				fixed_len += f_len;
-				string_len += s_len;
-			} else {
-				missed++;
-			}
-		}
-	}
-
 	*rdata_len = fixed_len + string_len;
 	*rdata = REALLOC(*rdata, *rdata_len);
 	bzero(*rdata, *rdata_len);
 
-	p2 = (*rdata) + fixed_len; /* auxilliary data (strings) will go here */
-	p = *rdata;
-	f_len = fixed_len;
-	s_len = string_len;
-
-	{
-		char *lastname = NULL;
-		int count2 = counted;
-		for (i = 0; i < total && count2; i++) {
-			struct srv_info_struct *s = &servers[i];
-			if (lastname && strequal(lastname, s->name))
-				continue;
-			lastname = s->name;
-			fill_srv_info(s, uLevel, &p, &f_len, &p2, &s_len,
-			              *rdata);
-			DEBUG(4, ("fill_srv_info %20s %8x %25s %15s\n", s->name,
-			          s->type, s->comment, s->domain));
-			count2--;
-		}
-	}
-
+	// We answer the request but don't care about other servers.
 	*rparam_len = 8;
 	*rparam = REALLOC(*rparam, *rparam_len);
-	SSVAL(*rparam, 0, (missed == 0 ? NERR_Success : ERROR_MORE_DATA));
+	SSVAL(*rparam, 0, NERR_Success);
 	SSVAL(*rparam, 2, 0);
-	SSVAL(*rparam, 4, counted);
-	SSVAL(*rparam, 6, counted + missed);
+	SSVAL(*rparam, 4, 0);
+	SSVAL(*rparam, 6, 0);
 
-	if (servers)
-		free(servers);
-
-	DEBUG(3, ("NetServerEnum domain = %s uLevel=%d counted=%d total=%d\n",
-	          domain, uLevel, counted, counted + missed));
+	DEBUG(3, ("NetServerEnum\n"));
 
 	return (True);
 }
@@ -914,31 +610,15 @@ static BOOL api_RNetServerGetInfo(int cnum, char *param, char *data, int mdrcnt,
 	}
 	p += 16;
 	if (uLevel > 0) {
-		struct srv_info_struct *servers = NULL;
-		int i, count;
-		pstring comment;
-		uint32 servertype = SV_TYPE_WIN95_PLUS;
-
-		pstrcpy(comment, lp_serverstring());
-
-		if ((count = get_server_info(SV_TYPE_ALL, &servers,
-		                             myworkgroup)) > 0) {
-			for (i = 0; i < count; i++)
-				if (strequal(servers[i].name, local_machine)) {
-					servertype = servers[i].type;
-					pstrcpy(comment, servers[i].comment);
-				}
-		}
-		if (servers)
-			free(servers);
-
 		SCVAL(p, 0, DEFAULT_MAJOR_VERSION);
 		SCVAL(p, 1, DEFAULT_MINOR_VERSION);
-		SIVAL(p, 2, servertype);
+		SIVAL(p, 2, SV_TYPE_WIN95_PLUS);
 
 		if (mdrcnt == struct_len) {
 			SIVAL(p, 6, 0);
 		} else {
+			pstring comment;
+			pstrcpy(comment, lp_serverstring());
 			SIVAL(p, 6, PTR_DIFF(p2, *rdata));
 			standard_sub(cnum, comment);
 			StrnCpy(p2, comment, MAX(mdrcnt - struct_len, 0));
