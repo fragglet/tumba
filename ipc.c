@@ -454,7 +454,7 @@ static BOOL api_RNetShareEnum(int cnum, char *param, char *data, int mdrcnt,
 
 	data_len = fixed_len = string_len = 0;
 	for (i = 0; i < count; i++)
-		if (lp_browseable(i) && lp_snum_ok(i)) {
+		if (lp_snum_ok(i)) {
 			total++;
 			data_len += fill_share_info(cnum, i, uLevel, 0, &f_len,
 			                            0, &s_len, 0);
@@ -473,11 +473,13 @@ static BOOL api_RNetShareEnum(int cnum, char *param, char *data, int mdrcnt,
 	p = *rdata;
 	f_len = fixed_len;
 	s_len = string_len;
-	for (i = 0; i < count; i++)
-		if (lp_browseable(i) && lp_snum_ok(i))
+	for (i = 0; i < count; i++) {
+		if (lp_snum_ok(i)) {
 			if (fill_share_info(cnum, i, uLevel, &p, &f_len, &p2,
 			                    &s_len, *rdata) < 0)
 				break;
+		}
+	}
 
 	*rparam_len = 8;
 	*rparam = REALLOC(*rparam, *rparam_len);

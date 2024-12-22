@@ -167,7 +167,6 @@ typedef struct {
 	BOOL bCaseMangle;
 	BOOL status;
 	BOOL bHideDotFiles;
-	BOOL bBrowseable;
 	BOOL bRead_only;
 	BOOL bMap_system;
 	BOOL bMap_hidden;
@@ -208,7 +207,6 @@ static service sDefault = {
     False,      /* case mangle */
     True,       /* status */
     True,       /* bHideDotFiles */
-    True,       /* bBrowseable */
     True,       /* bRead_only */
     False,      /* bMap_system */
     False,      /* bMap_hidden */
@@ -321,8 +319,6 @@ static struct parm_struct {
     {"short preserve case", P_BOOL, P_LOCAL, &sDefault.bShortCasePreserve, NULL,
      NULL},
     {"mangle case", P_BOOL, P_LOCAL, &sDefault.bCaseMangle, NULL, NULL},
-    {"browseable", P_BOOL, P_LOCAL, &sDefault.bBrowseable, NULL, NULL},
-    {"browsable", P_BOOL, P_LOCAL, &sDefault.bBrowseable, NULL, NULL},
     {"path", P_STRING, P_LOCAL, &sDefault.szPath, NULL, NULL},
     {"directory", P_STRING, P_LOCAL, &sDefault.szPath, NULL, NULL},
     {"guest account", P_STRING, P_LOCAL, &sDefault.szGuestaccount, NULL, NULL},
@@ -570,7 +566,6 @@ FN_LOCAL_BOOL(lp_shortpreservecase, bShortCasePreserve)
 FN_LOCAL_BOOL(lp_casemangle, bCaseMangle)
 FN_LOCAL_BOOL(lp_status, status)
 FN_LOCAL_BOOL(lp_hide_dot_files, bHideDotFiles)
-FN_LOCAL_BOOL(lp_browseable, bBrowseable)
 FN_LOCAL_BOOL(lp_readonly, bRead_only)
 FN_LOCAL_BOOL(lp_map_hidden, bMap_hidden)
 FN_LOCAL_BOOL(lp_map_archive, bMap_archive)
@@ -716,7 +711,6 @@ static BOOL lp_add_ipc(void)
 	iSERVICE(i).status = False;
 	iSERVICE(i).iMaxConnections = 0;
 	iSERVICE(i).bRead_only = True;
-	iSERVICE(i).bBrowseable = sDefault.bBrowseable;
 
 	DEBUG(3, ("adding IPC service\n"));
 

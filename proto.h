@@ -103,7 +103,6 @@ BOOL lp_shortpreservecase(int);
 BOOL lp_casemangle(int);
 BOOL lp_status(int);
 BOOL lp_hide_dot_files(int);
-BOOL lp_browseable(int);
 BOOL lp_readonly(int);
 BOOL lp_map_hidden(int);
 BOOL lp_map_archive(int);
