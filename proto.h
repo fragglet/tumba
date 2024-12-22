@@ -147,15 +147,14 @@ BOOL do_lock(int fnum, int cnum, uint32 count, uint32 offset, int lock_type,
              int *eclass, uint32 *ecode);
 BOOL do_unlock(int fnum, int cnum, uint32 count, uint32 offset, int *eclass,
                uint32 *ecode);
-BOOL locking_init(int read_only);
 BOOL locking_end(void);
-BOOL lock_share_entry(int cnum, uint32 dev, uint32 inode, int *ptok);
-BOOL unlock_share_entry(int cnum, uint32 dev, uint32 inode, int token);
-BOOL remove_share_oplock(int fnum, int token);
 
 /*The following definitions come from  locking_slow.c  */
 
-struct share_ops *locking_slow_init(int ronly);
+BOOL locking_init(int read_only);
+BOOL lock_share_entry(int cnum, uint32 dev, uint32 inode, int *ptok);
+BOOL unlock_share_entry(int cnum, uint32 dev, uint32 inode, int token);
+BOOL remove_share_oplock(int fnum, int token);
 
 /*The following definitions come from  mangle.c  */
 
