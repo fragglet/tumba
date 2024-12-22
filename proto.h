@@ -375,8 +375,6 @@ struct passwd *Get_Pwnam(char *user, BOOL allow_change);
 
 /*The following definitions come from  util.c  */
 
-int sig_usr2(void);
-int sig_usr1(void);
 void setup_logging(char *pname, BOOL interactive);
 void reopen_logs(void);
 void force_check_log_size(void);
