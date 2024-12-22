@@ -83,11 +83,7 @@ static void get_broadcast(struct in_addr *if_ipaddr, struct in_addr *if_bcast,
 	struct ifreq *ifr = NULL;
 	int i;
 
-#if defined(EVEREST)
-	int n_interfaces;
-	struct ifconf ifc;
-	struct ifreq *ifreqs;
-#elif defined(USE_IFREQ)
+#if defined(USE_IFREQ)
 	struct ifreq ifreq;
 	struct strioctl strioctl;
 	struct ifconf *ifc;
@@ -112,36 +108,7 @@ static void get_broadcast(struct in_addr *if_ipaddr, struct in_addr *if_bcast,
 	}
 
 	/* Get a list of the configured interfaces */
-#ifdef EVEREST
-	/* This is part of SCO Openserver 5: The ioctls are no longer part
-	   if the lower level STREAMS interface glue. They are now real
-	   ioctl calls */
-
-	if (ioctl(sock, SIOCGIFANUM, &n_interfaces) < 0) {
-		DEBUG(0, ("SIOCGIFANUM: %s\n", strerror(errno)));
-	} else {
-		DEBUG(0,
-		      ("number of interfaces returned is: %d\n", n_interfaces));
-
-		ifc.ifc_len = sizeof(struct ifreq) * n_interfaces;
-		ifc.ifc_buf = (caddr_t) alloca(ifc.ifc_len);
-
-		if (ioctl(sock, SIOCGIFCONF, &ifc) < 0)
-			DEBUG(0, ("SIOCGIFCONF: %s\n", strerror(errno)));
-		else {
-			ifr = ifc.ifc_req;
-
-			for (i = 0; i < n_interfaces; ++i) {
-				if (if_ipaddr->s_addr ==
-				    ((struct sockaddr_in *) &ifr[i].ifr_addr)
-				        ->sin_addr.s_addr) {
-					found = True;
-					break;
-				}
-			}
-		}
-	}
-#elif defined(USE_IFREQ)
+#if defined(USE_IFREQ)
 	ifc = (struct ifconf *) buff;
 	ifc->ifc_len = BUFSIZ - sizeof(struct ifconf);
 	strioctl.ic_cmd = SIOCGIFCONF;
