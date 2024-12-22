@@ -110,7 +110,6 @@ BOOL lp_strict_locking(int);
 BOOL lp_widelinks(int);
 BOOL lp_symlinks(int);
 BOOL lp_map_system(int);
-BOOL lp_delete_readonly(int);
 BOOL lp_fake_oplocks(int);
 BOOL lp_dos_filetimes(int);
 int lp_create_mode(int);

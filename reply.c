@@ -1341,10 +1341,6 @@ static BOOL can_delete(char *fname, int cnum, int dirtype)
 	fmode = dos_mode(cnum, fname, &sbuf);
 	if (fmode & aDIR)
 		return (False);
-	if (!lp_delete_readonly(SNUM(cnum))) {
-		if (fmode & aRONLY)
-			return (False);
-	}
 	if ((fmode & ~dirtype) & (aHIDDEN | aSYSTEM))
 		return (False);
 	return (True);

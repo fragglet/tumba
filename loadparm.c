@@ -175,7 +175,6 @@ typedef struct {
 	BOOL bWidelinks;
 	BOOL bSymlinks;
 	BOOL *copymap;
-	BOOL bDeleteReadonly;
 	BOOL bFakeOplocks;
 	BOOL bDosFiletimes;
 	char dummy[3]; /* for alignment */
@@ -213,7 +212,6 @@ static service sDefault = {
     True,       /* bWidelinks */
     True,       /* bSymlinks */
     NULL,       /* copymap */
-    False,      /* bDeleteReadonly */
     False,      /* bFakeOplocks */
     False,      /* bDosFiletimes */
     ""          /* dummy */
@@ -345,7 +343,6 @@ static struct parm_struct {
     {"follow symlinks", P_BOOL, P_LOCAL, &sDefault.bSymlinks, NULL, NULL},
     {"fake oplocks", P_BOOL, P_LOCAL, &sDefault.bFakeOplocks, NULL, NULL},
     {"dont descend", P_STRING, P_LOCAL, &sDefault.szDontdescend, NULL, NULL},
-    {"delete readonly", P_BOOL, P_LOCAL, &sDefault.bDeleteReadonly, NULL, NULL},
     {"dos filetimes", P_BOOL, P_LOCAL, &sDefault.bDosFiletimes, NULL, NULL},
 
     {NULL, P_BOOL, P_NONE, NULL, NULL, NULL}};
@@ -566,7 +563,6 @@ FN_LOCAL_BOOL(lp_strict_locking, bStrictLocking)
 FN_LOCAL_BOOL(lp_widelinks, bWidelinks)
 FN_LOCAL_BOOL(lp_symlinks, bSymlinks)
 FN_LOCAL_BOOL(lp_map_system, bMap_system)
-FN_LOCAL_BOOL(lp_delete_readonly, bDeleteReadonly)
 FN_LOCAL_BOOL(lp_fake_oplocks, bFakeOplocks)
 FN_LOCAL_BOOL(lp_dos_filetimes, bDosFiletimes)
 
