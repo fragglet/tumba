@@ -3646,42 +3646,26 @@ BOOL fcntl_lock(int fd, int op, uint32 offset, uint32 count, int type)
 {
 	struct flock lock;
 	int ret;
+	uint32 mask = ((unsigned) 1 << 31);
+	int32 s_count = (int32) count;   /* Signed count. */
+	int32 s_offset = (int32) offset; /* Signed offset. */
 
-	if (lp_ole_locking_compat()) {
-		uint32 mask = 0xC0000000;
+	/* interpret negative counts as large numbers */
+	if (s_count < 0)
+		s_count &= ~mask;
 
-		/* make sure the count is reasonable, we might kill the lockd
-		 * otherwise */
-		count &= ~mask;
+	/* no negative offsets */
+	if (s_offset < 0)
+		s_offset &= ~mask;
 
-		/* the offset is often strange - remove 2 of its bits if either
-		   of the top two bits are set. Shift the top ones by two bits.
-		   This still allows OLE2 apps to operate, but should stop lockd
-		   from dieing */
-		if ((offset & mask) != 0)
-			offset = (offset & ~mask) | ((offset & mask) >> 2);
-	} else {
-		uint32 mask = ((unsigned) 1 << 31);
-		int32 s_count = (int32) count;   /* Signed count. */
-		int32 s_offset = (int32) offset; /* Signed offset. */
-
-		/* interpret negative counts as large numbers */
-		if (s_count < 0)
-			s_count &= ~mask;
-
-		/* no negative offsets */
-		if (s_offset < 0)
-			s_offset &= ~mask;
-
-		/* count + offset must be in range */
-		while ((s_offset < 0 || (s_offset + s_count < 0)) && mask) {
-			s_offset &= ~mask;
-			mask = mask >> 1;
-		}
-
-		offset = (uint32) s_offset;
-		count = (uint32) s_count;
+	/* count + offset must be in range */
+	while ((s_offset < 0 || (s_offset + s_count < 0)) && mask) {
+		s_offset &= ~mask;
+		mask = mask >> 1;
 	}
+
+	offset = (uint32) s_offset;
+	count = (uint32) s_count;
 
 	DEBUG(8, ("fcntl_lock %d %d %d %d %d\n", fd, op, (int) offset,
 	          (int) count, type));

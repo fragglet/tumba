@@ -145,7 +145,6 @@ typedef struct {
 	BOOL bReadbmpx;
 	BOOL bSyslogOnly;
 	BOOL bBindInterfacesOnly;
-	BOOL bOleLockingCompat;
 } global;
 
 static global Globals;
@@ -321,8 +320,6 @@ static struct parm_struct {
      handle_coding_system, NULL},
     {"client code page", P_INTEGER, P_GLOBAL, &Globals.client_code_page, NULL,
      NULL},
-    {"ole locking compatibility", P_BOOL, P_GLOBAL, &Globals.bOleLockingCompat,
-     NULL, NULL},
     {"-valid", P_BOOL, P_LOCAL, &sDefault.valid, NULL, NULL},
     {"comment", P_STRING, P_LOCAL, &sDefault.comment, NULL, NULL},
     {"copy", P_STRING, P_LOCAL, &sDefault.szCopy, handle_copy, NULL},
@@ -425,7 +422,6 @@ static void init_globals(void)
 	Globals.ReadSize = 16 * 1024;
 	Globals.client_code_page = DEFAULT_CLIENT_CODE_PAGE;
 	Globals.bBindInterfacesOnly = False;
-	Globals.bOleLockingCompat = True;
 
 	/*
 	 * This must be done last as it checks the value in
@@ -559,7 +555,6 @@ FN_GLOBAL_BOOL(lp_writeraw, &Globals.bWriteRaw)
 FN_GLOBAL_BOOL(lp_strip_dot, &Globals.bStripDot)
 FN_GLOBAL_BOOL(lp_syslog_only, &Globals.bSyslogOnly)
 FN_GLOBAL_BOOL(lp_bind_interfaces_only, &Globals.bBindInterfacesOnly)
-FN_GLOBAL_BOOL(lp_ole_locking_compat, &Globals.bOleLockingCompat)
 
 FN_GLOBAL_INTEGER(lp_max_log_size, &Globals.max_log_size)
 FN_GLOBAL_INTEGER(lp_mangledstack, &Globals.mangled_stack)
