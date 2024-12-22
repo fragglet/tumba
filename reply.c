@@ -47,19 +47,6 @@ a packet to ensure chaining works correctly */
 #define GETFNUM(buf, where) (chain_fnum != -1 ? chain_fnum : SVAL(buf, where))
 
 /****************************************************************************
-report a possible attack via the password buffer overflow bug
-****************************************************************************/
-static void overflow_attack(int len)
-{
-	DEBUG(0,
-	      ("%s: ERROR: Invalid password length %d\n", timestring(), len));
-	DEBUG(0, ("your machine may be under attack by a user exploiting an "
-	          "old bug\n"));
-	DEBUG(0, ("Attack was from IP=%s\n", client_addr()));
-	exit_server("possible attack");
-}
-
-/****************************************************************************
   reply to an special message
 ****************************************************************************/
 int reply_special(char *inbuf, char *outbuf)
@@ -250,10 +237,6 @@ int reply_tcon_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	if ((SVAL(inbuf, smb_vwv2) & 0x1) != 0)
 		close_cnum(SVAL(inbuf, smb_tid));
 
-	if (passlen > MAX_PASS_LEN) {
-		overflow_attack(passlen);
-	}
-
 	{
 		char *path;
 		char *p;
@@ -365,9 +348,6 @@ int reply_sesssetup_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 
 	if (Protocol < PROTOCOL_NT1) {
 		smb_apasslen = SVAL(inbuf, smb_vwv7);
-		if (smb_apasslen > MAX_PASS_LEN) {
-			overflow_attack(smb_apasslen);
-		}
 
 		memcpy(smb_apasswd, smb_buf(inbuf), smb_apasslen);
 		smb_apasswd[smb_apasslen] = 0;
@@ -379,10 +359,6 @@ int reply_sesssetup_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 		uint16 passlen2 = SVAL(inbuf, smb_vwv8);
 
 		char *p = smb_buf(inbuf);
-
-		if (passlen1 > MAX_PASS_LEN) {
-			overflow_attack(passlen1);
-		}
 
 		passlen1 = MIN(passlen1, MAX_PASS_LEN);
 		passlen2 = MIN(passlen2, MAX_PASS_LEN);
