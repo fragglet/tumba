@@ -172,7 +172,6 @@ typedef struct {
 	int iDir_force_mode;
 	int iMaxConnections;
 	int iDefaultCase;
-	BOOL bAlternatePerm;
 	BOOL bCaseSensitive;
 	BOOL bCasePreserve;
 	BOOL bShortCasePreserve;
@@ -217,7 +216,6 @@ static service sDefault = {
     0000,       /* iDir_force_mode */
     0,          /* iMaxConnections */
     CASE_LOWER, /* iDefaultCase */
-    False,      /* bAlternatePerm */
     False,      /* case sensitive */
     True,       /* case preserve */
     False,      /* short case preserve */
@@ -607,7 +605,6 @@ FN_LOCAL_STRING(lp_volume, volume)
 FN_LOCAL_STRING(lp_mangled_map, szMangledMap)
 FN_LOCAL_STRING(lp_veto_oplocks, szVetoOplockFiles)
 
-FN_LOCAL_BOOL(lp_alternate_permissions, bAlternatePerm)
 FN_LOCAL_BOOL(lp_casesensitive, bCaseSensitive)
 FN_LOCAL_BOOL(lp_preservecase, bCasePreserve)
 FN_LOCAL_BOOL(lp_shortpreservecase, bShortCasePreserve)

@@ -190,7 +190,7 @@ int dos_mode(int cnum, char *path, struct stat *sbuf)
 
 	DEBUG(8, ("dos_mode: %d %s\n", cnum, path));
 
-	if (CAN_WRITE(cnum) && !lp_alternate_permissions(SNUM(cnum))) {
+	if (CAN_WRITE(cnum)) {
 		if (!((sbuf->st_mode & S_IWOTH) ||
 		      ((sbuf->st_mode & S_IWUSR) &&
 		       current_user.uid == sbuf->st_uid) ||
@@ -198,9 +198,8 @@ int dos_mode(int cnum, char *path, struct stat *sbuf)
 		       in_group(sbuf->st_gid, current_user.gid,
 		                current_user.ngroups, current_user.igroups))))
 			result |= aRONLY;
-	} else {
-		if ((sbuf->st_mode & S_IWUSR) == 0)
-			result |= aRONLY;
+	} else if ((sbuf->st_mode & S_IWUSR) == 0) {
+		result |= aRONLY;
 	}
 
 	if (MAP_ARCHIVE(cnum) && ((sbuf->st_mode & S_IXUSR) != 0))
