@@ -44,12 +44,8 @@ static void fault_report(int sig)
 	if (cont_fn) {
 		fault_setup(cont_fn);
 		cont_fn(NULL);
-#ifdef SIGSEGV
 		signal(SIGSEGV, SIGNAL_CAST SIG_DFL);
-#endif
-#ifdef SIGBUS
 		signal(SIGBUS, SIGNAL_CAST SIG_DFL);
-#endif
 		return; /* this should cause a core dump */
 	}
 	exit(1);
@@ -70,10 +66,6 @@ void fault_setup(void (*fn)(void *))
 {
 	cont_fn = fn;
 
-#ifdef SIGSEGV
 	signal(SIGSEGV, SIGNAL_CAST sig_fault);
-#endif
-#ifdef SIGBUS
 	signal(SIGBUS, SIGNAL_CAST sig_fault);
-#endif
 }
