@@ -466,7 +466,7 @@ static BOOL scan_directory(char *path, char *name, int cnum, BOOL docache)
 		mangled = !check_mangled_stack(name);
 
 	/* open the directory */
-	if (!(cur_dir = OpenDir(cnum, path, True))) {
+	if (!(cur_dir = OpenDir(cnum, path))) {
 		DEBUG(3, ("scan dir didn't open dir [%s]\n", path));
 		return (False);
 	}
@@ -707,11 +707,6 @@ BOOL check_name(char *name, int cnum)
 	BOOL ret;
 
 	errno = 0;
-
-	if (IS_VETO_PATH(cnum, name)) {
-		DEBUG(5, ("file path name %s vetoed\n", name));
-		return (0);
-	}
 
 	ret = reduce_name(name, Connections[cnum].connectpath,
 	                  lp_widelinks(SNUM(cnum)));
@@ -2940,7 +2935,6 @@ int make_connection(char *service, char *user, char *password, int pwlen,
 	pcon->service = snum;
 	pcon->used = True;
 	pcon->dirptr = NULL;
-	pcon->veto_list = NULL;
 	pcon->veto_oplock_list = NULL;
 	string_set(&pcon->dirpath, "");
 	string_set(&pcon->user, user);
@@ -3020,7 +3014,6 @@ int make_connection(char *service, char *user, char *password, int pwlen,
 	unbecome_user();
 
 	/* Add veto/hide lists */
-	set_namearray(&pcon->veto_list, lp_veto_files(SNUM(cnum)));
 	set_namearray(&pcon->veto_oplock_list, lp_veto_oplocks(SNUM(cnum)));
 
 	{
@@ -3489,7 +3482,6 @@ void close_cnum(int cnum, uint16 vuid)
 		Connections[cnum].ngroups = 0;
 	}
 
-	free_namearray(Connections[cnum].veto_list);
 	free_namearray(Connections[cnum].veto_oplock_list);
 
 	string_set(&Connections[cnum].user, "");

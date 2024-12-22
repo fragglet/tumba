@@ -115,7 +115,7 @@ static void *dptr_get(int key, uint32 lastused)
 			if (dptrs_open >= MAXDIR)
 				dptr_idleoldest();
 			DEBUG(4, ("Reopening dptr key %d\n", key));
-			if ((dp->ptr = OpenDir(dp->cnum, dp->path, True)))
+			if ((dp->ptr = OpenDir(dp->cnum, dp->path)))
 				dptrs_open++;
 		}
 		return (dp->ptr);
@@ -259,7 +259,7 @@ static BOOL start_dir(int cnum, char *directory)
 	if (!*directory)
 		directory = ".";
 
-	Connections[cnum].dirptr = OpenDir(cnum, directory, True);
+	Connections[cnum].dirptr = OpenDir(cnum, directory);
 	if (Connections[cnum].dirptr) {
 		dptrs_open++;
 		string_set(&Connections[cnum].dirpath, directory);
@@ -511,7 +511,7 @@ typedef struct {
 /*******************************************************************
 open a directory
 ********************************************************************/
-void *OpenDir(int cnum, char *name, BOOL use_veto)
+void *OpenDir(int cnum, char *name)
 {
 	Dir *dirp;
 	char *n;
@@ -530,10 +530,6 @@ void *OpenDir(int cnum, char *name, BOOL use_veto)
 
 	while ((n = readdirname(p))) {
 		int l = strlen(n) + 1;
-
-		/* If it's a vetoed file, pretend it doesn't even exist */
-		if (use_veto && IS_VETO_PATH(cnum, n))
-			continue;
 
 		if (used + l > dirp->mallocsize) {
 			int s = MAX(used + l, used + 2000);

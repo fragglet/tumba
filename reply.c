@@ -1468,7 +1468,7 @@ int reply_unlink(char *inbuf, char *outbuf, int dum_size, int dum_bufsize)
 		char *dname;
 
 		if (check_name(directory, cnum))
-			dirptr = OpenDir(cnum, directory, True);
+			dirptr = OpenDir(cnum, directory);
 
 		/* XXXX the CIFS spec says that if bit0 of the flags2 field is
 		   set then the pattern matches against the long name, otherwise
@@ -2393,59 +2393,6 @@ int reply_mkdir(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 }
 
 /****************************************************************************
-Static function used by reply_rmdir to delete an entire directory
-tree recursively.
-****************************************************************************/
-static BOOL recursive_rmdir(char *directory)
-{
-	char *dname = NULL;
-	BOOL ret = False;
-	void *dirptr = OpenDir(-1, directory, False);
-
-	if (dirptr == NULL)
-		return True;
-
-	while ((dname = ReadDirName(dirptr))) {
-		pstring fullname;
-		struct stat st;
-
-		if ((strcmp(dname, ".") == 0) || (strcmp(dname, "..") == 0))
-			continue;
-
-		/* Construct the full name. */
-		if (strlen(directory) + strlen(dname) + 1 >= sizeof(fullname)) {
-			errno = ENOMEM;
-			ret = True;
-			break;
-		}
-		pstrcpy(fullname, directory);
-		pstrcat(fullname, "/");
-		pstrcat(fullname, dname);
-
-		if (sys_lstat(fullname, &st) != 0) {
-			ret = True;
-			break;
-		}
-
-		if (st.st_mode & S_IFDIR) {
-			if (recursive_rmdir(fullname) != 0) {
-				ret = True;
-				break;
-			}
-			if (sys_rmdir(fullname) != 0) {
-				ret = True;
-				break;
-			}
-		} else if (sys_unlink(fullname) != 0) {
-			ret = True;
-			break;
-		}
-	}
-	CloseDir(dirptr);
-	return ret;
-}
-
-/****************************************************************************
   reply to a rmdir
 ****************************************************************************/
 int reply_rmdir(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
@@ -2464,75 +2411,6 @@ int reply_rmdir(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 		dptr_closepath(directory, SVAL(inbuf, smb_pid));
 		ok = (sys_rmdir(directory) == 0);
-		if (!ok && (errno == ENOTEMPTY) && lp_veto_files(SNUM(cnum))) {
-			/* Check to see if the only thing in this directory are
-			   vetoed files/directories. If so then delete them and
-			   retry. If we fail to delete any of them (and we
-			   *don't* do a recursive delete) then fail the rmdir.
-			 */
-			BOOL all_veto_files = True;
-			char *dname;
-			void *dirptr = OpenDir(cnum, directory, False);
-
-			if (dirptr != NULL) {
-				int dirpos = TellDir(dirptr);
-				while ((dname = ReadDirName(dirptr))) {
-					if ((strcmp(dname, ".") == 0) ||
-					    (strcmp(dname, "..") == 0))
-						continue;
-					if (!IS_VETO_PATH(cnum, dname)) {
-						all_veto_files = False;
-						break;
-					}
-				}
-				if (all_veto_files) {
-					SeekDir(dirptr, dirpos);
-					while ((dname = ReadDirName(dirptr))) {
-						pstring fullname;
-						struct stat st;
-
-						if ((strcmp(dname, ".") == 0) ||
-						    (strcmp(dname, "..") == 0))
-							continue;
-
-						/* Construct the full name. */
-						if (strlen(directory) +
-						        strlen(dname) + 1 >=
-						    sizeof(fullname)) {
-							errno = ENOMEM;
-							break;
-						}
-						pstrcpy(fullname, directory);
-						pstrcat(fullname, "/");
-						pstrcat(fullname, dname);
-
-						if (sys_lstat(fullname, &st) !=
-						    0)
-							break;
-						if (st.st_mode & S_IFDIR) {
-							if (lp_recursive_veto_delete(
-							        SNUM(cnum))) {
-								if (recursive_rmdir(
-								        fullname) !=
-								    0)
-									break;
-							}
-							if (sys_rmdir(
-							        fullname) != 0)
-								break;
-						} else if (sys_unlink(
-						               fullname) != 0)
-							break;
-					}
-					CloseDir(dirptr);
-					/* Retry the rmdir */
-					ok = (sys_rmdir(directory) == 0);
-				} else
-					CloseDir(dirptr);
-			} else
-				errno = ENOTEMPTY;
-		}
-
 		if (!ok)
 			DEBUG(3, ("couldn't remove directory %s : %s\n",
 			          directory, strerror(errno)));
@@ -2769,7 +2647,7 @@ int reply_mv(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		pstring destname;
 
 		if (check_name(directory, cnum))
-			dirptr = OpenDir(cnum, directory, True);
+			dirptr = OpenDir(cnum, directory);
 
 		if (dirptr) {
 			error = ERRbadfile;
@@ -2990,7 +2868,7 @@ int reply_copy(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		pstring destname;
 
 		if (check_name(directory, cnum))
-			dirptr = OpenDir(cnum, directory, True);
+			dirptr = OpenDir(cnum, directory);
 
 		if (dirptr) {
 			error = ERRbadfile;

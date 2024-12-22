@@ -169,7 +169,6 @@ typedef struct {
 	char *szInclude;
 	char *szDontdescend;
 	char *szMangledMap;
-	char *szVetoFiles;
 	char *szVetoOplockFiles;
 	char *comment;
 	char *volume;
@@ -201,7 +200,6 @@ typedef struct {
 	BOOL *copymap;
 	BOOL bDeleteReadonly;
 	BOOL bFakeOplocks;
-	BOOL bDeleteVetoFiles;
 	BOOL bDosFiletimes;
 	BOOL bDosFiletimeResolution;
 	BOOL bFakeDirCreateTimes;
@@ -218,7 +216,6 @@ static service sDefault = {
     NULL,       /* szInclude */
     NULL,       /* szDontdescend */
     NULL,       /* szMangledMap */
-    NULL,       /* szVetoFiles */
     NULL,       /* szVetoOplockFiles */
     NULL,       /* comment */
     NULL,       /* volume */
@@ -250,7 +247,6 @@ static service sDefault = {
     NULL,       /* copymap */
     False,      /* bDeleteReadonly */
     False,      /* bFakeOplocks */
-    False,      /* bDeleteVetoFiles */
     False,      /* bDosFiletimes */
     False,      /* bDosFiletimeResolution */
     False,      /* bFakeDirCreateTimes */
@@ -387,9 +383,6 @@ static struct parm_struct {
     {"set directory", P_BOOLREV, P_LOCAL, &sDefault.bNo_set_dir, NULL, NULL},
     {"status", P_BOOL, P_LOCAL, &sDefault.status, NULL, NULL},
     {"hide dot files", P_BOOL, P_LOCAL, &sDefault.bHideDotFiles, NULL, NULL},
-    {"delete veto files", P_BOOL, P_LOCAL, &sDefault.bDeleteVetoFiles, NULL,
-     NULL},
-    {"veto files", P_STRING, P_LOCAL, &sDefault.szVetoFiles, NULL, NULL},
     {"veto oplock files", P_STRING, P_LOCAL, &sDefault.szVetoOplockFiles, NULL,
      NULL},
     {"map system", P_BOOL, P_LOCAL, &sDefault.bMap_system, NULL, NULL},
@@ -641,7 +634,6 @@ FN_LOCAL_STRING(lp_guestaccount, szGuestaccount)
 FN_LOCAL_STRING(lp_comment, comment)
 FN_LOCAL_STRING(lp_volume, volume)
 FN_LOCAL_STRING(lp_mangled_map, szMangledMap)
-FN_LOCAL_STRING(lp_veto_files, szVetoFiles)
 FN_LOCAL_STRING(lp_veto_oplocks, szVetoOplockFiles)
 
 FN_LOCAL_BOOL(lp_alternate_permissions, bAlternatePerm)
@@ -665,7 +657,6 @@ FN_LOCAL_BOOL(lp_symlinks, bSymlinks)
 FN_LOCAL_BOOL(lp_map_system, bMap_system)
 FN_LOCAL_BOOL(lp_delete_readonly, bDeleteReadonly)
 FN_LOCAL_BOOL(lp_fake_oplocks, bFakeOplocks)
-FN_LOCAL_BOOL(lp_recursive_veto_delete, bDeleteVetoFiles)
 FN_LOCAL_BOOL(lp_dos_filetimes, bDosFiletimes)
 FN_LOCAL_BOOL(lp_dos_filetime_resolution, bDosFiletimeResolution)
 FN_LOCAL_BOOL(lp_fake_dir_create_times, bFakeDirCreateTimes)
