@@ -31,7 +31,7 @@ void *dptr_fetch(char *buf, int *num);
 void *dptr_fetch_lanman2(int dptr_num);
 BOOL dir_check_ftype(int cnum, int mode, struct stat *st, int dirtype);
 BOOL get_dir_entry(int cnum, char *mask, int dirtype, char *fname, int *size,
-                   int *mode, time_t *date, BOOL check_descend);
+                   int *mode, time_t *date);
 void *OpenDir(int cnum, char *name);
 void CloseDir(void *p);
 char *ReadDirName(void *p);
@@ -90,7 +90,6 @@ int lp_syslog(void);
 int lp_client_code_page(void);
 char *lp_servicename(int);
 char *lp_pathname(int);
-char *lp_dontdescend(int);
 char *lp_guestaccount(int);
 char *lp_comment(int);
 char *lp_volume(int);

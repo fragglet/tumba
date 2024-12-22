@@ -702,7 +702,6 @@ int reply_search(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	char *path;
 	char status[21];
 	int dptr_num = -1;
-	BOOL check_descend = False;
 	BOOL expect_close = False;
 	BOOL can_open = True;
 	BOOL bad_path = False;
@@ -848,18 +847,11 @@ int reply_search(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 					numentries = 0;
 				p += DIR_STRUCT_SIZE;
 			} else {
-				DEBUG(8, ("dirpath=<%s> dontdescend=<%s>\n",
-				          Connections[cnum].dirpath,
-				          lp_dontdescend(SNUM(cnum))));
-				if (in_list(Connections[cnum].dirpath,
-				            lp_dontdescend(SNUM(cnum)), True))
-					check_descend = True;
-
 				for (i = numentries;
 				     (i < maxentries) && !finished; i++) {
 					finished = !get_dir_entry(
 					    cnum, mask, dirtype, fname, &size,
-					    &mode, &date, check_descend);
+					    &mode, &date);
 					if (!finished) {
 						memcpy(p, status, 21);
 						make_dir_struct(p, mask, fname,

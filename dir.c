@@ -419,7 +419,7 @@ BOOL dir_check_ftype(int cnum, int mode, struct stat *st, int dirtype)
   get a directory entry
 ****************************************************************************/
 BOOL get_dir_entry(int cnum, char *mask, int dirtype, char *fname, int *size,
-                   int *mode, time_t *date, BOOL check_descend)
+                   int *mode, time_t *date)
 {
 	char *dname;
 	BOOL found = False;
@@ -479,10 +479,6 @@ BOOL get_dir_entry(int cnum, char *mask, int dirtype, char *fname, int *size,
 			DEBUG(5, ("Couldn't stat 1 [%s]\n", path));
 			continue;
 		}
-
-		if (check_descend && !strequal(fname, ".") &&
-		    !strequal(fname, ".."))
-			continue;
 
 		*mode = dos_mode(cnum, pathreal, &sbuf);
 

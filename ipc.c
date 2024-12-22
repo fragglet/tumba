@@ -224,7 +224,6 @@ static BOOL check_server_info(int uLevel, char *id)
 	return True;
 }
 
-
 /****************************************************************************
   view list of servers available (or possibly domains).
   ****************************************************************************/

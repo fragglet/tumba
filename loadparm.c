@@ -149,7 +149,6 @@ typedef struct {
 	char *szGuestaccount;
 	char *szCopy;
 	char *szInclude;
-	char *szDontdescend;
 	char *szVetoOplockFiles;
 	char *comment;
 	char *volume;
@@ -186,7 +185,6 @@ static service sDefault = {
     NULL,       /* szGuestAccount  - this is set in init_globals() */
     NULL,       /* szCopy */
     NULL,       /* szInclude */
-    NULL,       /* szDontdescend */
     NULL,       /* szVetoOplockFiles */
     NULL,       /* comment */
     NULL,       /* volume */
@@ -337,7 +335,6 @@ static struct parm_struct {
     {"wide links", P_BOOL, P_LOCAL, &sDefault.bWidelinks, NULL, NULL},
     {"follow symlinks", P_BOOL, P_LOCAL, &sDefault.bSymlinks, NULL, NULL},
     {"fake oplocks", P_BOOL, P_LOCAL, &sDefault.bFakeOplocks, NULL, NULL},
-    {"dont descend", P_STRING, P_LOCAL, &sDefault.szDontdescend, NULL, NULL},
     {"dos filetimes", P_BOOL, P_LOCAL, &sDefault.bDosFiletimes, NULL, NULL},
 
     {NULL, P_BOOL, P_NONE, NULL, NULL, NULL}};
@@ -535,7 +532,6 @@ FN_GLOBAL_INTEGER(lp_client_code_page, &Globals.client_code_page)
 
 FN_LOCAL_STRING(lp_servicename, szService)
 FN_LOCAL_STRING(lp_pathname, szPath)
-FN_LOCAL_STRING(lp_dontdescend, szDontdescend)
 FN_LOCAL_STRING(lp_guestaccount, szGuestaccount)
 FN_LOCAL_STRING(lp_comment, comment)
 FN_LOCAL_STRING(lp_volume, volume)

@@ -288,9 +288,9 @@ static int call_trans2open(char *inbuf, char *outbuf, int bufsize, int cnum,
 ****************************************************************************/
 static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
                                  int info_level, int requires_resume_key,
-                                 BOOL dont_descend, char **ppdata,
-                                 char *base_data, int space_remaining,
-                                 BOOL *out_of_space, int *last_name_off)
+                                 char **ppdata, char *base_data,
+                                 int space_remaining, BOOL *out_of_space,
+                                 int *last_name_off)
 {
 	char *dname;
 	BOOL found = False;
@@ -356,8 +356,6 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 		if (mask_match(fname, mask, case_sensitive, True)) {
 			BOOL isdots =
 			    (strequal(fname, "..") || strequal(fname, "."));
-			if (dont_descend && !isdots)
-				continue;
 
 			if (isrootdir && isdots)
 				continue;
@@ -658,7 +656,6 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 	int numentries = 0;
 	int i;
 	BOOL finished = False;
-	BOOL dont_descend = False;
 	BOOL out_of_space = False;
 	int space_remaining;
 	BOOL bad_path = False;
@@ -742,15 +739,6 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 	DEBUG(4, ("dptr_num is %d, wcard = %s, attr = %d\n", dptr_num, wcard,
 	          dirtype));
 
-	/* We don't need to check for VOL here as this is returned by
-	   a different TRANS2 call. */
-
-	DEBUG(8, ("dirpath=<%s> dontdescend=<%s>\n", Connections[cnum].dirpath,
-	          lp_dontdescend(SNUM(cnum))));
-	if (in_list(Connections[cnum].dirpath, lp_dontdescend(SNUM(cnum)),
-	            case_sensitive))
-		dont_descend = True;
-
 	p = pdata;
 	space_remaining = max_data_bytes;
 	out_of_space = False;
@@ -766,8 +754,8 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 		} else {
 			finished = !get_lanman2_dir_entry(
 			    cnum, mask, dirtype, info_level,
-			    requires_resume_key, dont_descend, &p, pdata,
-			    space_remaining, &out_of_space, &last_name_off);
+			    requires_resume_key, &p, pdata, space_remaining,
+			    &out_of_space, &last_name_off);
 		}
 
 		if (finished && out_of_space)
@@ -849,7 +837,6 @@ static int call_trans2findnext(char *inbuf, char *outbuf, int length,
 	int numentries = 0;
 	int i, last_name_off = 0;
 	BOOL finished = False;
-	BOOL dont_descend = False;
 	BOOL out_of_space = False;
 	int space_remaining;
 
@@ -911,15 +898,6 @@ resume_key = %d resume name = %s continue=%d level = %d\n",
 	      ("dptr_num is %d, mask = %s, attr = %x, dirptr=(0x%X,%d)\n",
 	       dptr_num, mask, dirtype, (unsigned int) Connections[cnum].dirptr,
 	       TellDir(Connections[cnum].dirptr)));
-
-	/* We don't need to check for VOL here as this is returned by
-	   a different TRANS2 call. */
-
-	DEBUG(8, ("dirpath=<%s> dontdescend=<%s>\n", Connections[cnum].dirpath,
-	          lp_dontdescend(SNUM(cnum))));
-	if (in_list(Connections[cnum].dirpath, lp_dontdescend(SNUM(cnum)),
-	            case_sensitive))
-		dont_descend = True;
 
 	p = pdata;
 	space_remaining = max_data_bytes;
@@ -1017,8 +995,8 @@ resume_key = %d resume name = %s continue=%d level = %d\n",
 		} else {
 			finished = !get_lanman2_dir_entry(
 			    cnum, mask, dirtype, info_level,
-			    requires_resume_key, dont_descend, &p, pdata,
-			    space_remaining, &out_of_space, &last_name_off);
+			    requires_resume_key, &p, pdata, space_remaining,
+			    &out_of_space, &last_name_off);
 		}
 
 		if (finished && out_of_space)
