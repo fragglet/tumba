@@ -3201,15 +3201,13 @@ static int reply_negprot(char *inbuf, char *outbuf, int size, int bufsize)
 	     protocol++) {
 		p = smb_buf(inbuf) + 1;
 		Index = 0;
-		if (lp_maxprotocol() >=
-		    supported_protocols[protocol].protocol_level)
-			while (p < (smb_buf(inbuf) + bcc)) {
-				if (strequal(p, supported_protocols[protocol]
-				                    .proto_name))
-					choice = Index;
-				Index++;
-				p += strlen(p) + 2;
-			}
+		while (p < (smb_buf(inbuf) + bcc)) {
+			if (strequal(p, supported_protocols[protocol]
+			                    .proto_name))
+				choice = Index;
+			Index++;
+			p += strlen(p) + 2;
+		}
 		if (choice != -1)
 			break;
 	}

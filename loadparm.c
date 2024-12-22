@@ -125,7 +125,6 @@ typedef struct {
 	int mangled_stack;
 	int max_xmit;
 	int deadtime;
-	int maxprotocol;
 	int syslog;
 	int ReadSize;
 	int client_code_page;
@@ -234,14 +233,6 @@ struct enum_list {
 	char *name;
 };
 
-static struct enum_list enum_protocol[] = {{PROTOCOL_NT1, "NT1"},
-                                           {PROTOCOL_LANMAN2, "LANMAN2"},
-                                           {PROTOCOL_LANMAN1, "LANMAN1"},
-                                           {PROTOCOL_CORE, "CORE"},
-                                           {PROTOCOL_COREPLUS, "COREPLUS"},
-                                           {PROTOCOL_COREPLUS, "CORE+"},
-                                           {-1, NULL}};
-
 static struct enum_list enum_case[] = {
     {CASE_LOWER, "lower"}, {CASE_UPPER, "upper"}, {-1, NULL}};
 
@@ -257,7 +248,6 @@ static struct parm_struct {
     {"log level", P_INTEGER, P_GLOBAL, &DEBUGLEVEL, NULL, NULL},
     {"syslog", P_INTEGER, P_GLOBAL, &Globals.syslog, NULL, NULL},
     {"syslog only", P_BOOL, P_GLOBAL, &Globals.bSyslogOnly, NULL, NULL},
-    {"protocol", P_ENUM, P_GLOBAL, &Globals.maxprotocol, NULL, enum_protocol},
     {"read bmpx", P_BOOL, P_GLOBAL, &Globals.bReadbmpx, NULL, NULL},
     {"read raw", P_BOOL, P_GLOBAL, &Globals.bReadRaw, NULL, NULL},
     {"write raw", P_BOOL, P_GLOBAL, &Globals.bWriteRaw, NULL, NULL},
@@ -377,7 +367,6 @@ static void init_globals(void)
 	Globals.max_xmit = 65535;
 	Globals.deadtime = 0;
 	Globals.max_log_size = 5000;
-	Globals.maxprotocol = PROTOCOL_NT1;
 	Globals.bReadRaw = True;
 	Globals.bWriteRaw = True;
 	Globals.bReadbmpx = True;
@@ -526,7 +515,6 @@ FN_GLOBAL_INTEGER(lp_mangledstack, &Globals.mangled_stack)
 FN_GLOBAL_INTEGER(lp_maxxmit, &Globals.max_xmit)
 FN_GLOBAL_INTEGER(lp_readsize, &Globals.ReadSize)
 FN_GLOBAL_INTEGER(lp_deadtime, &Globals.deadtime)
-FN_GLOBAL_INTEGER(lp_maxprotocol, &Globals.maxprotocol)
 FN_GLOBAL_INTEGER(lp_syslog, &Globals.syslog)
 FN_GLOBAL_INTEGER(lp_client_code_page, &Globals.client_code_page)
 
