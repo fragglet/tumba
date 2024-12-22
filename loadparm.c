@@ -170,7 +170,6 @@ typedef struct {
 	char *szDontdescend;
 	char *szMangledMap;
 	char *szVetoFiles;
-	char *szHideFiles;
 	char *szVetoOplockFiles;
 	char *comment;
 	char *volume;
@@ -220,7 +219,6 @@ static service sDefault = {
     NULL,       /* szDontdescend */
     NULL,       /* szMangledMap */
     NULL,       /* szVetoFiles */
-    NULL,       /* szHideFiles */
     NULL,       /* szVetoOplockFiles */
     NULL,       /* comment */
     NULL,       /* volume */
@@ -392,7 +390,6 @@ static struct parm_struct {
     {"delete veto files", P_BOOL, P_LOCAL, &sDefault.bDeleteVetoFiles, NULL,
      NULL},
     {"veto files", P_STRING, P_LOCAL, &sDefault.szVetoFiles, NULL, NULL},
-    {"hide files", P_STRING, P_LOCAL, &sDefault.szHideFiles, NULL, NULL},
     {"veto oplock files", P_STRING, P_LOCAL, &sDefault.szVetoOplockFiles, NULL,
      NULL},
     {"map system", P_BOOL, P_LOCAL, &sDefault.bMap_system, NULL, NULL},
@@ -645,7 +642,6 @@ FN_LOCAL_STRING(lp_comment, comment)
 FN_LOCAL_STRING(lp_volume, volume)
 FN_LOCAL_STRING(lp_mangled_map, szMangledMap)
 FN_LOCAL_STRING(lp_veto_files, szVetoFiles)
-FN_LOCAL_STRING(lp_hide_files, szHideFiles)
 FN_LOCAL_STRING(lp_veto_oplocks, szVetoOplockFiles)
 
 FN_LOCAL_BOOL(lp_alternate_permissions, bAlternatePerm)

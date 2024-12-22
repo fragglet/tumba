@@ -105,7 +105,6 @@ char *lp_comment(int);
 char *lp_volume(int);
 char *lp_mangled_map(int);
 char *lp_veto_files(int);
-char *lp_hide_files(int);
 char *lp_veto_oplocks(int);
 BOOL lp_alternate_permissions(int);
 BOOL lp_casesensitive(int);

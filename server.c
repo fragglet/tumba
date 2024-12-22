@@ -234,12 +234,6 @@ int dos_mode(int cnum, char *path, struct stat *sbuf)
 			result |= aHIDDEN;
 	}
 
-	/* Optimization : Only call is_hidden_path if it's not already
-	   hidden. */
-	if (!(result & aHIDDEN) && IS_HIDDEN_PATH(cnum, path)) {
-		result |= aHIDDEN;
-	}
-
 	DEBUG(8, ("dos_mode returning "));
 
 	if (result & aHIDDEN)
@@ -2947,7 +2941,6 @@ int make_connection(char *service, char *user, char *password, int pwlen,
 	pcon->used = True;
 	pcon->dirptr = NULL;
 	pcon->veto_list = NULL;
-	pcon->hide_list = NULL;
 	pcon->veto_oplock_list = NULL;
 	string_set(&pcon->dirpath, "");
 	string_set(&pcon->user, user);
@@ -3028,7 +3021,6 @@ int make_connection(char *service, char *user, char *password, int pwlen,
 
 	/* Add veto/hide lists */
 	set_namearray(&pcon->veto_list, lp_veto_files(SNUM(cnum)));
-	set_namearray(&pcon->hide_list, lp_hide_files(SNUM(cnum)));
 	set_namearray(&pcon->veto_oplock_list, lp_veto_oplocks(SNUM(cnum)));
 
 	{
@@ -3498,7 +3490,6 @@ void close_cnum(int cnum, uint16 vuid)
 	}
 
 	free_namearray(Connections[cnum].veto_list);
-	free_namearray(Connections[cnum].hide_list);
 	free_namearray(Connections[cnum].veto_oplock_list);
 
 	string_set(&Connections[cnum].user, "");
