@@ -22,6 +22,8 @@
 #include "includes.h"
 #include "trans2.h"
 
+#define MAX_MUX 50
+
 pstring servicesf = CONFIGFILE;
 extern pstring debugf;
 extern fstring myworkgroup;
@@ -3006,7 +3008,7 @@ int reply_lanman1(char *outbuf)
 	CVAL(outbuf, smb_flg) =
 	    0x81; /* Reply, SMBlockread, SMBwritelock supported */
 	SSVAL(outbuf, smb_vwv2, max_recv);
-	SSVAL(outbuf, smb_vwv3, lp_maxmux()); /* maxmux */
+	SSVAL(outbuf, smb_vwv3, MAX_MUX);
 	SSVAL(outbuf, smb_vwv4, 1);
 	SSVAL(outbuf, smb_vwv5, raw); /* tell redirector we support
 	                                 readbraw writebraw (possibly) */
@@ -3037,7 +3039,7 @@ int reply_lanman2(char *outbuf)
 	CVAL(outbuf, smb_flg) =
 	    0x81; /* Reply, SMBlockread, SMBwritelock supported */
 	SSVAL(outbuf, smb_vwv2, max_recv);
-	SSVAL(outbuf, smb_vwv3, lp_maxmux());
+	SSVAL(outbuf, smb_vwv3, MAX_MUX);
 	SSVAL(outbuf, smb_vwv4, 1);
 	SSVAL(outbuf, smb_vwv5, raw); /* readbraw and/or writebraw */
 	SSVAL(outbuf, smb_vwv10, TimeDiff(t) / 60);
@@ -3081,7 +3083,7 @@ int reply_nt1(char *outbuf)
 
 	Protocol = PROTOCOL_NT1;
 
-	SSVAL(outbuf, smb_vwv1 + 1, lp_maxmux());  /* maxmpx */
+	SSVAL(outbuf, smb_vwv1 + 1, MAX_MUX);
 	SSVAL(outbuf, smb_vwv2 + 1, 1);            /* num vcs */
 	SIVAL(outbuf, smb_vwv3 + 1, 0xffff);       /* max buffer. LOTS! */
 	SIVAL(outbuf, smb_vwv5 + 1, 0xffff);       /* raw size. LOTS! */
