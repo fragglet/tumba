@@ -108,10 +108,6 @@
 /***** automatically generated prototypes *****/
 #include "proto.h"
 
-#ifndef NGROUPS_MAX
-#define NGROUPS_MAX 128
-#endif
-
 #ifndef EDQUOT
 #define EDQUOT ENOSPC
 #endif
