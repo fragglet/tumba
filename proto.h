@@ -167,21 +167,6 @@ BOOL is_mangled(char *s);
 void mangle_name_83(char *s, int s_len);
 void name_map_mangle(char *OutName, BOOL need83, int snum);
 
-/*The following definitions come from  mem_man/mem_man.c  */
-
-void *smb_mem_malloc(size_t size, char *file, int line);
-char *smb_mem_strdup(char *s, char *file, int line);
-int smb_mem_free(void *ptr, char *file, int line);
-void smb_mem_write_info(void *ptr, FILE *outfile);
-char *smb_mem_query_file(void *ptr);
-int smb_mem_query_line(void *ptr);
-int smb_mem_test(void *ptr);
-void smb_mem_write_status(FILE *outfile);
-void smb_mem_write_verbose(FILE *outfile);
-void smb_mem_write_errors(FILE *outfile);
-void smb_mem_set_multiplier(int multiplier);
-void *smb_mem_resize(void *ptr, size_t newsize);
-
 /*The following definitions come from  params.c  */
 
 BOOL pm_process(char *FileName, BOOL (*sfunc)(char *),
@@ -305,12 +290,6 @@ int construct_reply(char *inbuf, char *outbuf, int size, int bufsize);
 
 int vslprintf(char *str, int n, char *format, va_list ap);
 
-/*The following definitions come from  status.c  */
-
-void Ucrit_addUsername(pstring username);
-unsigned int Ucrit_checkUsername(pstring username);
-void Ucrit_addPid(int pid);
-
 /*The following definitions come from  system.c  */
 
 int sys_select(fd_set *fds, struct timeval *tval);
@@ -357,8 +336,6 @@ int reply_findclose(char *inbuf, char *outbuf, int length, int bufsize);
 int reply_findnclose(char *inbuf, char *outbuf, int length, int bufsize);
 int reply_transs2(char *inbuf, char *outbuf, int length, int bufsize);
 int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize);
-
-/*The following definitions come from  ubiqx/ubi_dLinkList.c  */
 
 /*The following definitions come from  uid.c  */
 
