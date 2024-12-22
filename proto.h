@@ -122,7 +122,6 @@ BOOL lp_delete_readonly(int);
 BOOL lp_fake_oplocks(int);
 BOOL lp_dos_filetimes(int);
 BOOL lp_dos_filetime_resolution(int);
-BOOL lp_fake_dir_create_times(int);
 int lp_create_mode(int);
 int lp_force_create_mode(int);
 int lp_dir_mode(int);
@@ -354,7 +353,7 @@ time_t make_unix_date(void *date_ptr);
 time_t make_unix_date2(void *date_ptr);
 time_t make_unix_date3(void *date_ptr);
 char *timestring(void);
-time_t get_create_time(struct stat *st, BOOL fake_dirs);
+time_t get_create_time(struct stat *st);
 
 /*The following definitions come from  trans2.c  */
 

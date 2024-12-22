@@ -515,12 +515,9 @@ char *timestring(void)
   structure.
 ****************************************************************************/
 
-time_t get_create_time(struct stat *st, BOOL fake_dirs)
+time_t get_create_time(struct stat *st)
 {
 	time_t ret, ret1;
-
-	if (S_ISDIR(st->st_mode) && fake_dirs)
-		return (time_t) 315493200L; /* 1/1/1980 */
 
 	ret = MIN(st->st_ctime, st->st_mtime);
 	ret1 = MIN(ret, st->st_atime);

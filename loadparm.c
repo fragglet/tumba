@@ -195,7 +195,6 @@ typedef struct {
 	BOOL bFakeOplocks;
 	BOOL bDosFiletimes;
 	BOOL bDosFiletimeResolution;
-	BOOL bFakeDirCreateTimes;
 	char dummy[3]; /* for alignment */
 } service;
 
@@ -241,7 +240,6 @@ static service sDefault = {
     False,      /* bFakeOplocks */
     False,      /* bDosFiletimes */
     False,      /* bDosFiletimeResolution */
-    False,      /* bFakeDirCreateTimes */
     ""          /* dummy */
 };
 
@@ -384,8 +382,6 @@ static struct parm_struct {
     {"dos filetimes", P_BOOL, P_LOCAL, &sDefault.bDosFiletimes, NULL, NULL},
     {"dos filetime resolution", P_BOOL, P_LOCAL,
      &sDefault.bDosFiletimeResolution, NULL, NULL},
-    {"fake directory create times", P_BOOL, P_LOCAL,
-     &sDefault.bFakeDirCreateTimes, NULL, NULL},
 
     {NULL, P_BOOL, P_NONE, NULL, NULL, NULL}};
 
@@ -633,7 +629,6 @@ FN_LOCAL_BOOL(lp_delete_readonly, bDeleteReadonly)
 FN_LOCAL_BOOL(lp_fake_oplocks, bFakeOplocks)
 FN_LOCAL_BOOL(lp_dos_filetimes, bDosFiletimes)
 FN_LOCAL_BOOL(lp_dos_filetime_resolution, bDosFiletimeResolution)
-FN_LOCAL_BOOL(lp_fake_dir_create_times, bFakeDirCreateTimes)
 
 FN_LOCAL_INTEGER(lp_create_mode, iCreate_mask)
 FN_LOCAL_INTEGER(lp_force_create_mode, iCreate_force_mode)
