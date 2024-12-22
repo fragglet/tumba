@@ -2850,10 +2850,8 @@ int set_filelen(int fd, long len)
 	if (fstat(fd, &st) < 0)
 		return -1;
 
-#ifdef S_ISFIFO
 	if (S_ISFIFO(st.st_mode))
 		return 0;
-#endif
 
 	if (st.st_size == len)
 		return 0;
