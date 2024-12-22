@@ -116,7 +116,6 @@ typedef struct {
 	char *szRootdir;
 	char *szDefaultService;
 	char *szServerString;
-	char *szAutoServices;
 	char *szLogFile;
 	char *szConfigFile;
 	char *szSocketOptions;
@@ -184,7 +183,6 @@ typedef struct {
 	int iMaxConnections;
 	int iDefaultCase;
 	BOOL bAlternatePerm;
-	BOOL bRevalidate;
 	BOOL bCaseSensitive;
 	BOOL bCasePreserve;
 	BOOL bShortCasePreserve;
@@ -237,7 +235,6 @@ static service sDefault = {
     0,          /* iMaxConnections */
     CASE_LOWER, /* iDefaultCase */
     False,      /* bAlternatePerm */
-    False,      /* revalidate */
     False,      /* case sensitive */
     True,       /* case preserve */
     False,      /* short case preserve */
@@ -323,8 +320,6 @@ static struct parm_struct {
     {"netbios name", P_UGSTRING, P_GLOBAL, myname, NULL, NULL},
     {"log file", P_STRING, P_GLOBAL, &Globals.szLogFile, NULL, NULL},
     {"config file", P_STRING, P_GLOBAL, &Globals.szConfigFile, NULL, NULL},
-    {"preload", P_STRING, P_GLOBAL, &Globals.szAutoServices, NULL, NULL},
-    {"auto services", P_STRING, P_GLOBAL, &Globals.szAutoServices, NULL, NULL},
     {"server string", P_STRING, P_GLOBAL, &Globals.szServerString, NULL, NULL},
     {"lock dir", P_STRING, P_GLOBAL, &Globals.szLockDir, NULL, NULL},
     {"lock directory", P_STRING, P_GLOBAL, &Globals.szLockDir, NULL, NULL},
@@ -368,7 +363,6 @@ static struct parm_struct {
     {"comment", P_STRING, P_LOCAL, &sDefault.comment, NULL, NULL},
     {"copy", P_STRING, P_LOCAL, &sDefault.szCopy, handle_copy, NULL},
     {"include", P_STRING, P_LOCAL, &sDefault.szInclude, handle_include, NULL},
-    {"revalidate", P_BOOL, P_LOCAL, &sDefault.bRevalidate, NULL, NULL},
     {"default case", P_ENUM, P_LOCAL, &sDefault.iDefaultCase, NULL, enum_case},
     {"case sensitive", P_BOOL, P_LOCAL, &sDefault.bCaseSensitive, NULL, NULL},
     {"casesignames", P_BOOL, P_LOCAL, &sDefault.bCaseSensitive, NULL, NULL},
@@ -620,7 +614,6 @@ FN_GLOBAL_STRING(lp_serverstring, &Globals.szServerString)
 FN_GLOBAL_STRING(lp_lockdir, &Globals.szLockDir)
 FN_GLOBAL_STRING(lp_rootdir, &Globals.szRootdir)
 FN_GLOBAL_STRING(lp_defaultservice, &Globals.szDefaultService)
-FN_GLOBAL_STRING(lp_auto_services, &Globals.szAutoServices)
 FN_GLOBAL_STRING(lp_workgroup, &Globals.szWorkGroup)
 FN_GLOBAL_STRING(lp_character_set, &Globals.szCharacterSet)
 FN_GLOBAL_STRING(lp_interfaces, &Globals.szInterfaces)
@@ -665,7 +658,6 @@ FN_LOCAL_STRING(lp_hide_files, szHideFiles)
 FN_LOCAL_STRING(lp_veto_oplocks, szVetoOplockFiles)
 
 FN_LOCAL_BOOL(lp_alternate_permissions, bAlternatePerm)
-FN_LOCAL_BOOL(lp_revalidate, bRevalidate)
 FN_LOCAL_BOOL(lp_casesensitive, bCaseSensitive)
 FN_LOCAL_BOOL(lp_preservecase, bCasePreserve)
 FN_LOCAL_BOOL(lp_shortpreservecase, bShortCasePreserve)
