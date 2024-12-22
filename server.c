@@ -779,38 +779,6 @@ static int fd_attempt_open(char *fname, int flags, int mode)
 }
 
 /****************************************************************************
-Cache a uid_t currently with this file open. This is an optimization only
-used when multiple sessionsetup's have been done to one smbd.
-****************************************************************************/
-static void fd_add_to_uid_cache(file_fd_struct *fd_ptr, uid_t u)
-{
-	if (fd_ptr->uid_cache_count >=
-	    sizeof(fd_ptr->uid_users_cache) / sizeof(uid_t))
-		return;
-	fd_ptr->uid_users_cache[fd_ptr->uid_cache_count++] = u;
-}
-
-/****************************************************************************
-Remove a uid_t that currently has this file open. This is an optimization only
-used when multiple sessionsetup's have been done to one smbd.
-****************************************************************************/
-static void fd_remove_from_uid_cache(file_fd_struct *fd_ptr, uid_t u)
-{
-	int i;
-	for (i = 0; i < fd_ptr->uid_cache_count; i++)
-		if (fd_ptr->uid_users_cache[i] == u) {
-			if (i < (fd_ptr->uid_cache_count - 1))
-				memmove(
-				    (char *) &fd_ptr->uid_users_cache[i],
-				    (char *) &fd_ptr->uid_users_cache[i + 1],
-				    sizeof(uid_t) *
-				        (fd_ptr->uid_cache_count - 1 - i));
-			fd_ptr->uid_cache_count--;
-		}
-	return;
-}
-
-/****************************************************************************
 fd support routines - attempt to find an already open file by dev
 and inode - increments the ref_count of the returned file_fd_struct *.
 ****************************************************************************/
@@ -857,8 +825,6 @@ static file_fd_struct *fd_get_new(void)
 			fd_ptr->fd_readonly = -1;
 			fd_ptr->fd_writeonly = -1;
 			fd_ptr->real_open_flags = -1;
-			fd_ptr->uid_cache_count = 0;
-			fd_add_to_uid_cache(fd_ptr, (uid_t) current_user.uid);
 			fd_ptr->ref_count++;
 			/* Increment max used counter if neccessary, cuts down
 			   on search time when re-using */
@@ -922,10 +888,7 @@ static int fd_attempt_close(file_fd_struct *fd_ptr)
 			fd_ptr->real_open_flags = -1;
 			fd_ptr->dev = (uint32) -1;
 			fd_ptr->inode = (uint32) -1;
-			fd_ptr->uid_cache_count = 0;
-		} else
-			fd_remove_from_uid_cache(fd_ptr,
-			                         (uid_t) current_user.uid);
+		}
 	}
 	return fd_ptr->ref_count;
 }
@@ -1020,8 +983,6 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 			return;
 		}
 
-		fd_add_to_uid_cache(fd_ptr, (uid_t) current_user.uid);
-
 		/*
 		 * If not opened O_RDWR try
 		 * and do that here - a chmod may have been done
@@ -1046,8 +1007,6 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 			          fd_ptr->real_open_flags, fname,
 			          strerror(EACCES), flags));
 			check_for_pipe(fname);
-			fd_remove_from_uid_cache(fd_ptr,
-			                         (uid_t) current_user.uid);
 			fd_ptr->ref_count--;
 			return;
 		}

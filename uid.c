@@ -160,25 +160,6 @@ BOOL become_guest(void)
 	return (ret);
 }
 
-/*******************************************************************
-check if a username is OK
-********************************************************************/
-static BOOL check_user_ok(connection_struct *conn, user_struct *vuser, int snum)
-{
-	int i;
-	for (i = 0; i < conn->uid_cache.entries; i++)
-		if (conn->uid_cache.list[i] == vuser->uid)
-			return (True);
-
-	i = conn->uid_cache.entries % UID_CACHE_SIZE;
-	conn->uid_cache.list[i] = vuser->uid;
-
-	if (conn->uid_cache.entries < UID_CACHE_SIZE)
-		conn->uid_cache.entries++;
-
-	return (True);
-}
-
 /****************************************************************************
   become the user of a connection number
 ****************************************************************************/
@@ -214,9 +195,6 @@ BOOL become_user(connection_struct *conn, int cnum, uint16 vuid)
 	}
 
 	snum = conn->service;
-
-	if ((vuser != NULL) && !check_user_ok(conn, vuser, snum))
-		return False;
 
 	{
 		uid = conn->uid;

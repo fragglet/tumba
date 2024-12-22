@@ -307,8 +307,6 @@ typedef struct {
 
 typedef struct {
 	uint16 ref_count;
-	uint16 uid_cache_count;
-	uid_t uid_users_cache[10];
 	uint32 dev;
 	uint32 inode;
 	int fd;
@@ -340,11 +338,6 @@ typedef struct {
 	char *name;
 } files_struct;
 
-struct uid_cache {
-	int entries;
-	int list[UID_CACHE_SIZE];
-};
-
 typedef struct {
 	char *name;
 	BOOL is_wild;
@@ -352,7 +345,6 @@ typedef struct {
 
 typedef struct {
 	int service;
-	struct uid_cache uid_cache;
 	void *dirptr;
 	BOOL open;
 	BOOL read_only;
