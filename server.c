@@ -811,19 +811,6 @@ static void fd_remove_from_uid_cache(file_fd_struct *fd_ptr, uid_t u)
 }
 
 /****************************************************************************
-Check if a uid_t that currently has this file open is present. This is an
-optimization only used when multiple sessionsetup's have been done to one smbd.
-****************************************************************************/
-static BOOL fd_is_in_uid_cache(file_fd_struct *fd_ptr, uid_t u)
-{
-	int i;
-	for (i = 0; i < fd_ptr->uid_cache_count; i++)
-		if (fd_ptr->uid_users_cache[i] == u)
-			return True;
-	return False;
-}
-
-/****************************************************************************
 fd support routines - attempt to find an already open file by dev
 and inode - increments the ref_count of the returned file_fd_struct *.
 ****************************************************************************/
@@ -944,94 +931,6 @@ static int fd_attempt_close(file_fd_struct *fd_ptr)
 }
 
 /****************************************************************************
-fd support routines - check that current user has permissions
-to open this file. Used when uid not found in optimization cache.
-This is really ugly code, as due to POSIX locking braindamage we must
-fork and then attempt to open the file, and return success or failure
-via an exit code.
-****************************************************************************/
-static BOOL check_access_allowed_for_current_user(char *fname, int accmode)
-{
-	pid_t child_pid;
-
-	if ((child_pid = fork()) < 0) {
-		DEBUG(
-		    0,
-		    ("check_access_allowed_for_current_user: fork failed.\n"));
-		return False;
-	}
-
-	if (child_pid) {
-		/*
-		 * Parent.
-		 */
-		pid_t wpid;
-		int status_code;
-		if ((wpid = sys_waitpid(child_pid, &status_code, 0)) < 0) {
-			DEBUG(0, ("check_access_allowed_for_current_user: The "
-			          "process is no longer waiting!\n"));
-			return (False);
-		}
-
-		if (child_pid != wpid) {
-			DEBUG(0, ("check_access_allowed_for_current_user: We "
-			          "were waiting for the wrong process ID\n"));
-			return (False);
-		}
-#if defined(WIFEXITED) && defined(WEXITSTATUS)
-		if (WIFEXITED(status_code) == 0) {
-			DEBUG(0, ("check_access_allowed_for_current_user: The "
-			          "process exited while we were waiting\n"));
-			return (False);
-		}
-		if (WEXITSTATUS(status_code) != 0) {
-			DEBUG(9, ("check_access_allowed_for_current_user: The "
-			          "status of the process exiting was %d. "
-			          "Returning access denied.\n",
-			          status_code));
-			return (False);
-		}
-#else  /* defined(WIFEXITED) && defined(WEXITSTATUS) */
-		if (status_code != 0) {
-			DEBUG(9, ("check_access_allowed_for_current_user: The "
-			          "status of the process exiting was %d. "
-			          "Returning access denied.\n",
-			          status_code));
-			return (False);
-		}
-#endif /* defined(WIFEXITED) && defined(WEXITSTATUS) */
-
-		/*
-		 * Success - the child could open the file.
-		 */
-		DEBUG(
-		    9,
-		    ("check_access_allowed_for_current_user: The status of the "
-		     "process exiting was %d. Returning access allowed.\n",
-		     status_code));
-		return True;
-	} else {
-		/*
-		 * Child.
-		 */
-		int fd;
-		DEBUG(9, ("check_access_allowed_for_current_user: Child - "
-		          "attempting to open %s with mode %d.\n",
-		          fname, accmode));
-		if ((fd = fd_attempt_open(fname, accmode, 0)) < 0) {
-			/* Access denied. */
-			_exit(EACCES);
-		}
-		close(fd);
-		DEBUG(9, ("check_access_allowed_for_current_user: Child - "
-		          "returning ok.\n"));
-		_exit(0);
-	}
-
-	return False;
-}
-
-/****************************************************************************
 open a file
 ****************************************************************************/
 static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
@@ -1119,29 +1018,6 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 			fd_ptr->ref_count--;
 			errno = EEXIST;
 			return;
-		}
-
-		/*
-		 * Ensure that the user attempting to open
-		 * this file has permissions to do so, if
-		 * the user who originally opened the file wasn't
-		 * the same as the current user.
-		 */
-
-		if (!fd_is_in_uid_cache(fd_ptr, (uid_t) current_user.uid)) {
-			if (!check_access_allowed_for_current_user(fname,
-			                                           accmode)) {
-				/* Error - permission denied. */
-				DEBUG(3, ("Permission denied opening file %s "
-				          "(flags=%d, accmode = %d)\n",
-				          fname, flags, accmode));
-				/* Ensure the ref_count is decremented. */
-				fd_ptr->ref_count--;
-				fd_remove_from_uid_cache(
-				    fd_ptr, (uid_t) current_user.uid);
-				errno = EACCES;
-				return;
-			}
 		}
 
 		fd_add_to_uid_cache(fd_ptr, (uid_t) current_user.uid);
