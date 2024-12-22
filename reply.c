@@ -32,7 +32,6 @@ extern int DEBUGLEVEL;
 extern int max_send;
 extern int max_recv;
 extern int chain_fnum;
-extern char magic_char;
 extern connection_struct Connections[];
 extern files_struct Files[];
 extern BOOL case_sensitive;

@@ -1605,7 +1605,6 @@ load parameters specific to a connection/service
 ****************************************************************************/
 BOOL become_service(int cnum, BOOL do_chdir)
 {
-	extern char magic_char;
 	static int last_cnum = -1;
 	int snum;
 
@@ -1635,7 +1634,6 @@ BOOL become_service(int cnum, BOOL do_chdir)
 	short_case_preserve = lp_shortpreservecase(snum);
 	case_mangle = lp_casemangle(snum);
 	case_sensitive = lp_casesensitive(snum);
-	magic_char = lp_magicchar(snum);
 	use_mangled_map = (*lp_mangled_map(snum) ? True : False);
 	return (True);
 }

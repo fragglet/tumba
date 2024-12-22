@@ -203,7 +203,6 @@ typedef struct {
 	BOOL bMangledNames;
 	BOOL bWidelinks;
 	BOOL bSymlinks;
-	char magic_char;
 	BOOL *copymap;
 	BOOL bDeleteReadonly;
 	BOOL bFakeOplocks;
@@ -257,7 +256,6 @@ static service sDefault = {
     True,       /* bMangledNames */
     True,       /* bWidelinks */
     True,       /* bSymlinks */
-    '~',        /* magic char */
     NULL,       /* copymap */
     False,      /* bDeleteReadonly */
     False,      /* bFakeOplocks */
@@ -378,7 +376,6 @@ static struct parm_struct {
     {"short preserve case", P_BOOL, P_LOCAL, &sDefault.bShortCasePreserve, NULL,
      NULL},
     {"mangle case", P_BOOL, P_LOCAL, &sDefault.bCaseMangle, NULL, NULL},
-    {"mangling char", P_CHAR, P_LOCAL, &sDefault.magic_char, NULL, NULL},
     {"browseable", P_BOOL, P_LOCAL, &sDefault.bBrowseable, NULL, NULL},
     {"browsable", P_BOOL, P_LOCAL, &sDefault.bBrowseable, NULL, NULL},
     {"path", P_STRING, P_LOCAL, &sDefault.szPath, NULL, NULL},
@@ -700,8 +697,6 @@ FN_LOCAL_INTEGER(lp_dir_mode, iDir_mask)
 FN_LOCAL_INTEGER(lp_force_dir_mode, iDir_force_mode)
 FN_LOCAL_INTEGER(lp_max_connections, iMaxConnections)
 FN_LOCAL_INTEGER(lp_defaultcase, iDefaultCase)
-
-FN_LOCAL_CHAR(lp_magicchar, magic_char)
 
 /* local prototypes */
 static int strwicmp(char *psz1, char *psz2);

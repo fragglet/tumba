@@ -383,14 +383,14 @@ static char *map_filename(char *s,       /* This is null terminated */
 } /* map_filename */
 
 /* this is the magic char used for mangling */
-char magic_char = '~';
+#define MAGIC_CHAR '~'
 
 /****************************************************************************
 return True if the name could be a mangled name
 ****************************************************************************/
 BOOL is_mangled(char *s)
 {
-	char *m = strchr(s, magic_char);
+	char *m = strchr(s, MAGIC_CHAR);
 
 	if (!m)
 		return (False);
@@ -579,7 +579,7 @@ void mangle_name_83(char *s, int s_len)
 
 	csum = csum % (36 * 36);
 
-	slprintf(s, s_len - 1, "%s%c%c%c", base, magic_char, base36(csum / 36),
+	slprintf(s, s_len - 1, "%s%c%c%c", base, MAGIC_CHAR, base36(csum / 36),
 	         base36(csum % 36));
 
 	if (*extension) {

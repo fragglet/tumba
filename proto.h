@@ -142,7 +142,6 @@ int lp_dir_mode(int);
 int lp_force_dir_mode(int);
 int lp_max_connections(int);
 int lp_defaultcase(int);
-char lp_magicchar(int);
 int lp_add_service(char *pszService, int iDefaultService);
 BOOL lp_file_list_changed(void);
 BOOL lp_do_parameter(int snum, char *pszParmName, char *pszParmValue);
