@@ -100,7 +100,6 @@ char *lp_veto_oplocks(int);
 BOOL lp_casesensitive(int);
 BOOL lp_preservecase(int);
 BOOL lp_shortpreservecase(int);
-BOOL lp_casemangle(int);
 BOOL lp_status(int);
 BOOL lp_hide_dot_files(int);
 BOOL lp_readonly(int);

@@ -23,7 +23,6 @@
 
 extern int DEBUGLEVEL;
 extern int case_default;
-extern BOOL case_mangle;
 
 /****************************************************************************
  * Provide a checksum on a string
@@ -95,19 +94,6 @@ BOOL is_8_3(char *fname, BOOL check_case)
 	len = strlen(fname);
 
 	DEBUG(5, ("checking %s for 8.3\n", fname));
-
-	if (check_case && case_mangle) {
-		switch (case_default) {
-		case CASE_LOWER:
-			if (strhasupper(fname))
-				return (False);
-			break;
-		case CASE_UPPER:
-			if (strhaslower(fname))
-				return (False);
-			break;
-		}
-	}
 
 	/* can't be longer than 12 chars */
 	if (len == 0 || len > 12)

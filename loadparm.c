@@ -164,7 +164,6 @@ typedef struct {
 	BOOL bCaseSensitive;
 	BOOL bCasePreserve;
 	BOOL bShortCasePreserve;
-	BOOL bCaseMangle;
 	BOOL status;
 	BOOL bHideDotFiles;
 	BOOL bRead_only;
@@ -204,7 +203,6 @@ static service sDefault = {
     False,      /* case sensitive */
     True,       /* case preserve */
     False,      /* short case preserve */
-    False,      /* case mangle */
     True,       /* status */
     True,       /* bHideDotFiles */
     True,       /* bRead_only */
@@ -318,7 +316,6 @@ static struct parm_struct {
     {"preserve case", P_BOOL, P_LOCAL, &sDefault.bCasePreserve, NULL, NULL},
     {"short preserve case", P_BOOL, P_LOCAL, &sDefault.bShortCasePreserve, NULL,
      NULL},
-    {"mangle case", P_BOOL, P_LOCAL, &sDefault.bCaseMangle, NULL, NULL},
     {"path", P_STRING, P_LOCAL, &sDefault.szPath, NULL, NULL},
     {"directory", P_STRING, P_LOCAL, &sDefault.szPath, NULL, NULL},
     {"guest account", P_STRING, P_LOCAL, &sDefault.szGuestaccount, NULL, NULL},
@@ -563,7 +560,6 @@ FN_LOCAL_STRING(lp_veto_oplocks, szVetoOplockFiles)
 FN_LOCAL_BOOL(lp_casesensitive, bCaseSensitive)
 FN_LOCAL_BOOL(lp_preservecase, bCasePreserve)
 FN_LOCAL_BOOL(lp_shortpreservecase, bShortCasePreserve)
-FN_LOCAL_BOOL(lp_casemangle, bCaseMangle)
 FN_LOCAL_BOOL(lp_status, status)
 FN_LOCAL_BOOL(lp_hide_dot_files, bHideDotFiles)
 FN_LOCAL_BOOL(lp_readonly, bRead_only)

@@ -45,7 +45,6 @@ extern int case_default;
 extern BOOL case_sensitive;
 extern BOOL case_preserve;
 extern BOOL short_case_preserve;
-extern BOOL case_mangle;
 time_t smb_last_time = (time_t) 0;
 
 extern int smb_read_error;
@@ -1428,7 +1427,6 @@ BOOL become_service(int cnum, BOOL do_chdir)
 	case_default = lp_defaultcase(snum);
 	case_preserve = lp_preservecase(snum);
 	short_case_preserve = lp_shortpreservecase(snum);
-	case_mangle = lp_casemangle(snum);
 	case_sensitive = lp_casesensitive(snum);
 	return (True);
 }

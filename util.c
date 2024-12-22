@@ -62,7 +62,6 @@ int syslog_level;
 BOOL case_sensitive;
 BOOL case_preserve;
 BOOL short_case_preserve;
-BOOL case_mangle;
 
 fstring remote_machine = "";
 fstring local_machine = "";
