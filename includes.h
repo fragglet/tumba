@@ -31,9 +31,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <time.h>
-#ifndef NO_UTIMEH
 #include <utime.h>
-#endif
 #include <sys/types.h>
 
 #include <stddef.h>

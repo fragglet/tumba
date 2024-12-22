@@ -3487,7 +3487,6 @@ static BOOL dump_core(void)
 		return (False);
 	umask(~(0700));
 
-#ifndef NO_GETRLIMIT
 #ifdef RLIMIT_CORE
 	{
 		struct rlimit rlp;
@@ -3498,7 +3497,6 @@ static BOOL dump_core(void)
 		DEBUG(3,
 		      ("Core limits now %d %d\n", rlp.rlim_cur, rlp.rlim_max));
 	}
-#endif
 #endif
 
 	DEBUG(0, ("Dumping core in %s\n", dname));
@@ -4306,7 +4304,6 @@ int main(int argc, char *argv[])
 	DEBUG(2, ("%s smbd version %s started\n", timestring(), VERSION));
 	DEBUG(2, ("Copyright Andrew Tridgell 1992-1997\n"));
 
-#ifndef NO_GETRLIMIT
 #ifdef RLIMIT_NOFILE
 	{
 		struct rlimit rlp;
@@ -4324,7 +4321,6 @@ int main(int argc, char *argv[])
 		DEBUG(3, ("Maximum number of open files per session is %d\n",
 		          rlp.rlim_cur));
 	}
-#endif
 #endif
 
 	DEBUG(2, ("uid=%d gid=%d euid=%d egid=%d\n", getuid(), getgid(),

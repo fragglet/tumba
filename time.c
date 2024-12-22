@@ -484,23 +484,7 @@ char *timestring(void)
 		slprintf(TimeBuf, sizeof(TimeBuf) - 1,
 		         "%ld seconds since the Epoch", (long) t);
 	else
-#ifdef NO_STRFTIME
-		fstrcpy(TimeBuf, asctime(tm));
-#elif defined(AMPM)
 		strftime(TimeBuf, 100, "%Y/%m/%d %r", tm);
-#elif defined(TZ_TIME)
-	{
-		int zone = TimeDiff(t);
-		int absZoneMinutes = (zone < 0 ? -zone : zone) / 60;
-		size_t len =
-		    strftime(TimeBuf, sizeof(TimeBuf) - 6, "%Y/%m/%d %T", tm);
-		slprintf(TimeBuf + len, sizeof(TimeBuf) - len - 1,
-		         " %c%02d%02d", zone < 0 ? '+' : '-',
-		         absZoneMinutes / 60, absZoneMinutes % 60);
-	}
-#else
-		strftime(TimeBuf, 100, "%Y/%m/%d %T", tm);
-#endif
 	return (TimeBuf);
 }
 

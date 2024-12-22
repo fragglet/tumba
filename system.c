@@ -43,52 +43,6 @@ this replaces the normal select() system call
 return if some data has arrived on one of the file descriptors
 return -1 means error
 ********************************************************************/
-#ifdef NO_SELECT
-static int pollfd(int fd)
-{
-	int r = 0;
-
-#ifdef HAS_RDCHK
-	r = rdchk(fd);
-#elif defined(TCRDCHK)
-	(void) ioctl(fd, TCRDCHK, &r);
-#else
-	(void) ioctl(fd, FIONREAD, &r);
-#endif
-
-	return (r);
-}
-
-int sys_select(fd_set *fds, struct timeval *tval)
-{
-	fd_set fds2;
-	int counter = 0;
-	int found = 0;
-
-	FD_ZERO(&fds2);
-
-	while (1) {
-		int i;
-		for (i = 0; i < 255; i++) {
-			if (FD_ISSET(i, fds) && pollfd(i) > 0) {
-				found++;
-				FD_SET(i, &fds2);
-			}
-		}
-
-		if (found) {
-			memcpy((void *) fds, (void *) &fds2, sizeof(fds2));
-			return (found);
-		}
-
-		if (tval && tval->tv_sec < counter)
-			return (0);
-		sleep(1);
-		counter++;
-	}
-}
-
-#else
 int sys_select(fd_set *fds, struct timeval *tval)
 {
 	struct timeval t2;
@@ -104,7 +58,6 @@ int sys_select(fd_set *fds, struct timeval *tval)
 
 	return (selrtn);
 }
-#endif
 
 /*******************************************************************
 just a unlink wrapper
@@ -143,11 +96,7 @@ The wait() calls vary between systems
 ********************************************************************/
 int sys_waitpid(pid_t pid, int *status, int options)
 {
-#ifdef USE_WAITPID
 	return waitpid(pid, status, options);
-#else  /* USE_WAITPID */
-	return wait4(pid, status, options, NULL);
-#endif /* USE_WAITPID */
 }
 
 /*******************************************************************
@@ -322,11 +271,7 @@ for getwd
 char *sys_getwd(char *s)
 {
 	char *wd;
-#ifdef USE_GETCWD
 	wd = (char *) getcwd(s, sizeof(pstring));
-#else
-	wd = (char *) getwd(s);
-#endif
 	if (wd)
 		unix_to_dos(wd, True);
 	return wd;
@@ -337,11 +282,7 @@ chown isn't used much but OS/2 doesn't have it
 ********************************************************************/
 int sys_chown(char *fname, int uid, int gid)
 {
-#ifdef NO_CHOWN
-	DEBUG(1, ("Warning - chown(%s,%d,%d) not done\n", fname, uid, gid));
-#else
 	return (chown(fname, uid, gid));
-#endif
 }
 
 /*******************************************************************
@@ -349,11 +290,7 @@ os/2 also doesn't have chroot
 ********************************************************************/
 int sys_chroot(char *dname)
 {
-#ifdef NO_CHROOT
-	DEBUG(1, ("Warning - chroot(%s) not done\n", dname));
-#else
 	return (chroot(dname));
-#endif
 }
 
 /**************************************************************************

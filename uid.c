@@ -217,24 +217,10 @@ BOOL unbecome_user(void)
 	ChDir(OriginalDir);
 
 	if (initial_uid == 0) {
-#ifdef USE_SETRES
-		setresuid(-1, getuid(), -1);
-		setresgid(-1, getgid(), -1);
-#elif defined(USE_SETFS)
-		setfsuid(initial_uid);
-		setfsgid(initial_gid);
-#else
 		if (seteuid(initial_uid) != 0)
 			setuid(initial_uid);
 		setgid(initial_gid);
-#endif
 	}
-#ifdef NO_EID
-	if (initial_uid == 0)
-		DEBUG(2, ("Running with no EID\n"));
-	initial_uid = getuid();
-	initial_gid = getgid();
-#else
 	if (geteuid() != initial_uid) {
 		DEBUG(0,
 		      ("Warning: You appear to have a trapdoor uid system\n"));
@@ -245,7 +231,6 @@ BOOL unbecome_user(void)
 		      ("Warning: You appear to have a trapdoor gid system\n"));
 		initial_gid = getegid();
 	}
-#endif
 
 	current_user.uid = initial_uid;
 	current_user.gid = initial_gid;
@@ -314,13 +299,11 @@ void unbecome_root(BOOL restore_dir)
 		exit_server("Failed to restore gid");
 	}
 
-#ifndef NO_SETGROUPS
 	if (current_user_saved.ngroups > 0) {
 		if (setgroups(current_user_saved.ngroups,
 		              current_user_saved.groups) < 0)
 			DEBUG(0, ("ERROR: setgroups call failed!\n"));
 	}
-#endif
 
 	/* now restore our uid */
 	if (!become_uid(current_user_saved.uid)) {

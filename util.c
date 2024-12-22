@@ -2835,24 +2835,6 @@ void *Realloc(void *p, int size)
 	return (ret);
 }
 
-#ifdef NOSTRDUP
-/****************************************************************************
-duplicate a string
-****************************************************************************/
-char *strdup(char *s)
-{
-	char *ret = NULL;
-	int len;
-	if (!s)
-		return (NULL);
-	ret = (char *) malloc((len = strlen(s)) + 1);
-	if (!ret)
-		return (NULL);
-	safe_strcpy(ret, s, len);
-	return (ret);
-}
-#endif
-
 /****************************************************************************
 get my own name and IP
 ****************************************************************************/

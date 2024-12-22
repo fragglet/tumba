@@ -718,10 +718,6 @@ int slprintf(char *str, int n, char *format, ...);
 void ajt_panic(void);
 #endif
 
-#ifdef NOSTRDUP
-char *strdup(char *s);
-#endif
-
 #ifndef MIN
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #endif
