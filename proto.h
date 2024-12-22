@@ -102,8 +102,6 @@ char *lp_pathname(int);
 char *lp_dontdescend(int);
 char *lp_guestaccount(int);
 char *lp_comment(int);
-char *lp_force_user(int);
-char *lp_force_group(int);
 char *lp_volume(int);
 char *lp_mangled_map(int);
 char *lp_veto_files(int);

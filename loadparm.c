@@ -173,8 +173,6 @@ typedef struct {
 	char *szHideFiles;
 	char *szVetoOplockFiles;
 	char *comment;
-	char *force_user;
-	char *force_group;
 	char *volume;
 	int iCreate_mask;
 	int iCreate_force_mode;
@@ -225,8 +223,6 @@ static service sDefault = {
     NULL,       /* szHideFiles */
     NULL,       /* szVetoOplockFiles */
     NULL,       /* comment */
-    NULL,       /* force user */
-    NULL,       /* force group */
     NULL,       /* volume */
     0744,       /* iCreate_mask */
     0000,       /* iCreate_force_mode */
@@ -376,9 +372,6 @@ static struct parm_struct {
     {"directory", P_STRING, P_LOCAL, &sDefault.szPath, NULL, NULL},
     {"guest account", P_STRING, P_LOCAL, &sDefault.szGuestaccount, NULL, NULL},
     {"volume", P_STRING, P_LOCAL, &sDefault.volume, NULL, NULL},
-    {"force user", P_STRING, P_LOCAL, &sDefault.force_user, NULL, NULL},
-    {"force group", P_STRING, P_LOCAL, &sDefault.force_group, NULL, NULL},
-    {"group", P_STRING, P_LOCAL, &sDefault.force_group, NULL, NULL},
     {"read only", P_BOOL, P_LOCAL, &sDefault.bRead_only, NULL, NULL},
     {"write ok", P_BOOLREV, P_LOCAL, &sDefault.bRead_only, NULL, NULL},
     {"writeable", P_BOOLREV, P_LOCAL, &sDefault.bRead_only, NULL, NULL},
@@ -649,8 +642,6 @@ FN_LOCAL_STRING(lp_pathname, szPath)
 FN_LOCAL_STRING(lp_dontdescend, szDontdescend)
 FN_LOCAL_STRING(lp_guestaccount, szGuestaccount)
 FN_LOCAL_STRING(lp_comment, comment)
-FN_LOCAL_STRING(lp_force_user, force_user)
-FN_LOCAL_STRING(lp_force_group, force_group)
 FN_LOCAL_STRING(lp_volume, volume)
 FN_LOCAL_STRING(lp_mangled_map, szMangledMap)
 FN_LOCAL_STRING(lp_veto_files, szVetoFiles)

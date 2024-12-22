@@ -352,7 +352,6 @@ typedef struct {
 
 typedef struct {
 	int service;
-	BOOL force_user;
 	struct uid_cache uid_cache;
 	void *dirptr;
 	BOOL open;

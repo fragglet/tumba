@@ -2938,7 +2938,6 @@ int make_connection(char *service, char *user, char *password, int pwlen,
 	}
 
 	pcon->read_only = lp_readonly(snum);
-	pcon->force_user = force;
 	pcon->vuid = vuid;
 	pcon->uid = pass->pw_uid;
 	pcon->gid = pass->pw_gid;
@@ -2952,37 +2951,6 @@ int make_connection(char *service, char *user, char *password, int pwlen,
 	pcon->veto_oplock_list = NULL;
 	string_set(&pcon->dirpath, "");
 	string_set(&pcon->user, user);
-
-	if (*lp_force_group(snum)) {
-		struct group *gptr;
-		pstring gname;
-
-		StrnCpy(gname, lp_force_group(snum), sizeof(pstring) - 1);
-		/* default service may be a group name 		*/
-		string_sub(gname, "%S", service);
-		gptr = (struct group *) getgrnam(gname);
-
-		if (gptr) {
-			pcon->gid = gptr->gr_gid;
-			DEBUG(3, ("Forced group %s\n", gname));
-		} else
-			DEBUG(1, ("Couldn't find group %s\n", gname));
-	}
-
-	if (*lp_force_user(snum)) {
-		struct passwd *pass2;
-		fstring fuser;
-		fstrcpy(fuser, lp_force_user(snum));
-		pass2 = (struct passwd *) Get_Pwnam(fuser, True);
-		if (pass2) {
-			pcon->uid = pass2->pw_uid;
-			string_set(&pcon->user, fuser);
-			fstrcpy(user, fuser);
-			pcon->force_user = True;
-			DEBUG(3, ("Forced user %s\n", fuser));
-		} else
-			DEBUG(1, ("Couldn't find user %s\n", fuser));
-	}
 
 	{
 		pstring s;
