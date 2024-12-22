@@ -750,7 +750,6 @@ static int fd_attempt_open(char *fname, int flags, int mode)
 		fd = sys_open(fname, flags, mode);
 	}
 
-#if (defined(ENAMETOOLONG) && defined(HAVE_PATHCONF))
 	if ((fd == -1) && (errno == ENAMETOOLONG)) {
 		int max_len;
 		char *p = strrchr(fname, '/');
@@ -776,7 +775,6 @@ static int fd_attempt_open(char *fname, int flags, int mode)
 				p[max_len] = tmp;
 		}
 	}
-#endif
 	return fd;
 }
 
