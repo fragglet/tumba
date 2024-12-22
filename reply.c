@@ -472,12 +472,6 @@ int reply_sesssetup_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	pstrcpy(user, lp_guestaccount(-1));
 	guest = True;
 
-	if (!Get_Pwnam(user, True)) {
-		DEBUG(3, ("No such user %s - using guest account\n", user));
-		pstrcpy(user, lp_guestaccount(-1));
-		guest = True;
-	}
-
 	/* it's ok - setup a reply */
 	if (Protocol < PROTOCOL_NT1) {
 		set_message(outbuf, 3, 0, True);
