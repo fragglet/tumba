@@ -81,7 +81,6 @@ BOOL lp_syslog_only(void);
 BOOL lp_time_server(void);
 BOOL lp_bind_interfaces_only(void);
 int lp_max_log_size(void);
-int lp_mangledstack(void);
 int lp_maxxmit(void);
 int lp_readsize(void);
 int lp_deadtime(void);

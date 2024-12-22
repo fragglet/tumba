@@ -23,6 +23,7 @@
 #include "trans2.h"
 
 #define MAX_MUX 50
+#define MANGLED_STACK_SIZE 200
 
 pstring servicesf = CONFIGFILE;
 extern pstring debugf;
@@ -2556,7 +2557,7 @@ BOOL reload_services(BOOL test)
 		}
 	}
 
-	reset_mangled_stack(lp_mangledstack());
+	reset_mangled_stack(MANGLED_STACK_SIZE);
 
 	/* this forces service parameters to be flushed */
 	become_service(-1, True);

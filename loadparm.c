@@ -122,7 +122,6 @@ typedef struct {
 	char *szInterfaces;
 	char *szSocketAddress;
 	int max_log_size;
-	int mangled_stack;
 	int max_xmit;
 	int deadtime;
 	int syslog;
@@ -276,7 +275,6 @@ static struct parm_struct {
     {"socket address", P_STRING, P_GLOBAL, &Globals.szSocketAddress, NULL,
      NULL},
     {"max log size", P_INTEGER, P_GLOBAL, &Globals.max_log_size, NULL, NULL},
-    {"mangled stack", P_INTEGER, P_GLOBAL, &Globals.mangled_stack, NULL, NULL},
     {"max xmit", P_INTEGER, P_GLOBAL, &Globals.max_xmit, NULL, NULL},
     {"deadtime", P_INTEGER, P_GLOBAL, &Globals.deadtime, NULL, NULL},
     {"time offset", P_INTEGER, P_GLOBAL, &extra_time_offset, NULL, NULL},
@@ -363,7 +361,6 @@ static void init_globals(void)
 	slprintf(s, sizeof(s) - 1, "%d.%d", DEFAULT_MAJOR_VERSION,
 	         DEFAULT_MINOR_VERSION);
 
-	Globals.mangled_stack = 200;
 	Globals.max_xmit = 65535;
 	Globals.deadtime = 0;
 	Globals.max_log_size = 5000;
@@ -511,7 +508,6 @@ FN_GLOBAL_BOOL(lp_syslog_only, &Globals.bSyslogOnly)
 FN_GLOBAL_BOOL(lp_bind_interfaces_only, &Globals.bBindInterfacesOnly)
 
 FN_GLOBAL_INTEGER(lp_max_log_size, &Globals.max_log_size)
-FN_GLOBAL_INTEGER(lp_mangledstack, &Globals.mangled_stack)
 FN_GLOBAL_INTEGER(lp_maxxmit, &Globals.max_xmit)
 FN_GLOBAL_INTEGER(lp_readsize, &Globals.ReadSize)
 FN_GLOBAL_INTEGER(lp_deadtime, &Globals.deadtime)
