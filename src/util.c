@@ -2888,55 +2888,12 @@ void reset_globals_after_fork(void)
 }
 
 /*******************************************************************
- return the DNS name of the client
- ******************************************************************/
-char *client_name(void)
-{
-	struct sockaddr sa;
-	struct sockaddr_in *sockin = (struct sockaddr_in *) (&sa);
-	int length = sizeof(sa);
-	static pstring name_buf;
-	struct hostent *hp;
-
-	if (global_client_name_done)
-		return name_buf;
-
-	pstrcpy(name_buf, "UNKNOWN");
-
-	if (Client == -1) {
-		return name_buf;
-	}
-
-	if (getpeername(Client, &sa, &length) < 0) {
-		DEBUG(0, ("getpeername failed\n"));
-		return name_buf;
-	}
-
-	/* Look up the remote host name. */
-	if ((hp = gethostbyaddr((char *) &sockin->sin_addr,
-	                        sizeof(sockin->sin_addr), AF_INET)) == 0) {
-		DEBUG(1, ("Gethostbyaddr failed for %s\n", client_addr()));
-		StrnCpy(name_buf, client_addr(), sizeof(name_buf) - 1);
-	} else {
-		StrnCpy(name_buf, (char *) hp->h_name, sizeof(name_buf) - 1);
-		if (!matchname(name_buf, sockin->sin_addr)) {
-			DEBUG(0, ("Matchname failed on %s %s\n", name_buf,
-			          client_addr()));
-			pstrcpy(name_buf, "UNKNOWN");
-		}
-	}
-	global_client_name_done = True;
-	return name_buf;
-}
-
-/*******************************************************************
  return the IP addr of the client as a string
  ******************************************************************/
 char *client_addr(void)
 {
-	struct sockaddr sa;
-	struct sockaddr_in *sockin = (struct sockaddr_in *) (&sa);
-	int length = sizeof(sa);
+	struct sockaddr_in sockin;
+	int length = sizeof(sockin);
 	static fstring addr_buf;
 
 	if (global_client_addr_done)
@@ -2948,12 +2905,12 @@ char *client_addr(void)
 		return addr_buf;
 	}
 
-	if (getpeername(Client, &sa, &length) < 0) {
+	if (getpeername(Client, (struct sockaddr *) &sockin, &length) < 0) {
 		DEBUG(0, ("getpeername failed\n"));
 		return addr_buf;
 	}
 
-	fstrcpy(addr_buf, (char *) inet_ntoa(sockin->sin_addr));
+	fstrcpy(addr_buf, (char *) inet_ntoa(sockin.sin_addr));
 
 	global_client_addr_done = True;
 	return addr_buf;
@@ -2973,13 +2930,11 @@ void standard_sub_basic(char *str)
 	for (s = str; s && *s && (p = strchr(s, '%')); s = p) {
 		switch (*(p + 1)) {
 		case 'I':
+		case 'M':
 			string_sub(p, "%I", client_addr());
 			break;
 		case 'L':
 			string_sub(p, "%L", local_machine);
-			break;
-		case 'M':
-			string_sub(p, "%M", client_name());
 			break;
 		case 'R':
 			string_sub(p, "%R", remote_proto);

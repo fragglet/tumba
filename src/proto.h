@@ -405,7 +405,6 @@ int open_socket_in(int type, int port, int dlevel, uint32 socket_addr);
 uint32 interpret_addr(char *str);
 struct in_addr *interpret_addr2(char *str);
 void reset_globals_after_fork(void);
-char *client_name(void);
 char *client_addr(void);
 void standard_sub_basic(char *str);
 int PutUniCode(char *dst, char *src);
