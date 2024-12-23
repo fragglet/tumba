@@ -38,12 +38,6 @@ FILE *dbf = NULL;
 /* the client file descriptor */
 int Client = -1;
 
-/* the last IP received from */
-struct in_addr lastip;
-
-/* the last port received from */
-int lastport = 0;
-
 /* this is used by the chaining code */
 int chain_size = 0;
 
@@ -75,7 +69,6 @@ BOOL sam_logon_in_ssb = False;
 
 pstring myname = "";
 fstring myworkgroup = "";
-char **my_netbios_names;
 
 int smb_read_error = 0;
 
