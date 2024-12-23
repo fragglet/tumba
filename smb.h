@@ -270,10 +270,6 @@ struct smb_passwd {
 struct current_user {
 	int cnum;
 	int uid, gid;
-	int ngroups;
-	gid_t *groups;
-	int *igroups;
-	int *attrs;
 };
 
 typedef struct {
@@ -354,15 +350,6 @@ typedef struct {
 	int uid;    /* uid of user who *opened* this connection */
 	int gid;    /* gid of user who *opened* this connection */
 
-	/* following groups stuff added by ih */
-
-	/* This groups info is valid for the user that *opened* the connection
-	 */
-	int ngroups;
-	gid_t *groups;
-	int *igroups; /* an integer version - some OSes are broken :-( */
-	int *attrs;
-
 	time_t lastused;
 	BOOL used;
 	int num_files_open;
@@ -406,13 +393,6 @@ typedef struct {
 	fstring name;           /* unix user name of a validated user */
 	fstring real_name; /* to store real name from password file - simeon */
 	BOOL guest;
-
-	/* following groups stuff added by ih */
-	/* This groups info is needed for when we become_user() for this uid */
-	int n_groups;
-	gid_t *groups;
-	int *igroups; /* an integer version - some OSes are broken :-( */
-	int *attrs;   /* attributes associated with each gid */
 
 	int n_sids;
 	int *sids;

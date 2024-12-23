@@ -381,23 +381,6 @@ void close_sockets(void)
 }
 
 /****************************************************************************
-determine whether we are in the specified group
-****************************************************************************/
-BOOL in_group(gid_t group, int current_gid, int ngroups, int *groups)
-{
-	int i;
-
-	if (group == current_gid)
-		return (True);
-
-	for (i = 0; i < ngroups; i++)
-		if (group == groups[i])
-			return (True);
-
-	return (False);
-}
-
-/****************************************************************************
 this is a safer strcpy(), meant to prevent core dumps when nasty things happen
 ****************************************************************************/
 char *StrCpy(char *dest, char *src)

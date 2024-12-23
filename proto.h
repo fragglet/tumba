@@ -251,8 +251,6 @@ BOOL receive_next_smb(int smbfd, int oplockfd, char *inbuf, int bufsize,
                       int timeout);
 BOOL snum_used(int snum);
 BOOL reload_services(BOOL test);
-int setup_groups(char *user, int uid, int gid, int *p_ngroups, int **p_igroups,
-                 gid_t **p_groups, int **p_attrs);
 int make_connection(char *service, char *dev);
 int find_free_file(void);
 int reply_corep(char *outbuf);
@@ -342,7 +340,6 @@ BOOL is_a_socket(int fd);
 BOOL next_token(char **ptr, char *buff, char *sep);
 void array_promote(char *array, int elsize, int element);
 void close_sockets(void);
-BOOL in_group(gid_t group, int current_gid, int ngroups, int *groups);
 char *StrCpy(char *dest, char *src);
 char *StrnCpy(char *dest, char *src, int n);
 void putip(void *dest, void *src);

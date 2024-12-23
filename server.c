@@ -190,11 +190,9 @@ int dos_mode(int cnum, char *path, struct stat *sbuf)
 	if (CAN_WRITE(cnum)) {
 		if (!((sbuf->st_mode & S_IWOTH) ||
 		      ((sbuf->st_mode & S_IWUSR) &&
-		       current_user.uid == sbuf->st_uid) ||
-		      ((sbuf->st_mode & S_IWGRP) &&
-		       in_group(sbuf->st_gid, current_user.gid,
-		                current_user.ngroups, current_user.igroups))))
+		       current_user.uid == sbuf->st_uid))) {
 			result |= aRONLY;
+		}
 	} else if ((sbuf->st_mode & S_IWUSR) == 0) {
 		result |= aRONLY;
 	}
@@ -335,10 +333,7 @@ int file_utime(int cnum, char *fname, struct utimbuf *times)
 	if (CAN_WRITE(cnum)) {
 		if (((sb.st_mode & S_IWOTH) ||
 		     ((sb.st_mode & S_IWUSR) &&
-		      current_user.uid == sb.st_uid) ||
-		     ((sb.st_mode & S_IWGRP) &&
-		      in_group(sb.st_gid, current_user.gid,
-		               current_user.ngroups, current_user.igroups)))) {
+		      current_user.uid == sb.st_uid))) {
 			/* We are allowed to become root and change the
 			 * filetime. */
 			become_root(False);
@@ -2582,81 +2577,6 @@ static int sig_hup(void)
 }
 
 /****************************************************************************
-Setup the groups a user belongs to.
-****************************************************************************/
-int setup_groups(char *user, int uid, int gid, int *p_ngroups, int **p_igroups,
-                 gid_t **p_groups, int **p_attrs)
-{
-	if (-1 == initgroups(user, gid)) {
-		if (getuid() == 0) {
-			DEBUG(0, ("Unable to initgroups!\n"));
-			if (gid < 0 || gid > 16000 || uid < 0 || uid > 16000)
-				DEBUG(0, ("This is probably a problem with the "
-				          "account %s\n",
-				          user));
-		}
-	} else {
-		int i, ngroups;
-		int *igroups;
-		int *attrs;
-		gid_t grp = 0;
-		ngroups = getgroups(0, &grp);
-		if (ngroups <= 0)
-			ngroups = 32;
-		igroups = (int *) malloc(sizeof(int) * ngroups);
-		attrs = (int *) malloc(sizeof(int) * ngroups);
-		for (i = 0; i < ngroups; i++) {
-			attrs[i] = 0x7; /* XXXX don't know what NT user
-			                   attributes are yet! */
-			igroups[i] = 0x42424242;
-		}
-		ngroups = getgroups(ngroups, (gid_t *) igroups);
-
-		if (igroups[0] == 0x42424242)
-			ngroups = 0;
-
-		*p_ngroups = ngroups;
-		*p_attrs = attrs;
-
-		/* The following bit of code is very strange. It is due to the
-		   fact that some OSes use int* and some use gid_t* for
-		   getgroups, and some (like SunOS) use both, one in prototypes,
-		   and one in man pages and the actual code. Thus we detect it
-		   dynamically using some very ugly code */
-		if (ngroups > 0) {
-			/* does getgroups return ints or gid_t ?? */
-			static BOOL groups_use_ints = True;
-
-			if (groups_use_ints && ngroups == 1 &&
-			    SVAL(igroups, 2) == 0x4242)
-				groups_use_ints = False;
-
-			for (i = 0; groups_use_ints && i < ngroups; i++)
-				if (igroups[i] == 0x42424242)
-					groups_use_ints = False;
-
-			if (groups_use_ints) {
-				*p_igroups = igroups;
-				*p_groups = (gid_t *) igroups;
-			} else {
-				gid_t *groups = (gid_t *) igroups;
-				igroups = (int *) malloc(sizeof(int) * ngroups);
-				for (i = 0; i < ngroups; i++) {
-					igroups[i] = groups[i];
-				}
-				*p_igroups = igroups;
-				*p_groups = (gid_t *) groups;
-			}
-		}
-		DEBUG(3, ("%s is in %d groups\n", user, ngroups));
-		for (i = 0; i < ngroups; i++)
-			DEBUG(3, ("%d ", igroups[i]));
-		DEBUG(3, ("\n"));
-	}
-	return 0;
-}
-
-/****************************************************************************
   make a connection to a service
 ****************************************************************************/
 int make_connection(char *service, char *dev)
@@ -2741,17 +2661,6 @@ int make_connection(char *service, char *dev)
 		string_set(&pcon->connectpath, s);
 		DEBUG(3, ("Connect path is %s\n", s));
 	}
-
-	/* groups stuff added by ih */
-	pcon->ngroups = 0;
-	pcon->igroups = NULL;
-	pcon->groups = NULL;
-	pcon->attrs = NULL;
-
-	/* Find all the groups this uid is in and store them. Used by
-	 * become_user() */
-	setup_groups(pcon->user, pcon->uid, pcon->gid, &pcon->ngroups,
-	             &pcon->igroups, &pcon->groups, &pcon->attrs);
 
 	/* check number of connections */
 	if (!claim_connection(cnum, lp_servicename(SNUM(cnum)),
@@ -3265,15 +3174,6 @@ void close_cnum(int cnum)
 
 	Connections[cnum].open = False;
 	num_connections_open--;
-	if (Connections[cnum].ngroups && Connections[cnum].groups) {
-		if (Connections[cnum].igroups !=
-		    (int *) Connections[cnum].groups)
-			free(Connections[cnum].groups);
-		free(Connections[cnum].igroups);
-		Connections[cnum].groups = NULL;
-		Connections[cnum].igroups = NULL;
-		Connections[cnum].ngroups = 0;
-	}
 
 	free_namearray(Connections[cnum].veto_oplock_list);
 

@@ -183,10 +183,6 @@ BOOL become_user(connection_struct *conn, int cnum)
 	{
 		uid = conn->uid;
 		gid = conn->gid;
-		current_user.groups = conn->groups;
-		current_user.igroups = conn->igroups;
-		current_user.ngroups = conn->ngroups;
-		current_user.attrs = conn->attrs;
 	}
 
 	if (initial_uid == 0) {
@@ -296,12 +292,6 @@ void unbecome_root(BOOL restore_dir)
 	if (!become_gid(current_user_saved.gid)) {
 		DEBUG(0, ("ERROR: Failed to restore gid\n"));
 		exit_server("Failed to restore gid");
-	}
-
-	if (current_user_saved.ngroups > 0) {
-		if (setgroups(current_user_saved.ngroups,
-		              current_user_saved.groups) < 0)
-			DEBUG(0, ("ERROR: setgroups call failed!\n"));
 	}
 
 	/* now restore our uid */
