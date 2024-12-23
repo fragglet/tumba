@@ -2659,16 +2659,14 @@ void *Realloc(void *p, int size)
 		return NULL;
 	}
 
-	if (!p)
-		ret = (void *) malloc(size);
-	else
-		ret = (void *) realloc(p, size);
+	ret = realloc(p, size);
 
-	if (!ret)
+	if (ret == NULL) {
 		DEBUG(
 		    0,
 		    ("Memory allocation error: failed to expand to %d bytes\n",
 		     size));
+	}
 
 	return (ret);
 }
