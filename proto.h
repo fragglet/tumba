@@ -404,7 +404,6 @@ void become_daemon(void);
 int set_filelen(int fd, long len);
 void *Realloc(void *p, int size);
 BOOL get_myname(char *my_name, struct in_addr *ip);
-BOOL ip_equal(struct in_addr ip1, struct in_addr ip2);
 int open_socket_in(int type, int port, int dlevel, uint32 socket_addr);
 uint32 interpret_addr(char *str);
 struct in_addr *interpret_addr2(char *str);

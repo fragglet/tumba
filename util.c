@@ -2752,17 +2752,6 @@ BOOL get_myname(char *my_name, struct in_addr *ip)
 }
 
 /****************************************************************************
-true if two IP addresses are equal
-****************************************************************************/
-BOOL ip_equal(struct in_addr ip1, struct in_addr ip2)
-{
-	uint32 a1, a2;
-	a1 = ntohl(ip1.s_addr);
-	a2 = ntohl(ip2.s_addr);
-	return (a1 == a2);
-}
-
-/****************************************************************************
 open a socket of the specified type, port and address for incoming data
 ****************************************************************************/
 int open_socket_in(int type, int port, int dlevel, uint32 socket_addr)
