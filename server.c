@@ -1615,6 +1615,16 @@ static int sig_pipe(void)
 	return (0);
 }
 
+static void set_keepalive_option(int fd)
+{
+	int enabled = 1;
+	int ret = setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &enabled, sizeof(int));
+
+	if (ret != 0) {
+		DEBUG(0, ("Failed to set keepalive option"));
+	}
+}
+
 /****************************************************************************
   open the socket communication
 ****************************************************************************/
@@ -1769,8 +1779,7 @@ max can be %d\n",
 					close_low_fds();
 					am_parent = 0;
 
-					set_socket_options(Client,
-					                   "SO_KEEPALIVE");
+					set_keepalive_option(Client);
 
 					/* Reset global variables in util.c so
 					   that client substitutions will be
@@ -1814,7 +1823,7 @@ max can be %d\n",
 		/* close our standard file descriptors */
 		close_low_fds();
 
-		set_socket_options(Client, "SO_KEEPALIVE");
+		set_keepalive_option(Client);
 	}
 
 	return True;
@@ -2536,7 +2545,7 @@ BOOL reload_services(BOOL test)
 	{
 		extern int Client;
 		if (Client != -1) {
-			set_socket_options(Client, "SO_KEEPALIVE");
+			set_keepalive_option(Client);
 		}
 	}
 

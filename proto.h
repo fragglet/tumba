@@ -341,7 +341,6 @@ char *tmpdir(void);
 BOOL is_a_socket(int fd);
 BOOL next_token(char **ptr, char *buff, char *sep);
 void array_promote(char *array, int elsize, int element);
-void set_socket_options(int fd, char *options);
 void close_sockets(void);
 BOOL in_group(gid_t group, int current_gid, int ngroups, int *groups);
 char *StrCpy(char *dest, char *src);
