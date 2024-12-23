@@ -3822,8 +3822,9 @@ static void process(void)
 	{
 		struct in_addr ip;
 		ip = *interpret_addr2("localhost");
-		if (zero_ip(ip))
+		if (ip.s_addr == 0) {
 			ip = *interpret_addr2("127.0.0.1");
+		}
 		*OutBuffer = 0;
 		send_one_packet(OutBuffer, 1, ip, NMB_PORT, SOCK_DGRAM);
 	}

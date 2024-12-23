@@ -391,14 +391,6 @@ char *StrnCpy(char *dest, char *src, int n)
 	return (dest);
 }
 
-/*******************************************************************
-copy an IP address from one buffer to another
-********************************************************************/
-void putip(void *dest, void *src)
-{
-	memcpy(dest, src, 4);
-}
-
 /****************************************************************************
 interpret the weird netbios "name". Return the name type
 ****************************************************************************/
@@ -2008,9 +2000,9 @@ BOOL send_one_packet(char *buf, int len, struct in_addr ip, int port, int type)
 
 	/* set the address and port */
 	bzero((char *) &sock_out, sizeof(sock_out));
-	putip((char *) &sock_out.sin_addr, (char *) &ip);
-	sock_out.sin_port = htons(port);
 	sock_out.sin_family = AF_INET;
+	sock_out.sin_addr = ip;
+	sock_out.sin_port = htons(port);
 
 	if (DEBUGLEVEL > 0)
 		DEBUG(3, ("sending a packet of len %d to (%s) on port %d of "
@@ -2713,7 +2705,7 @@ BOOL get_myname(char *my_name, struct in_addr *ip)
 	}
 
 	if (ip)
-		putip((char *) ip, (char *) hp->h_addr);
+		*ip = *((struct in_addr *) hp->h_addr);
 
 	return (True);
 }
@@ -2822,7 +2814,7 @@ uint32 interpret_addr(char *str)
 			          str));
 			return 0;
 		}
-		putip((char *) &res, (char *) hp->h_addr);
+		res = ((struct in_addr *) hp->h_addr)->s_addr;
 	}
 
 	if (res == (uint32) -1)
@@ -2840,16 +2832,6 @@ struct in_addr *interpret_addr2(char *str)
 	uint32 a = interpret_addr(str);
 	ret.s_addr = a;
 	return (&ret);
-}
-
-/*******************************************************************
-  check if an IP is the 0.0.0.0
-  ******************************************************************/
-BOOL zero_ip(struct in_addr ip)
-{
-	uint32 a;
-	putip((char *) &a, (char *) &ip);
-	return (a == 0);
 }
 
 /*******************************************************************
