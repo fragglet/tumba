@@ -2850,8 +2850,8 @@ BOOL get_myname(char *my_name, struct in_addr *ip)
 	}
 
 	/* get host info */
-	if ((hp = Get_Hostbyname(hostname)) == 0) {
-		DEBUG(0, ("Get_Hostbyname: Unknown host %s.\n", hostname));
+	if ((hp = gethostbyname(hostname)) == 0) {
+		DEBUG(0, ("gethostbyname: Unknown host %s.\n", hostname));
 		return False;
 	}
 
@@ -2898,8 +2898,8 @@ int open_socket_in(int type, int port, int dlevel, uint32 socket_addr)
 	}
 
 	/* get host info */
-	if ((hp = Get_Hostbyname(host_name)) == 0) {
-		DEBUG(0, ("Get_Hostbyname: Unknown host. %s\n", host_name));
+	if ((hp = gethostbyname(host_name)) == 0) {
+		DEBUG(0, ("gethostbyname: Unknown host. %s\n", host_name));
 		return -1;
 	}
 
@@ -2974,13 +2974,13 @@ uint32 interpret_addr(char *str)
 		res = inet_addr(str);
 	} else {
 		/* otherwise assume it's a network name of some sort and use
-		   Get_Hostbyname */
-		if ((hp = Get_Hostbyname(str)) == 0) {
-			DEBUG(3, ("Get_Hostbyname: Unknown host. %s\n", str));
+		   gethostbyname */
+		if ((hp = gethostbyname(str)) == 0) {
+			DEBUG(3, ("gethostbyname: Unknown host. %s\n", str));
 			return 0;
 		}
 		if (hp->h_addr == NULL) {
-			DEBUG(3, ("Get_Hostbyname: host address is invalid for "
+			DEBUG(3, ("gethostbyname: host address is invalid for "
 			          "host %s.\n",
 			          str));
 			return 0;
@@ -3023,8 +3023,8 @@ static BOOL matchname(char *remotehost, struct in_addr addr)
 	struct hostent *hp;
 	int i;
 
-	if ((hp = Get_Hostbyname(remotehost)) == 0) {
-		DEBUG(0, ("Get_Hostbyname(%s): lookup failure", remotehost));
+	if ((hp = gethostbyname(remotehost)) == 0) {
+		DEBUG(0, ("gethostbyname(%s): lookup failure", remotehost));
 		return False;
 	}
 
@@ -3256,48 +3256,6 @@ int PutUniCode(char *dst, char *src)
 	dst[ret++] = 0;
 	dst[ret++] = 0;
 	return (ret);
-}
-
-/****************************************************************************
-a wrapper for gethostbyname() that tries with all lower and all upper case
-if the initial name fails
-****************************************************************************/
-struct hostent *Get_Hostbyname(char *name)
-{
-	char *name2 = strdup(name);
-	struct hostent *ret;
-
-	if (!name2) {
-		DEBUG(0,
-		      ("Memory allocation error in Get_Hostbyname! panic\n"));
-		exit(0);
-	}
-
-	ret = sys_gethostbyname(name2);
-	if (ret != NULL) {
-		free(name2);
-		return (ret);
-	}
-
-	/* try with all lowercase */
-	strlower(name2);
-	ret = sys_gethostbyname(name2);
-	if (ret != NULL) {
-		free(name2);
-		return (ret);
-	}
-
-	/* try with all uppercase */
-	strupper(name2);
-	ret = sys_gethostbyname(name2);
-	if (ret != NULL) {
-		free(name2);
-		return (ret);
-	}
-
-	/* nothing works :-( */
-	free(name2);
-	return (NULL);
 }
 
 /****************************************************************************

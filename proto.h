@@ -292,7 +292,6 @@ int sys_chmod(char *fname, int mode);
 char *sys_getwd(char *s);
 int sys_chown(char *fname, int uid, int gid);
 int sys_chroot(char *dname);
-struct hostent *sys_gethostbyname(char *name);
 
 /*The following definitions come from  time.c  */
 
@@ -421,7 +420,6 @@ char *client_name(void);
 char *client_addr(void);
 void standard_sub_basic(char *str);
 int PutUniCode(char *dst, char *src);
-struct hostent *Get_Hostbyname(char *name);
 BOOL process_exists(int pid);
 char *gidtoname(int gid);
 void BlockSignals(BOOL block, int signum);
