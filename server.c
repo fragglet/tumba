@@ -1628,11 +1628,7 @@ static BOOL open_sockets(BOOL is_daemon, int port)
 	extern int Client;
 
 	if (is_daemon) {
-		int num_interfaces = iface_count();
-		int fd_listenset[FD_SETSIZE];
-		fd_set listen_set;
-		int s;
-		int i;
+		int server_socket;
 
 		/* Stop zombies */
 #ifdef SIGCLD_IGNORE
@@ -1644,126 +1640,92 @@ static BOOL open_sockets(BOOL is_daemon, int port)
 		if (atexit_set == 0)
 			atexit(killkids);
 
-		FD_ZERO(&listen_set);
-
-		/* Just bind to 0.0.0.0 - accept connections from
-		 * anywhere. */
-		num_interfaces = 1;
-
 		/* open an incoming socket */
-		s = open_socket_in(SOCK_STREAM, port, 0,
-		                   interpret_addr(lp_socket_address()));
-		if (s == -1)
+		server_socket = open_socket_in(SOCK_STREAM, port, 0,
+		                               interpret_addr(lp_socket_address()));
+		if (server_socket == -1)
 			return (False);
 
 		/* ready to listen */
-		if (listen(s, 5) == -1) {
+		if (listen(server_socket, 5) == -1) {
 			DEBUG(0, ("open_sockets: listen: %s\n",
 			          strerror(errno)));
-			close(s);
+			close(server_socket);
 			return False;
 		}
-
-		fd_listenset[0] = s;
-		FD_SET(s, &listen_set);
 
 		/* now accept incoming connections - forking a new process
 		   for each incoming connection */
 		DEBUG(2, ("waiting for a connection\n"));
 		while (1) {
-			fd_set lfds;
+			fd_set listen_set;
 			int num;
+			struct sockaddr addr;
+			int in_addrlen = sizeof(addr);
 
-			memcpy((char *) &lfds, (char *) &listen_set,
-			       sizeof(listen_set));
+			FD_ZERO(&listen_set);
+			FD_SET(server_socket, &listen_set);
 
-			num = sys_select(&lfds, NULL);
+			num = sys_select(&listen_set, NULL);
 
 			if (num == -1 && errno == EINTR)
 				continue;
 
-			/* Find the sockets that are read-ready - accept on
-			 * these. */
-			for (; num > 0; num--) {
-				struct sockaddr addr;
-				int in_addrlen = sizeof(addr);
+			if (!FD_ISSET(server_socket, &listen_set)) {
+				continue;
+			}
 
-				s = -1;
-				for (i = 0; i < num_interfaces; i++) {
-					if (FD_ISSET(fd_listenset[i], &lfds)) {
-						s = fd_listenset[i];
-						/* Clear this so we don't look
-						 * at it again. */
-						FD_CLR(fd_listenset[i], &lfds);
-						break;
-					}
-				}
+			Client = accept(server_socket, &addr, &in_addrlen);
 
-				Client = accept(s, &addr, &in_addrlen);
+			if (Client == -1 && errno == EINTR)
+				continue;
 
-				if (Client == -1 && errno == EINTR)
-					continue;
+			if (Client == -1) {
+				DEBUG(0, ("open_sockets: accept: %s\n",
+				          strerror(errno)));
+				continue;
+			}
 
-				if (Client == -1) {
-					DEBUG(0, ("open_sockets: accept: %s\n",
-					          strerror(errno)));
-					continue;
-				}
+			signal(SIGPIPE, SIGNAL_CAST sig_pipe);
+			signal(SIGCLD, SIGNAL_CAST SIG_DFL);
+			if (Client != -1 && fork() == 0) {
+				/* Child code ... */
 
-#ifdef NO_FORK_DEBUG
-#ifndef NO_SIGNAL_TEST
 				signal(SIGPIPE, SIGNAL_CAST sig_pipe);
 				signal(SIGCLD, SIGNAL_CAST SIG_DFL);
-#endif /* NO_SIGNAL_TEST */
+
+				/* close the listening socket */
+				close(server_socket);
+
+				/* close our standard file descriptors */
+				close_low_fds();
+				am_parent = 0;
+
+				set_keepalive_option(Client);
+
+				/* Reset global variables in util.c so
+				   that client substitutions will be done
+				   correctly in the process. */
+				reset_globals_after_fork();
 				return True;
-#else /* NO_FORK_DEBUG */
-				if (Client != -1 && fork() == 0) {
-					/* Child code ... */
+			}
+			close(Client); /* The parent doesn't need this socket */
 
-#ifndef NO_SIGNAL_TEST
-					signal(SIGPIPE, SIGNAL_CAST sig_pipe);
-					signal(SIGCLD, SIGNAL_CAST SIG_DFL);
-#endif /* NO_SIGNAL_TEST */
-					/* close the listening socket(s) */
-					for (i = 0; i < num_interfaces; i++)
-						close(fd_listenset[i]);
+			/*
+			 * Force parent to check log size after spawning child.
+			 * Fix from klausr@ITAP.Physik.Uni-Stuttgart.De. The
+			 * parent smbd will log to logserver.smb. It writes
+			 * only two messages for each child started/finished.
+			 * But each child writes, say, 50 messages also in
+			 * logserver.smb, begining with the debug_count of the
+			 * parent, before the child opens its own log file
+			 * logserver.client. In a worst case scenario the size
+			 * of logserver.smb would be checked after about
+			 * 50*50=2500 messages (ca. 100kb).
+			 */
+			force_check_log_size();
 
-					/* close our standard file descriptors
-					 */
-					close_low_fds();
-					am_parent = 0;
-
-					set_keepalive_option(Client);
-
-					/* Reset global variables in util.c so
-					   that client substitutions will be
-					   done correctly in the process.
-					 */
-					reset_globals_after_fork();
-					return True;
-				}
-				close(Client); /* The parent doesn't need this
-				                  socket */
-
-				/*
-				 * Force parent to check log size after spawning
-				 * child. Fix from
-				 * klausr@ITAP.Physik.Uni-Stuttgart.De. The
-				 * parent smbd will log to logserver.smb. It
-				 * writes only two messages for each child
-				 * started/finished. But each child writes, say,
-				 * 50 messages also in logserver.smb, begining
-				 * with the debug_count of the parent, before
-				 * the child opens its own log file
-				 * logserver.client. In a worst case scenario
-				 * the size of logserver.smb would be checked
-				 * after about 50*50=2500 messages (ca. 100kb).
-				 */
-				force_check_log_size();
-
-#endif /* NO_FORK_DEBUG */
-			} /* end for num */
-		} /* end while 1 */
+		}
 	} /* end if is_daemon */
 	else {
 		/* Started from inetd. fd 0 is the socket. */
