@@ -2456,8 +2456,6 @@ BOOL reload_services(BOOL test)
 
 	reopen_logs();
 
-	load_interfaces();
-
 	{
 		extern int Client;
 		if (Client != -1) {
