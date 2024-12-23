@@ -118,7 +118,6 @@ typedef struct {
 	char *szWorkGroup;
 	char *szCharacterSet;
 	char *szCodingSystem;
-	char *szInterfaces;
 	char *szSocketAddress;
 	int max_log_size;
 	int max_xmit;
@@ -131,7 +130,6 @@ typedef struct {
 	BOOL bWriteRaw;
 	BOOL bReadbmpx;
 	BOOL bSyslogOnly;
-	BOOL bBindInterfacesOnly;
 } global;
 
 static global Globals;
@@ -248,9 +246,6 @@ static struct parm_struct {
     {"read raw", P_BOOL, P_GLOBAL, &Globals.bReadRaw, NULL, NULL},
     {"write raw", P_BOOL, P_GLOBAL, &Globals.bWriteRaw, NULL, NULL},
     {"strip dot", P_BOOL, P_GLOBAL, &Globals.bStripDot, NULL, NULL},
-    {"interfaces", P_STRING, P_GLOBAL, &Globals.szInterfaces, NULL, NULL},
-    {"bind interfaces only", P_BOOL, P_GLOBAL, &Globals.bBindInterfacesOnly,
-     NULL, NULL},
     {"netbios name", P_UGSTRING, P_GLOBAL, myname, NULL, NULL},
     {"log file", P_STRING, P_GLOBAL, &Globals.szLogFile, NULL, NULL},
     {"config file", P_STRING, P_GLOBAL, &Globals.szConfigFile, NULL, NULL},
@@ -367,7 +362,6 @@ static void init_globals(void)
 	Globals.bSyslogOnly = False;
 	Globals.ReadSize = 16 * 1024;
 	Globals.client_code_page = DEFAULT_CLIENT_CODE_PAGE;
-	Globals.bBindInterfacesOnly = False;
 
 	/*
 	 * This must be done last as it checks the value in
@@ -492,7 +486,6 @@ FN_GLOBAL_STRING(lp_rootdir, &Globals.szRootdir)
 FN_GLOBAL_STRING(lp_defaultservice, &Globals.szDefaultService)
 FN_GLOBAL_STRING(lp_workgroup, &Globals.szWorkGroup)
 FN_GLOBAL_STRING(lp_character_set, &Globals.szCharacterSet)
-FN_GLOBAL_STRING(lp_interfaces, &Globals.szInterfaces)
 FN_GLOBAL_STRING(lp_socket_address, &Globals.szSocketAddress)
 
 FN_GLOBAL_BOOL(lp_readbmpx, &Globals.bReadbmpx)
@@ -500,7 +493,6 @@ FN_GLOBAL_BOOL(lp_readraw, &Globals.bReadRaw)
 FN_GLOBAL_BOOL(lp_writeraw, &Globals.bWriteRaw)
 FN_GLOBAL_BOOL(lp_strip_dot, &Globals.bStripDot)
 FN_GLOBAL_BOOL(lp_syslog_only, &Globals.bSyslogOnly)
-FN_GLOBAL_BOOL(lp_bind_interfaces_only, &Globals.bBindInterfacesOnly)
 
 FN_GLOBAL_INTEGER(lp_max_log_size, &Globals.max_log_size)
 FN_GLOBAL_INTEGER(lp_maxxmit, &Globals.max_xmit)
