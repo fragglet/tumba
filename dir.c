@@ -633,19 +633,10 @@ typedef struct {
 
 static ubi_dlList dir_cache[1] = {{NULL, NULL, 0}};
 
-void DirCacheAdd(char *path, char *name, char *dname, int snum)
 /* ------------------------------------------------------------------------ **
  * Add an entry to the directory cache.
- *
- *  Input:  path  -
- *          name  -
- *          dname -
- *          snum  -
- *
- *  Output: None.
- *
- * ------------------------------------------------------------------------ **
- */
+ * ------------------------------------------------------------------------ **/
+void DirCacheAdd(char *path, char *name, char *dname, int snum)
 {
 	int pathlen;
 	int namelen;
@@ -712,16 +703,10 @@ char *DirCacheCheck(char *path, char *name, int snum)
 	return (NULL);
 } /* DirCacheCheck */
 
-void DirCacheFlush(int snum)
 /* ------------------------------------------------------------------------ **
  * Remove all cache entries which have an snum that matches the input.
- *
- *  Input:  snum  -
- *
- *  Output: None.
- *
- * ------------------------------------------------------------------------ **
- */
+ * ------------------------------------------------------------------------ **/
+void DirCacheFlush(int snum)
 {
 	dir_cache_entry *entry;
 	ubi_dlNodePtr next;
@@ -733,7 +718,7 @@ void DirCacheFlush(int snum)
 			free(ubi_dlRemThis(dir_cache, entry));
 		entry = (dir_cache_entry *) next;
 	}
-} /* DirCacheFlush */
+}
 
 /* -------------------------------------------------------------------------- **
  * End of the section that manages the global directory cache.
