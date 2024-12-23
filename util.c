@@ -67,7 +67,6 @@ fstring remote_machine = "";
 fstring local_machine = "";
 fstring remote_proto = "UNKNOWN";
 pstring myhostname = "";
-pstring user_socket_options = "";
 
 pstring sesssetup_user = "";
 pstring samlogon_user = "";

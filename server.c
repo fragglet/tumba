@@ -51,8 +51,6 @@ time_t smb_last_time = (time_t) 0;
 
 extern int smb_read_error;
 
-extern pstring user_socket_options;
-
 connection_struct Connections[MAX_CONNECTIONS];
 files_struct Files[MAX_OPEN_FILES];
 
@@ -1773,8 +1771,6 @@ max can be %d\n",
 
 					set_socket_options(Client,
 					                   "SO_KEEPALIVE");
-					set_socket_options(Client,
-					                   user_socket_options);
 
 					/* Reset global variables in util.c so
 					   that client substitutions will be
@@ -1819,7 +1815,6 @@ max can be %d\n",
 		close_low_fds();
 
 		set_socket_options(Client, "SO_KEEPALIVE");
-		set_socket_options(Client, user_socket_options);
 	}
 
 	return True;
@@ -2542,7 +2537,6 @@ BOOL reload_services(BOOL test)
 		extern int Client;
 		if (Client != -1) {
 			set_socket_options(Client, "SO_KEEPALIVE");
-			set_socket_options(Client, user_socket_options);
 		}
 	}
 
@@ -4238,9 +4232,6 @@ int main(int argc, char *argv[])
 		switch (opt) {
 		case 'f':
 			strncpy(pidFile, optarg, sizeof(pidFile));
-			break;
-		case 'O':
-			pstrcpy(user_socket_options, optarg);
 			break;
 		case 'i':
 			pstrcpy(scope, optarg);

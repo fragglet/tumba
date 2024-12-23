@@ -68,7 +68,6 @@
 BOOL bLoaded = False;
 
 extern int DEBUGLEVEL;
-extern pstring user_socket_options;
 extern pstring myname;
 
 #ifndef GLOBAL_NAME
@@ -252,7 +251,6 @@ static struct parm_struct {
     {"interfaces", P_STRING, P_GLOBAL, &Globals.szInterfaces, NULL, NULL},
     {"bind interfaces only", P_BOOL, P_GLOBAL, &Globals.bBindInterfacesOnly,
      NULL, NULL},
-    {"socket options", P_GSTRING, P_GLOBAL, user_socket_options, NULL, NULL},
     {"netbios name", P_UGSTRING, P_GLOBAL, myname, NULL, NULL},
     {"log file", P_STRING, P_GLOBAL, &Globals.szLogFile, NULL, NULL},
     {"config file", P_STRING, P_GLOBAL, &Globals.szConfigFile, NULL, NULL},
