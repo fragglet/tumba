@@ -46,7 +46,6 @@ extern pstring scope;
 extern int DEBUGLEVEL;
 extern int case_default;
 extern BOOL case_sensitive;
-extern BOOL case_preserve;
 extern BOOL short_case_preserve;
 time_t smb_last_time = (time_t) 0;
 
@@ -541,8 +540,7 @@ BOOL unix_convert(char *name, int cnum, pstring saved_last_component,
 			pstrcpy(saved_last_component, name);
 	}
 
-	if (!case_sensitive &&
-	    (!case_preserve || (is_8_3(name, False) && !short_case_preserve)))
+	if (!case_sensitive && is_8_3(name, False) && !short_case_preserve)
 		strnorm(name);
 
 	/* stat the name - if it exists then we are all done! */
@@ -624,14 +622,6 @@ BOOL unix_convert(char *name, int cnum, pstring saved_last_component,
 
 				/* just the last part of the name doesn't exist
 				 */
-				/* we may need to strupper() or strlower() it in
-				   case this conversion is being used for file
-				   creation purposes */
-				/* if the filename is of mixed case then don't
-				 * normalise it */
-				if (!case_preserve && (!strhasupper(start) ||
-				                       !strhaslower(start)))
-					strnorm(start);
 
 				/* check on the mangled stack to see if we can
 				   recover the base of the filename */
@@ -1428,7 +1418,6 @@ BOOL become_service(int cnum, BOOL do_chdir)
 	last_cnum = cnum;
 
 	case_default = lp_defaultcase(snum);
-	case_preserve = lp_preservecase(snum);
 	short_case_preserve = lp_shortpreservecase(snum);
 	case_sensitive = lp_casesensitive(snum);
 	return (True);

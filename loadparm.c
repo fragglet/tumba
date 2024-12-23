@@ -157,7 +157,6 @@ typedef struct {
 	int iMaxConnections;
 	int iDefaultCase;
 	BOOL bCaseSensitive;
-	BOOL bCasePreserve;
 	BOOL bShortCasePreserve;
 	BOOL status;
 	BOOL bHideDotFiles;
@@ -193,7 +192,6 @@ static service sDefault = {
     0,          /* iMaxConnections */
     CASE_LOWER, /* iDefaultCase */
     False,      /* case sensitive */
-    True,       /* case preserve */
     False,      /* short case preserve */
     True,       /* status */
     True,       /* bHideDotFiles */
@@ -290,7 +288,6 @@ static struct parm_struct {
     {"default case", P_ENUM, P_LOCAL, &sDefault.iDefaultCase, NULL, enum_case},
     {"case sensitive", P_BOOL, P_LOCAL, &sDefault.bCaseSensitive, NULL, NULL},
     {"casesignames", P_BOOL, P_LOCAL, &sDefault.bCaseSensitive, NULL, NULL},
-    {"preserve case", P_BOOL, P_LOCAL, &sDefault.bCasePreserve, NULL, NULL},
     {"short preserve case", P_BOOL, P_LOCAL, &sDefault.bShortCasePreserve, NULL,
      NULL},
     {"path", P_STRING, P_LOCAL, &sDefault.szPath, NULL, NULL},
@@ -522,7 +519,6 @@ FN_LOCAL_STRING(lp_volume, volume)
 FN_LOCAL_STRING(lp_veto_oplocks, szVetoOplockFiles)
 
 FN_LOCAL_BOOL(lp_casesensitive, bCaseSensitive)
-FN_LOCAL_BOOL(lp_preservecase, bCasePreserve)
 FN_LOCAL_BOOL(lp_shortpreservecase, bShortCasePreserve)
 FN_LOCAL_BOOL(lp_status, status)
 FN_LOCAL_BOOL(lp_hide_dot_files, bHideDotFiles)
