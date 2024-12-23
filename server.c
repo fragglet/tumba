@@ -1646,67 +1646,26 @@ static BOOL open_sockets(BOOL is_daemon, int port)
 
 		FD_ZERO(&listen_set);
 
-		if (lp_interfaces() && lp_bind_interfaces_only()) {
-			/* We have been given an interfaces line, and been
-			   told to only bind to those interfaces. Create a
-			   socket per interface and bind to only these.
-			 */
+		/* Just bind to 0.0.0.0 - accept connections from
+		 * anywhere. */
+		num_interfaces = 1;
 
-			if (num_interfaces > FD_SETSIZE) {
-				DEBUG(
-				    0,
-				    ("open_sockets: Too many interfaces specified to bind to. Number was %d \
-max can be %d\n",
-				     num_interfaces, FD_SETSIZE));
-				return False;
-			}
+		/* open an incoming socket */
+		s = open_socket_in(SOCK_STREAM, port, 0,
+		                   interpret_addr(lp_socket_address()));
+		if (s == -1)
+			return (False);
 
-			/* Now open a listen socket for each of the interfaces.
-			 */
-			for (i = 0; i < num_interfaces; i++) {
-				struct in_addr *ifip = iface_n_ip(i);
-
-				if (ifip == NULL) {
-					DEBUG(0, ("open_sockets: interface %d "
-					          "has NULL IP address !\n",
-					          i));
-					continue;
-				}
-				s = fd_listenset[i] = open_socket_in(
-				    SOCK_STREAM, port, 0, ifip->s_addr);
-				if (s == -1)
-					return False;
-				/* ready to listen */
-				if (listen(s, 5) == -1) {
-					DEBUG(0, ("listen: %s\n",
-					          strerror(errno)));
-					close(s);
-					return False;
-				}
-				FD_SET(s, &listen_set);
-			}
-		} else {
-			/* Just bind to 0.0.0.0 - accept connections from
-			 * anywhere. */
-			num_interfaces = 1;
-
-			/* open an incoming socket */
-			s = open_socket_in(SOCK_STREAM, port, 0,
-			                   interpret_addr(lp_socket_address()));
-			if (s == -1)
-				return (False);
-
-			/* ready to listen */
-			if (listen(s, 5) == -1) {
-				DEBUG(0, ("open_sockets: listen: %s\n",
-				          strerror(errno)));
-				close(s);
-				return False;
-			}
-
-			fd_listenset[0] = s;
-			FD_SET(s, &listen_set);
+		/* ready to listen */
+		if (listen(s, 5) == -1) {
+			DEBUG(0, ("open_sockets: listen: %s\n",
+			          strerror(errno)));
+			close(s);
+			return False;
 		}
+
+		fd_listenset[0] = s;
+		FD_SET(s, &listen_set);
 
 		/* now accept incoming connections - forking a new process
 		   for each incoming connection */
