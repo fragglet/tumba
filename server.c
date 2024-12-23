@@ -4198,12 +4198,6 @@ int main(int argc, char *argv[])
 
 	max_recv = MIN(lp_maxxmit(), BUFFER_SIZE);
 
-	if (*lp_rootdir()) {
-		if (sys_chroot(lp_rootdir()) == 0)
-			DEBUG(2, ("%s changed root to %s\n", timestring(),
-			          lp_rootdir()));
-	}
-
 	/* Setup the oplock IPC socket. */
 	if (!open_oplock_ipc())
 		exit(1);

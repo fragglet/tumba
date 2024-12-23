@@ -109,7 +109,6 @@ extern int extra_time_offset;
  */
 typedef struct {
 	char *szLockDir;
-	char *szRootdir;
 	char *szDefaultService;
 	char *szServerString;
 	char *szLogFile;
@@ -252,9 +251,6 @@ static struct parm_struct {
     {"server string", P_STRING, P_GLOBAL, &Globals.szServerString, NULL, NULL},
     {"lock dir", P_STRING, P_GLOBAL, &Globals.szLockDir, NULL, NULL},
     {"lock directory", P_STRING, P_GLOBAL, &Globals.szLockDir, NULL, NULL},
-    {"root directory", P_STRING, P_GLOBAL, &Globals.szRootdir, NULL, NULL},
-    {"root dir", P_STRING, P_GLOBAL, &Globals.szRootdir, NULL, NULL},
-    {"root", P_STRING, P_GLOBAL, &Globals.szRootdir, NULL, NULL},
     {"default service", P_STRING, P_GLOBAL, &Globals.szDefaultService, NULL,
      NULL},
     {"default", P_STRING, P_GLOBAL, &Globals.szDefaultService, NULL, NULL},
@@ -344,7 +340,6 @@ static void init_globals(void)
 
 	string_set(&Globals.szWorkGroup, WORKGROUP);
 	string_set(&Globals.szLockDir, LOCKDIR);
-	string_set(&Globals.szRootdir, "/");
 	string_set(&Globals.szSocketAddress, "0.0.0.0");
 	slprintf(s, sizeof(s) - 1, "Samba %s", VERSION);
 	string_set(&Globals.szServerString, s);
@@ -482,7 +477,6 @@ FN_GLOBAL_STRING(lp_logfile, &Globals.szLogFile)
 FN_GLOBAL_STRING(lp_configfile, &Globals.szConfigFile)
 FN_GLOBAL_STRING(lp_serverstring, &Globals.szServerString)
 FN_GLOBAL_STRING(lp_lockdir, &Globals.szLockDir)
-FN_GLOBAL_STRING(lp_rootdir, &Globals.szRootdir)
 FN_GLOBAL_STRING(lp_defaultservice, &Globals.szDefaultService)
 FN_GLOBAL_STRING(lp_workgroup, &Globals.szWorkGroup)
 FN_GLOBAL_STRING(lp_character_set, &Globals.szCharacterSet)
