@@ -646,9 +646,6 @@ SCRIPTS = smbtar addtosmbpass
 # object modules
 ######################################################################
 
-# modules in the ubiqx library from Chris Hertel
-UBIOBJ = ubiqx/ubi_dLinkList.o
-
 # general utility object files
 UTILOBJ1 = util.o system.o charset.o kanji.o fault.o charcnv.o
 UTILOBJ2 = $(UTILOBJ1) loadparm.o params.o username.o time.o
@@ -658,7 +655,7 @@ UTILOBJ = $(UTILOBJ2) interface.o slprintf.o
 SMBDOBJ1 = $(UTILOBJ) trans2.o dir.o
 SMBDOBJ2 = ipc.o reply.o mangle.o password.o uid.o
 SMBDOBJ3 = server.o
-SMBDOBJ = $(SMBDOBJ1) $(SMBDOBJ2) $(SMBDOBJ3) $(UBIOBJ) $(VTP_OBJ) $(LOCKOBJ)
+SMBDOBJ = $(SMBDOBJ1) $(SMBDOBJ2) $(SMBDOBJ3) $(VTP_OBJ) $(LOCKOBJ)
 
 # object code needed for programs that handle the the locking files
 LOCKOBJ = locking_slow.o locking.o

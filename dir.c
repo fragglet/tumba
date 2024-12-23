@@ -624,22 +624,21 @@ int TellDir(void *p)
  */
 
 typedef struct {
-	ubi_dlNode node;
 	char *path;
 	char *name;
 	char *dname;
 	int snum;
 } dir_cache_entry;
 
-static ubi_dlList dir_cache[1] = {{NULL, NULL, 0}};
+static dir_cache_entry *dir_cache[DIRCACHESIZE];
+static int dir_cache_head = 0, dir_cache_tail = 0;
 
 /* ------------------------------------------------------------------------ **
  * Add an entry to the directory cache.
  * ------------------------------------------------------------------------ **/
 void DirCacheAdd(char *path, char *name, char *dname, int snum)
 {
-	int pathlen;
-	int namelen;
+	int pathlen, namelen, new_head;
 	dir_cache_entry *entry;
 
 	/* Allocate the structure & string space in one go so that it can be
@@ -660,38 +659,35 @@ void DirCacheAdd(char *path, char *name, char *dname, int snum)
 	entry->dname = pstrcpy(&(entry->name[namelen]), dname);
 	entry->snum = snum;
 
-	/* Add the new entry to the linked list. */
-	(void) ubi_dlAddHead(dir_cache, entry);
+	/* Add the new entry to the cache. Free up an entry if needed. */
+	new_head = (dir_cache_head + 1) % DIRCACHESIZE;
+	if (new_head == dir_cache_tail) {
+		free(dir_cache[dir_cache_tail]);
+		dir_cache_tail = (dir_cache_tail + 1) % DIRCACHESIZE;
+	}
+	dir_cache[new_head] = entry;
+	dir_cache_head = new_head;
 	DEBUG(4, ("Added dir cache entry %s %s -> %s\n", path, name, dname));
-
-	/* Free excess cache entries. */
-	while (DIRCACHESIZE < dir_cache->count)
-		free(ubi_dlRemTail(dir_cache));
-
 } /* DirCacheAdd */
 
-char *DirCacheCheck(char *path, char *name, int snum)
 /* ------------------------------------------------------------------------ **
  * Search for an entry to the directory cache.
- *
- *  Input:  path  -
- *          name  -
- *          snum  -
  *
  *  Output: The dname string of the located entry, or NULL if the entry was
  *          not found.
  *
  *  Notes:  This uses a linear search, which is is okay because of
- *          the small size of the cache.  Use a splay tree or hash
- *          for large caches.
- *
+ *          the small size of the cache.
  * ------------------------------------------------------------------------ **
  */
+char *DirCacheCheck(char *path, char *name, int snum)
 {
 	dir_cache_entry *entry;
+	int idx;
 
-	for (entry = (dir_cache_entry *) ubi_dlFirst(dir_cache); NULL != entry;
-	     entry = (dir_cache_entry *) ubi_dlNext(entry)) {
+	for (idx = dir_cache_head; idx != dir_cache_tail;
+	     idx = (idx + DIRCACHESIZE - 1) % DIRCACHESIZE) {
+		entry = dir_cache[idx];
 		if (entry->snum == snum && 0 == strcmp(name, entry->name) &&
 		    0 == strcmp(path, entry->path)) {
 			DEBUG(4, ("Got dir cache hit on %s %s -> %s\n", path,
@@ -709,15 +705,22 @@ char *DirCacheCheck(char *path, char *name, int snum)
 void DirCacheFlush(int snum)
 {
 	dir_cache_entry *entry;
-	ubi_dlNodePtr next;
+	int idx, new_tail = dir_cache_head;
 
-	for (entry = (dir_cache_entry *) ubi_dlFirst(dir_cache);
-	     NULL != entry;) {
-		next = ubi_dlNext(entry);
-		if (entry->snum == snum)
-			free(ubi_dlRemThis(dir_cache, entry));
-		entry = (dir_cache_entry *) next;
+	for (idx = dir_cache_head; idx != dir_cache_tail;
+	     idx = (idx + DIRCACHESIZE - 1) % DIRCACHESIZE) {
+		entry = dir_cache[idx];
+		dir_cache[idx] = NULL;
+
+		if (entry->snum == snum) {
+			free(entry);
+		} else {
+			dir_cache[new_tail] = entry;
+			new_tail = (new_tail + DIRCACHESIZE - 1) % DIRCACHESIZE;
+		}
 	}
+
+	dir_cache_tail = new_tail;
 }
 
 /* -------------------------------------------------------------------------- **
