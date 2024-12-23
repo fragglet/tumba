@@ -381,47 +381,27 @@ callers without affecting the source string.
 char *lp_string(char *s)
 {
 	static char *bufs[10];
-	static int buflen[10];
-	static int next = -1;
+	static int next = 0;
 	char *ret;
-	int i;
 	int len = s ? strlen(s) : 0;
 
-	if (next == -1) {
-		/* initialisation */
-		for (i = 0; i < 10; i++) {
-			bufs[i] = NULL;
-			buflen[i] = 0;
-		}
-		next = 0;
-	}
+	len += 100; /* the +100 is for some substitution room */
 
-	len = MAX(len + 100, sizeof(pstring)); /* the +100 is for some
-	                                          substitution room */
-
-	if (buflen[next] != len) {
-		buflen[next] = len;
-		if (bufs[next])
-			free(bufs[next]);
-		bufs[next] = (char *) malloc(len);
-		if (!bufs[next]) {
-			DEBUG(0, ("out of memory in lp_string()"));
-			exit(1);
-		}
-	}
-
+	bufs[next] = realloc(bufs[next], len);
 	ret = &bufs[next][0];
+
 	next = (next + 1) % 10;
 
-	if (!s)
-		*ret = 0;
-	else
-		StrCpy(ret, s);
+	if (s == NULL) {
+		ret[0] = '\0';
+	} else {
+		memcpy(ret, s, len + 1);
+	}
 
 	trim_string(ret, "\"", "\"");
 
 	standard_sub_basic(ret);
-	return (ret);
+	return ret;
 }
 
 /*

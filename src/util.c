@@ -374,32 +374,6 @@ void close_sockets(void)
 }
 
 /****************************************************************************
-this is a safer strcpy(), meant to prevent core dumps when nasty things happen
-****************************************************************************/
-char *StrCpy(char *dest, char *src)
-{
-	char *d = dest;
-
-#if AJT
-	/* I don't want to get lazy with these ... */
-	if (!dest || !src) {
-		DEBUG(0, ("ERROR: NULL StrCpy() called!\n"));
-		ajt_panic();
-	}
-#endif
-
-	if (!dest)
-		return (NULL);
-	if (!src) {
-		*dest = 0;
-		return (dest);
-	}
-	while ((*d++ = *src++))
-		;
-	return (dest);
-}
-
-/****************************************************************************
 line strncpy but always null terminates. Make sure there is room!
 ****************************************************************************/
 char *StrnCpy(char *dest, char *src, int n)

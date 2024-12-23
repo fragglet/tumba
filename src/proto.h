@@ -337,7 +337,6 @@ BOOL is_a_socket(int fd);
 BOOL next_token(char **ptr, char *buff, char *sep);
 void array_promote(char *array, int elsize, int element);
 void close_sockets(void);
-char *StrCpy(char *dest, char *src);
 char *StrnCpy(char *dest, char *src, int n);
 void putip(void *dest, void *src);
 BOOL file_exist(char *fname, struct stat *sbuf);
