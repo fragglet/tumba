@@ -163,7 +163,7 @@ BOOL become_guest(void)
 ****************************************************************************/
 BOOL become_user(connection_struct *conn, int cnum)
 {
-	int snum, gid;
+	int gid;
 	int uid;
 
 	if ((current_user.cnum == cnum) && (current_user.uid == conn->uid)) {
@@ -177,8 +177,6 @@ BOOL become_user(connection_struct *conn, int cnum)
 		DEBUG(2, ("Connection %d not open\n", cnum));
 		return (False);
 	}
-
-	snum = conn->service;
 
 	{
 		uid = conn->uid;

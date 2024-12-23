@@ -2505,8 +2505,6 @@ int make_connection(char *service, char *dev)
 	int snum;
 	struct passwd *pass = NULL;
 	connection_struct *pcon;
-	BOOL guest = False;
-	BOOL force = False;
 	static BOOL first_connection = True;
 
 	strlower(service);
@@ -2540,9 +2538,6 @@ int make_connection(char *service, char *dev)
 
 	/* add it as a possible user name */
 	add_session_user(service);
-
-	guest = True;
-	force = True;
 
 	cnum = find_free_connection(str_checksum(service) + str_checksum(user));
 	if (cnum < 0) {
