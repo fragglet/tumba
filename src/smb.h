@@ -332,11 +332,6 @@ typedef struct {
 } files_struct;
 
 typedef struct {
-	char *name;
-	BOOL is_wild;
-} name_compare_entry;
-
-typedef struct {
 	int service;
 	void *dirptr;
 	BOOL open;
