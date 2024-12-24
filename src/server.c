@@ -1184,7 +1184,7 @@ static void truncate_unless_locked(int fnum, int cnum, int token,
 open a file with a share mode
 ****************************************************************************/
 void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
-                      int mode, int oplock_request, int *Access, int *action)
+                      int mode, int *Access, int *action)
 {
 	files_struct *fs_p = &Files[fnum];
 	int flags = 0;

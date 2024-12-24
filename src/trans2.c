@@ -192,8 +192,6 @@ static int call_trans2open(char *inbuf, char *outbuf, int bufsize, int cnum,
 	char *params = *pparams;
 	int16 open_mode = SVAL(params, 2);
 	int16 open_attr = SVAL(params, 6);
-	BOOL oplock_request = (((SVAL(params, 0) | (1 << 1)) >> 1) |
-	                       ((SVAL(params, 0) | (1 << 2)) >> 1));
 	int16 open_ofun = SVAL(params, 12);
 	int32 open_size = IVAL(params, 14);
 	char *pname = &params[28];
@@ -233,7 +231,7 @@ static int call_trans2open(char *inbuf, char *outbuf, int bufsize, int cnum,
 	unixmode = unix_mode(cnum, open_attr | aARCH);
 
 	open_file_shared(fnum, cnum, fname, open_mode, open_ofun, unixmode,
-	                 oplock_request, &rmode, &smb_action);
+	                 &rmode, &smb_action);
 
 	if (!Files[fnum].open) {
 		if ((errno == ENOENT) && bad_path) {
@@ -270,10 +268,7 @@ static int call_trans2open(char *inbuf, char *outbuf, int bufsize, int cnum,
 	SIVAL(params, 8, size);
 	SSVAL(params, 12, rmode);
 
-	if (oplock_request && lp_fake_oplocks(SNUM(cnum))) {
-		smb_action |= EXTENDED_OPLOCK_GRANTED;
-	}
-
+	/* Note we grant no oplocks. See comment in reply_open_and_X() */
 	SSVAL(params, 18, smb_action);
 	SIVAL(params, 20, inode);
 

@@ -226,7 +226,7 @@ int sys_disk_free(char *path, int *bsize, int *dfree, int *dsize);
 BOOL check_name(char *name, int cnum);
 void close_file(int fnum, BOOL normal_close);
 void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
-                      int mode, int oplock_request, int *Access, int *action);
+                      int mode, int *Access, int *action);
 int seek_file(int fnum, uint32 pos);
 int read_file(int fnum, char *data, uint32 pos, int n);
 int write_file(int fnum, char *data, int n);

@@ -911,7 +911,6 @@ int reply_open(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	struct stat sbuf;
 	BOOL bad_path = False;
 	files_struct *fsp;
-	int oplock_request = CORE_OPLOCK_REQUEST(inbuf);
 
 	cnum = SVAL(inbuf, smb_tid);
 
@@ -936,7 +935,7 @@ int reply_open(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	unixmode = unix_mode(cnum, aARCH);
 
 	open_file_shared(fnum, cnum, fname, share_mode, 3, unixmode,
-	                 oplock_request, &rmode, NULL);
+	                 &rmode, NULL);
 
 	fsp = &Files[fnum];
 
@@ -970,13 +969,8 @@ int reply_open(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	put_dos_date3(outbuf, smb_vwv2, mtime);
 	SIVAL(outbuf, smb_vwv4, size);
 	SSVAL(outbuf, smb_vwv6, rmode);
+	/* Note we grant no oplocks. See comment in reply_open_and_X() */
 
-	if (oplock_request && lp_fake_oplocks(SNUM(cnum))) {
-		CVAL(outbuf, smb_flg) |= CORE_OPLOCK_GRANTED;
-	}
-
-	if (fsp->granted_oplock)
-		CVAL(outbuf, smb_flg) |= CORE_OPLOCK_GRANTED;
 	return (outsize);
 }
 
@@ -990,11 +984,6 @@ int reply_open_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	int fnum = -1;
 	int smb_mode = SVAL(inbuf, smb_vwv3);
 	int smb_attr = SVAL(inbuf, smb_vwv5);
-	/* Breakout the oplock request bits so we can set the
-	   reply bits separately. */
-	BOOL ex_oplock_request = EXTENDED_OPLOCK_REQUEST(inbuf);
-	BOOL core_oplock_request = CORE_OPLOCK_REQUEST(inbuf);
-	BOOL oplock_request = ex_oplock_request | core_oplock_request;
 	int smb_ofun = SVAL(inbuf, smb_vwv8);
 	int unixmode;
 	int size = 0, fmode = 0, mtime = 0, rmode = 0;
@@ -1024,7 +1013,7 @@ int reply_open_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	unixmode = unix_mode(cnum, smb_attr | aARCH);
 
 	open_file_shared(fnum, cnum, fname, smb_mode, smb_ofun, unixmode,
-	                 oplock_request, &rmode, &smb_action);
+	                 &rmode, &smb_action);
 
 	fsp = &Files[fnum];
 
@@ -1050,31 +1039,15 @@ int reply_open_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 		return (ERROR(ERRDOS, ERRnoaccess));
 	}
 
-	/* If the caller set the extended oplock request bit
-	   and we granted one (by whatever means) - set the
-	   correct bit for extended oplock reply.
+	/* The Samba version of this function had code to handle oplock
+	   requests. We don't support oplocks and just grant no oplock requests,
+	   which is compliant according to the CIFS draft spec:
+
+	   > Versions of the CIFS file sharing protocol including and newer
+	   > than the "LANMAN1.0" dialect support oplocks. (Note, however, that
+	   > an implementation, even of these later dialects, can implement
+	   > oplocks trivially by always refusing to grant them.)
 	 */
-
-	if (ex_oplock_request && lp_fake_oplocks(SNUM(cnum))) {
-		smb_action |= EXTENDED_OPLOCK_GRANTED;
-	}
-
-	if (ex_oplock_request && fsp->granted_oplock) {
-		smb_action |= EXTENDED_OPLOCK_GRANTED;
-	}
-
-	/* If the caller set the core oplock request bit
-	   and we granted one (by whatever means) - set the
-	   correct bit for core oplock reply.
-	 */
-
-	if (core_oplock_request && lp_fake_oplocks(SNUM(cnum))) {
-		CVAL(outbuf, smb_flg) |= CORE_OPLOCK_GRANTED;
-	}
-
-	if (core_oplock_request && fsp->granted_oplock) {
-		CVAL(outbuf, smb_flg) |= CORE_OPLOCK_GRANTED;
-	}
 
 	set_message(outbuf, 15, 0, True);
 	SSVAL(outbuf, smb_vwv2, fnum);
@@ -1115,7 +1088,6 @@ int reply_mknew(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	int ofun = 0;
 	BOOL bad_path = False;
 	files_struct *fsp;
-	int oplock_request = CORE_OPLOCK_REQUEST(inbuf);
 
 	com = SVAL(inbuf, smb_com);
 	cnum = SVAL(inbuf, smb_tid);
@@ -1156,7 +1128,7 @@ int reply_mknew(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	/* Open file in dos compatibility share mode. */
 	open_file_shared(fnum, cnum, fname, (DENY_FCB << 4) | 0xF, ofun,
-	                 unixmode, oplock_request, NULL, NULL);
+	                 unixmode, NULL, NULL);
 
 	fsp = &Files[fnum];
 
@@ -1171,13 +1143,7 @@ int reply_mknew(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	outsize = set_message(outbuf, 1, 0, True);
 	SSVAL(outbuf, smb_vwv0, fnum);
-
-	if (oplock_request && lp_fake_oplocks(SNUM(cnum))) {
-		CVAL(outbuf, smb_flg) |= CORE_OPLOCK_GRANTED;
-	}
-
-	if (fsp->granted_oplock)
-		CVAL(outbuf, smb_flg) |= CORE_OPLOCK_GRANTED;
+	/* Note we grant no oplocks. See comment in reply_open_and_X() */
 
 	DEBUG(2, ("new file %s\n", fname));
 	DEBUG(3, ("%s mknew %s fd=%d fnum=%d cnum=%d dmode=%d umode=%o\n",
@@ -1201,7 +1167,6 @@ int reply_ctemp(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	mode_t unixmode;
 	BOOL bad_path = False;
 	files_struct *fsp;
-	int oplock_request = CORE_OPLOCK_REQUEST(inbuf);
 
 	cnum = SVAL(inbuf, smb_tid);
 	createmode = SVAL(inbuf, smb_vwv0);
@@ -1229,7 +1194,7 @@ int reply_ctemp(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	/* Open file in dos compatibility share mode. */
 	/* We should fail if file exists. */
 	open_file_shared(fnum, cnum, fname2, (DENY_FCB << 4) | 0xF, 0x10,
-	                 unixmode, oplock_request, NULL, NULL);
+	                 unixmode, NULL, NULL);
 
 	fsp = &Files[fnum];
 
@@ -1247,12 +1212,7 @@ int reply_ctemp(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	CVAL(smb_buf(outbuf), 0) = 4;
 	pstrcpy(smb_buf(outbuf) + 1, fname2);
 
-	if (oplock_request && lp_fake_oplocks(SNUM(cnum))) {
-		CVAL(outbuf, smb_flg) |= CORE_OPLOCK_GRANTED;
-	}
-
-	if (fsp->granted_oplock)
-		CVAL(outbuf, smb_flg) |= CORE_OPLOCK_GRANTED;
+	/* Note we grant no oplocks. See comment in reply_open_and_X() */
 
 	DEBUG(2, ("created temp file %s\n", fname2));
 	DEBUG(3, ("%s ctemp %s fd=%d fnum=%d cnum=%d dmode=%d umode=%o\n",
@@ -2603,7 +2563,7 @@ static BOOL copy_file(char *src, char *dest1, int cnum, int ofun, int count,
 	fnum1 = find_free_file();
 	if (fnum1 < 0)
 		return (False);
-	open_file_shared(fnum1, cnum, src, (DENY_NONE << 4), 1, 0, 0, &Access,
+	open_file_shared(fnum1, cnum, src, (DENY_NONE << 4), 1, 0, &Access,
 	                 &action);
 
 	if (!Files[fnum1].open) {
@@ -2620,7 +2580,7 @@ static BOOL copy_file(char *src, char *dest1, int cnum, int ofun, int count,
 		return (False);
 	}
 	open_file_shared(fnum2, cnum, dest, (DENY_NONE << 4) | 1, ofun,
-	                 st.st_mode, 0, &Access, &action);
+	                 st.st_mode, &Access, &action);
 
 	if (!Files[fnum2].open) {
 		close_file(fnum1, False);
