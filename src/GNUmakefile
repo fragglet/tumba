@@ -11,9 +11,11 @@ CODEPAGEDIR = $(LIBDIR)/samba/codepages
 WORKGROUP = WORKGROUP
 
 CONFIGFILE = /etc/rumba_smbd.conf
+LOCKDIR = /tmp/rumba_smbd.locks
 SMBLOGFILE = /var/log/rumba_smbd.log
 
-DEFINES = -DCODEPAGEDIR=\"$(CODEPAGEDIR)\" \
+DEFINES = -DLOCKDIR=\"$(LOCKDIR)\" \
+          -DCODEPAGEDIR=\"$(CODEPAGEDIR)\" \
           -DWORKGROUP=\"$(WORKGROUP)\" \
           -DCONFIGFILE=\"$(CONFIGFILE)\" \
           -DSMBLOGFILE=\"$(SMBLOGFILE)\"
