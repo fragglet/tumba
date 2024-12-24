@@ -1,6 +1,6 @@
 
 # The base directory for all samba files
-PREFIX = /usr/local/samba
+PREFIX = /usr/local
 
 SHAREDIR = $(PREFIX)/share
 LIBDIR = $(PREFIX)/lib
