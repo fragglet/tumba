@@ -143,7 +143,6 @@ typedef struct {
 	char *szGuestaccount;
 	char *szCopy;
 	char *szInclude;
-	char *szVetoOplockFiles;
 	char *comment;
 	char *volume;
 	int iCreate_mask;
@@ -165,7 +164,6 @@ typedef struct {
 	BOOL bWidelinks;
 	BOOL bSymlinks;
 	BOOL *copymap;
-	BOOL bFakeOplocks;
 	BOOL bDosFiletimes;
 	char dummy[3]; /* for alignment */
 } service;
@@ -178,7 +176,6 @@ static service sDefault = {
     NULL,       /* szGuestAccount  - this is set in init_globals() */
     NULL,       /* szCopy */
     NULL,       /* szInclude */
-    NULL,       /* szVetoOplockFiles */
     NULL,       /* comment */
     NULL,       /* volume */
     0744,       /* iCreate_mask */
@@ -200,7 +197,6 @@ static service sDefault = {
     True,       /* bWidelinks */
     True,       /* bSymlinks */
     NULL,       /* copymap */
-    False,      /* bFakeOplocks */
     False,      /* bDosFiletimes */
     ""          /* dummy */
 };
@@ -299,8 +295,6 @@ static struct parm_struct {
      NULL},
     {"status", P_BOOL, P_LOCAL, &sDefault.status, NULL, NULL},
     {"hide dot files", P_BOOL, P_LOCAL, &sDefault.bHideDotFiles, NULL, NULL},
-    {"veto oplock files", P_STRING, P_LOCAL, &sDefault.szVetoOplockFiles, NULL,
-     NULL},
     {"map system", P_BOOL, P_LOCAL, &sDefault.bMap_system, NULL, NULL},
     {"map hidden", P_BOOL, P_LOCAL, &sDefault.bMap_hidden, NULL, NULL},
     {"map archive", P_BOOL, P_LOCAL, &sDefault.bMap_archive, NULL, NULL},
@@ -308,7 +302,6 @@ static struct parm_struct {
     {"strict locking", P_BOOL, P_LOCAL, &sDefault.bStrictLocking, NULL, NULL},
     {"wide links", P_BOOL, P_LOCAL, &sDefault.bWidelinks, NULL, NULL},
     {"follow symlinks", P_BOOL, P_LOCAL, &sDefault.bSymlinks, NULL, NULL},
-    {"fake oplocks", P_BOOL, P_LOCAL, &sDefault.bFakeOplocks, NULL, NULL},
     {"dos filetimes", P_BOOL, P_LOCAL, &sDefault.bDosFiletimes, NULL, NULL},
 
     {NULL, P_BOOL, P_NONE, NULL, NULL, NULL}};
@@ -480,7 +473,6 @@ FN_LOCAL_STRING(lp_pathname, szPath)
 FN_LOCAL_STRING(lp_guestaccount, szGuestaccount)
 FN_LOCAL_STRING(lp_comment, comment)
 FN_LOCAL_STRING(lp_volume, volume)
-FN_LOCAL_STRING(lp_veto_oplocks, szVetoOplockFiles)
 
 FN_LOCAL_BOOL(lp_casesensitive, bCaseSensitive)
 FN_LOCAL_BOOL(lp_shortpreservecase, bShortCasePreserve)
@@ -494,7 +486,6 @@ FN_LOCAL_BOOL(lp_strict_locking, bStrictLocking)
 FN_LOCAL_BOOL(lp_widelinks, bWidelinks)
 FN_LOCAL_BOOL(lp_symlinks, bSymlinks)
 FN_LOCAL_BOOL(lp_map_system, bMap_system)
-FN_LOCAL_BOOL(lp_fake_oplocks, bFakeOplocks)
 FN_LOCAL_BOOL(lp_dos_filetimes, bDosFiletimes)
 
 FN_LOCAL_INTEGER(lp_create_mode, iCreate_mask)
