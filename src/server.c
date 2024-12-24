@@ -1646,7 +1646,7 @@ static BOOL open_sockets(BOOL is_daemon, int port)
 			fd_set listen_set;
 			int num;
 			struct sockaddr addr;
-			int in_addrlen = sizeof(addr);
+			socklen_t in_addrlen = sizeof(addr);
 
 			FD_ZERO(&listen_set);
 			FD_SET(server_socket, &listen_set);

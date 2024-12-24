@@ -20,7 +20,7 @@ DEFINES = -DLOCKDIR=\"$(LOCKDIR)\" \
           -DCONFIGFILE=\"$(CONFIGFILE)\" \
           -DSMBLOGFILE=\"$(SMBLOGFILE)\"
 
-CFLAGS = -MMD $(DEFINES)
+CFLAGS = -MMD -Wall $(DEFINES)
 
 OBJECTS = \
 	charcnv.o            \

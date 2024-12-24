@@ -234,7 +234,6 @@ static BOOL api_RNetServerEnum(int cnum, char *param, char *data, int mdrcnt,
 	char *str2 = skip_string(str1, 1);
 	char *p = skip_string(str2, 1);
 	int uLevel = SVAL(p, 0);
-	int fixed_len, string_len;
 
 	p += 8;
 
@@ -243,9 +242,7 @@ static BOOL api_RNetServerEnum(int cnum, char *param, char *data, int mdrcnt,
 	if (!check_server_info(uLevel, str2))
 		return False;
 
-	*rdata_len = fixed_len + string_len;
-	*rdata = REALLOC(*rdata, *rdata_len);
-	bzero(*rdata, *rdata_len);
+	*rdata_len = 0;
 
 	// We answer the request but don't care about other servers.
 	*rparam_len = 8;

@@ -1361,8 +1361,6 @@ int reply_readbraw(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	uint32 startpos;
 	char *header = outbuf;
 	int ret = 0;
-	char *fname;
-	int fd;
 
 	cnum = SVAL(inbuf, smb_tid);
 	fnum = GETFNUM(inbuf, smb_vwv0);
@@ -1381,9 +1379,6 @@ int reply_readbraw(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		_smb_setlen(header, 0);
 		transfer_file(0, Client, 0, header, 4, 0);
 		return (-1);
-	} else {
-		fd = Files[fnum].fd_ptr->fd;
-		fname = Files[fnum].name;
 	}
 
 	if (!is_locked(fnum, cnum, maxcount, startpos, F_RDLCK)) {
@@ -2765,11 +2760,6 @@ int reply_lockingX(char *inbuf, char *outbuf, int length, int bufsize)
 	   we have granted an oplock on.
 	 */
 	if ((locktype & LOCKING_ANDX_OPLOCK_RELEASE)) {
-		int token;
-		files_struct *fsp = &Files[fnum];
-		uint32 dev = fsp->fd_ptr->dev;
-		uint32 inode = fsp->fd_ptr->inode;
-
 		DEBUG(5, ("reply_lockingX: oplock break reply from client for "
 		          "fnum = %d. no oplock granted as not supported.\n",
 		          fnum));
