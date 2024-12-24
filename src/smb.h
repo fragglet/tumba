@@ -351,9 +351,6 @@ typedef struct {
 	time_t lastused;
 	BOOL used;
 	int num_files_open;
-	name_compare_entry *veto_oplock_list; /* Per-share list of files to
-	                                         refuse oplocks on. */
-
 } connection_struct;
 
 /* NTDOMAIN defines needed here. */
@@ -487,8 +484,6 @@ struct connection_options {
 #define MAP_HIDDEN(cnum) (OPEN_CNUM(cnum) && lp_map_hidden(SNUM(cnum)))
 #define MAP_SYSTEM(cnum) (OPEN_CNUM(cnum) && lp_map_system(SNUM(cnum)))
 #define MAP_ARCHIVE(cnum) (OPEN_CNUM(cnum) && lp_map_archive(SNUM(cnum)))
-#define IS_VETO_OPLOCK_PATH(cnum, path)                                        \
-	(is_in_path((path), Connections[(cnum)].veto_oplock_list))
 
 /* the basic packet size, assuming no words or bytes */
 #define smb_size 39

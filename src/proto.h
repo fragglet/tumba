@@ -371,7 +371,6 @@ int transfer_file(int infd, int outfd, int n, char *header, int headlen,
                   int align);
 int read_smb_length(int fd, char *inbuf, int timeout);
 BOOL receive_smb(int fd, char *buffer, int timeout);
-BOOL push_smb_message(char *buf, int msg_len);
 BOOL receive_message_or_smb(int smbfd, char *buffer, int buffer_len,
                             int timeout, BOOL *got_smb);
 BOOL send_smb(int fd, char *buffer);

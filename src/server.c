@@ -1938,7 +1938,6 @@ int make_connection(char *service, char *dev)
 	pcon->service = snum;
 	pcon->used = True;
 	pcon->dirptr = NULL;
-	pcon->veto_oplock_list = NULL;
 	string_set(&pcon->dirpath, "");
 	string_set(&pcon->user, user);
 
@@ -2003,9 +2002,6 @@ int make_connection(char *service, char *dev)
 
 	/* we've finished with the sensitive stuff */
 	unbecome_user();
-
-	/* Add veto/hide lists */
-	set_namearray(&pcon->veto_oplock_list, lp_veto_oplocks(SNUM(cnum)));
 
 	{
 		DEBUG(1, ("%s %s (%s) connect to service %s as user %s "
@@ -2406,8 +2402,6 @@ void close_cnum(int cnum)
 
 	Connections[cnum].open = False;
 	num_connections_open--;
-
-	free_namearray(Connections[cnum].veto_oplock_list);
 
 	string_set(&Connections[cnum].user, "");
 	string_set(&Connections[cnum].dirpath, "");

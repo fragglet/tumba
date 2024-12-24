@@ -1692,61 +1692,6 @@ BOOL receive_smb(int fd, char *buffer, int timeout)
 }
 
 /****************************************************************************
- structure to hold a linked list of local messages.
- for processing.
-****************************************************************************/
-
-typedef struct _message_list {
-	struct _message_list *msg_next;
-	char *msg_buf;
-	int msg_len;
-} pending_message_list;
-
-static pending_message_list *smb_msg_head = NULL;
-
-/****************************************************************************
- Function to push a linked list of local messages ready
- for processing.
-****************************************************************************/
-
-static BOOL push_local_message(pending_message_list **pml, char *buf,
-                               int msg_len)
-{
-	pending_message_list *msg =
-	    (pending_message_list *) malloc(sizeof(pending_message_list));
-
-	if (msg == NULL) {
-		DEBUG(0, ("push_message: malloc fail (1)\n"));
-		return False;
-	}
-
-	msg->msg_buf = (char *) malloc(msg_len);
-	if (msg->msg_buf == NULL) {
-		DEBUG(0, ("push_local_message: malloc fail (2)\n"));
-		free((char *) msg);
-		return False;
-	}
-
-	memcpy(msg->msg_buf, buf, msg_len);
-	msg->msg_len = msg_len;
-
-	msg->msg_next = *pml;
-	*pml = msg;
-
-	return True;
-}
-
-/****************************************************************************
- Function to push a linked list of local smb messages ready
- for processing.
-****************************************************************************/
-
-BOOL push_smb_message(char *buf, int msg_len)
-{
-	return push_local_message(&smb_msg_head, buf, msg_len);
-}
-
-/****************************************************************************
   Do a select on an two fd's - with timeout.
 
   If a local udp message has been pushed onto the
@@ -1776,26 +1721,6 @@ BOOL receive_message_or_smb(int smbfd, char *buffer, int buffer_len,
 	smb_read_error = 0;
 
 	*got_smb = False;
-
-	/*
-	 * Check to see if we already have a message on the smb queue.
-	 * If so - copy and return it.
-	 */
-
-	if (smb_msg_head) {
-		pending_message_list *msg = smb_msg_head;
-		memcpy(buffer, msg->msg_buf, MIN(buffer_len, msg->msg_len));
-		smb_msg_head = msg->msg_next;
-
-		/* Free the message we just copied. */
-		free((char *) msg->msg_buf);
-		free((char *) msg);
-		*got_smb = True;
-
-		DEBUG(5, ("receive_message_or_smb: returning queued smb "
-		          "message.\n"));
-		return True;
-	}
 
 	FD_ZERO(&fds);
 	FD_SET(smbfd, &fds);
