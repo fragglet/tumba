@@ -284,11 +284,3 @@ int sys_chown(char *fname, int uid, int gid)
 {
 	return (chown(fname, uid, gid));
 }
-
-/*******************************************************************
-os/2 also doesn't have chroot
-********************************************************************/
-int sys_chroot(char *dname)
-{
-	return (chroot(dname));
-}

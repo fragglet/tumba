@@ -275,7 +275,6 @@ int sys_rename(char *from, char *to);
 int sys_chmod(char *fname, int mode);
 char *sys_getwd(char *s);
 int sys_chown(char *fname, int uid, int gid);
-int sys_chroot(char *dname);
 
 /*The following definitions come from  time.c  */
 
