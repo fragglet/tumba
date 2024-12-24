@@ -933,8 +933,8 @@ int reply_open(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	unixmode = unix_mode(cnum, aARCH);
 
-	open_file_shared(fnum, cnum, fname, share_mode, 3, unixmode,
-	                 &rmode, NULL);
+	open_file_shared(fnum, cnum, fname, share_mode, 3, unixmode, &rmode,
+	                 NULL);
 
 	fsp = &Files[fnum];
 

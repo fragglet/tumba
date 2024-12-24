@@ -1597,7 +1597,8 @@ static int sig_pipe(void)
 static void set_keepalive_option(int fd)
 {
 	int enabled = 1;
-	int ret = setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &enabled, sizeof(int));
+	int ret =
+	    setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &enabled, sizeof(int));
 
 	if (ret != 0) {
 		DEBUG(0, ("Failed to set keepalive option"));
@@ -1625,15 +1626,15 @@ static BOOL open_sockets(BOOL is_daemon, int port)
 			atexit(killkids);
 
 		/* open an incoming socket */
-		server_socket = open_socket_in(SOCK_STREAM, port, 0,
-		                               interpret_addr(lp_socket_address()));
+		server_socket = open_socket_in(
+		    SOCK_STREAM, port, 0, interpret_addr(lp_socket_address()));
 		if (server_socket == -1)
 			return (False);
 
 		/* ready to listen */
 		if (listen(server_socket, 5) == -1) {
-			DEBUG(0, ("open_sockets: listen: %s\n",
-			          strerror(errno)));
+			DEBUG(0,
+			      ("open_sockets: listen: %s\n", strerror(errno)));
 			close(server_socket);
 			return False;
 		}
@@ -1708,7 +1709,6 @@ static BOOL open_sockets(BOOL is_daemon, int port)
 			 * 50*50=2500 messages (ca. 100kb).
 			 */
 			force_check_log_size();
-
 		}
 	} /* end if is_daemon */
 	else {
@@ -2332,8 +2332,8 @@ static int reply_negprot(char *inbuf, char *outbuf, int size, int bufsize)
 		p = smb_buf(inbuf) + 1;
 		Index = 0;
 		while (p < (smb_buf(inbuf) + bcc)) {
-			if (strequal(p, supported_protocols[protocol]
-			                    .proto_name))
+			if (strequal(p,
+			             supported_protocols[protocol].proto_name))
 				choice = Index;
 			Index++;
 			p += strlen(p) + 2;
@@ -3141,9 +3141,9 @@ static void process(void)
 
 		errno = 0;
 
-		for (counter = SMBD_SELECT_LOOP; !receive_message_or_smb(
-		         Client, InBuffer, BUFFER_SIZE,
-		         SMBD_SELECT_LOOP * 1000, &got_smb);
+		for (counter = SMBD_SELECT_LOOP;
+		     !receive_message_or_smb(Client, InBuffer, BUFFER_SIZE,
+		                             SMBD_SELECT_LOOP * 1000, &got_smb);
 		     counter += SMBD_SELECT_LOOP) {
 			int i;
 			time_t t;
