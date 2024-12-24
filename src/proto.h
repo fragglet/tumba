@@ -138,7 +138,6 @@ BOOL locking_end(void);
 BOOL locking_init(int read_only);
 BOOL lock_share_entry(int cnum, uint32 dev, uint32 inode, int *ptok);
 BOOL unlock_share_entry(int cnum, uint32 dev, uint32 inode, int token);
-BOOL remove_share_oplock(int fnum, int token);
 
 /*The following definitions come from  mangle.c  */
 
