@@ -30,7 +30,6 @@ extern connection_struct Connections[];
 extern files_struct Files[];
 extern BOOL case_sensitive;
 extern int Client;
-extern int oplock_sock;
 extern int smb_read_error;
 extern fstring local_machine;
 extern int global_oplock_break;
@@ -1823,8 +1822,8 @@ int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize)
 		       num_params_sofar < total_params) {
 			BOOL ret;
 
-			ret = receive_next_smb(Client, oplock_sock, inbuf,
-			                       bufsize, SMB_SECONDARY_WAIT);
+			ret = receive_next_smb(Client, inbuf, bufsize,
+			                       SMB_SECONDARY_WAIT);
 
 			if ((ret && (CVAL(inbuf, smb_com) != SMBtranss2)) ||
 			    !ret) {

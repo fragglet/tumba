@@ -1692,81 +1692,6 @@ BOOL receive_smb(int fd, char *buffer, int timeout)
 }
 
 /****************************************************************************
-  read a message from a udp fd.
-The timeout is in milli seconds
-****************************************************************************/
-BOOL receive_local_message(int fd, char *buffer, int buffer_len, int timeout)
-{
-	struct sockaddr_in from;
-	int fromlen = sizeof(from);
-	int32 msg_len = 0;
-
-	smb_read_error = 0;
-
-	if (timeout != 0) {
-		struct timeval to;
-		fd_set fds;
-		int selrtn;
-
-		FD_ZERO(&fds);
-		FD_SET(fd, &fds);
-
-		to.tv_sec = timeout / 1000;
-		to.tv_usec = (timeout % 1000) * 1000;
-
-		selrtn = sys_select(&fds, &to);
-
-		/* Check if error */
-		if (selrtn == -1) {
-			/* something is wrong. Maybe the socket is dead? */
-			smb_read_error = READ_ERROR;
-			return False;
-		}
-
-		/* Did we timeout ? */
-		if (selrtn == 0) {
-			smb_read_error = READ_TIMEOUT;
-			return False;
-		}
-	}
-
-	/*
-	 * Read a loopback udp message.
-	 */
-	msg_len = recvfrom(fd, &buffer[UDP_CMD_HEADER_LEN],
-	                   buffer_len - UDP_CMD_HEADER_LEN, 0,
-	                   (struct sockaddr *) &from, &fromlen);
-
-	if (msg_len < 0) {
-		DEBUG(0, ("receive_local_message. Error in recvfrom. (%s).\n",
-		          strerror(errno)));
-		return False;
-	}
-
-	/* Validate message length. */
-	if (msg_len > (buffer_len - UDP_CMD_HEADER_LEN)) {
-		DEBUG(0, ("receive_local_message: invalid msg_len (%d) max can "
-		          "be %d\n",
-		          msg_len, buffer_len - UDP_CMD_HEADER_LEN));
-		return False;
-	}
-
-	/* Validate message from address (must be localhost). */
-	if (from.sin_addr.s_addr != htonl(INADDR_LOOPBACK)) {
-		DEBUG(0, ("receive_local_message: invalid 'from' address \
-(was %x should be 127.0.0.1\n",
-		          from.sin_addr.s_addr));
-		return False;
-	}
-
-	/* Setup the message header */
-	SIVAL(buffer, UDP_CMD_LEN_OFFSET, msg_len);
-	SSVAL(buffer, UDP_CMD_PORT_OFFSET, ntohs(from.sin_port));
-
-	return True;
-}
-
-/****************************************************************************
  structure to hold a linked list of local messages.
  for processing.
 ****************************************************************************/
@@ -1841,8 +1766,8 @@ BOOL push_smb_message(char *buf, int msg_len)
 
 The timeout is in milli seconds
 ****************************************************************************/
-BOOL receive_message_or_smb(int smbfd, int oplock_fd, char *buffer,
-                            int buffer_len, int timeout, BOOL *got_smb)
+BOOL receive_message_or_smb(int smbfd, char *buffer, int buffer_len,
+                            int timeout, BOOL *got_smb)
 {
 	fd_set fds;
 	int selrtn;
@@ -1874,7 +1799,6 @@ BOOL receive_message_or_smb(int smbfd, int oplock_fd, char *buffer,
 
 	FD_ZERO(&fds);
 	FD_SET(smbfd, &fds);
-	FD_SET(oplock_fd, &fds);
 
 	to.tv_sec = timeout / 1000;
 	to.tv_usec = (timeout % 1000) * 1000;
@@ -1898,7 +1822,7 @@ BOOL receive_message_or_smb(int smbfd, int oplock_fd, char *buffer,
 		*got_smb = True;
 		return receive_smb(smbfd, buffer, 0);
 	} else {
-		return receive_local_message(oplock_fd, buffer, buffer_len, 0);
+		return False;
 	}
 }
 

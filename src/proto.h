@@ -237,11 +237,7 @@ int unix_error_packet(char *inbuf, char *outbuf, int def_class, uint32 def_code,
                       int line);
 int error_packet(char *inbuf, char *outbuf, int error_class, uint32 error_code,
                  int line);
-BOOL oplock_break(uint32 dev, uint32 inode, struct timeval *tval);
-BOOL request_oplock_break(share_mode_entry *share_entry, uint32 dev,
-                          uint32 inode);
-BOOL receive_next_smb(int smbfd, int oplockfd, char *inbuf, int bufsize,
-                      int timeout);
+BOOL receive_next_smb(int smbfd, char *inbuf, int bufsize, int timeout);
 BOOL snum_used(int snum);
 BOOL reload_services(BOOL test);
 int make_connection(char *service, char *dev);
@@ -377,10 +373,9 @@ int transfer_file(int infd, int outfd, int n, char *header, int headlen,
                   int align);
 int read_smb_length(int fd, char *inbuf, int timeout);
 BOOL receive_smb(int fd, char *buffer, int timeout);
-BOOL receive_local_message(int fd, char *buffer, int buffer_len, int timeout);
 BOOL push_smb_message(char *buf, int msg_len);
-BOOL receive_message_or_smb(int smbfd, int oplock_fd, char *buffer,
-                            int buffer_len, int timeout, BOOL *got_smb);
+BOOL receive_message_or_smb(int smbfd, char *buffer, int buffer_len,
+                            int timeout, BOOL *got_smb);
 BOOL send_smb(int fd, char *buffer);
 char *name_ptr(char *buf, int ofs);
 int name_extract(char *buf, int ofs, char *name);
