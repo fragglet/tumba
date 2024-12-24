@@ -157,10 +157,6 @@ void name_map_mangle(char *OutName, BOOL need83, int snum);
 BOOL pm_process(char *FileName, BOOL (*sfunc)(char *),
                 BOOL (*pfunc)(char *, char *));
 
-/*The following definitions come from  password.c  */
-
-void add_session_user(char *user);
-
 /*The following definitions come from  reply.c  */
 
 int reply_special(char *inbuf, char *outbuf);

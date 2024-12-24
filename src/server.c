@@ -2536,9 +2536,6 @@ int make_connection(char *service, char *dev)
 		return (-6);
 	}
 
-	/* add it as a possible user name */
-	add_session_user(service);
-
 	cnum = find_free_connection(str_checksum(service) + str_checksum(user));
 	if (cnum < 0) {
 		DEBUG(0, ("%s couldn't find free connection\n", timestring()));
@@ -2626,7 +2623,6 @@ int make_connection(char *service, char *dev)
 #endif
 
 	num_connections_open++;
-	add_session_user(user);
 
 	/* we've finished with the sensitive stuff */
 	unbecome_user();

@@ -32,7 +32,6 @@ OBJECTS = \
 	locking_slow.o       \
 	mangle.o             \
 	params.o             \
-	password.o           \
 	reply.o              \
 	server.o             \
 	slprintf.o           \

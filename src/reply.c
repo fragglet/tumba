@@ -99,8 +99,6 @@ int reply_special(char *inbuf, char *outbuf)
 			break;
 		}
 
-		add_session_user(remote_machine);
-
 		reload_services(True);
 		reopen_logs();
 
@@ -404,8 +402,6 @@ int reply_sesssetup_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 		pstrcpy(sesssetup_user, user);
 
 	reload_services(True);
-
-	add_session_user(user);
 
 	guest = True;
 
