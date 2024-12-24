@@ -1046,6 +1046,10 @@ int reply_open_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	   > than the "LANMAN1.0" dialect support oplocks. (Note, however, that
 	   > an implementation, even of these later dialects, can implement
 	   > oplocks trivially by always refusing to grant them.)
+
+	   TODO: We can improve performance by granting a fake lock if the
+	   underlying filesystem is read-only (like a CD-ROM), or if we're
+	   feeling a bit bolder, if the file is read-only.
 	 */
 
 	set_message(outbuf, 15, 0, True);
