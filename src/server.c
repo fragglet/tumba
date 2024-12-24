@@ -81,8 +81,6 @@ int chain_fnum = -1;
 /* number of open connections */
 static int num_connections_open = 0;
 
-BOOL global_oplock_break = False;
-
 extern fstring remote_machine;
 
 extern pstring OriginalDir;
@@ -2891,21 +2889,6 @@ static int switch_message(int type, char *inbuf, char *outbuf, int size,
 	} else {
 		DEBUG(3, ("switch message %s (pid %d)\n",
 		          smb_messages[match].name, pid));
-
-		if (global_oplock_break &&
-		    (smb_messages[match].flags & QUEUE_IN_OPLOCK)) {
-			/*
-			 * Queue this message as we are the process of an oplock
-			 * break.
-			 */
-
-			DEBUG(2, ("%s: switch_message: queueing message due to "
-			          "being in oplock break state.\n",
-			          timestring()));
-
-			push_smb_message(inbuf, size);
-			return -1;
-		}
 
 		if (smb_messages[match].fn) {
 			int cnum = SVAL(inbuf, smb_tid);

@@ -40,7 +40,6 @@ extern BOOL short_case_preserve;
 extern pstring sesssetup_user;
 extern fstring myworkgroup;
 extern int Client;
-extern int global_oplock_break;
 
 /* this macro should always be used to extract an fnum (smb_fid) from
 a packet to ensure chaining works correctly */
@@ -1364,19 +1363,6 @@ int reply_readbraw(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	int ret = 0;
 	char *fname;
 	int fd;
-
-	/*
-	 * Special check if an oplock break has been issued
-	 * and the readraw request croses on the wire, we must
-	 * return a zero length response here.
-	 */
-
-	if (global_oplock_break) {
-		_smb_setlen(header, 0);
-		transfer_file(0, Client, 0, header, 4, 0);
-		DEBUG(5, ("readbraw - oplock break finished\n"));
-		return -1;
-	}
 
 	cnum = SVAL(inbuf, smb_tid);
 	fnum = GETFNUM(inbuf, smb_vwv0);
