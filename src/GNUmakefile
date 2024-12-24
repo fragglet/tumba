@@ -55,4 +55,9 @@ rumba_smbd: $(OBJECTS)
 clean:
 	rm -f $(OBJECTS) rumba_smbd $(DEPS)
 
+format:
+	clang-format -i *.[ch]
+
+.PHONY: clean format
+
 -include $(DEPS)
