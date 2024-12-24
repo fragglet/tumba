@@ -2785,48 +2785,9 @@ int reply_lockingX(char *inbuf, char *outbuf, int length, int bufsize)
 		uint32 inode = fsp->fd_ptr->inode;
 
 		DEBUG(5, ("reply_lockingX: oplock break reply from client for "
-		          "fnum = %d\n",
+		          "fnum = %d. no oplock granted as not supported.\n",
 		          fnum));
-		/*
-		 * Make sure we have granted an oplock on this file.
-		 */
-		if (!fsp->granted_oplock) {
-			DEBUG(
-			    0,
-			    ("reply_lockingX: Error : oplock break from client for fnum = %d and \
-no oplock granted on this file.\n",
-			     fnum));
-			return ERROR(ERRDOS, ERRlock);
-		}
-
-		/* Remove the oplock flag from the sharemode. */
-		lock_share_entry(fsp->cnum, dev, inode, &token);
-		if (remove_share_oplock(fnum, token) == False) {
-			DEBUG(
-			    0,
-			    ("reply_lockingX: failed to remove share oplock for fnum %d, \
-dev = %x, inode = %x\n",
-			     fnum, dev, inode));
-			unlock_share_entry(fsp->cnum, dev, inode, token);
-		} else {
-			unlock_share_entry(fsp->cnum, dev, inode, token);
-
-			/* Clear the granted flag and return. */
-			fsp->granted_oplock = False;
-		}
-
-		/* if this is a pure oplock break request then don't send a
-		 * reply */
-		if (num_locks == 0 && num_ulocks == 0) {
-			/* Sanity check - ensure a pure oplock break is not a
-			   chained request. */
-			if (CVAL(inbuf, smb_vwv0) != 0xff)
-				DEBUG(0,
-				      ("reply_lockingX: Error : pure oplock "
-				       "break is a chained %d request !\n",
-				       (unsigned int) CVAL(inbuf, smb_vwv0)));
-			return -1;
-		}
+		return ERROR(ERRDOS, ERRlock);
 	}
 
 	/* Data now points at the beginning of the list

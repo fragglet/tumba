@@ -327,8 +327,6 @@ typedef struct {
 	BOOL can_write;
 	BOOL share_mode;
 	BOOL modified;
-	BOOL granted_oplock;
-	BOOL sent_oplock_break;
 	BOOL reserved;
 	char *name;
 } files_struct;

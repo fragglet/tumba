@@ -892,7 +892,6 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 
 	fsp->open = False;
 	fsp->fd_ptr = 0;
-	fsp->granted_oplock = False;
 	errno = EPERM;
 
 	pstrcpy(fname, fname1);
@@ -1075,8 +1074,6 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 		fsp->can_write = ((flags & (O_WRONLY | O_RDWR)) != 0);
 		fsp->share_mode = 0;
 		fsp->modified = False;
-		fsp->granted_oplock = False;
-		fsp->sent_oplock_break = False;
 		fsp->cnum = cnum;
 		/*
 		 * Note that the file name here is the *untranslated* name
@@ -1141,11 +1138,6 @@ void close_file(int fnum, BOOL normal_close)
 #endif
 
 	fd_attempt_close(fs_p->fd_ptr);
-
-	if (fs_p->granted_oplock == True)
-		global_oplocks_open--;
-
-	fs_p->sent_oplock_break = False;
 
 	DEBUG(2, ("%s %s closed file %s (numopen=%d)\n", timestring(),
 	          Connections[cnum].user, fs_p->name,
@@ -1966,255 +1958,9 @@ pid %d, port %d, dev = %x, inode = %x\n",
 ****************************************************************************/
 BOOL oplock_break(uint32 dev, uint32 inode, struct timeval *tval)
 {
-	extern struct current_user current_user;
-	extern int Client;
-	char *inbuf = NULL;
-	char *outbuf = NULL;
-	files_struct *fsp = NULL;
-	int fnum;
-	time_t start_time;
-	BOOL shutdown_server = False;
-	int saved_cnum;
-	pstring saved_dir;
-
-	DEBUG(3, ("%s oplock_break: called for dev = %x, inode = %x. Current \
-global_oplocks_open = %d\n",
-	          timestring(), dev, inode, global_oplocks_open));
-
-	/* We need to search the file open table for the
-	   entry containing this dev and inode, and ensure
-	   we have an oplock on it. */
-	for (fnum = 0; fnum < MAX_OPEN_FILES; fnum++) {
-		if (OPEN_FNUM(fnum)) {
-			if ((Files[fnum].fd_ptr->dev == dev) &&
-			    (Files[fnum].fd_ptr->inode == inode) &&
-			    (Files[fnum].open_time.tv_sec == tval->tv_sec) &&
-			    (Files[fnum].open_time.tv_usec == tval->tv_usec)) {
-				fsp = &Files[fnum];
-				break;
-			}
-		}
-	}
-
-	if (fsp == NULL) {
-		/* The file could have been closed in the meantime - return
-		 * success. */
-		DEBUG(
-		    0,
-		    ("%s oplock_break: cannot find open file with dev = %x, inode = %x (fnum = %d) \
-allowing break to succeed.\n",
-		     timestring(), dev, inode, fnum));
-		return True;
-	}
-
-	/* Ensure we have an oplock on the file */
-
-	/* There is a potential race condition in that an oplock could
-	   have been broken due to another udp request, and yet there are
-	   still oplock break messages being sent in the udp message
-	   queue for this file. So return true if we don't have an oplock,
-	   as we may have just freed it.
-	 */
-
-	if (!fsp->granted_oplock) {
-		DEBUG(0, ("%s oplock_break: file %s (fnum = %d, dev = %x, "
-		          "inode = %x) has no oplock. Allowing break to "
-		          "succeed regardless.\n",
-		          timestring(), fsp->name, fnum, dev, inode));
-		return True;
-	}
-
-	/* mark the oplock break as sent - we don't want to send twice! */
-	if (fsp->sent_oplock_break) {
-		DEBUG(0, ("%s oplock_break: ERROR: oplock_break already sent "
-		          "for file %s (fnum = %d, dev = %x, inode = %x)\n",
-		          timestring(), fsp->name, fnum, dev, inode));
-
-		/* We have to fail the open here as we cannot send another
-		   oplock break on this file whilst we are awaiting a response
-		   from the client - neither can we allow another open to
-		   succeed while we are waiting for the client. */
-		return False;
-	}
-
-	/* Now comes the horrid part. We must send an oplock break to the
-	   client, and then process incoming messages until we get a close or
-	   oplock release. At this point we know we need a new inbuf/outbuf
-	   buffer pair. We cannot use these staticaly as we may recurse into
-	   here due to messages crossing on the wire.
-	 */
-
-	if ((inbuf = (char *) malloc(BUFFER_SIZE + SAFETY_MARGIN)) == NULL) {
-		DEBUG(0, ("oplock_break: malloc fail for input buffer.\n"));
-		return False;
-	}
-
-	if ((outbuf = (char *) malloc(BUFFER_SIZE + SAFETY_MARGIN)) == NULL) {
-		DEBUG(0, ("oplock_break: malloc fail for output buffer.\n"));
-		free(inbuf);
-		inbuf = NULL;
-		return False;
-	}
-
-	/* Prepare the SMBlockingX message. */
-	bzero(outbuf, smb_size);
-	set_message(outbuf, 8, 0, True);
-
-	SCVAL(outbuf, smb_com, SMBlockingX);
-	SSVAL(outbuf, smb_tid, fsp->cnum);
-	SSVAL(outbuf, smb_pid, 0xFFFF);
-	SSVAL(outbuf, smb_uid, 0);
-	SSVAL(outbuf, smb_mid, 0xFFFF);
-	SCVAL(outbuf, smb_vwv0, 0xFF);
-	SSVAL(outbuf, smb_vwv2, fnum);
-	SCVAL(outbuf, smb_vwv3, LOCKING_ANDX_OPLOCK_RELEASE);
-	/* Change this when we have level II oplocks. */
-	SCVAL(outbuf, smb_vwv3 + 1, OPLOCKLEVEL_NONE);
-
-	send_smb(Client, outbuf);
-
-	/* Remember we just sent an oplock break on this file. */
-	fsp->sent_oplock_break = True;
-
-	/* We need this in case a readraw crosses on the wire. */
-	global_oplock_break = True;
-
-	/* Process incoming messages. */
-
-	/* JRA - If we don't get a break from the client in OPLOCK_BREAK_TIMEOUT
-	   seconds we should just die.... */
-
-	start_time = time(NULL);
-
-	/*
-	 * Save the information we need to re-become the
-	 * user, then unbecome the user whilst we're doing this.
-	 */
-	saved_cnum = fsp->cnum;
-	GetWd(saved_dir);
-	unbecome_user();
-
-	while (OPEN_FNUM(fnum) && fsp->granted_oplock) {
-		if (receive_smb(Client, inbuf, OPLOCK_BREAK_TIMEOUT * 1000) ==
-		    False) {
-			/*
-			 * Die if we got an error.
-			 */
-
-			if (smb_read_error == READ_EOF)
-				DEBUG(0, ("%s oplock_break: end of file from "
-				          "client\n",
-				          timestring()));
-
-			if (smb_read_error == READ_ERROR)
-				DEBUG(0, ("%s oplock_break: receive_smb error "
-				          "(%s)\n",
-				          timestring(), strerror(errno)));
-
-			if (smb_read_error == READ_TIMEOUT)
-				DEBUG(0, ("%s oplock_break: receive_smb timed "
-				          "out after %d seconds.\n",
-				          timestring(), OPLOCK_BREAK_TIMEOUT));
-
-			DEBUG(
-			    0,
-			    ("%s oplock_break failed for file %s (fnum = %d, dev = %x, \
-inode = %x).\n",
-			     timestring(), fsp->name, fnum, dev, inode));
-			shutdown_server = True;
-			break;
-		}
-
-		/*
-		 * There are certain SMB requests that we shouldn't allow
-		 * to recurse. opens, renames and deletes are the obvious
-		 * ones. This is handled in the switch_message() function.
-		 * If global_oplock_break is set they will push the packet onto
-		 * the pending smb queue and return -1 (no reply).
-		 * JRA.
-		 */
-
-		process_smb(inbuf, outbuf);
-
-		/*
-		 * Die if we go over the time limit.
-		 */
-
-		if ((time(NULL) - start_time) > OPLOCK_BREAK_TIMEOUT) {
-			DEBUG(
-			    0,
-			    ("%s oplock_break: no break received from client within \
-%d seconds.\n",
-			     timestring(), OPLOCK_BREAK_TIMEOUT));
-			DEBUG(
-			    0,
-			    ("%s oplock_break failed for file %s (fnum = %d, dev = %x, \
-inode = %x).\n",
-			     timestring(), fsp->name, fnum, dev, inode));
-			shutdown_server = True;
-			break;
-		}
-	}
-
-	/*
-	 * Go back to being the user who requested the oplock
-	 * break.
-	 */
-	if (!become_user(&Connections[saved_cnum], saved_cnum)) {
-		DEBUG(0, ("%s oplock_break: unable to re-become user ! "
-		          "Shutting down server\n",
-		          timestring()));
-		close_sockets();
-		close(oplock_sock);
-		exit_server("unable to re-become user");
-	}
-	/* Including the directory. */
-	ChDir(saved_dir);
-
-	/* Free the buffers we've been using to recurse. */
-	free(inbuf);
-	free(outbuf);
-
-	/* We need this in case a readraw crossed on the wire. */
-	if (global_oplock_break)
-		global_oplock_break = False;
-
-	/*
-	 * If the client did not respond we must die.
-	 */
-
-	if (shutdown_server) {
-		DEBUG(0, ("%s oplock_break: client failure in break - shutting "
-		          "down this smbd.\n",
-		          timestring()));
-		close_sockets();
-		close(oplock_sock);
-		exit_server("oplock break failure");
-	}
-
-	if (OPEN_FNUM(fnum)) {
-		/* The lockingX reply will have removed the oplock flag
-		   from the sharemode. */
-		/* Paranoia.... */
-		fsp->granted_oplock = False;
-		fsp->sent_oplock_break = False;
-		global_oplocks_open--;
-	}
-
-	/* Santity check - remove this later. JRA */
-	if (global_oplocks_open < 0) {
-		DEBUG(0, ("oplock_break: global_oplocks_open < 0 (%d). PANIC "
-		          "ERROR\n",
-		          global_oplocks_open));
-		exit_server("oplock_break: global_oplocks_open < 0");
-	}
-
-	DEBUG(
-	    3,
-	    ("%s oplock_break: returning success for fnum = %d, dev = %x, inode = %x. Current \
-global_oplocks_open = %d\n",
-	     timestring(), fnum, dev, inode, global_oplocks_open));
-
+	DEBUG(0, ("%s oplock_break: oplocks not supported. "
+	          "Allowing break to succeed regardless.\n",
+	          timestring()));
 	return True;
 }
 
@@ -2642,34 +2388,6 @@ int make_connection(char *service, char *dev)
 }
 
 /****************************************************************************
-  Attempt to break an oplock on a file (if oplocked).
-  Returns True if the file was closed as a result of
-  the oplock break, False otherwise.
-  Used as a last ditch attempt to free a space in the
-  file table when we have run out.
-****************************************************************************/
-
-static BOOL attempt_close_oplocked_file(files_struct *fp)
-{
-
-	DEBUG(5,
-	      ("attempt_close_oplocked_file: checking file %s.\n", fp->name));
-
-	if (fp->open && fp->granted_oplock && !fp->sent_oplock_break) {
-
-		/* Try and break the oplock. */
-		file_fd_struct *fsp = fp->fd_ptr;
-		if (oplock_break(fsp->dev, fsp->inode, &fp->open_time)) {
-			if (!fp->open) /* Did the oplock break close the file ?
-			                */
-				return True;
-		}
-	}
-
-	return False;
-}
-
-/****************************************************************************
   find first available file slot
 ****************************************************************************/
 int find_free_file(void)
@@ -2707,33 +2425,6 @@ int find_free_file(void)
 			Files[i].reserved = True;
 			return (i);
 		}
-
-	/*
-	 * Before we give up, go through the open files
-	 * and see if there are any files opened with a
-	 * batch oplock. If so break the oplock and then
-	 * re-use that entry (if it becomes closed).
-	 * This may help as NT/95 clients tend to keep
-	 * files batch oplocked for quite a long time
-	 * after they have finished with them.
-	 */
-	for (i = first_file; i < MAX_OPEN_FILES; i++) {
-		if (attempt_close_oplocked_file(&Files[i])) {
-			memset(&Files[i], 0, sizeof(Files[i]));
-			first_file = i + 1;
-			Files[i].reserved = True;
-			return (i);
-		}
-	}
-
-	for (i = 1; i < MAX_OPEN_FILES; i++) {
-		if (attempt_close_oplocked_file(&Files[i])) {
-			memset(&Files[i], 0, sizeof(Files[i]));
-			first_file = i + 1;
-			Files[i].reserved = True;
-			return (i);
-		}
-	}
 
 	DEBUG(1, ("ERROR! Out of file structures - perhaps increase "
 	          "MAX_OPEN_FILES?\n"));
