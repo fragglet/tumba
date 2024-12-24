@@ -1533,22 +1533,6 @@ char *volume_label(int snum)
 }
 
 /*******************************************************************
-rename a service
-********************************************************************/
-void lp_rename_service(int snum, char *new_name)
-{
-	string_set(&pSERVICE(snum)->szService, new_name);
-}
-
-/*******************************************************************
-remove a service
-********************************************************************/
-void lp_remove_service(int snum)
-{
-	pSERVICE(snum)->valid = False;
-}
-
-/*******************************************************************
 copy a service
 ********************************************************************/
 void lp_copy_service(int snum, char *new_name)

@@ -120,8 +120,6 @@ int lp_numservices(void);
 void lp_dump(FILE *f);
 int lp_servicenumber(char *pszServiceName);
 char *volume_label(int snum);
-void lp_rename_service(int snum, char *new_name);
-void lp_remove_service(int snum);
 void lp_copy_service(int snum, char *new_name);
 
 /*The following definitions come from  locking.c  */
