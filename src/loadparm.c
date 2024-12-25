@@ -378,9 +378,8 @@ char *lp_string(char *s)
 	char *ret;
 	int len = s ? strlen(s) : 0;
 
-	len += 100; /* the +100 is for some substitution room */
-
-	bufs[next] = realloc(bufs[next], len);
+	/* the +100 is for some substitution room */
+	bufs[next] = realloc(bufs[next], len + 100);
 	ret = &bufs[next][0];
 
 	next = (next + 1) % 10;
