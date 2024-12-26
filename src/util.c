@@ -485,21 +485,6 @@ uint32_t file_size(char *file_name)
 	return (buf.st_size);
 }
 
-/*******************************************************************
-  case insensitive string compararison
-********************************************************************/
-int StrCaseCmp(char *s, char *t)
-{
-	/* compare until we run out of string, either t or s, or find a
-	 * difference */
-	while (*s && *t && toupper(*s) == toupper(*t)) {
-		s++;
-		t++;
-	}
-
-	return (toupper(*s) - toupper(*t));
-}
-
 void init_dos_char_table(void)
 {
 	int i;
@@ -535,7 +520,7 @@ bool strequal(char *s1, char *s2)
 	if (!s1 || !s2)
 		return (false);
 
-	return (StrCaseCmp(s1, s2) == 0);
+	return strcasecmp(s1, s2) == 0;
 }
 
 /*******************************************************************

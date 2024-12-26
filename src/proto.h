@@ -283,7 +283,6 @@ bool file_exist(char *fname, struct stat *sbuf);
 time_t file_modtime(char *fname);
 bool directory_exist(char *dname, struct stat *st);
 uint32_t file_size(char *file_name);
-int StrCaseCmp(char *s, char *t);
 int isdoschar(int c);
 void init_dos_char_table(void);
 bool strequal(char *s1, char *s2);
