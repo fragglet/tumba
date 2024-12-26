@@ -96,7 +96,6 @@ typedef struct {
 	char *szServerString;
 	char *szLogFile;
 	char *szConfigFile;
-	char *szValidChars;
 	char *szWorkGroup;
 	char *szCharacterSet;
 	char *szSocketAddress;
@@ -191,7 +190,6 @@ static BOOL bGlobalOnly = False;
 #define NUMPARAMETERS (sizeof(parm_table) / sizeof(struct parm_struct))
 
 /* prototypes for the special type handlers */
-static BOOL handle_valid_chars(char *pszParmValue, char **ptr);
 static BOOL handle_include(char *pszParmValue, char **ptr);
 static BOOL handle_copy(char *pszParmValue, char **ptr);
 static BOOL handle_character_set(char *pszParmValue, char **ptr);
@@ -227,8 +225,6 @@ static struct parm_struct {
     {"default service", P_STRING, P_GLOBAL, &Globals.szDefaultService, NULL,
      NULL},
     {"default", P_STRING, P_GLOBAL, &Globals.szDefaultService, NULL, NULL},
-    {"valid chars", P_STRING, P_GLOBAL, &Globals.szValidChars,
-     handle_valid_chars, NULL},
     {"workgroup", P_USTRING, P_GLOBAL, &Globals.szWorkGroup, NULL, NULL},
     {"character set", P_STRING, P_GLOBAL, &Globals.szCharacterSet,
      handle_character_set, NULL},
@@ -843,23 +839,6 @@ static BOOL handle_character_set(char *pszParmValue, char **ptr)
 {
 	string_set(ptr, pszParmValue);
 	interpret_character_set(pszParmValue);
-	return (True);
-}
-
-/***************************************************************************
-handle the valid chars lines
-***************************************************************************/
-static BOOL handle_valid_chars(char *pszParmValue, char **ptr)
-{
-	string_set(ptr, pszParmValue);
-
-	/* A dependency here is that the parameter client code page must be
-	   set before this is called - as calling codepage_initialise()
-	   would overwrite the valid char lines.
-	 */
-	codepage_initialise(lp_client_code_page());
-
-	add_char_string(pszParmValue);
 	return (True);
 }
 
