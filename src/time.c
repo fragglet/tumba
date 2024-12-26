@@ -45,18 +45,6 @@ extern int DEBUGLEVEL;
 #define TIME_T_MAX (~(time_t) 0 - TIME_T_MIN)
 #endif
 
-/*******************************************************************
-a gettimeofday wrapper
-********************************************************************/
-void GetTimeOfDay(struct timeval *tval)
-{
-#ifdef GETTIMEOFDAY1
-	gettimeofday(tval);
-#else
-	gettimeofday(tval, NULL);
-#endif
-}
-
 #define TM_YEAR_BASE 1900
 
 /*******************************************************************

@@ -1055,7 +1055,7 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 		fsp->fd_ptr = fd_ptr;
 		Connections[cnum].num_files_open++;
 		fsp->mode = sbuf->st_mode;
-		GetTimeOfDay(&fsp->open_time);
+		gettimeofday(&fsp->open_time, NULL);
 		fsp->size = 0;
 		fsp->pos = -1;
 		fsp->open = True;
@@ -2660,7 +2660,7 @@ static int switch_message(int type, char *inbuf, char *outbuf, int size,
 	struct timeval msg_end_time;
 	static unsigned long total_time = 0;
 
-	GetTimeOfDay(&msg_start_time);
+	getimeofday(&msg_start_time, NULL);
 #endif
 
 	if (pid == -1)
@@ -2737,7 +2737,7 @@ static int switch_message(int type, char *inbuf, char *outbuf, int size,
 	}
 
 #if PROFILING
-	GetTimeOfDay(&msg_end_time);
+	gettimeofday(&msg_end_time, NULL);
 	if (!(smb_messages[match].flags & TIME_INIT)) {
 		smb_messages[match].time = 0;
 		smb_messages[match].flags |= TIME_INIT;

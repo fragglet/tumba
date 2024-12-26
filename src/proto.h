@@ -263,7 +263,6 @@ int sys_chown(char *fname, int uid, int gid);
 
 /*The following definitions come from  time.c  */
 
-void GetTimeOfDay(struct timeval *tval);
 void TimeInit(void);
 int TimeDiff(time_t t);
 struct tm *LocalTime(time_t *t);
