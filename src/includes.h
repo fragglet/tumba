@@ -95,7 +95,6 @@
 #include "byteorder.h"
 
 #include "charset.h"
-#include "kanji.h"
 
 #ifndef MAXCODEPAGELINES
 #define MAXCODEPAGELINES 256

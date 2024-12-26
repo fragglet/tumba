@@ -26,7 +26,6 @@ OBJECTS = \
 	dir.o                \
 	fault.o              \
 	ipc.o                \
-	kanji.o              \
 	loadparm.o           \
 	locking.o            \
 	mangle.o             \

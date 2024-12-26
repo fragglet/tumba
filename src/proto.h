@@ -55,11 +55,6 @@ struct in_addr *iface_n_ip(int n);
 
 int reply_trans(char *inbuf, char *outbuf, int size, int bufsize);
 
-/*The following definitions come from  kanji.c  */
-
-void interpret_coding_system(char *str);
-void initialize_multibyte_vectors(int client_codepage);
-
 /*The following definitions come from  loadparm.c  */
 
 char *lp_string(char *s);
