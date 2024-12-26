@@ -435,7 +435,7 @@ bool file_exist(char *fname, struct stat *sbuf)
 	if (!sbuf)
 		sbuf = &st;
 
-	if (sys_stat(fname, sbuf) != 0)
+	if (stat(fname, sbuf) != 0)
 		return (false);
 
 	return (S_ISREG(sbuf->st_mode));
@@ -448,7 +448,7 @@ time_t file_modtime(char *fname)
 {
 	struct stat st;
 
-	if (sys_stat(fname, &st) != 0)
+	if (stat(fname, &st) != 0)
 		return (0);
 
 	return (st.st_mtime);
@@ -465,7 +465,7 @@ bool directory_exist(char *dname, struct stat *st)
 	if (!st)
 		st = &st2;
 
-	if (sys_stat(dname, st) != 0)
+	if (stat(dname, st) != 0)
 		return (false);
 
 	ret = S_ISDIR(st->st_mode);
@@ -481,7 +481,7 @@ uint32 file_size(char *file_name)
 {
 	struct stat buf;
 	buf.st_size = 0;
-	sys_stat(file_name, &buf);
+	stat(file_name, &buf);
 	return (buf.st_size);
 }
 
@@ -830,7 +830,7 @@ int ChDir(char *path)
 	if (*path == '/' && strcsequal(LastDir, path))
 		return (0);
 	DEBUG(3, ("chdir to %s\n", path));
-	res = sys_chdir(path);
+	res = chdir(path);
 	if (!res)
 		pstrcpy(LastDir, path);
 	return (res);
@@ -861,7 +861,7 @@ char *GetWd(char *str)
 	*s = 0;
 
 	if (!use_getwd_cache)
-		return (sys_getwd(str));
+		return getcwd(str, sizeof(pstring));
 
 	/* init the cache */
 	if (!getwd_cache_init) {
@@ -877,7 +877,7 @@ char *GetWd(char *str)
 
 	if (stat(".", &st) == -1) {
 		DEBUG(0, ("Very strange, couldn't stat \".\"\n"));
-		return (sys_getwd(str));
+		return getcwd(str, sizeof(pstring));
 	}
 
 	for (i = 0; i < MAX_GETWDCACHE; i++)
@@ -918,7 +918,7 @@ char *GetWd(char *str)
 	   methods. The very slow getcwd, which spawns a process on some
 	   systems, or the not quite so bad getwd. */
 
-	if (!sys_getwd(s)) {
+	if (!getcwd(s, sizeof(pstring))) {
 		DEBUG(0, ("Getwd failed, errno %s\n", strerror(errno)));
 		return (NULL);
 	}

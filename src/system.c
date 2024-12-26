@@ -60,78 +60,6 @@ int sys_select(fd_set *fds, struct timeval *tval)
 }
 
 /*******************************************************************
-just a unlink wrapper
-********************************************************************/
-int sys_unlink(char *fname)
-{
-	return unlink(fname);
-}
-
-/*******************************************************************
-a simple open() wrapper
-********************************************************************/
-int sys_open(char *fname, int flags, int mode)
-{
-	return open(fname, flags, mode);
-}
-
-/*******************************************************************
-a simple opendir() wrapper
-********************************************************************/
-DIR *sys_opendir(char *dname)
-{
-	return opendir(dname);
-}
-
-/*******************************************************************
-and a stat() wrapper
-********************************************************************/
-int sys_stat(char *fname, struct stat *sbuf)
-{
-	return stat(fname, sbuf);
-}
-
-/*******************************************************************
-The wait() calls vary between systems
-********************************************************************/
-int sys_waitpid(pid_t pid, int *status, int options)
-{
-	return waitpid(pid, status, options);
-}
-
-/*******************************************************************
-don't forget lstat()
-********************************************************************/
-int sys_lstat(char *fname, struct stat *sbuf)
-{
-	return lstat(fname, sbuf);
-}
-
-/*******************************************************************
-mkdir() gets a wrapper
-********************************************************************/
-int sys_mkdir(char *dname, int mode)
-{
-	return mkdir(dname, mode);
-}
-
-/*******************************************************************
-do does rmdir()
-********************************************************************/
-int sys_rmdir(char *dname)
-{
-	return rmdir(dname);
-}
-
-/*******************************************************************
-I almost forgot chdir()
-********************************************************************/
-int sys_chdir(char *dname)
-{
-	return chdir(dname);
-}
-
-/*******************************************************************
 now for utime()
 ********************************************************************/
 int sys_utime(char *fname, struct utimbuf *times)
@@ -253,28 +181,4 @@ int sys_rename(char *from, char *to)
 		rcode = copy_reg(zfrom, zto);
 	}
 	return rcode;
-}
-
-/*******************************************************************
-for chmod
-********************************************************************/
-int sys_chmod(char *fname, int mode)
-{
-	return chmod(fname, mode);
-}
-
-/*******************************************************************
-for getwd
-********************************************************************/
-char *sys_getwd(char *s)
-{
-	return (char *) getcwd(s, sizeof(pstring));
-}
-
-/*******************************************************************
-chown isn't used much but OS/2 doesn't have it
-********************************************************************/
-int sys_chown(char *fname, int uid, int gid)
-{
-	return (chown(fname, uid, gid));
 }

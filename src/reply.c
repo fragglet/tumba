@@ -511,7 +511,7 @@ int reply_getatr(char *inbuf, char *outbuf, int in_size, int buffsize)
 		mtime = 0;
 		ok = true;
 	} else if (check_name(fname, cnum)) {
-		if (sys_stat(fname, &sbuf) == 0) {
+		if (stat(fname, &sbuf) == 0) {
 			mode = dos_mode(cnum, fname, &sbuf);
 			size = sbuf.st_size;
 			mtime = sbuf.st_mtime;
@@ -1229,7 +1229,7 @@ static bool can_delete(char *fname, int cnum, int dirtype)
 	if (!CAN_WRITE(cnum))
 		return (false);
 
-	if (sys_lstat(fname, &sbuf) != 0)
+	if (lstat(fname, &sbuf) != 0)
 		return (false);
 	fmode = dos_mode(cnum, fname, &sbuf);
 	if (fmode & aDIR)
@@ -1287,7 +1287,7 @@ int reply_unlink(char *inbuf, char *outbuf, int dum_size, int dum_bufsize)
 		pstrcat(directory, "/");
 		pstrcat(directory, mask);
 		if (can_delete(directory, cnum, dirtype) &&
-		    !sys_unlink(directory))
+		    !unlink(directory))
 			count++;
 		if (!count)
 			exists = file_exist(directory, NULL);
@@ -1322,7 +1322,7 @@ int reply_unlink(char *inbuf, char *outbuf, int dum_size, int dum_bufsize)
 				         directory, dname);
 				if (!can_delete(fname, cnum, dirtype))
 					continue;
-				if (!sys_unlink(fname))
+				if (!unlink(fname))
 					count++;
 				DEBUG(3, ("reply_unlink : doing unlink on %s\n",
 				          fname));
@@ -2173,7 +2173,7 @@ int reply_mkdir(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	unix_convert(directory, cnum, 0, &bad_path);
 
 	if (check_name(directory, cnum))
-		ret = sys_mkdir(directory, unix_mode(cnum, aDIR));
+		ret = mkdir(directory, unix_mode(cnum, aDIR));
 
 	if (ret < 0) {
 		if ((errno == ENOENT) && bad_path) {
@@ -2209,7 +2209,7 @@ int reply_rmdir(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	if (check_name(directory, cnum)) {
 
 		dptr_closepath(directory, SVAL(inbuf, smb_pid));
-		ok = (sys_rmdir(directory) == 0);
+		ok = (rmdir(directory) == 0);
 		if (!ok)
 			DEBUG(3, ("couldn't remove directory %s : %s\n",
 			          directory, strerror(errno)));
@@ -2307,7 +2307,7 @@ static bool can_rename(char *fname, int cnum)
 	if (!CAN_WRITE(cnum))
 		return (false);
 
-	if (sys_lstat(fname, &sbuf) != 0)
+	if (lstat(fname, &sbuf) != 0)
 		return (false);
 
 	return (true);

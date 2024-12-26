@@ -227,20 +227,8 @@ int vslprintf(char *str, int n, char *format, va_list ap);
 
 int sys_select(fd_set *fds, struct timeval *tval);
 int sys_select(fd_set *fds, struct timeval *tval);
-int sys_unlink(char *fname);
-int sys_open(char *fname, int flags, int mode);
-DIR *sys_opendir(char *dname);
-int sys_stat(char *fname, struct stat *sbuf);
-int sys_waitpid(pid_t pid, int *status, int options);
-int sys_lstat(char *fname, struct stat *sbuf);
-int sys_mkdir(char *dname, int mode);
-int sys_rmdir(char *dname);
-int sys_chdir(char *dname);
 int sys_utime(char *fname, struct utimbuf *times);
 int sys_rename(char *from, char *to);
-int sys_chmod(char *fname, int mode);
-char *sys_getwd(char *s);
-int sys_chown(char *fname, int uid, int gid);
 
 /*The following definitions come from  time.c  */
 

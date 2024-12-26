@@ -357,7 +357,7 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 			if (needslash)
 				pstrcat(pathreal, "/");
 			pstrcat(pathreal, dname);
-			if (sys_stat(pathreal, &sbuf) != 0) {
+			if (stat(pathreal, &sbuf) != 0) {
 				DEBUG(5, ("get_lanman2_dir_entry:Couldn't stat "
 				          "[%s] (%s)\n",
 				          pathreal, strerror(errno)));
@@ -1047,7 +1047,7 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
 	DEBUG(3, ("call_trans2qfsinfo: cnum = %d, level = %d\n", cnum,
 	          info_level));
 
-	if (sys_stat(".", &st) != 0) {
+	if (stat(".", &st) != 0) {
 		DEBUG(2, ("call_trans2qfsinfo: stat of . failed (%s)\n",
 		          strerror(errno)));
 		return (ERROR(ERRSRV, ERRinvdevice));
@@ -1205,7 +1205,7 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
 		fname = &fname1[0];
 		pstrcpy(fname, &params[6]);
 		unix_convert(fname, cnum, 0, &bad_path);
-		if (!check_name(fname, cnum) || sys_stat(fname, &sbuf)) {
+		if (!check_name(fname, cnum) || stat(fname, &sbuf)) {
 			DEBUG(3, ("fileinfo of %s failed (%s)\n", fname,
 			          strerror(errno)));
 			if ((errno == ENOENT) && bad_path) {
@@ -1440,7 +1440,7 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 			return (UNIXERROR(ERRDOS, ERRbadpath));
 		}
 
-		if (sys_stat(fname, &st) != 0) {
+		if (stat(fname, &st) != 0) {
 			DEBUG(3, ("stat of %s failed (%s)\n", fname,
 			          strerror(errno)));
 			if ((errno == ENOENT) && bad_path) {
@@ -1565,7 +1565,7 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 
 	if (size != st.st_size) {
 		if (fd == -1) {
-			fd = sys_open(fname, O_RDWR, 0);
+			fd = open(fname, O_RDWR, 0);
 			if (fd == -1) {
 				return (ERROR(ERRDOS, ERRbadpath));
 			}
@@ -1603,7 +1603,7 @@ static int call_trans2mkdir(char *inbuf, char *outbuf, int length, int bufsize,
 
 	unix_convert(directory, cnum, 0, &bad_path);
 	if (check_name(directory, cnum))
-		ret = sys_mkdir(directory, unix_mode(cnum, aDIR));
+		ret = mkdir(directory, unix_mode(cnum, aDIR));
 
 	if (ret < 0) {
 		DEBUG(5, ("call_trans2mkdir error (%s)\n", strerror(errno)));

@@ -243,7 +243,7 @@ int dos_chmod(int cnum, char *fname, int dosmode, struct stat *st)
 
 	if (!st) {
 		st = &st1;
-		if (sys_stat(fname, st))
+		if (stat(fname, st))
 			return (-1);
 	}
 
@@ -287,7 +287,7 @@ int dos_chmod(int cnum, char *fname, int dosmode, struct stat *st)
 		unixmode |= tmp;
 	}
 
-	return (sys_chmod(fname, unixmode));
+	return (chmod(fname, unixmode));
 }
 
 /*******************************************************************
@@ -318,7 +318,7 @@ int file_utime(int cnum, char *fname, struct utimbuf *times)
 	   (as DOS does).
 	 */
 
-	if (sys_stat(fname, &sb) != 0)
+	if (stat(fname, &sb) != 0)
 		return -1;
 
 	/* Check if we have write access. */
@@ -529,7 +529,7 @@ bool unix_convert(char *name, int cnum, pstring saved_last_component,
 		strnorm(name);
 
 	/* stat the name - if it exists then we are all done! */
-	if (sys_stat(name, &st) == 0)
+	if (stat(name, &st) == 0)
 		return (true);
 
 	saved_errno = errno;
@@ -563,7 +563,7 @@ bool unix_convert(char *name, int cnum, pstring saved_last_component,
 			pstrcpy(saved_last_component, end ? end + 1 : start);
 
 		/* check if the name exists up to this point */
-		if (sys_stat(name, &st) == 0) {
+		if (stat(name, &st) == 0) {
 			/* it exists. it must either be a directory or this must
 			   be the last part of the path for it to be OK */
 			if (end && !(st.st_mode & S_IFDIR)) {
@@ -682,7 +682,7 @@ bool check_name(char *name, int cnum)
 	   University of Geneva */
 	if (!lp_symlinks(SNUM(cnum))) {
 		struct stat statbuf;
-		if ((sys_lstat(name, &statbuf) != -1) &&
+		if ((lstat(name, &statbuf) != -1) &&
 		    (S_ISLNK(statbuf.st_mode))) {
 			DEBUG(3, ("check_name: denied: file path name %s is a "
 			          "symlink\n",
@@ -714,16 +714,16 @@ static void check_for_pipe(char *fname)
 }
 
 /****************************************************************************
-fd support routines - attempt to do a sys_open
+fd support routines - attempt to do a open
 ****************************************************************************/
 static int fd_attempt_open(char *fname, int flags, int mode)
 {
-	int fd = sys_open(fname, flags, mode);
+	int fd = open(fname, flags, mode);
 
 	/* Fix for files ending in '.' */
 	if ((fd == -1) && (errno == ENOENT) && (strchr(fname, '.') == NULL)) {
 		pstrcat(fname, ".");
-		fd = sys_open(fname, flags, mode);
+		fd = open(fname, flags, mode);
 	}
 
 	if ((fd == -1) && (errno == ENAMETOOLONG)) {
@@ -747,7 +747,7 @@ static int fd_attempt_open(char *fname, int flags, int mode)
 			char tmp = p[max_len];
 
 			p[max_len] = '\0';
-			if ((fd = sys_open(fname, flags, mode)) == -1)
+			if ((fd = open(fname, flags, mode)) == -1)
 				p[max_len] = tmp;
 		}
 	}
@@ -823,7 +823,7 @@ Save the already open fd (we cannot close due to POSIX file locking braindamage.
 ****************************************************************************/
 static void fd_attempt_reopen(char *fname, int mode, file_fd_struct *fd_ptr)
 {
-	int fd = sys_open(fname, O_RDWR, mode);
+	int fd = open(fname, O_RDWR, mode);
 
 	if (fd == -1)
 		return;
@@ -925,7 +925,7 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 	 * open fd table.
 	 */
 	if (sbuf == 0) {
-		if (sys_stat(fname, &statbuf) < 0) {
+		if (stat(fname, &statbuf) < 0) {
 			if (errno != ENOENT) {
 				DEBUG(3, ("Error doing stat on file %s (%s)\n",
 				          fname, strerror(errno)));
@@ -1547,7 +1547,7 @@ static int sig_cld(void)
 	DEBUG(5, ("got SIGCLD\n"));
 
 #ifdef USE_WAITPID
-	while (sys_waitpid((pid_t) -1, (int *) NULL, WNOHANG) > 0)
+	while (waitpid((pid_t) -1, (int *) NULL, WNOHANG) > 0)
 		;
 #endif
 
@@ -2387,7 +2387,7 @@ static bool dump_core(void)
 		*p = 0;
 	pstrcat(dname, "/corefiles");
 	mkdir(dname, 0700);
-	sys_chown(dname, getuid(), getgid());
+	chown(dname, getuid(), getgid());
 	chmod(dname, 0700);
 	if (chdir(dname))
 		return (false);

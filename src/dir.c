@@ -475,7 +475,7 @@ bool get_dir_entry(int cnum, char *mask, int dirtype, char *fname, int *size,
 		pstrcpy(pathreal, path);
 		pstrcat(path, fname);
 		pstrcat(pathreal, dname);
-		if (sys_stat(pathreal, &sbuf) != 0) {
+		if (stat(pathreal, &sbuf) != 0) {
 			DEBUG(5, ("Couldn't stat 1 [%s]\n", path));
 			continue;
 		}
@@ -515,7 +515,7 @@ void *OpenDir(int cnum, char *name)
 {
 	Dir *dirp;
 	char *n;
-	void *p = sys_opendir(name);
+	void *p = opendir(name);
 	int used = 0;
 
 	if (!p)
