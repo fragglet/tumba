@@ -66,7 +66,6 @@ char *lp_string(char *s);
 char *lp_logfile(void);
 char *lp_configfile(void);
 char *lp_serverstring(void);
-char *lp_lockdir(void);
 char *lp_defaultservice(void);
 char *lp_workgroup(void);
 char *lp_character_set(void);

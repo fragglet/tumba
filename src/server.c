@@ -3253,10 +3253,6 @@ int main(int argc, char *argv[])
 		become_daemon();
 	}
 
-	if (!directory_exist(lp_lockdir(), NULL)) {
-		mkdir(lp_lockdir(), 0755);
-	}
-
 	if (*pidFile) {
 		int fd;
 		char buf[20];
