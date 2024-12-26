@@ -29,9 +29,6 @@ BOOL passive = False;
 
 int Protocol = PROTOCOL_COREPLUS;
 
-/* a default finfo structure to ensure all fields are sensible */
-file_info def_finfo = {-1, 0, 0, 0, 0, 0, 0, ""};
-
 /* these are some file handles where debug info will be stored */
 FILE *dbf = NULL;
 
@@ -2633,14 +2630,6 @@ int PutUniCode(char *dst, char *src)
 	dst[ret++] = 0;
 	dst[ret++] = 0;
 	return (ret);
-}
-
-/****************************************************************************
-check if a process exists. Does this work on all unixes?
-****************************************************************************/
-BOOL process_exists(int pid)
-{
-	return (kill(pid, 0) == 0 || errno != ESRCH);
 }
 
 /*******************************************************************

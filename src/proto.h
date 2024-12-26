@@ -377,7 +377,6 @@ void reset_globals_after_fork(void);
 char *client_addr(void);
 void standard_sub_basic(char *str);
 int PutUniCode(char *dst, char *src);
-BOOL process_exists(int pid);
 char *gidtoname(int gid);
 void BlockSignals(BOOL block, int signum);
 void ajt_panic(void);
