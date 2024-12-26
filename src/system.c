@@ -64,7 +64,7 @@ just a unlink wrapper
 ********************************************************************/
 int sys_unlink(char *fname)
 {
-	return (unlink(dos2unix_format(fname, false)));
+	return unlink(fname);
 }
 
 /*******************************************************************
@@ -72,7 +72,7 @@ a simple open() wrapper
 ********************************************************************/
 int sys_open(char *fname, int flags, int mode)
 {
-	return (open(dos2unix_format(fname, false), flags, mode));
+	return open(fname, flags, mode);
 }
 
 /*******************************************************************
@@ -80,7 +80,7 @@ a simple opendir() wrapper
 ********************************************************************/
 DIR *sys_opendir(char *dname)
 {
-	return (opendir(dos2unix_format(dname, false)));
+	return opendir(dname);
 }
 
 /*******************************************************************
@@ -88,7 +88,7 @@ and a stat() wrapper
 ********************************************************************/
 int sys_stat(char *fname, struct stat *sbuf)
 {
-	return (stat(dos2unix_format(fname, false), sbuf));
+	return stat(fname, sbuf);
 }
 
 /*******************************************************************
@@ -104,7 +104,7 @@ don't forget lstat()
 ********************************************************************/
 int sys_lstat(char *fname, struct stat *sbuf)
 {
-	return (lstat(dos2unix_format(fname, false), sbuf));
+	return lstat(fname, sbuf);
 }
 
 /*******************************************************************
@@ -112,7 +112,7 @@ mkdir() gets a wrapper
 ********************************************************************/
 int sys_mkdir(char *dname, int mode)
 {
-	return (mkdir(dos2unix_format(dname, false), mode));
+	return mkdir(dname, mode);
 }
 
 /*******************************************************************
@@ -120,7 +120,7 @@ do does rmdir()
 ********************************************************************/
 int sys_rmdir(char *dname)
 {
-	return (rmdir(dos2unix_format(dname, false)));
+	return rmdir(dname);
 }
 
 /*******************************************************************
@@ -128,7 +128,7 @@ I almost forgot chdir()
 ********************************************************************/
 int sys_chdir(char *dname)
 {
-	return (chdir(dos2unix_format(dname, false)));
+	return chdir(dname);
 }
 
 /*******************************************************************
@@ -145,7 +145,7 @@ int sys_utime(char *fname, struct utimbuf *times)
 	if (times->actime == (time_t) 0 || times->actime == (time_t) -1)
 		times->actime = times->modtime;
 
-	return (utime(dos2unix_format(fname, false), times));
+	return utime(fname, times);
 }
 
 /*********************************************************
@@ -246,9 +246,7 @@ int sys_rename(char *from, char *to)
 	int rcode;
 	pstring zfrom, zto;
 
-	pstrcpy(zfrom, dos2unix_format(from, false));
-	pstrcpy(zto, dos2unix_format(to, false));
-	rcode = rename(zfrom, zto);
+	rcode = rename(from, to);
 
 	if (errno == EXDEV) {
 		/* Rename across filesystems needed. */
@@ -262,7 +260,7 @@ for chmod
 ********************************************************************/
 int sys_chmod(char *fname, int mode)
 {
-	return (chmod(dos2unix_format(fname, false), mode));
+	return chmod(fname, mode);
 }
 
 /*******************************************************************
@@ -270,11 +268,7 @@ for getwd
 ********************************************************************/
 char *sys_getwd(char *s)
 {
-	char *wd;
-	wd = (char *) getcwd(s, sizeof(pstring));
-	if (wd)
-		unix2dos_format(wd, true);
-	return wd;
+	return (char *) getcwd(s, sizeof(pstring));
 }
 
 /*******************************************************************

@@ -2491,6 +2491,7 @@ also return the inode number if requested
 ********************************************************************/
 char *readdirname(void *p)
 {
+	static pstring buf;
 	struct DIRECT *ptr;
 	char *dname;
 
@@ -2503,14 +2504,8 @@ char *readdirname(void *p)
 
 	dname = ptr->d_name;
 
-	{
-		static pstring buf;
-		pstrcpy(buf, dname);
-		unix2dos_format(buf, true);
-		dname = buf;
-	}
-
-	return (dname);
+	pstrcpy(buf, dname);
+	return buf;
 }
 
 /****************************************************************************
