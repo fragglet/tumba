@@ -498,7 +498,8 @@ void init_dos_char_table(void)
 	memset(valid_dos_chars, 0, sizeof(valid_dos_chars));
 
 	for (i = 0; i <= 127; i++) {
-		if (isalnum((char) i) || strchr("._^$~!#%&-{}()@'`", (char) i)) {
+		if (isalnum((char) i) ||
+		    strchr("._^$~!#%&-{}()@'`", (char) i)) {
 			valid_dos_chars[i / 8] |= i % 8;
 		}
 	}

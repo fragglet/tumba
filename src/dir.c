@@ -40,8 +40,8 @@ static struct dptr_struct {
 	bool valid;
 	bool finished;
 	bool expect_close;
-	char *wcard; /* Field only used for lanman2 trans2_findfirst/next
-	                searches */
+	char *wcard;   /* Field only used for lanman2 trans2_findfirst/next
+	                  searches */
 	uint16_t attr; /* Field only used for lanman2 trans2_findfirst/next
 	                searches */
 	char *path;

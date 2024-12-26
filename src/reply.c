@@ -732,7 +732,8 @@ int reply_search(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		while (*p) {
 			if (*p != '?' && *p != '*' && !isdoschar(*p)) {
 				DEBUG(5, ("Invalid char [%c] in search "
-				          "mask?\n", *p));
+				          "mask?\n",
+				          *p));
 				*p = '?';
 			}
 			p++;
@@ -1286,8 +1287,7 @@ int reply_unlink(char *inbuf, char *outbuf, int dum_size, int dum_bufsize)
 	if (!has_wild) {
 		pstrcat(directory, "/");
 		pstrcat(directory, mask);
-		if (can_delete(directory, cnum, dirtype) &&
-		    !unlink(directory))
+		if (can_delete(directory, cnum, dirtype) && !unlink(directory))
 			count++;
 		if (!count)
 			exists = file_exist(directory, NULL);

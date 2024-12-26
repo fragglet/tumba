@@ -100,7 +100,8 @@ char *volume_label(int snum);
 
 /*The following definitions come from  locking.c  */
 
-bool is_locked(int fnum, int cnum, uint32_t count, uint32_t offset, int lock_type);
+bool is_locked(int fnum, int cnum, uint32_t count, uint32_t offset,
+               int lock_type);
 bool do_lock(int fnum, int cnum, uint32_t count, uint32_t offset, int lock_type,
              int *eclass, uint32_t *ecode);
 bool do_unlock(int fnum, int cnum, uint32_t count, uint32_t offset, int *eclass,
@@ -198,10 +199,10 @@ int write_file(int fnum, char *data, int n);
 bool become_service(int cnum, bool do_chdir);
 int find_service(char *service);
 int cached_error_packet(char *inbuf, char *outbuf, int fnum, int line);
-int unix_error_packet(char *inbuf, char *outbuf, int def_class, uint32_t def_code,
-                      int line);
-int error_packet(char *inbuf, char *outbuf, int error_class, uint32_t error_code,
-                 int line);
+int unix_error_packet(char *inbuf, char *outbuf, int def_class,
+                      uint32_t def_code, int line);
+int error_packet(char *inbuf, char *outbuf, int error_class,
+                 uint32_t error_code, int line);
 bool receive_next_smb(int smbfd, char *inbuf, int bufsize, int timeout);
 bool snum_used(int snum);
 bool reload_services(bool test);

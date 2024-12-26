@@ -28,10 +28,10 @@
 
 #include "local.h"
 #include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <time.h>
 #include <utime.h>

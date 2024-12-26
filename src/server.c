@@ -1481,8 +1481,8 @@ struct {
 /****************************************************************************
   create an error packet from errno
 ****************************************************************************/
-int unix_error_packet(char *inbuf, char *outbuf, int def_class, uint32_t def_code,
-                      int line)
+int unix_error_packet(char *inbuf, char *outbuf, int def_class,
+                      uint32_t def_code, int line)
 {
 	int eclass = def_class;
 	int ecode = def_code;
@@ -1510,8 +1510,8 @@ int unix_error_packet(char *inbuf, char *outbuf, int def_class, uint32_t def_cod
 /****************************************************************************
   create an error packet. Normally called using the ERROR() macro
 ****************************************************************************/
-int error_packet(char *inbuf, char *outbuf, int error_class, uint32_t error_code,
-                 int line)
+int error_packet(char *inbuf, char *outbuf, int error_class,
+                 uint32_t error_code, int line)
 {
 	int outsize = set_message(outbuf, 0, 0, true);
 
