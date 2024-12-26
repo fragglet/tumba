@@ -276,7 +276,6 @@ void reopen_logs(void);
 void force_check_log_size(void);
 char *tmpdir(void);
 bool is_a_socket(int fd);
-bool next_token(char **ptr, char *buff, char *sep);
 void array_promote(char *array, int elsize, int element);
 void close_sockets(void);
 char *StrnCpy(char *dest, char *src, int n);

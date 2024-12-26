@@ -292,53 +292,6 @@ bool is_a_socket(int fd)
 	return (getsockopt(fd, SOL_SOCKET, SO_TYPE, &v, &l) == 0);
 }
 
-static char *last_ptr = NULL;
-
-/****************************************************************************
-  Get the next token from a string, return false if none found
-  handles double-quotes.
-Based on a routine by GJC@VILLAGE.COM.
-Extensively modified by Andrew.Tridgell@anu.edu.au
-****************************************************************************/
-bool next_token(char **ptr, char *buff, char *sep)
-{
-	char *s;
-	bool quoted;
-
-	if (!ptr)
-		ptr = &last_ptr;
-	if (!ptr)
-		return (false);
-
-	s = *ptr;
-
-	/* default to simple separators */
-	if (!sep)
-		sep = " \t\n\r";
-
-	/* find the first non sep char */
-	while (*s && strchr(sep, *s))
-		s++;
-
-	/* nothing left? */
-	if (!*s)
-		return (false);
-
-	/* copy over the token */
-	for (quoted = false; *s && (quoted || !strchr(sep, *s)); s++) {
-		if (*s == '\"')
-			quoted = !quoted;
-		else
-			*buff++ = *s;
-	}
-
-	*ptr = (*s) ? s + 1 : s;
-	*buff = 0;
-	last_ptr = *ptr;
-
-	return (true);
-}
-
 /****************************************************************************
 prompte a dptr (to make it recently used)
 ****************************************************************************/
