@@ -21,6 +21,8 @@
 
 #include "includes.h"
 
+static uint8 valid_dos_chars[32];
+
 pstring scope = "";
 
 int DEBUGLEVEL = 1;
@@ -496,6 +498,31 @@ int StrCaseCmp(char *s, char *t)
 	}
 
 	return (toupper(*s) - toupper(*t));
+}
+
+void init_dos_char_table(void)
+{
+	int i;
+
+#ifdef LC_ALL
+	/* include <locale.h> in includes.h if available for OS */
+	/* we take only standard 7-bit ASCII definitions from ctype */
+	setlocale(LC_ALL, "C");
+#endif
+
+	memset(valid_dos_chars, 0, sizeof(valid_dos_chars));
+
+	for (i = 0; i <= 127; i++) {
+		if (isalnum((char) i) || strchr("._^$~!#%&-{}()@'`", (char) i)) {
+			valid_dos_chars[i / 8] |= i % 8;
+		}
+	}
+}
+
+int isdoschar(int c)
+{
+	c &= 0xff;
+	return (valid_dos_chars[c / 8] & (c % 8)) != 0;
 }
 
 /*******************************************************************

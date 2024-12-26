@@ -5,8 +5,6 @@
 char *unix2dos_format(char *str, bool overwrite);
 char *dos2unix_format(char *str, bool overwrite);
 void interpret_character_set(char *str);
-void init_dos_char_table(void);
-int isdoschar(int c);
 
 /*The following definitions come from  dir.c  */
 
@@ -305,6 +303,8 @@ time_t file_modtime(char *fname);
 bool directory_exist(char *dname, struct stat *st);
 uint32 file_size(char *file_name);
 int StrCaseCmp(char *s, char *t);
+int isdoschar(int c);
+void init_dos_char_table(void);
 bool strequal(char *s1, char *s2);
 bool strcsequal(char *s1, char *s2);
 void strlower(char *s);
