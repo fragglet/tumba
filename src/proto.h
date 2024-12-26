@@ -5,6 +5,8 @@
 char *unix2dos_format(char *str, BOOL overwrite);
 char *dos2unix_format(char *str, BOOL overwrite);
 void interpret_character_set(char *str);
+void init_dos_char_table(void);
+int isdoschar(int c);
 
 /*The following definitions come from  charset.c  */
 

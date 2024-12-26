@@ -21,11 +21,8 @@
 
 #ifndef CHARSET_C
 
-extern char dos_char_map[256];
 extern void add_char_string(char *s);
 extern void charset_initialise(void);
-
-#define isdoschar(c) (dos_char_map[(c & 0xff)] != 0)
 
 /* this is used to determine if a character is safe to use in
    something that may be put on a command line */

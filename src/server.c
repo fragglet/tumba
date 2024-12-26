@@ -3118,7 +3118,7 @@ int main(int argc, char *argv[])
 
 	setup_logging(argv[0], False);
 
-	charset_initialise();
+	init_dos_char_table();
 
 	/* make absolutely sure we run as root - to handle cases where people
 	   are crazy enough to have it setuid */

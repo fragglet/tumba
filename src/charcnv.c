@@ -30,6 +30,8 @@ static BOOL mapsinited = 0;
 static char unix2dos[256];
 static char dos2unix[256];
 
+static uint8 valid_dos_chars[32];
+
 static void initmaps(void)
 {
 	int k;
@@ -284,4 +286,29 @@ void interpret_character_set(char *str)
 	} else {
 		DEBUG(0, ("unrecognized character set\n"));
 	}
+}
+
+void init_dos_char_table(void)
+{
+	int i;
+
+#ifdef LC_ALL
+	/* include <locale.h> in includes.h if available for OS */
+	/* we take only standard 7-bit ASCII definitions from ctype */
+	setlocale(LC_ALL, "C");
+#endif
+
+	memset(valid_dos_chars, 0, sizeof(valid_dos_chars));
+
+	for (i = 0; i <= 127; i++) {
+		if (isalnum((char) i) || strchr("._^$~!#%&-{}()@'`", (char) i)) {
+			valid_dos_chars[i / 8] |= i % 8;
+		}
+	}
+}
+
+int isdoschar(int c)
+{
+	c &= 0xff;
+	return (valid_dos_chars[c / 8] & (c % 8)) != 0;
 }

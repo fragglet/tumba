@@ -127,22 +127,6 @@ initialise the charset arrays
 ****************************************************************************/
 void charset_initialise(void)
 {
-	int i;
-
-#ifdef LC_ALL
-	/* include <locale.h> in includes.h if available for OS */
-	/* we take only standard 7-bit ASCII definitions from ctype */
-	setlocale(LC_ALL, "C");
-#endif
-
-	for (i = 0; i <= 255; i++) {
-		dos_char_map[i] = 0;
-	}
-
-	for (i = 0; i <= 127; i++) {
-		if (isalnum((char) i) || strchr("._^$~!#%&-{}()@'`", (char) i))
-			add_dos_char(i, False, 0, False);
-	}
 }
 
 /****************************************************************************
