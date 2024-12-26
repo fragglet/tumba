@@ -2479,7 +2479,7 @@ char *readdirname(void *p)
 	{
 		static pstring buf;
 		pstrcpy(buf, dname);
-		unix_to_dos(buf, True);
+		unix2dos_format(buf, True);
 		dname = buf;
 	}
 

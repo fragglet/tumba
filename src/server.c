@@ -658,7 +658,7 @@ wrap it to get filenames right
 ****************************************************************************/
 int sys_disk_free(char *path, int *bsize, int *dfree, int *dsize)
 {
-	return (disk_free(dos_to_unix(path, False), bsize, dfree, dsize));
+	return (disk_free(dos2unix_format(path, False), bsize, dfree, dsize));
 }
 
 /****************************************************************************
@@ -1071,8 +1071,8 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 		 * Note that the file name here is the *untranslated* name
 		 * ie. it is still in the DOS codepage sent from the client.
 		 * All use of this filename will pass though the sys_xxxx
-		 * functions which will do the dos_to_unix translation before
-		 * mapping into a UNIX filename. JRA.
+		 * functions which will do the dos2unix_format translation
+		 * before mapping into a UNIX filename. JRA.
 		 */
 		string_set(&fsp->name, fname);
 		fsp->wbmpx_ptr = NULL;
