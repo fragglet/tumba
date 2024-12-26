@@ -49,22 +49,6 @@
 
 #include "includes.h"
 
-/* Set default coding system for KANJI if none specified in Makefile. */
-/*
- * We treat KANJI specially due to historical precedent (it was the
- * first non-english codepage added to Samba). With the new dynamic
- * codepage support this is not needed anymore.
- *
- * The define 'KANJI' is being overloaded to mean 'use kanji codepage
- * by default' and also 'this is the filename-to-disk conversion
- * method to use'. This really should be removed and all control
- * over this left in the smb.conf parameters 'client codepage'
- * and 'coding system'.
- */
-#ifndef KANJI
-#define KANJI "sbcs"
-#endif /* KANJI */
-
 BOOL bLoaded = False;
 
 extern int DEBUGLEVEL;
@@ -115,7 +99,6 @@ typedef struct {
 	char *szValidChars;
 	char *szWorkGroup;
 	char *szCharacterSet;
-	char *szCodingSystem;
 	char *szSocketAddress;
 	int max_log_size;
 	int max_xmit;
@@ -212,7 +195,6 @@ static BOOL handle_valid_chars(char *pszParmValue, char **ptr);
 static BOOL handle_include(char *pszParmValue, char **ptr);
 static BOOL handle_copy(char *pszParmValue, char **ptr);
 static BOOL handle_character_set(char *pszParmValue, char **ptr);
-static BOOL handle_coding_system(char *pszParmValue, char **ptr);
 
 struct enum_list {
 	int value;
@@ -257,8 +239,6 @@ static struct parm_struct {
     {"deadtime", P_INTEGER, P_GLOBAL, &Globals.deadtime, NULL, NULL},
     {"time offset", P_INTEGER, P_GLOBAL, &extra_time_offset, NULL, NULL},
     {"read size", P_INTEGER, P_GLOBAL, &Globals.ReadSize, NULL, NULL},
-    {"coding system", P_STRING, P_GLOBAL, &Globals.szCodingSystem,
-     handle_coding_system, NULL},
     {"client code page", P_INTEGER, P_GLOBAL, &Globals.client_code_page, NULL,
      NULL},
     {"-valid", P_BOOL, P_LOCAL, &sDefault.valid, NULL, NULL},
@@ -342,13 +322,6 @@ static void init_globals(void)
 	Globals.bSyslogOnly = False;
 	Globals.ReadSize = 16 * 1024;
 	Globals.client_code_page = DEFAULT_CLIENT_CODE_PAGE;
-
-	/*
-	 * This must be done last as it checks the value in
-	 * client_code_page.
-	 */
-
-	interpret_coding_system(KANJI);
 }
 
 /***************************************************************************
@@ -861,16 +834,6 @@ BOOL lp_file_list_changed(void)
 		f = f->next;
 	}
 	return (False);
-}
-
-/***************************************************************************
-  handle the interpretation of the coding system parameter
-  *************************************************************************/
-static BOOL handle_coding_system(char *pszParmValue, char **ptr)
-{
-	string_set(ptr, pszParmValue);
-	interpret_coding_system(pszParmValue);
-	return (True);
 }
 
 /***************************************************************************
