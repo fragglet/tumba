@@ -8,12 +8,6 @@ void interpret_character_set(char *str);
 void init_dos_char_table(void);
 int isdoschar(int c);
 
-/*The following definitions come from  charset.c  */
-
-void charset_initialise(void);
-void codepage_initialise(int client_codepage);
-void add_char_string(char *s);
-
 /*The following definitions come from  dir.c  */
 
 void init_dptrs(void);
