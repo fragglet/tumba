@@ -1159,59 +1159,6 @@ static void print_parameter(struct parm_struct *p, void *ptr, FILE *f)
 }
 
 /***************************************************************************
-print a parameter of the specified type
-***************************************************************************/
-static void parameter_string(struct parm_struct *p, void *ptr, char *s)
-{
-	int i;
-	s[0] = 0;
-
-	switch (p->type) {
-	case P_ENUM:
-		for (i = 0; p->enum_list[i].name; i++) {
-			if (*(int *) ptr == p->enum_list[i].value) {
-				slprintf(s, sizeof(pstring) - 1, "%s",
-				         p->enum_list[i].name);
-				break;
-			}
-		}
-		break;
-
-	case P_BOOL:
-		slprintf(s, sizeof(pstring) - 1, "%s", BOOLSTR(*(BOOL *) ptr));
-		break;
-
-	case P_BOOLREV:
-		slprintf(s, sizeof(pstring) - 1, "%s", BOOLSTR(!*(BOOL *) ptr));
-		break;
-
-	case P_INTEGER:
-		slprintf(s, sizeof(pstring) - 1, "%d", *(int *) ptr);
-		break;
-
-	case P_CHAR:
-		slprintf(s, sizeof(pstring) - 1, "%c", *(char *) ptr);
-		break;
-
-	case P_OCTAL:
-		slprintf(s, sizeof(pstring) - 1, "0%o", *(int *) ptr);
-		break;
-
-	case P_GSTRING:
-	case P_UGSTRING:
-		if ((char *) ptr)
-			slprintf(s, sizeof(pstring) - 1, "%s", (char *) ptr);
-		break;
-
-	case P_STRING:
-	case P_USTRING:
-		if (*(char **) ptr)
-			slprintf(s, sizeof(pstring) - 1, "%s", *(char **) ptr);
-		break;
-	}
-}
-
-/***************************************************************************
 check if two parameters are equal
 ***************************************************************************/
 static BOOL equal_parameter(parm_type type, void *ptr1, void *ptr2)
@@ -1350,60 +1297,6 @@ static void dump_a_service(service *pService, FILE *f)
 }
 
 /***************************************************************************
-return info about the next service  in a service. snum==-1 gives the default
-serice and snum==-2 gives the globals
-
-return 0 when out of parameters
-***************************************************************************/
-int lp_next_parameter(int snum, int *i, char *label, char *value,
-                      int allparameters)
-{
-	if (snum == -2) {
-		/* do the globals */
-		for (; parm_table[*i].label; (*i)++)
-			if (parm_table[*i].class == P_GLOBAL &&
-			    parm_table[*i].ptr &&
-			    (*parm_table[*i].label != '-') &&
-			    ((*i) == 0 || (parm_table[*i].ptr !=
-			                   parm_table[(*i) - 1].ptr))) {
-				pstrcpy(label, parm_table[*i].label);
-				parameter_string(&parm_table[*i],
-				                 parm_table[*i].ptr, value);
-				(*i)++;
-				return 1;
-			}
-		return 0;
-	} else {
-		service *pService = (snum == -1 ? &sDefault : pSERVICE(snum));
-
-		for (; parm_table[*i].label; (*i)++)
-			if (parm_table[*i].class == P_LOCAL &&
-			    parm_table[*i].ptr &&
-			    (*parm_table[*i].label != '-') &&
-			    ((*i) == 0 || (parm_table[*i].ptr !=
-			                   parm_table[(*i) - 1].ptr))) {
-				int pdiff =
-				    PTR_DIFF(parm_table[*i].ptr, &sDefault);
-
-				if (snum == -1 || allparameters ||
-				    !equal_parameter(
-				        parm_table[*i].type,
-				        ((char *) pService) + pdiff,
-				        ((char *) &sDefault) + pdiff)) {
-					pstrcpy(label, parm_table[*i].label);
-					parameter_string(
-					    &parm_table[*i],
-					    ((char *) pService) + pdiff, value);
-					(*i)++;
-					return 1;
-				}
-			}
-	}
-
-	return 0;
-}
-
-/***************************************************************************
 Return TRUE if the passed service number is within range.
 ***************************************************************************/
 BOOL lp_snum_ok(int iService)
@@ -1529,18 +1422,4 @@ char *volume_label(int snum)
 	if (!*ret)
 		return (lp_servicename(snum));
 	return (ret);
-}
-
-/*******************************************************************
-copy a service
-********************************************************************/
-void lp_copy_service(int snum, char *new_name)
-{
-	char *oldname = lp_servicename(snum);
-	do_section(new_name);
-	if (snum >= 0) {
-		snum = lp_servicenumber(new_name);
-		if (snum >= 0)
-			lp_do_parameter(snum, "copy", oldname);
-	}
 }

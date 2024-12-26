@@ -110,8 +110,6 @@ int lp_defaultcase(int);
 int lp_add_service(char *pszService, int iDefaultService);
 BOOL lp_file_list_changed(void);
 BOOL lp_do_parameter(int snum, char *pszParmName, char *pszParmValue);
-int lp_next_parameter(int snum, int *i, char *label, char *value,
-                      int allparameters);
 BOOL lp_snum_ok(int iService);
 BOOL lp_loaded(void);
 void lp_killunused(BOOL (*snumused)(int));
@@ -120,7 +118,6 @@ int lp_numservices(void);
 void lp_dump(FILE *f);
 int lp_servicenumber(char *pszServiceName);
 char *volume_label(int snum);
-void lp_copy_service(int snum, char *new_name);
 
 /*The following definitions come from  locking.c  */
 
@@ -374,7 +371,6 @@ char *name_ptr(char *buf, int ofs);
 int name_extract(char *buf, int ofs, char *name);
 int name_len(char *s);
 BOOL send_one_packet(char *buf, int len, struct in_addr ip, int port, int type);
-BOOL in_list(char *s, char *list, BOOL casesensitive);
 BOOL string_init(char **dest, char *src);
 void string_free(char **s);
 BOOL string_set(char **dest, char *src);

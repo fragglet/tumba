@@ -41,15 +41,12 @@ int Client = -1;
 /* this is used by the chaining code */
 int chain_size = 0;
 
-int trans_num = 0;
-
 /*
    case handling on filenames
 */
 int case_default = CASE_LOWER;
 
 pstring debugf = "";
-int syslog_level;
 
 /* the following control case operations - they are put here so the
    client can link easily */
@@ -1869,29 +1866,6 @@ BOOL send_one_packet(char *buf, int len, struct in_addr ip, int port, int type)
 
 	close(out_fd);
 	return (ret);
-}
-
-/****************************************************************************
-check if a string is part of a list
-****************************************************************************/
-BOOL in_list(char *s, char *list, BOOL casesensitive)
-{
-	pstring tok;
-	char *p = list;
-
-	if (!list)
-		return (False);
-
-	while (next_token(&p, tok, LIST_SEP)) {
-		if (casesensitive) {
-			if (strcmp(tok, s) == 0)
-				return (True);
-		} else {
-			if (StrCaseCmp(tok, s) == 0)
-				return (True);
-		}
-	}
-	return (False);
 }
 
 /* this is used to prevent lots of mallocs of size 1 */
