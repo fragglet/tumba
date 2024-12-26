@@ -490,66 +490,12 @@ int StrCaseCmp(char *s, char *t)
 {
 	/* compare until we run out of string, either t or s, or find a
 	 * difference */
-	/* We *must* use toupper rather than tolower here due to the
-	   asynchronous upper to lower mapping.
-	 */
-#if !defined(KANJI_WIN95_COMPATIBILITY)
-	/*
-	 * For completeness we should put in equivalent code for code pages
-	 * 949 (Korean hangul) and 950 (Big5 Traditional Chinese) here - but
-	 * doubt anyone wants Samba to behave differently from Win95 and WinNT
-	 * here. They both treat full width ascii characters as case senstive
-	 * filenames (ie. they don't do the work we do here).
-	 * JRA.
-	 */
-
-	if (lp_client_code_page() == KANJI_CODEPAGE) {
-		/* Win95 treats full width ascii characters as case sensitive.
-		 */
-		int diff;
-		for (;;) {
-			if (!*s || !*t)
-				return toupper(*s) - toupper(*t);
-			else if (is_sj_alph(*s) && is_sj_alph(*t)) {
-				diff = sj_toupper2(*(s + 1)) -
-				       sj_toupper2(*(t + 1));
-				if (diff)
-					return diff;
-				s += 2;
-				t += 2;
-			} else if (is_shift_jis(*s) && is_shift_jis(*t)) {
-				diff = ((int) (unsigned char) *s) -
-				       ((int) (unsigned char) *t);
-				if (diff)
-					return diff;
-				diff = ((int) (unsigned char) *(s + 1)) -
-				       ((int) (unsigned char) *(t + 1));
-				if (diff)
-					return diff;
-				s += 2;
-				t += 2;
-			} else if (is_shift_jis(*s))
-				return 1;
-			else if (is_shift_jis(*t))
-				return -1;
-			else {
-				diff = toupper(*s) - toupper(*t);
-				if (diff)
-					return diff;
-				s++;
-				t++;
-			}
-		}
-	} else
-#endif /* KANJI_WIN95_COMPATIBILITY */
-	{
-		while (*s && *t && toupper(*s) == toupper(*t)) {
-			s++;
-			t++;
-		}
-
-		return (toupper(*s) - toupper(*t));
+	while (*s && *t && toupper(*s) == toupper(*t)) {
+		s++;
+		t++;
 	}
+
+	return (toupper(*s) - toupper(*t));
 }
 
 /*******************************************************************
@@ -584,37 +530,9 @@ BOOL strcsequal(char *s1, char *s2)
 void strlower(char *s)
 {
 	while (*s) {
-#if !defined(KANJI_WIN95_COMPATIBILITY)
-		/*
-		 * For completeness we should put in equivalent code for code
-		 * pages 949 (Korean hangul) and 950 (Big5 Traditional Chinese)
-		 * here - but doubt anyone wants Samba to behave differently
-		 * from Win95 and WinNT here. They both treat full width ascii
-		 * characters as case senstive filenames (ie. they don't do the
-		 * work we do here). JRA.
-		 */
-
-		if (lp_client_code_page() == KANJI_CODEPAGE) {
-			/* Win95 treats full width ascii characters as case
-			 * sensitive. */
-			if (is_shift_jis(*s)) {
-				if (is_sj_upper(s[0], s[1]))
-					s[1] = sj_tolower2(s[1]);
-				s += 2;
-			} else if (is_kana(*s)) {
-				s++;
-			} else {
-				if (isupper(*s))
-					*s = tolower(*s);
-				s++;
-			}
-		} else
-#endif /* KANJI_WIN95_COMPATIBILITY */
-		{
-			if (isupper(*s))
-				*s = tolower(*s);
-			s++;
-		}
+		if (isupper(*s))
+			*s = tolower(*s);
+		s++;
 	}
 }
 
@@ -624,37 +542,9 @@ void strlower(char *s)
 void strupper(char *s)
 {
 	while (*s) {
-#if !defined(KANJI_WIN95_COMPATIBILITY)
-		/*
-		 * For completeness we should put in equivalent code for code
-		 * pages 949 (Korean hangul) and 950 (Big5 Traditional Chinese)
-		 * here - but doubt anyone wants Samba to behave differently
-		 * from Win95 and WinNT here. They both treat full width ascii
-		 * characters as case senstive filenames (ie. they don't do the
-		 * work we do here). JRA.
-		 */
-
-		if (lp_client_code_page() == KANJI_CODEPAGE) {
-			/* Win95 treats full width ascii characters as case
-			 * sensitive. */
-			if (is_shift_jis(*s)) {
-				if (is_sj_lower(s[0], s[1]))
-					s[1] = sj_toupper2(s[1]);
-				s += 2;
-			} else if (is_kana(*s)) {
-				s++;
-			} else {
-				if (islower(*s))
-					*s = toupper(*s);
-				s++;
-			}
-		} else
-#endif /* KANJI_WIN95_COMPATIBILITY */
-		{
-			if (islower(*s))
-				*s = toupper(*s);
-			s++;
-		}
+		if (islower(*s))
+			*s = toupper(*s);
+		s++;
 	}
 }
 
@@ -1150,35 +1040,9 @@ does a string have any uppercase chars in it?
 BOOL strhasupper(char *s)
 {
 	while (*s) {
-#if !defined(KANJI_WIN95_COMPATIBILITY)
-		/*
-		 * For completeness we should put in equivalent code for code
-		 * pages 949 (Korean hangul) and 950 (Big5 Traditional Chinese)
-		 * here - but doubt anyone wants Samba to behave differently
-		 * from Win95 and WinNT here. They both treat full width ascii
-		 * characters as case senstive filenames (ie. they don't do the
-		 * work we do here). JRA.
-		 */
-
-		if (lp_client_code_page() == KANJI_CODEPAGE) {
-			/* Win95 treats full width ascii characters as case
-			 * sensitive. */
-			if (is_shift_jis(*s))
-				s += 2;
-			else if (is_kana(*s))
-				s++;
-			else {
-				if (isupper(*s))
-					return (True);
-				s++;
-			}
-		} else
-#endif /* KANJI_WIN95_COMPATIBILITY */
-		{
-			if (isupper(*s))
-				return (True);
-			s++;
-		}
+		if (isupper(*s))
+			return (True);
+		s++;
 	}
 	return (False);
 }
@@ -1189,39 +1053,9 @@ does a string have any lowercase chars in it?
 BOOL strhaslower(char *s)
 {
 	while (*s) {
-#if !defined(KANJI_WIN95_COMPATIBILITY)
-		/*
-		 * For completeness we should put in equivalent code for code
-		 * pages 949 (Korean hangul) and 950 (Big5 Traditional Chinese)
-		 * here - but doubt anyone wants Samba to behave differently
-		 * from Win95 and WinNT here. They both treat full width ascii
-		 * characters as case senstive filenames (ie. they don't do the
-		 * work we do here). JRA.
-		 */
-
-		if (lp_client_code_page() == KANJI_CODEPAGE) {
-			/* Win95 treats full width ascii characters as case
-			 * sensitive. */
-			if (is_shift_jis(*s)) {
-				if (is_sj_upper(s[0], s[1]))
-					return (True);
-				if (is_sj_lower(s[0], s[1]))
-					return (True);
-				s += 2;
-			} else if (is_kana(*s)) {
-				s++;
-			} else {
-				if (islower(*s))
-					return (True);
-				s++;
-			}
-		} else
-#endif /* KANJI_WIN95_COMPATIBILITY */
-		{
-			if (islower(*s))
-				return (True);
-			s++;
-		}
+		if (islower(*s))
+			return (True);
+		s++;
 	}
 	return (False);
 }
@@ -1233,36 +1067,10 @@ int count_chars(char *s, char c)
 {
 	int count = 0;
 
-#if !defined(KANJI_WIN95_COMPATIBILITY)
-	/*
-	 * For completeness we should put in equivalent code for code pages
-	 * 949 (Korean hangul) and 950 (Big5 Traditional Chinese) here - but
-	 * doubt anyone wants Samba to behave differently from Win95 and WinNT
-	 * here. They both treat full width ascii characters as case senstive
-	 * filenames (ie. they don't do the work we do here).
-	 * JRA.
-	 */
-
-	if (lp_client_code_page() == KANJI_CODEPAGE) {
-		/* Win95 treats full width ascii characters as case sensitive.
-		 */
-		while (*s) {
-			if (is_shift_jis(*s))
-				s += 2;
-			else {
-				if (*s == c)
-					count++;
-				s++;
-			}
-		}
-	} else
-#endif /* KANJI_WIN95_COMPATIBILITY */
-	{
-		while (*s) {
-			if (*s == c)
-				count++;
-			s++;
-		}
+	while (*s) {
+		if (*s == c)
+			count++;
+		s++;
 	}
 	return (count);
 }

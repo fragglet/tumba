@@ -825,17 +825,10 @@ enum case_handling {
 #define BIG5_CODEPAGE 950
 #define SIMPLIFIED_CHINESE_CODEPAGE 936
 
-#ifdef KANJI
-/*
- * Default client code page - Japanese
- */
-#define DEFAULT_CLIENT_CODE_PAGE KANJI_CODEPAGE
-#else /* KANJI */
 /*
  * Default client code page - 850 - Western European
  */
 #define DEFAULT_CLIENT_CODE_PAGE MSDOS_LATIN_1_CODEPAGE
-#endif /* KANJI */
 
 /*
  * Size of buffer to use when moving files across filesystems.

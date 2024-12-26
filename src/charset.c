@@ -28,7 +28,6 @@ extern int DEBUGLEVEL;
  * Codepage definitions.
  */
 
-#if !defined(KANJI)
 /* lower->upper mapping for IBM Code Page 850 - MS-DOS Latin 1 */
 unsigned char cp_850[][4] = {
     /* dec col/row oct hex  description */
@@ -95,10 +94,6 @@ unsigned char cp_850[][4] = {
 
     {0x9C, 0, 0, 0}, /* Pound        */
     {0, 0, 0, 0}};
-#else  /* KANJI */
-/* lower->upper mapping for IBM Code Page 932 - MS-DOS Japanese SJIS */
-unsigned char cp_932[][4] = {{0, 0, 0, 0}};
-#endif /* KANJI */
 
 char xx_dos_char_map[256];
 char xx_upper_char_map[256];
@@ -351,15 +346,6 @@ void codepage_initialise(int client_codepage)
 	cp = load_client_codepage(client_codepage);
 
 	if (cp == NULL) {
-#ifdef KANJI
-		DEBUG(
-		    6,
-		    ("codepage_initialise: loading dynamic codepage file %s/codepage.%d \
-for code page %d failed. Using default client codepage 932\n",
-		     CODEPAGEDIR, client_codepage, client_codepage));
-		cp = cp_932;
-		client_codepage = KANJI_CODEPAGE;
-#else  /* KANJI */
 		DEBUG(
 		    6,
 		    ("codepage_initialise: loading dynamic codepage file %s/codepage.%d \
@@ -367,7 +353,6 @@ for code page %d failed. Using default client codepage 850\n",
 		     CODEPAGEDIR, client_codepage, client_codepage));
 		cp = cp_850;
 		client_codepage = MSDOS_LATIN_1_CODEPAGE;
-#endif /* KANJI */
 	}
 
 	/*
