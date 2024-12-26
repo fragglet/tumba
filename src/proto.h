@@ -235,7 +235,6 @@ int sys_rename(char *from, char *to);
 
 void TimeInit(void);
 int TimeDiff(time_t t);
-struct tm *LocalTime(time_t *t);
 time_t interpret_long_date(char *p);
 void put_long_date(char *p, time_t t);
 bool null_mtime(time_t mtime);

@@ -210,18 +210,6 @@ static int LocTimeDiff(time_t lte)
 	return TimeDiff(t);
 }
 
-/****************************************************************************
-try to optimise the localtime call, it can be quite expensive on some machines
-****************************************************************************/
-struct tm *LocalTime(time_t *t)
-{
-	time_t t2 = *t;
-
-	t2 -= TimeDiff(t2);
-
-	return (gmtime(&t2));
-}
-
 #define TIME_FIXUP_CONSTANT                                                    \
 	(369.0 * 365.25 * 24 * 60 * 60 - (3.0 * 24 * 60 * 60 + 6.0 * 60 * 60))
 
@@ -344,7 +332,7 @@ static uint32_t make_dos_date(time_t unixdate)
 	struct tm *t;
 	uint32_t ret = 0;
 
-	t = LocalTime(&unixdate);
+	t = localtime(&unixdate);
 	if (!t)
 		return 0xFFFFFFFF;
 
@@ -466,7 +454,7 @@ char *timestring(void)
 {
 	static fstring TimeBuf;
 	time_t t = time(NULL);
-	struct tm *tm = LocalTime(&t);
+	struct tm *tm = localtime(&t);
 
 	if (!tm)
 		slprintf(TimeBuf, sizeof(TimeBuf) - 1,

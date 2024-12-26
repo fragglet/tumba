@@ -518,7 +518,7 @@ static bool api_NetRemoteTOD(int cnum, char *param, char *data, int mdrcnt,
 
 		/* the client expects to get localtime, not GMT, in this bit
 		   (I think, this needs testing) */
-		t = LocalTime(&unixdate);
+		t = localtime(&unixdate);
 
 		SIVAL(p, 4, 0); /* msecs ? */
 		CVAL(p, 8) = t->tm_hour;
