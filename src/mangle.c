@@ -116,19 +116,14 @@ BOOL is_8_3(char *fname, BOOL check_case)
 
 	{
 		char *p = fname;
-		int skip;
 
 		dot_pos = 0;
 		while (*p) {
-			if ((skip = skip_multibyte_char(*p)) != 0)
-				p += skip;
-			else {
-				if (*p == '.' && !dot_pos)
-					dot_pos = (char *) p;
-				if (!isdoschar(*p))
-					return (False);
-				p++;
-			}
+			if (*p == '.' && !dot_pos)
+				dot_pos = (char *) p;
+			if (!isdoschar(*p))
+				return (False);
+			p++;
 		}
 	}
 
@@ -335,7 +330,6 @@ void mangle_name_83(char *s, int s_len)
 	char base[9];
 	int baselen = 0;
 	int extlen = 0;
-	int skip;
 
 	extension[0] = 0;
 	base[0] = 0;
@@ -361,24 +355,9 @@ void mangle_name_83(char *s, int s_len)
 		else {
 			*p++ = 0;
 			while (*p && extlen < 3) {
-				skip = skip_multibyte_char(*p);
-				if (skip == 2) {
-					if (extlen < 2) {
-						extension[extlen++] = p[0];
-						extension[extlen++] = p[1];
-					} else {
-						extension[extlen++] = base36(
-						    ((unsigned char) *p) % 36);
-					}
-					p += 2;
-				} else if (skip == 1) {
+				if (isdoschar(*p) && *p != '.')
 					extension[extlen++] = p[0];
-					p++;
-				} else {
-					if (isdoschar(*p) && *p != '.')
-						extension[extlen++] = p[0];
-					p++;
-				}
+				p++;
 			}
 			extension[extlen] = 0;
 		}
@@ -387,24 +366,9 @@ void mangle_name_83(char *s, int s_len)
 	p = s;
 
 	while (*p && baselen < 5) {
-		skip = skip_multibyte_char(*p);
-		if (skip == 2) {
-			if (baselen < 4) {
-				base[baselen++] = p[0];
-				base[baselen++] = p[1];
-			} else {
-				base[baselen++] =
-				    base36(((unsigned char) *p) % 36);
-			}
-			p += 2;
-		} else if (skip == 1) {
+		if (isdoschar(*p) && *p != '.')
 			base[baselen++] = p[0];
-			p++;
-		} else {
-			if (isdoschar(*p) && *p != '.')
-				base[baselen++] = p[0];
-			p++;
-		}
+		p++;
 	}
 	base[baselen] = 0;
 
@@ -429,7 +393,6 @@ static BOOL illegal_name(char *name)
 	static unsigned char illegal[256];
 	static BOOL initialised = False;
 	unsigned char *s;
-	int skip;
 
 	if (!initialised) {
 		char *ill = "*\\/?<>|\":";
@@ -441,15 +404,10 @@ static BOOL illegal_name(char *name)
 	}
 
 	for (s = (unsigned char *) name; *s;) {
-		skip = skip_multibyte_char(*s);
-		if (skip != 0)
-			s += skip;
-		else {
-			if (illegal[*s])
-				return (True);
-			else
-				s++;
-		}
+		if (illegal[*s])
+			return (True);
+		else
+			s++;
 	}
 
 	return (False);

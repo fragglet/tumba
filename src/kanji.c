@@ -56,12 +56,10 @@ char *(*multibyte_strtok)(char *,
  * charcnv.c.
  */
 
-static int skip_non_multibyte_char(char);
 static BOOL not_multibyte_char_1(char);
 
 char *(*_dos_to_unix)(char *, BOOL) = dos2unix_format;
 char *(*_unix_to_dos)(char *, BOOL) = unix2dos_format;
-int (*_skip_multibyte_char)(char) = skip_non_multibyte_char;
 BOOL (*is_multibyte_char_1)(char) = not_multibyte_char_1;
 
 #else /* KANJI */
@@ -72,12 +70,10 @@ BOOL (*is_multibyte_char_1)(char) = not_multibyte_char_1;
  */
 
 static char *sj_to_sj(char *from, BOOL overwrite);
-static int skip_kanji_multibyte_char(char);
 static BOOL is_kanji_multibyte_char_1(char);
 
 char *(*_dos_to_unix)(char *, BOOL) = sj_to_sj;
 char *(*_unix_to_dos)(char *, BOOL) = sj_to_sj;
-int (*_skip_multibyte_char)(char) = skip_kanji_multibyte_char;
 int (*is_multibyte_char_1)(char) = is_kanji_multibyte_char_1;
 
 #endif /* KANJI */
@@ -189,20 +185,6 @@ static char *sj_strrchr(char *s, int c)
 		}
 	}
 	return q;
-}
-
-/*******************************************************************
- Kanji multibyte char skip function.
-*******************************************************************/
-
-static int skip_kanji_multibyte_char(char c)
-{
-	if (is_shift_jis(c)) {
-		return 2;
-	} else if (is_kana(c)) {
-		return 1;
-	}
-	return 0;
 }
 
 /*******************************************************************
@@ -355,18 +337,6 @@ static char *generic_multibyte_strrchr(char *s, int c)
 		}
 	}
 	return q;
-}
-
-/*******************************************************************
- Generic multibyte char skip function.
-*******************************************************************/
-
-static int skip_generic_multibyte_char(char c)
-{
-	if ((*is_multibyte_char_1)(c)) {
-		return 2;
-	}
-	return 0;
 }
 
 /*******************************************************************
@@ -1137,15 +1107,6 @@ void interpret_coding_system(char *str)
 }
 
 /*******************************************************************
- Non multibyte char function.
-*******************************************************************/
-
-static int skip_non_multibyte_char(char c)
-{
-	return 0;
-}
-
-/*******************************************************************
  Function that always says a character isn't multibyte.
 *******************************************************************/
 
@@ -1171,7 +1132,6 @@ void initialize_multibyte_vectors(int client_codepage)
 		multibyte_strrchr = (char *(*) (char *, int) ) sj_strrchr;
 		multibyte_strstr = (char *(*) (char *, char *) ) sj_strstr;
 		multibyte_strtok = (char *(*) (char *, char *) ) sj_strtok;
-		_skip_multibyte_char = skip_kanji_multibyte_char;
 		is_multibyte_char_1 = is_kanji_multibyte_char_1;
 		break;
 	case HANGUL_CODEPAGE:
@@ -1183,7 +1143,6 @@ void initialize_multibyte_vectors(int client_codepage)
 		    (char *(*) (char *, char *) ) generic_multibyte_strstr;
 		multibyte_strtok =
 		    (char *(*) (char *, char *) ) generic_multibyte_strtok;
-		_skip_multibyte_char = skip_generic_multibyte_char;
 		is_multibyte_char_1 = hangul_is_multibyte_char_1;
 	case BIG5_CODEPAGE:
 		multibyte_strchr =
@@ -1194,7 +1153,6 @@ void initialize_multibyte_vectors(int client_codepage)
 		    (char *(*) (char *, char *) ) generic_multibyte_strstr;
 		multibyte_strtok =
 		    (char *(*) (char *, char *) ) generic_multibyte_strtok;
-		_skip_multibyte_char = skip_generic_multibyte_char;
 		is_multibyte_char_1 = big5_is_multibyte_char_1;
 	case SIMPLIFIED_CHINESE_CODEPAGE:
 		multibyte_strchr =
@@ -1205,7 +1163,6 @@ void initialize_multibyte_vectors(int client_codepage)
 		    (char *(*) (char *, char *) ) generic_multibyte_strstr;
 		multibyte_strtok =
 		    (char *(*) (char *, char *) ) generic_multibyte_strtok;
-		_skip_multibyte_char = skip_generic_multibyte_char;
 		is_multibyte_char_1 = simpch_is_multibyte_char_1;
 		break;
 	/*
@@ -1216,7 +1173,6 @@ void initialize_multibyte_vectors(int client_codepage)
 		multibyte_strrchr = (char *(*) (char *, int) ) strrchr;
 		multibyte_strstr = (char *(*) (char *, char *) ) strstr;
 		multibyte_strtok = (char *(*) (char *, char *) ) strtok;
-		_skip_multibyte_char = skip_non_multibyte_char;
 		is_multibyte_char_1 = not_multibyte_char_1;
 		break;
 	}

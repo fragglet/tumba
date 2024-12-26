@@ -728,21 +728,14 @@ int reply_search(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	mask_convert(mask);
 
 	{
-		int skip;
-
 		p = mask;
 		while (*p) {
-			if ((skip = skip_multibyte_char(*p)) != 0) {
-				p += skip;
-			} else {
-				if (*p != '?' && *p != '*' && !isdoschar(*p)) {
-					DEBUG(5, ("Invalid char [%c] in search "
-					          "mask?\n",
-					          *p));
-					*p = '?';
-				}
-				p++;
+			if (*p != '?' && *p != '*' && !isdoschar(*p)) {
+				DEBUG(5, ("Invalid char [%c] in search "
+				          "mask?\n", *p));
+				*p = '?';
 			}
+			p++;
 		}
 	}
 

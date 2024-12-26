@@ -611,14 +611,9 @@ void strlower(char *s)
 		} else
 #endif /* KANJI_WIN95_COMPATIBILITY */
 		{
-			int skip = skip_multibyte_char(*s);
-			if (skip != 0)
-				s += skip;
-			else {
-				if (isupper(*s))
-					*s = tolower(*s);
-				s++;
-			}
+			if (isupper(*s))
+				*s = tolower(*s);
+			s++;
 		}
 	}
 }
@@ -656,14 +651,9 @@ void strupper(char *s)
 		} else
 #endif /* KANJI_WIN95_COMPATIBILITY */
 		{
-			int skip = skip_multibyte_char(*s);
-			if (skip != 0)
-				s += skip;
-			else {
-				if (islower(*s))
-					*s = toupper(*s);
-				s++;
-			}
+			if (islower(*s))
+				*s = toupper(*s);
+			s++;
 		}
 	}
 }
@@ -695,16 +685,10 @@ BOOL strisnormal(char *s)
 ****************************************************************************/
 void string_replace(char *s, char oldc, char newc)
 {
-	int skip;
 	while (*s) {
-		skip = skip_multibyte_char(*s);
-		if (skip != 0)
-			s += skip;
-		else {
-			if (oldc == *s)
-				*s = newc;
-			s++;
-		}
+		if (oldc == *s)
+			*s = newc;
+		s++;
 	}
 }
 
@@ -1191,14 +1175,9 @@ BOOL strhasupper(char *s)
 		} else
 #endif /* KANJI_WIN95_COMPATIBILITY */
 		{
-			int skip = skip_multibyte_char(*s);
-			if (skip != 0)
-				s += skip;
-			else {
-				if (isupper(*s))
-					return (True);
-				s++;
-			}
+			if (isupper(*s))
+				return (True);
+			s++;
 		}
 	}
 	return (False);
@@ -1239,14 +1218,9 @@ BOOL strhaslower(char *s)
 		} else
 #endif /* KANJI_WIN95_COMPATIBILITY */
 		{
-			int skip = skip_multibyte_char(*s);
-			if (skip != 0)
-				s += skip;
-			else {
-				if (islower(*s))
-					return (True);
-				s++;
-			}
+			if (islower(*s))
+				return (True);
+			s++;
 		}
 	}
 	return (False);
@@ -1285,14 +1259,9 @@ int count_chars(char *s, char c)
 #endif /* KANJI_WIN95_COMPATIBILITY */
 	{
 		while (*s) {
-			int skip = skip_multibyte_char(*s);
-			if (skip != 0)
-				s += skip;
-			else {
-				if (*s == c)
-					count++;
-				s++;
-			}
+			if (*s == c)
+				count++;
+			s++;
 		}
 	}
 	return (count);
