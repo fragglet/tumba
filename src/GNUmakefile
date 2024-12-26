@@ -5,16 +5,13 @@ PREFIX = /usr/local
 SHAREDIR = $(PREFIX)/share
 LIBDIR = $(PREFIX)/lib
 
-CODEPAGEDIR = $(LIBDIR)/samba/codepages
-
 # the default group you want your machine to appear in for browsing.
 WORKGROUP = WORKGROUP
 
 CONFIGFILE = /etc/rumba_smbd.conf
 SMBLOGFILE = /var/log/rumba_smbd.log
 
-DEFINES = -DCODEPAGEDIR=\"$(CODEPAGEDIR)\" \
-          -DWORKGROUP=\"$(WORKGROUP)\" \
+DEFINES = -DWORKGROUP=\"$(WORKGROUP)\" \
           -DCONFIGFILE=\"$(CONFIGFILE)\" \
           -DSMBLOGFILE=\"$(SMBLOGFILE)\"
 
