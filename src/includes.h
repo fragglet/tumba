@@ -94,8 +94,6 @@
 
 #include "byteorder.h"
 
-#include "charset.h"
-
 #ifndef MAXCODEPAGELINES
 #define MAXCODEPAGELINES 256
 #endif

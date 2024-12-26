@@ -22,7 +22,6 @@ CFLAGS = -MMD -Wall $(DEFINES)
 
 OBJECTS = \
 	charcnv.o            \
-	charset.o            \
 	dir.o                \
 	fault.o              \
 	ipc.o                \
