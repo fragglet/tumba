@@ -128,12 +128,6 @@ BOOL do_unlock(int fnum, int cnum, uint32 count, uint32 offset, int *eclass,
                uint32 *ecode);
 BOOL locking_end(void);
 
-/*The following definitions come from  locking_slow.c  */
-
-BOOL locking_init(int read_only);
-BOOL lock_share_entry(int cnum, uint32 dev, uint32 inode, int *ptok);
-BOOL unlock_share_entry(int cnum, uint32 dev, uint32 inode, int token);
-
 /*The following definitions come from  mangle.c  */
 
 int str_checksum(char *s);

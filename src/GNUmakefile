@@ -31,7 +31,6 @@ OBJECTS = \
 	kanji.o              \
 	loadparm.o           \
 	locking.o            \
-	locking_slow.o       \
 	mangle.o             \
 	params.o             \
 	reply.o              \

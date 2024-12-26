@@ -3485,9 +3485,6 @@ int main(int argc, char *argv[])
 	if (!open_sockets(is_daemon, port))
 		exit(1);
 
-	if (!locking_init(0))
-		exit(1);
-
 	/* possibly reload the services file. */
 	reload_services(True);
 
