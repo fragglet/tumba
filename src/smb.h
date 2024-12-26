@@ -294,6 +294,7 @@ typedef struct {
 	int service;
 	void *dirptr;
 	bool open;
+	bool ipc;
 	bool read_only;
 	char *dirpath;
 	char *connectpath;
@@ -414,6 +415,8 @@ struct connection_options {
 #define VALID_CNUM(cnum) (((cnum) >= 0) && ((cnum) < MAX_CONNECTIONS))
 #define OPEN_CNUM(cnum) (VALID_CNUM(cnum) && Connections[cnum].open)
 #define FNUM_OK(fnum, c) (OPEN_FNUM(fnum) && (c) == Files[fnum].cnum)
+
+#define IS_IPC(cnum)       (VALID_CNUM(cnum) && Connections[cnum].ipc)
 
 #define CHECK_FNUM(fnum, c)                                                    \
 	if (!FNUM_OK(fnum, c))                                                 \

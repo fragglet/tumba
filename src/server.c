@@ -1894,7 +1894,10 @@ int make_connection(char *service, char *dev)
 		return (-4);
 	}
 
-	if (*dev == '?' || !*dev) {
+	/* you can only connect to the IPC$ service as an ipc device */
+	if (strequal(service, "IPC$")) {
+		pstrcpy(dev, "IPC");
+	} else if (*dev == '?' || !*dev) {
 		pstrcpy(dev, "A:");
 	}
 
@@ -1923,6 +1926,7 @@ int make_connection(char *service, char *dev)
 	}
 
 	pcon->read_only = lp_readonly(snum);
+	pcon->ipc = strncmp(dev, "IPC", 3) == 0;
 	pcon->uid = pass->pw_uid;
 	pcon->gid = pass->pw_gid;
 	pcon->num_files_open = 0;

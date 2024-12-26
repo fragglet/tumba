@@ -990,6 +990,15 @@ int reply_open_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	pstrcpy(fname, smb_buf(inbuf));
 	unix_convert(fname, cnum, 0, &bad_path);
 
+	/* NT uses named pipes to do browsing (opens PIPE/srvsvc). We don't
+	   support this, but if we send the "invalid device" error back, it
+	   will fall back to the LANMAN approach instead. However, it does
+	   introduce a brief pause. */
+	if (IS_IPC(cnum)) {
+		DEBUG(1, ("Tried to open IPC %s\n", fname));
+		return(ERROR(ERRSRV,ERRinvdevice));
+	}
+
 	fnum = find_free_file();
 	if (fnum < 0)
 		return (ERROR(ERRSRV, ERRnofids));
