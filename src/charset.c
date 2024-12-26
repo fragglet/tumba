@@ -95,13 +95,7 @@ unsigned char cp_850[][4] = {
     {0x9C, 0, 0, 0}, /* Pound        */
     {0, 0, 0, 0}};
 
-char xx_dos_char_map[256];
-char xx_upper_char_map[256];
-char xx_lower_char_map[256];
-
-char *dos_char_map = xx_dos_char_map;
-char *upper_char_map = xx_upper_char_map;
-char *lower_char_map = xx_lower_char_map;
+char dos_char_map[256];
 
 /*
  * This code has been extended to deal with ascynchronous mappings
@@ -126,14 +120,6 @@ static void add_dos_char(int lower, BOOL map_lower_to_upper, int upper,
 		dos_char_map[lower] = 1;
 	if (upper)
 		dos_char_map[upper] = 1;
-	lower_char_map[lower] = (char) lower; /* Define tolower(lower) */
-	upper_char_map[upper] = (char) upper; /* Define toupper(upper) */
-	if (lower && upper) {
-		if (map_upper_to_lower)
-			lower_char_map[upper] = (char) lower;
-		if (map_lower_to_upper)
-			upper_char_map[lower] = (char) upper;
-	}
 }
 
 /****************************************************************************
@@ -156,20 +142,6 @@ void charset_initialise(void)
 	for (i = 0; i <= 127; i++) {
 		if (isalnum((char) i) || strchr("._^$~!#%&-{}()@'`", (char) i))
 			add_dos_char(i, False, 0, False);
-	}
-
-	for (i = 0; i <= 255; i++) {
-		char c = (char) i;
-		upper_char_map[i] = lower_char_map[i] = c;
-
-		/* Some systems have buggy isupper/islower for characters
-		   above 127. Best not to rely on them. */
-		if (i < 128) {
-			if (isupper(c))
-				lower_char_map[i] = tolower(c);
-			if (islower(c))
-				upper_char_map[i] = toupper(c);
-		}
 	}
 }
 
