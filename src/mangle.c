@@ -48,9 +48,9 @@ int str_checksum(char *s)
 } /* str_checksum */
 
 /****************************************************************************
-return True if a name is a special msdos reserved name
+return true if a name is a special msdos reserved name
 ****************************************************************************/
-static BOOL is_reserved_msdos(char *fname)
+static bool is_reserved_msdos(char *fname)
 {
 	char upperFname[13];
 	char *p;
@@ -74,15 +74,15 @@ static BOOL is_reserved_msdos(char *fname)
 	    (strcmp(upperFname, "LPT3") == 0) ||
 	    (strcmp(upperFname, "NUL") == 0) ||
 	    (strcmp(upperFname, "PRN") == 0))
-		return (True);
+		return (true);
 
-	return (False);
+	return (false);
 } /* is_reserved_msdos */
 
 /****************************************************************************
-return True if a name is in 8.3 dos format
+return true if a name is in 8.3 dos format
 ****************************************************************************/
-BOOL is_8_3(char *fname, BOOL check_case)
+bool is_8_3(char *fname, bool check_case)
 {
 	int len;
 	char *dot_pos;
@@ -97,11 +97,11 @@ BOOL is_8_3(char *fname, BOOL check_case)
 
 	/* can't be longer than 12 chars */
 	if (len == 0 || len > 12)
-		return (False);
+		return (false);
 
 	/* can't be an MS-DOS Special file such as lpt1 or even lpt1.txt */
 	if (is_reserved_msdos(fname))
-		return (False);
+		return (false);
 
 	/* can't contain invalid dos chars */
 	/* Windows use the ANSI charset.
@@ -122,7 +122,7 @@ BOOL is_8_3(char *fname, BOOL check_case)
 			if (*p == '.' && !dot_pos)
 				dot_pos = (char *) p;
 			if (!isdoschar(*p))
-				return (False);
+				return (false);
 			p++;
 		}
 	}
@@ -139,23 +139,23 @@ BOOL is_8_3(char *fname, BOOL check_case)
 
 	/* base can't be greater than 8 */
 	if (l > 8)
-		return (False);
+		return (false);
 
 	if (lp_strip_dot() && len - l == 1 && !strchr(dot_pos + 1, '.')) {
 		*dot_pos = 0;
-		return (True);
+		return (true);
 	}
 
 	/* extension must be between 1 and 3 */
 	if ((len - l < 2) || (len - l > 4))
-		return (False);
+		return (false);
 
 	/* extension can't have a dot */
 	if (strchr(dot_pos + 1, '.'))
-		return (False);
+		return (false);
 
 	/* must be in 8.3 format */
-	return (True);
+	return (true);
 } /* is_8_3 */
 
 /* -------------------------------------------------------------------------- **
@@ -234,23 +234,23 @@ static void push_mangled_name(char *s)
 /****************************************************************************
  * check for a name on the mangled name stack CRH
  ****************************************************************************/
-BOOL check_mangled_stack(char *s)
+bool check_mangled_stack(char *s)
 {
 	int i;
 	pstring tmpname;
 	char extension[5];
 	char *p = strrchr(s, '.');
-	BOOL check_extension = False;
+	bool check_extension = false;
 
 	extension[0] = 0;
 
 	/* If the stack doesn't exist, fail. */
 	if (!mangled_stack)
-		return (False);
+		return (false);
 
 	/* If there is a file extension, then we need to play with it, too. */
 	if (p) {
-		check_extension = True;
+		check_extension = true;
 		StrnCpy(extension, p, 4);
 		strlower(extension); /* XXXXXXX */
 	}
@@ -278,10 +278,10 @@ BOOL check_mangled_stack(char *s)
 		DEBUG(3, ("Found %s on mangled stack as %s\n", s,
 		          mangled_stack[i]));
 		array_promote(mangled_stack[0], sizeof(fstring), i);
-		return (True);
+		return (true);
 	}
 
-	return (False);
+	return (false);
 } /* check_mangled_stack */
 
 /* End of the mangled stack section.
@@ -292,14 +292,14 @@ BOOL check_mangled_stack(char *s)
 #define MAGIC_CHAR '~'
 
 /****************************************************************************
-return True if the name could be a mangled name
+return true if the name could be a mangled name
 ****************************************************************************/
-BOOL is_mangled(char *s)
+bool is_mangled(char *s)
 {
 	char *m = strchr(s, MAGIC_CHAR);
 
 	if (!m)
-		return (False);
+		return (false);
 
 	/* we use two base 36 chars before the extension */
 	if (m[1] == '.' || m[1] == 0 || m[2] == '.' || m[2] == 0 ||
@@ -307,7 +307,7 @@ BOOL is_mangled(char *s)
 		return (is_mangled(m + 1));
 
 	/* it could be */
-	return (True);
+	return (true);
 } /* is_mangled */
 
 /****************************************************************************
@@ -336,7 +336,7 @@ void mangle_name_83(char *s, int s_len)
 
 	p = strrchr(s, '.');
 	if (p && (strlen(p + 1) < (size_t) 4)) {
-		BOOL all_normal = (strisnormal(p + 1)); /* XXXXXXXXX */
+		bool all_normal = (strisnormal(p + 1)); /* XXXXXXXXX */
 
 		if (all_normal && p[1] != 0) {
 			*p = 0;
@@ -388,43 +388,43 @@ void mangle_name_83(char *s, int s_len)
 /*******************************************************************
   work out if a name is illegal, even for long names
   ******************************************************************/
-static BOOL illegal_name(char *name)
+static bool illegal_name(char *name)
 {
 	static unsigned char illegal[256];
-	static BOOL initialised = False;
+	static bool initialised = false;
 	unsigned char *s;
 
 	if (!initialised) {
 		char *ill = "*\\/?<>|\":";
-		initialised = True;
+		initialised = true;
 
 		bzero((char *) illegal, 256);
 		for (s = (unsigned char *) ill; *s; s++)
-			illegal[*s] = True;
+			illegal[*s] = true;
 	}
 
 	for (s = (unsigned char *) name; *s;) {
 		if (illegal[*s])
-			return (True);
+			return (true);
 		else
 			s++;
 	}
 
-	return (False);
+	return (false);
 } /* illegal_name */
 
 /****************************************************************************
-convert a filename to DOS format. return True if successful.
+convert a filename to DOS format. return true if successful.
 ****************************************************************************/
-void name_map_mangle(char *OutName, BOOL need83, int snum)
+void name_map_mangle(char *OutName, bool need83, int snum)
 {
 #ifdef MANGLE_LONG_FILENAMES
 	if (!need83 && illegal_name(OutName))
-		need83 = True;
+		need83 = true;
 #endif
 
 	/* check if it's already in 8.3 format */
-	if (need83 && !is_8_3(OutName, True)) {
+	if (need83 && !is_8_3(OutName, true)) {
 		/* mangle it into 8.3 */
 		push_mangled_name(OutName);
 		mangle_name_83(OutName, sizeof(pstring) - 1);

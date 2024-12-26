@@ -75,16 +75,16 @@ static int map_lock_type(files_struct *fsp, int lock_type)
  Utility function called to see if a file region is locked.
 ****************************************************************************/
 
-BOOL is_locked(int fnum, int cnum, uint32 count, uint32 offset, int lock_type)
+bool is_locked(int fnum, int cnum, uint32 count, uint32 offset, int lock_type)
 {
 	int snum = SNUM(cnum);
 	files_struct *fsp = &Files[fnum];
 
 	if (count == 0)
-		return (False);
+		return (false);
 
 	if (!lp_locking(snum) || !lp_strict_locking(snum))
-		return (False);
+		return (false);
 
 	/*
 	 * Note that most UNIX's can *test* for a write lock on
@@ -99,19 +99,19 @@ BOOL is_locked(int fnum, int cnum, uint32 count, uint32 offset, int lock_type)
  Utility function called by locking requests.
 ****************************************************************************/
 
-BOOL do_lock(int fnum, int cnum, uint32 count, uint32 offset, int lock_type,
+bool do_lock(int fnum, int cnum, uint32 count, uint32 offset, int lock_type,
              int *eclass, uint32 *ecode)
 {
-	BOOL ok = False;
+	bool ok = false;
 	files_struct *fsp = &Files[fnum];
 
 	if (!lp_locking(SNUM(cnum)))
-		return (True);
+		return (true);
 
 	if (count == 0) {
 		*eclass = ERRDOS;
 		*ecode = ERRnoaccess;
-		return False;
+		return false;
 	}
 
 	if (OPEN_FNUM(fnum) && fsp->can_lock && (fsp->cnum == cnum))
@@ -121,23 +121,23 @@ BOOL do_lock(int fnum, int cnum, uint32 count, uint32 offset, int lock_type,
 	if (!ok) {
 		*eclass = ERRDOS;
 		*ecode = ERRlock;
-		return False;
+		return false;
 	}
-	return True; /* Got lock */
+	return true; /* Got lock */
 }
 
 /****************************************************************************
  Utility function called by unlocking requests.
 ****************************************************************************/
 
-BOOL do_unlock(int fnum, int cnum, uint32 count, uint32 offset, int *eclass,
+bool do_unlock(int fnum, int cnum, uint32 count, uint32 offset, int *eclass,
                uint32 *ecode)
 {
-	BOOL ok = False;
+	bool ok = false;
 	files_struct *fsp = &Files[fnum];
 
 	if (!lp_locking(SNUM(cnum)))
-		return (True);
+		return (true);
 
 	if (OPEN_FNUM(fnum) && fsp->can_lock && (fsp->cnum == cnum))
 		ok = fcntl_lock(fsp->fd_ptr->fd, F_SETLK, offset, count,
@@ -146,7 +146,7 @@ BOOL do_unlock(int fnum, int cnum, uint32 count, uint32 offset, int *eclass,
 	if (!ok) {
 		*eclass = ERRDOS;
 		*ecode = ERRlock;
-		return False;
+		return false;
 	}
-	return True; /* Did unlock */
+	return true; /* Did unlock */
 }

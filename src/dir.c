@@ -37,9 +37,9 @@ static struct dptr_struct {
 	int cnum;
 	uint32 lastused;
 	void *ptr;
-	BOOL valid;
-	BOOL finished;
-	BOOL expect_close;
+	bool valid;
+	bool finished;
+	bool expect_close;
 	char *wcard; /* Field only used for lanman2 trans2_findfirst/next
 	                searches */
 	uint16 attr; /* Field only used for lanman2 trans2_findfirst/next
@@ -54,18 +54,18 @@ initialise the dir array
 ****************************************************************************/
 void init_dptrs(void)
 {
-	static BOOL dptrs_init = False;
+	static bool dptrs_init = false;
 	int i;
 
 	if (dptrs_init)
 		return;
 	for (i = 0; i < NUMDIRPTRS; i++) {
-		dirptrs[i].valid = False;
+		dirptrs[i].valid = false;
 		dirptrs[i].wcard = NULL;
 		dirptrs[i].ptr = NULL;
 		string_init(&dirptrs[i].path, "");
 	}
-	dptrs_init = True;
+	dptrs_init = true;
 }
 
 /****************************************************************************
@@ -147,26 +147,26 @@ char *dptr_wcard(int key)
 set the dir wcard for a dir index (lanman2 specific)
 Returns 0 on ok, 1 on fail.
 ****************************************************************************/
-BOOL dptr_set_wcard(int key, char *wcard)
+bool dptr_set_wcard(int key, char *wcard)
 {
 	if (dirptrs[key].valid) {
 		dirptrs[key].wcard = wcard;
-		return True;
+		return true;
 	}
-	return False;
+	return false;
 }
 
 /****************************************************************************
 set the dir attrib for a dir index (lanman2 specific)
 Returns 0 on ok, 1 on fail.
 ****************************************************************************/
-BOOL dptr_set_attr(int key, uint16 attr)
+bool dptr_set_attr(int key, uint16 attr)
 {
 	if (dirptrs[key].valid) {
 		dirptrs[key].attr = attr;
-		return True;
+		return true;
 	}
-	return False;
+	return false;
 }
 
 /****************************************************************************
@@ -206,7 +206,7 @@ void dptr_close(int key)
 		/* Lanman 2 specific code */
 		if (dirptrs[key].wcard)
 			free(dirptrs[key].wcard);
-		dirptrs[key].valid = False;
+		dirptrs[key].valid = false;
 		string_set(&dirptrs[key].path, "");
 	}
 }
@@ -249,12 +249,12 @@ void dptr_closepath(char *path, int pid)
 /****************************************************************************
   start a directory listing
 ****************************************************************************/
-static BOOL start_dir(int cnum, char *directory)
+static bool start_dir(int cnum, char *directory)
 {
 	DEBUG(5, ("start_dir cnum=%d dir=%s\n", cnum, directory));
 
 	if (!check_name(directory, cnum))
-		return (False);
+		return (false);
 
 	if (!*directory)
 		directory = ".";
@@ -263,16 +263,16 @@ static BOOL start_dir(int cnum, char *directory)
 	if (Connections[cnum].dirptr) {
 		dptrs_open++;
 		string_set(&Connections[cnum].dirpath, directory);
-		return (True);
+		return (true);
 	}
 
-	return (False);
+	return (false);
 }
 
 /****************************************************************************
 create a new dir ptr
 ****************************************************************************/
-int dptr_create(int cnum, char *path, BOOL expect_close, int pid)
+int dptr_create(int cnum, char *path, bool expect_close, int pid)
 {
 	int i;
 	uint32 old;
@@ -326,13 +326,13 @@ int dptr_create(int cnum, char *path, BOOL expect_close, int pid)
 	dirptrs[i].ptr = Connections[cnum].dirptr;
 	string_set(&dirptrs[i].path, path);
 	dirptrs[i].lastused = dircounter++;
-	dirptrs[i].finished = False;
+	dirptrs[i].finished = false;
 	dirptrs[i].cnum = cnum;
 	dirptrs[i].pid = pid;
 	dirptrs[i].expect_close = expect_close;
 	dirptrs[i].wcard = NULL; /* Only used in lanman2 searches */
 	dirptrs[i].attr = 0;     /* Only used in lanman2 searches */
-	dirptrs[i].valid = True;
+	dirptrs[i].valid = true;
 
 	DEBUG(3, ("creating new dirptr %d for path %s, expect_close = %d\n", i,
 	          path, expect_close));
@@ -345,26 +345,26 @@ int dptr_create(int cnum, char *path, BOOL expect_close, int pid)
 /****************************************************************************
 fill the 5 byte server reserved dptr field
 ****************************************************************************/
-BOOL dptr_fill(char *buf1, unsigned int key)
+bool dptr_fill(char *buf1, unsigned int key)
 {
 	unsigned char *buf = (unsigned char *) buf1;
 	void *p = dptr_get(key, 0);
 	uint32 offset;
 	if (!p) {
 		DEBUG(1, ("filling null dirptr %d\n", key));
-		return (False);
+		return (false);
 	}
 	offset = TellDir(p);
 	DEBUG(6, ("fill on key %d dirptr 0x%x now at %d\n", key, p, offset));
 	buf[0] = key;
 	SIVAL(buf, 1, offset | DPTR_MASK);
-	return (True);
+	return (true);
 }
 
 /****************************************************************************
-return True is the offset is at zero
+return true is the offset is at zero
 ****************************************************************************/
-BOOL dptr_zero(char *buf)
+bool dptr_zero(char *buf)
 {
 	return ((IVAL(buf, 1) & ~DPTR_MASK) == 0);
 }
@@ -408,27 +408,27 @@ void *dptr_fetch_lanman2(int dptr_num)
 /****************************************************************************
 check a filetype for being valid
 ****************************************************************************/
-BOOL dir_check_ftype(int cnum, int mode, struct stat *st, int dirtype)
+bool dir_check_ftype(int cnum, int mode, struct stat *st, int dirtype)
 {
 	if (((mode & ~dirtype) & (aHIDDEN | aSYSTEM | aDIR)) != 0)
-		return False;
-	return True;
+		return false;
+	return true;
 }
 
 /****************************************************************************
   get a directory entry
 ****************************************************************************/
-BOOL get_dir_entry(int cnum, char *mask, int dirtype, char *fname, int *size,
+bool get_dir_entry(int cnum, char *mask, int dirtype, char *fname, int *size,
                    int *mode, time_t *date)
 {
 	char *dname;
-	BOOL found = False;
+	bool found = false;
 	struct stat sbuf;
 	pstring path;
 	pstring pathreal;
-	BOOL isrootdir;
+	bool isrootdir;
 	pstring filename;
-	BOOL needslash;
+	bool needslash;
 
 	*path = *pathreal = *filename = 0;
 
@@ -441,7 +441,7 @@ BOOL get_dir_entry(int cnum, char *mask, int dirtype, char *fname, int *size,
 	     '/');
 
 	if (!Connections[cnum].dirptr)
-		return (False);
+		return (false);
 
 	while (!found) {
 		dname = ReadDirName(Connections[cnum].dirptr);
@@ -451,13 +451,13 @@ BOOL get_dir_entry(int cnum, char *mask, int dirtype, char *fname, int *size,
 		          TellDir(Connections[cnum].dirptr)));
 
 		if (dname == NULL)
-			return (False);
+			return (false);
 
 		pstrcpy(filename, dname);
 
 		if (strcmp(filename, mask) != 0) {
-			name_map_mangle(filename, True, SNUM(cnum));
-			if (!mask_match(filename, mask, False, False)) {
+			name_map_mangle(filename, true, SNUM(cnum));
+			if (!mask_match(filename, mask, false, false)) {
 				continue;
 			}
 		}
@@ -494,7 +494,7 @@ BOOL get_dir_entry(int cnum, char *mask, int dirtype, char *fname, int *size,
 		DEBUG(5,
 		      ("get_dir_entry found %s fname=%s\n", pathreal, fname));
 
-		found = True;
+		found = true;
 	}
 
 	return (found);
@@ -586,12 +586,12 @@ char *ReadDirName(void *p)
 /*******************************************************************
 seek a dir
 ********************************************************************/
-BOOL SeekDir(void *p, int pos)
+bool SeekDir(void *p, int pos)
 {
 	Dir *dirp = (Dir *) p;
 
 	if (!dirp)
-		return (False);
+		return (false);
 
 	if (pos < dirp->pos) {
 		dirp->current = dirp->data;

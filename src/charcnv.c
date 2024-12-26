@@ -25,7 +25,7 @@ extern int DEBUGLEVEL;
 
 static char cvtbuf[1024];
 
-static BOOL mapsinited = 0;
+static bool mapsinited = 0;
 
 static char unix2dos[256];
 static char dos2unix[256];
@@ -41,7 +41,7 @@ static void initmaps(void)
 	for (k = 0; k < 256; k++)
 		dos2unix[k] = k;
 
-	mapsinited = True;
+	mapsinited = true;
 }
 
 static void update_map(char *str)
@@ -227,7 +227,7 @@ static void init_koi8_r(void)
 /*
  * Convert unix to dos
  */
-char *unix2dos_format(char *str, BOOL overwrite)
+char *unix2dos_format(char *str, bool overwrite)
 {
 	char *p;
 	char *dp;
@@ -250,7 +250,7 @@ char *unix2dos_format(char *str, BOOL overwrite)
 /*
  * Convert dos to unix
  */
-char *dos2unix_format(char *str, BOOL overwrite)
+char *dos2unix_format(char *str, bool overwrite)
 {
 	char *p;
 	char *dp;

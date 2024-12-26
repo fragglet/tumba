@@ -55,10 +55,10 @@ void init_uid(void)
 /****************************************************************************
   become the specified uid
 ****************************************************************************/
-static BOOL become_uid(int uid)
+static bool become_uid(int uid)
 {
 	if (initial_uid != 0)
-		return (True);
+		return (true);
 
 	if (uid == -1 || uid == 65535) {
 		DEBUG(1, ("WARNING: using uid %d is a security risk\n", uid));
@@ -77,27 +77,27 @@ static BOOL become_uid(int uid)
 		if (uid > 32000)
 			DEBUG(0, ("Looks like your OS doesn't like high uid "
 			          "values - try using a different account\n"));
-		return (False);
+		return (false);
 	}
 
 	if (((uid == -1) || (uid == 65535)) && geteuid() != uid) {
 		DEBUG(0, ("Invalid uid -1. perhaps you have a account with uid "
 		          "65535?\n"));
-		return (False);
+		return (false);
 	}
 
 	current_user.uid = uid;
 
-	return (True);
+	return (true);
 }
 
 /****************************************************************************
   become the specified gid
 ****************************************************************************/
-static BOOL become_gid(int gid)
+static bool become_gid(int gid)
 {
 	if (initial_uid != 0)
-		return (True);
+		return (true);
 
 	if (gid == -1 || gid == 65535) {
 		DEBUG(1, ("WARNING: using gid %d is a security risk\n", gid));
@@ -116,18 +116,18 @@ static BOOL become_gid(int gid)
 		if (gid > 32000)
 			DEBUG(0, ("Looks like your OS doesn't like high gid "
 			          "values - try using a different account\n"));
-		return (False);
+		return (false);
 	}
 
 	current_user.gid = gid;
 
-	return (True);
+	return (true);
 }
 
 /****************************************************************************
   become the specified uid and gid
 ****************************************************************************/
-static BOOL become_id(int uid, int gid)
+static bool become_id(int uid, int gid)
 {
 	return (become_gid(gid) && become_uid(uid));
 }
@@ -135,18 +135,18 @@ static BOOL become_id(int uid, int gid)
 /****************************************************************************
 become the guest user
 ****************************************************************************/
-BOOL become_guest(void)
+bool become_guest(void)
 {
-	BOOL ret;
+	bool ret;
 	static struct passwd *pass = NULL;
 
 	if (initial_uid != 0)
-		return (True);
+		return (true);
 
 	if (!pass)
-		pass = Get_Pwnam(lp_guestaccount(-1), True);
+		pass = Get_Pwnam(lp_guestaccount(-1), true);
 	if (!pass)
-		return (False);
+		return (false);
 
 	ret = become_id(pass->pw_uid, pass->pw_gid);
 
@@ -161,21 +161,21 @@ BOOL become_guest(void)
 /****************************************************************************
   become the user of a connection number
 ****************************************************************************/
-BOOL become_user(connection_struct *conn, int cnum)
+bool become_user(connection_struct *conn, int cnum)
 {
 	int gid;
 	int uid;
 
 	if ((current_user.cnum == cnum) && (current_user.uid == conn->uid)) {
 		DEBUG(4, ("Skipping become_user - already user\n"));
-		return (True);
+		return (true);
 	}
 
 	unbecome_user();
 
 	if (!(VALID_CNUM(cnum) && conn->open)) {
 		DEBUG(2, ("Connection %d not open\n", cnum));
-		return (False);
+		return (false);
 	}
 
 	{
@@ -185,10 +185,10 @@ BOOL become_user(connection_struct *conn, int cnum)
 
 	if (initial_uid == 0) {
 		if (!become_gid(gid))
-			return (False);
+			return (false);
 
 		if (!become_uid(uid))
-			return (False);
+			return (false);
 	}
 
 	current_user.cnum = cnum;
@@ -196,16 +196,16 @@ BOOL become_user(connection_struct *conn, int cnum)
 	DEBUG(5, ("become_user uid=(%d,%d) gid=(%d,%d)\n", getuid(), geteuid(),
 	          getgid(), getegid()));
 
-	return (True);
+	return (true);
 }
 
 /****************************************************************************
   unbecome the user of a connection number
 ****************************************************************************/
-BOOL unbecome_user(void)
+bool unbecome_user(void)
 {
 	if (current_user.cnum == -1)
-		return (False);
+		return (false);
 
 	ChDir(OriginalDir);
 
@@ -237,7 +237,7 @@ BOOL unbecome_user(void)
 
 	current_user.cnum = -1;
 
-	return (True);
+	return (true);
 }
 
 static struct current_user current_user_saved;
@@ -252,7 +252,7 @@ after the operation
 
 Set save_dir if you also need to save/restore the CWD
 ****************************************************************************/
-void become_root(BOOL save_dir)
+void become_root(bool save_dir)
 {
 	if (become_root_depth) {
 		DEBUG(0, ("ERROR: become root depth is non zero\n"));
@@ -272,7 +272,7 @@ When the privilaged operation is over call this
 
 Set save_dir if you also need to save/restore the CWD
 ****************************************************************************/
-void unbecome_root(BOOL restore_dir)
+void unbecome_root(bool restore_dir)
 {
 	if (become_root_depth != 1) {
 		DEBUG(0, ("ERROR: unbecome root depth is %d\n",

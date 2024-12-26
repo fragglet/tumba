@@ -25,7 +25,7 @@ pstring scope = "";
 
 int DEBUGLEVEL = 1;
 
-BOOL passive = False;
+bool passive = false;
 
 int Protocol = PROTOCOL_COREPLUS;
 
@@ -47,9 +47,9 @@ pstring debugf = "";
 
 /* the following control case operations - they are put here so the
    client can link easily */
-BOOL case_sensitive;
-BOOL case_preserve;
-BOOL short_case_preserve;
+bool case_sensitive;
+bool case_preserve;
+bool short_case_preserve;
 
 fstring remote_machine = "";
 fstring local_machine = "";
@@ -59,19 +59,19 @@ pstring myhostname = "";
 pstring sesssetup_user = "";
 pstring samlogon_user = "";
 
-BOOL sam_logon_in_ssb = False;
+bool sam_logon_in_ssb = false;
 
 pstring myname = "";
 fstring myworkgroup = "";
 
 int smb_read_error = 0;
 
-static BOOL stdout_logging = False;
+static bool stdout_logging = false;
 
 /*******************************************************************
   get ready for syslog stuff
   ******************************************************************/
-void setup_logging(char *pname, BOOL interactive)
+void setup_logging(char *pname, bool interactive)
 {
 #ifdef SYSLOG
 	if (!interactive) {
@@ -86,12 +86,12 @@ void setup_logging(char *pname, BOOL interactive)
 	}
 #endif
 	if (interactive) {
-		stdout_logging = True;
+		stdout_logging = true;
 		dbf = stdout;
 	}
 }
 
-BOOL append_log = False;
+bool append_log = false;
 
 /****************************************************************************
 reopen the log files
@@ -283,7 +283,7 @@ char *tmpdir(void)
 /****************************************************************************
 determine if a file descriptor is in fact a socket
 ****************************************************************************/
-BOOL is_a_socket(int fd)
+bool is_a_socket(int fd)
 {
 	int v, l;
 	l = sizeof(int);
@@ -293,20 +293,20 @@ BOOL is_a_socket(int fd)
 static char *last_ptr = NULL;
 
 /****************************************************************************
-  Get the next token from a string, return False if none found
+  Get the next token from a string, return false if none found
   handles double-quotes.
 Based on a routine by GJC@VILLAGE.COM.
 Extensively modified by Andrew.Tridgell@anu.edu.au
 ****************************************************************************/
-BOOL next_token(char **ptr, char *buff, char *sep)
+bool next_token(char **ptr, char *buff, char *sep)
 {
 	char *s;
-	BOOL quoted;
+	bool quoted;
 
 	if (!ptr)
 		ptr = &last_ptr;
 	if (!ptr)
-		return (False);
+		return (false);
 
 	s = *ptr;
 
@@ -320,10 +320,10 @@ BOOL next_token(char **ptr, char *buff, char *sep)
 
 	/* nothing left? */
 	if (!*s)
-		return (False);
+		return (false);
 
 	/* copy over the token */
-	for (quoted = False; *s && (quoted || !strchr(sep, *s)); s++) {
+	for (quoted = false; *s && (quoted || !strchr(sep, *s)); s++) {
 		if (*s == '\"')
 			quoted = !quoted;
 		else
@@ -334,7 +334,7 @@ BOOL next_token(char **ptr, char *buff, char *sep)
 	*buff = 0;
 	last_ptr = *ptr;
 
-	return (True);
+	return (true);
 }
 
 /****************************************************************************
@@ -427,14 +427,14 @@ static int name_interpret(char *in, char *out)
 /*******************************************************************
   check if a file exists
 ********************************************************************/
-BOOL file_exist(char *fname, struct stat *sbuf)
+bool file_exist(char *fname, struct stat *sbuf)
 {
 	struct stat st;
 	if (!sbuf)
 		sbuf = &st;
 
 	if (sys_stat(fname, sbuf) != 0)
-		return (False);
+		return (false);
 
 	return (S_ISREG(sbuf->st_mode));
 }
@@ -455,16 +455,16 @@ time_t file_modtime(char *fname)
 /*******************************************************************
   check if a directory exists
 ********************************************************************/
-BOOL directory_exist(char *dname, struct stat *st)
+bool directory_exist(char *dname, struct stat *st)
 {
 	struct stat st2;
-	BOOL ret;
+	bool ret;
 
 	if (!st)
 		st = &st2;
 
 	if (sys_stat(dname, st) != 0)
-		return (False);
+		return (false);
 
 	ret = S_ISDIR(st->st_mode);
 	if (!ret)
@@ -501,12 +501,12 @@ int StrCaseCmp(char *s, char *t)
 /*******************************************************************
   compare 2 strings
 ********************************************************************/
-BOOL strequal(char *s1, char *s2)
+bool strequal(char *s1, char *s2)
 {
 	if (s1 == s2)
-		return (True);
+		return (true);
 	if (!s1 || !s2)
-		return (False);
+		return (false);
 
 	return (StrCaseCmp(s1, s2) == 0);
 }
@@ -514,12 +514,12 @@ BOOL strequal(char *s1, char *s2)
 /*******************************************************************
   compare 2 strings (case sensitive)
 ********************************************************************/
-BOOL strcsequal(char *s1, char *s2)
+bool strcsequal(char *s1, char *s2)
 {
 	if (s1 == s2)
-		return (True);
+		return (true);
 	if (!s1 || !s2)
-		return (False);
+		return (false);
 
 	return (strcmp(s1, s2) == 0);
 }
@@ -562,7 +562,7 @@ void strnorm(char *s)
 /*******************************************************************
 check if a string is in "normal" case
 ********************************************************************/
-BOOL strisnormal(char *s)
+bool strisnormal(char *s)
 {
 	if (case_default == CASE_UPPER)
 		return (!strhaslower(s));
@@ -670,7 +670,7 @@ void smb_setlen(char *buf, int len)
 /*******************************************************************
   setup the word count and byte count for a smb message
 ********************************************************************/
-int set_message(char *buf, int num_words, int num_bytes, BOOL zero)
+int set_message(char *buf, int num_words, int num_bytes, bool zero)
 {
 	if (zero)
 		bzero(buf + smb_size, num_words * 2 + num_bytes);
@@ -733,12 +733,12 @@ char *skip_string(char *buf, int n)
 /*******************************************************************
 trim the specified elements off the front and back of a string
 ********************************************************************/
-BOOL trim_string(char *s, char *front, char *back)
+bool trim_string(char *s, char *front, char *back)
 {
-	BOOL ret = False;
+	bool ret = false;
 	while (front && *front && strncmp(s, front, strlen(front)) == 0) {
 		char *p = s;
-		ret = True;
+		ret = true;
 		while (1) {
 			if (!(*p = p[strlen(front)]))
 				break;
@@ -748,7 +748,7 @@ BOOL trim_string(char *s, char *front, char *back)
 	while (
 	    back && *back && strlen(s) >= strlen(back) &&
 	    (strncmp(s + strlen(s) - strlen(back), back, strlen(back)) == 0)) {
-		ret = True;
+		ret = true;
 		s[strlen(s) - strlen(back)] = 0;
 	}
 	return (ret);
@@ -816,10 +816,10 @@ struct {
 	ino_t inode;
 	dev_t dev;
 	char *text;
-	BOOL valid;
+	bool valid;
 } ino_list[MAX_GETWDCACHE];
 
-BOOL use_getwd_cache = True;
+bool use_getwd_cache = true;
 
 /*******************************************************************
   return the absolute current directory path
@@ -827,7 +827,7 @@ BOOL use_getwd_cache = True;
 char *GetWd(char *str)
 {
 	pstring s;
-	static BOOL getwd_cache_init = False;
+	static bool getwd_cache_init = false;
 	struct stat st, st2;
 	int i;
 
@@ -838,10 +838,10 @@ char *GetWd(char *str)
 
 	/* init the cache */
 	if (!getwd_cache_init) {
-		getwd_cache_init = True;
+		getwd_cache_init = true;
 		for (i = 0; i < MAX_GETWDCACHE; i++) {
 			string_init(&ino_list[i].text, "");
-			ino_list[i].valid = False;
+			ino_list[i].valid = false;
 		}
 	}
 
@@ -881,7 +881,7 @@ char *GetWd(char *str)
 						   then something's changed,
 						    scrub the entry and start
 						   from scratch. */
-						ino_list[i].valid = False;
+						ino_list[i].valid = false;
 					}
 				}
 			}
@@ -906,7 +906,7 @@ char *GetWd(char *str)
 	string_set(&ino_list[i].text, s);
 	ino_list[i].dev = st.st_dev;
 	ino_list[i].inode = st.st_ino;
-	ino_list[i].valid = True;
+	ino_list[i].valid = true;
 
 	/* put it at the top of the list */
 	array_promote((char *) &ino_list[0], sizeof(ino_list[0]), i);
@@ -921,17 +921,17 @@ on the system that has the referenced file system.
 
 widelinks are allowed if widelinks is true
 ********************************************************************/
-BOOL reduce_name(char *s, char *dir, BOOL widelinks)
+bool reduce_name(char *s, char *dir, bool widelinks)
 {
 #ifndef REDUCE_PATHS
-	return True;
+	return true;
 #else
 	pstring dir2;
 	pstring wd;
 	pstring base_name;
 	pstring newname;
 	char *p = NULL;
-	BOOL relative = (*s != '/');
+	bool relative = (*s != '/');
 
 	*dir2 = *wd = *base_name = *newname = 0;
 
@@ -940,13 +940,13 @@ BOOL reduce_name(char *s, char *dir, BOOL widelinks)
 		/* can't have a leading .. */
 		if (strncmp(s, "..", 2) == 0 && (s[2] == 0 || s[2] == '/')) {
 			DEBUG(3, ("Illegal file name? (%s)\n", s));
-			return (False);
+			return (false);
 		}
 
 		if (strlen(s) == 0)
 			pstrcpy(s, "./");
 
-		return (True);
+		return (true);
 	}
 
 	DEBUG(3, ("reduce_name [%s] [%s]\n", s, dir));
@@ -958,22 +958,22 @@ BOOL reduce_name(char *s, char *dir, BOOL widelinks)
 	p = strrchr(base_name, '/');
 
 	if (!p)
-		return (True);
+		return (true);
 
 	if (!GetWd(wd)) {
 		DEBUG(0, ("couldn't getwd for %s %s\n", s, dir));
-		return (False);
+		return (false);
 	}
 
 	if (ChDir(dir) != 0) {
 		DEBUG(0, ("couldn't chdir to %s\n", dir));
-		return (False);
+		return (false);
 	}
 
 	if (!GetWd(dir2)) {
 		DEBUG(0, ("couldn't getwd for %s\n", dir));
 		ChDir(wd);
-		return (False);
+		return (false);
 	}
 
 	if (p && (p != base_name)) {
@@ -988,13 +988,13 @@ BOOL reduce_name(char *s, char *dir, BOOL widelinks)
 		ChDir(wd);
 		DEBUG(3, ("couldn't chdir for %s %s basename=%s\n", s, dir,
 		          base_name));
-		return (False);
+		return (false);
 	}
 
 	if (!GetWd(newname)) {
 		ChDir(wd);
 		DEBUG(2, ("couldn't get wd for %s %s\n", s, dir2));
-		return (False);
+		return (false);
 	}
 
 	if (p && (p != base_name)) {
@@ -1012,7 +1012,7 @@ BOOL reduce_name(char *s, char *dir, BOOL widelinks)
 			DEBUG(2, ("Bad access attempt? s=%s dir=%s newname=%s "
 			          "l=%d\n",
 			          s, dir2, newname, l));
-			return (False);
+			return (false);
 		}
 
 		if (relative) {
@@ -1030,34 +1030,34 @@ BOOL reduce_name(char *s, char *dir, BOOL widelinks)
 		pstrcpy(s, "./");
 
 	DEBUG(3, ("reduced to %s\n", s));
-	return (True);
+	return (true);
 #endif
 }
 
 /****************************************************************************
 does a string have any uppercase chars in it?
 ****************************************************************************/
-BOOL strhasupper(char *s)
+bool strhasupper(char *s)
 {
 	while (*s) {
 		if (isupper(*s))
-			return (True);
+			return (true);
 		s++;
 	}
-	return (False);
+	return (false);
 }
 
 /****************************************************************************
 does a string have any lowercase chars in it?
 ****************************************************************************/
-BOOL strhaslower(char *s)
+bool strhaslower(char *s)
 {
 	while (*s) {
 		if (islower(*s))
-			return (True);
+			return (true);
 		s++;
 	}
-	return (False);
+	return (false);
 }
 
 /****************************************************************************
@@ -1380,7 +1380,7 @@ a keepalive packet.
 static int read_smb_length_return_keepalive(int fd, char *inbuf, int timeout)
 {
 	int len = 0, msg_type;
-	BOOL ok = False;
+	bool ok = false;
 
 	while (!ok) {
 		if (timeout > 0)
@@ -1434,7 +1434,7 @@ int read_smb_length(int fd, char *inbuf, int timeout)
   This function will return on a
   receipt of a session keepalive packet.
 ****************************************************************************/
-BOOL receive_smb(int fd, char *buffer, int timeout)
+bool receive_smb(int fd, char *buffer, int timeout)
 {
 	int len, ret;
 
@@ -1444,7 +1444,7 @@ BOOL receive_smb(int fd, char *buffer, int timeout)
 
 	len = read_smb_length_return_keepalive(fd, buffer, timeout);
 	if (len < 0)
-		return (False);
+		return (false);
 
 	if (len > BUFFER_SIZE) {
 		DEBUG(0, ("Invalid packet length! (%d bytes).\n", len));
@@ -1456,10 +1456,10 @@ BOOL receive_smb(int fd, char *buffer, int timeout)
 		ret = read_data(fd, buffer + 4, len);
 		if (ret != len) {
 			smb_read_error = READ_ERROR;
-			return False;
+			return false;
 		}
 	}
-	return (True);
+	return (true);
 }
 
 /****************************************************************************
@@ -1477,13 +1477,13 @@ BOOL receive_smb(int fd, char *buffer, int timeout)
   if the second (loopback UDP) fd is ready then read a message
   from it and setup the buffer header to identify the length
   and from address.
-  Returns False on timeout or error.
-  Else returns True.
+  Returns false on timeout or error.
+  Else returns true.
 
 The timeout is in milli seconds
 ****************************************************************************/
-BOOL receive_message_or_smb(int smbfd, char *buffer, int buffer_len,
-                            int timeout, BOOL *got_smb)
+bool receive_message_or_smb(int smbfd, char *buffer, int buffer_len,
+                            int timeout, bool *got_smb)
 {
 	fd_set fds;
 	int selrtn;
@@ -1491,7 +1491,7 @@ BOOL receive_message_or_smb(int smbfd, char *buffer, int buffer_len,
 
 	smb_read_error = 0;
 
-	*got_smb = False;
+	*got_smb = false;
 
 	FD_ZERO(&fds);
 	FD_SET(smbfd, &fds);
@@ -1505,27 +1505,27 @@ BOOL receive_message_or_smb(int smbfd, char *buffer, int buffer_len,
 	if (selrtn == -1) {
 		/* something is wrong. Maybe the socket is dead? */
 		smb_read_error = READ_ERROR;
-		return False;
+		return false;
 	}
 
 	/* Did we timeout ? */
 	if (selrtn == 0) {
 		smb_read_error = READ_TIMEOUT;
-		return False;
+		return false;
 	}
 
 	if (FD_ISSET(smbfd, &fds)) {
-		*got_smb = True;
+		*got_smb = true;
 		return receive_smb(smbfd, buffer, 0);
 	} else {
-		return False;
+		return false;
 	}
 }
 
 /****************************************************************************
   send an smb to a fd
 ****************************************************************************/
-BOOL send_smb(int fd, char *buffer)
+bool send_smb(int fd, char *buffer)
 {
 	int len;
 	int ret, nwritten = 0;
@@ -1544,7 +1544,7 @@ BOOL send_smb(int fd, char *buffer)
 		nwritten += ret;
 	}
 
-	return True;
+	return true;
 }
 
 /****************************************************************************
@@ -1602,20 +1602,20 @@ int name_len(char *s)
 /****************************************************************************
 send a single packet to a port on another machine
 ****************************************************************************/
-BOOL send_one_packet(char *buf, int len, struct in_addr ip, int port, int type)
+bool send_one_packet(char *buf, int len, struct in_addr ip, int port, int type)
 {
-	BOOL ret;
+	bool ret;
 	int out_fd;
 	struct sockaddr_in sock_out;
 
 	if (passive)
-		return (True);
+		return (true);
 
 	/* create a socket to write to */
 	out_fd = socket(AF_INET, type, 0);
 	if (out_fd == -1) {
 		DEBUG(0, ("socket failed"));
-		return False;
+		return false;
 	}
 
 	/* set the address and port */
@@ -1648,7 +1648,7 @@ static char *null_string = NULL;
 /****************************************************************************
 set a string value, allocing the space for the string
 ****************************************************************************/
-BOOL string_init(char **dest, char *src)
+bool string_init(char **dest, char *src)
 {
 	int l;
 	if (!src)
@@ -1666,12 +1666,12 @@ BOOL string_init(char **dest, char *src)
 		(*dest) = (char *) malloc(l + 1);
 		if ((*dest) == NULL) {
 			DEBUG(0, ("Out of memory in string_init\n"));
-			return False;
+			return false;
 		}
 
 		pstrcpy(*dest, src);
 	}
-	return (True);
+	return (true);
 }
 
 /****************************************************************************
@@ -1692,7 +1692,7 @@ void string_free(char **s)
 set a string value, allocing the space for the string, and deallocating any
 existing space
 ****************************************************************************/
-BOOL string_set(char **dest, char *src)
+bool string_set(char **dest, char *src)
 {
 	string_free(dest);
 
@@ -1706,26 +1706,26 @@ enough room!
 This routine looks for pattern in s and replaces it with
 insert. It may do multiple replacements.
 
-return True if a substitution was done.
+return true if a substitution was done.
 ****************************************************************************/
-BOOL string_sub(char *s, char *pattern, char *insert)
+bool string_sub(char *s, char *pattern, char *insert)
 {
-	BOOL ret = False;
+	bool ret = false;
 	char *p;
 	int ls, lp, li;
 
 	if (!insert || !pattern || !s)
-		return (False);
+		return (false);
 
 	ls = strlen(s);
 	lp = strlen(pattern);
 	li = strlen(insert);
 
 	if (!*pattern)
-		return (False);
+		return (false);
 
 	while (lp <= ls && (p = strstr(s, pattern))) {
-		ret = True;
+		ret = true;
 		memmove(p + li, p + lp, ls + 1 - (PTR_DIFF(p, s) + lp));
 		memcpy(p, insert, li);
 		s = p + li;
@@ -1736,11 +1736,11 @@ BOOL string_sub(char *s, char *pattern, char *insert)
 
 /*********************************************************
  * Recursive routine that is called by mask_match.
- * Does the actual matching. Returns True if matched,
- * False if failed.
+ * Does the actual matching. Returns true if matched,
+ * false if failed.
  *********************************************************/
 
-BOOL do_match(char *str, char *regexp, int case_sig)
+bool do_match(char *str, char *regexp, int case_sig)
 {
 	char *p;
 
@@ -1756,7 +1756,7 @@ BOOL do_match(char *str, char *regexp, int case_sig)
 			   the one after the '*' */
 			p++;
 			if (!*p)
-				return True; /* Automatic match */
+				return true; /* Automatic match */
 			while (*str) {
 				while (*str && (case_sig ? (*p != *str)
 				                         : (toupper(*p) !=
@@ -1771,24 +1771,24 @@ BOOL do_match(char *str, char *regexp, int case_sig)
 				str--; /* We've eaten the match char after the
 				          '*' */
 				if (do_match(str, p, case_sig)) {
-					return True;
+					return true;
 				}
 				if (!*str) {
-					return False;
+					return false;
 				} else {
 					str++;
 				}
 			}
-			return False;
+			return false;
 
 		default:
 			if (case_sig) {
 				if (*str != *p) {
-					return False;
+					return false;
 				}
 			} else {
 				if (toupper(*str) != toupper(*p)) {
-					return False;
+					return false;
 				}
 			}
 			str++, p++;
@@ -1797,10 +1797,10 @@ BOOL do_match(char *str, char *regexp, int case_sig)
 	}
 
 	if (!*p && !*str)
-		return True;
+		return true;
 
 	if (!*p && str[0] == '.' && str[1] == 0) {
-		return (True);
+		return (true);
 	}
 
 	if (!*str && *p == '?') {
@@ -1810,10 +1810,10 @@ BOOL do_match(char *str, char *regexp, int case_sig)
 	}
 
 	if (!*str && (*p == '*' && p[1] == '\0')) {
-		return True;
+		return true;
 	}
 
-	return False;
+	return false;
 }
 
 /*********************************************************
@@ -1823,13 +1823,13 @@ BOOL do_match(char *str, char *regexp, int case_sig)
  * The 8.3 handling was rewritten by Ums Harald <Harald.Ums@pro-sieben.de>
  *********************************************************/
 
-BOOL mask_match(char *str, char *regexp, int case_sig, BOOL trans2)
+bool mask_match(char *str, char *regexp, int case_sig, bool trans2)
 {
 	char *p;
 	pstring t_pattern, t_filename, te_pattern, te_filename;
 	fstring ebase, eext, sbase, sext;
 
-	BOOL matched = False;
+	bool matched = false;
 
 	/* Make local copies of str and regexp */
 	pstrcpy(t_pattern, regexp);
@@ -1840,7 +1840,7 @@ BOOL mask_match(char *str, char *regexp, int case_sig, BOOL trans2)
 	string_sub(t_pattern, "**", "*");
 
 	if (strequal(t_pattern, "*"))
-		return (True);
+		return (true);
 
 	DEBUG(8, ("mask_match str=<%s> regexp=<%s>, case_sig = %d\n",
 	          t_filename, t_pattern, case_sig));
@@ -1851,7 +1851,7 @@ BOOL mask_match(char *str, char *regexp, int case_sig, BOOL trans2)
 		 * characters.
 		 */
 		char *fp, *rp, *cp2, *cp1;
-		BOOL last_wcard_was_star = False;
+		bool last_wcard_was_star = false;
 		int num_path_components, num_regexp_components;
 
 		pstrcpy(te_pattern, t_pattern);
@@ -1879,9 +1879,9 @@ BOOL mask_match(char *str, char *regexp, int case_sig, BOOL trans2)
 					*rp = '\0';
 
 				if (cp1[strlen(cp1) - 1] == '*')
-					last_wcard_was_star = True;
+					last_wcard_was_star = true;
 				else
-					last_wcard_was_star = False;
+					last_wcard_was_star = false;
 
 				if (!do_match(cp2, cp1, case_sig))
 					break;
@@ -1915,7 +1915,7 @@ BOOL mask_match(char *str, char *regexp, int case_sig, BOOL trans2)
 			}
 			if (cp1 == NULL &&
 			    ((*cp2 == '\0') || last_wcard_was_star))
-				matched = True;
+				matched = true;
 		}
 	} else {
 
@@ -1933,7 +1933,7 @@ BOOL mask_match(char *str, char *regexp, int case_sig, BOOL trans2)
 			    strequal(t_pattern, "*.") ||
 			    strequal(t_pattern, "?.") ||
 			    strequal(t_pattern, "?"))
-				matched = True;
+				matched = true;
 		} else if (strequal(t_filename, "..")) {
 			/*
 			 *  Patterns:  *.*  *. ?. ? *.? are valid
@@ -1945,7 +1945,7 @@ BOOL mask_match(char *str, char *regexp, int case_sig, BOOL trans2)
 			    strequal(t_pattern, "?") ||
 			    strequal(t_pattern, "*.?") ||
 			    strequal(t_pattern, "?.*"))
-				matched = True;
+				matched = true;
 		} else {
 
 			if ((p = strrchr(t_pattern, '.'))) {
@@ -1961,7 +1961,7 @@ BOOL mask_match(char *str, char *regexp, int case_sig, BOOL trans2)
 					 * there is no DOT */
 					*eext = 0;
 					if (strequal(ebase, "*"))
-						return (True);
+						return (true);
 				}
 			} else {
 				/*
@@ -2139,7 +2139,7 @@ void *Realloc(void *p, int size)
 /****************************************************************************
 get my own name and IP
 ****************************************************************************/
-BOOL get_myname(char *my_name, struct in_addr *ip)
+bool get_myname(char *my_name, struct in_addr *ip)
 {
 	struct hostent *hp;
 	pstring hostname;
@@ -2149,13 +2149,13 @@ BOOL get_myname(char *my_name, struct in_addr *ip)
 	/* get my host name */
 	if (gethostname(hostname, MAXHOSTNAMELEN) == -1) {
 		DEBUG(0, ("gethostname failed\n"));
-		return False;
+		return false;
 	}
 
 	/* get host info */
 	if ((hp = gethostbyname(hostname)) == 0) {
 		DEBUG(0, ("gethostbyname: Unknown host %s.\n", hostname));
-		return False;
+		return false;
 	}
 
 	if (my_name) {
@@ -2170,7 +2170,7 @@ BOOL get_myname(char *my_name, struct in_addr *ip)
 	if (ip)
 		*ip = *((struct in_addr *) hp->h_addr);
 
-	return (True);
+	return (true);
 }
 
 /****************************************************************************
@@ -2249,7 +2249,7 @@ uint32 interpret_addr(char *str)
 	struct hostent *hp;
 	uint32 res;
 	int i;
-	BOOL pure_address = True;
+	bool pure_address = true;
 
 	if (strcmp(str, "0.0.0.0") == 0)
 		return (0);
@@ -2258,7 +2258,7 @@ uint32 interpret_addr(char *str)
 
 	for (i = 0; pure_address && str[i]; i++)
 		if (!(isdigit(str[i]) || str[i] == '.'))
-			pure_address = False;
+			pure_address = false;
 
 	/* if it's in the form of an IP address then get the lib to interpret it
 	 */
@@ -2297,13 +2297,13 @@ struct in_addr *interpret_addr2(char *str)
 	return (&ret);
 }
 
-static BOOL global_client_name_done = False;
-static BOOL global_client_addr_done = False;
+static bool global_client_name_done = false;
+static bool global_client_addr_done = false;
 
 void reset_globals_after_fork(void)
 {
-	global_client_name_done = False;
-	global_client_addr_done = False;
+	global_client_name_done = false;
+	global_client_addr_done = false;
 }
 
 /*******************************************************************
@@ -2331,7 +2331,7 @@ char *client_addr(void)
 
 	fstrcpy(addr_buf, (char *) inet_ntoa(sockin.sin_addr));
 
-	global_client_addr_done = True;
+	global_client_addr_done = true;
 	return addr_buf;
 }
 
@@ -2425,7 +2425,7 @@ char *gidtoname(int gid)
 /*******************************************************************
 block sigs
 ********************************************************************/
-void BlockSignals(BOOL block, int signum)
+void BlockSignals(bool block, int signum)
 {
 #ifdef USE_SIGBLOCK
 	int block_mask = sigmask(signum);
@@ -2479,7 +2479,7 @@ char *readdirname(void *p)
 	{
 		static pstring buf;
 		pstrcpy(buf, dname);
-		unix2dos_format(buf, True);
+		unix2dos_format(buf, true);
 		dname = buf;
 	}
 
@@ -2489,7 +2489,7 @@ char *readdirname(void *p)
 /****************************************************************************
 routine to do file locking
 ****************************************************************************/
-BOOL fcntl_lock(int fd, int op, uint32 offset, uint32 count, int type)
+bool fcntl_lock(int fd, int op, uint32 offset, uint32 count, int type)
 {
 	struct flock lock;
 	int ret;
@@ -2537,11 +2537,11 @@ BOOL fcntl_lock(int fd, int op, uint32 offset, uint32 count, int type)
 		    (lock.l_pid != 0) && (lock.l_pid != getpid())) {
 			DEBUG(3,
 			      ("fd %d is locked by pid %d\n", fd, lock.l_pid));
-			return (True);
+			return (true);
 		}
 
 		/* it must be not locked or locked by me */
-		return (False);
+		return (false);
 	}
 
 	/* a lock set or unset */
@@ -2552,17 +2552,17 @@ BOOL fcntl_lock(int fd, int op, uint32 offset, uint32 count, int type)
 
 		/* perhaps it doesn't support this sort of locking?? */
 		if (errno == EINVAL) {
-			DEBUG(3, ("locking not supported? returning True\n"));
-			return (True);
+			DEBUG(3, ("locking not supported? returning true\n"));
+			return (true);
 		}
 
-		return (False);
+		return (false);
 	}
 
 	/* everything went OK */
 	DEBUG(8, ("Lock call successful\n"));
 
-	return (True);
+	return (true);
 }
 
 /*******************************************************************

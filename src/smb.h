@@ -31,14 +31,10 @@
 #define DGRAM_PORT 138
 #define SMB_PORT 139
 
-#define False (0)
-#define True (1)
 #define BOOLSTR(b) ((b) ? "Yes" : "No")
 #define BITSETB(ptr, bit) ((((char *) ptr)[0] & (1 << (bit))) != 0)
 #define BITSETW(ptr, bit) ((SVAL(ptr, 0) & (1 << (bit))) != 0)
 #define PTR_DIFF(p1, p2) ((ptrdiff_t) (((char *) (p1)) - (char *) (p2)))
-
-typedef int BOOL;
 
 /* limiting size of ipc replies */
 #define REALLOC(ptr, size) Realloc(ptr, MAX((size), 4 * 1024))
@@ -291,8 +287,8 @@ typedef struct {
 	int32 wr_timeout;
 	int32 wr_errclass;
 	int32 wr_error;  /* Cached errors */
-	BOOL wr_mode;    /* write through mode) */
-	BOOL wr_discard; /* discard all further data */
+	bool wr_mode;    /* write through mode) */
+	bool wr_discard; /* discard all further data */
 } write_bmpx_struct;
 
 /*
@@ -321,21 +317,21 @@ typedef struct {
 	uint32 mmap_size;
 	write_bmpx_struct *wbmpx_ptr;
 	struct timeval open_time;
-	BOOL open;
-	BOOL can_lock;
-	BOOL can_read;
-	BOOL can_write;
-	BOOL share_mode;
-	BOOL modified;
-	BOOL reserved;
+	bool open;
+	bool can_lock;
+	bool can_read;
+	bool can_write;
+	bool share_mode;
+	bool modified;
+	bool reserved;
 	char *name;
 } files_struct;
 
 typedef struct {
 	int service;
 	void *dirptr;
-	BOOL open;
-	BOOL read_only;
+	bool open;
+	bool read_only;
 	char *dirpath;
 	char *connectpath;
 	char *origpath;
@@ -344,7 +340,7 @@ typedef struct {
 	int gid;    /* gid of user who *opened* this connection */
 
 	time_t lastused;
-	BOOL used;
+	bool used;
 	int num_files_open;
 } connection_struct;
 
@@ -382,7 +378,7 @@ typedef struct {
 	fstring requested_name; /* user name from the client */
 	fstring name;           /* unix user name of a validated user */
 	fstring real_name; /* to store real name from password file - simeon */
-	BOOL guest;
+	bool guest;
 
 	int n_sids;
 	int *sids;
@@ -792,7 +788,7 @@ enum case_handling {
 
 /* Macro to cache an error in a write_bmpx_struct */
 #define CACHE_ERROR(w, c, e)                                                   \
-	((w)->wr_errclass = (c), (w)->wr_error = (e), w->wr_discard = True, -1)
+	((w)->wr_errclass = (c), (w)->wr_error = (e), w->wr_discard = true, -1)
 /* Macro to test if an error has been cached for this fnum */
 #define HAS_CACHED_ERROR(fnum)                                                 \
 	(Files[(fnum)].open && Files[(fnum)].wbmpx_ptr &&                      \

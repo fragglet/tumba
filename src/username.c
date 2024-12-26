@@ -49,7 +49,7 @@ a wrapper for getpwnam() that tries with all lower and all upper case
 if the initial name fails. Also tried with first letter capitalised
 Note that this changes user!
 ****************************************************************************/
-struct passwd *Get_Pwnam(char *user, BOOL allow_change)
+struct passwd *Get_Pwnam(char *user, bool allow_change)
 {
 	return _Get_Pwnam(user);
 }

@@ -64,10 +64,10 @@ extern fstring myworkgroup;
 extern int Client;
 extern int smb_read_error;
 
-static BOOL api_Unsupported(int cnum, char *param, char *data, int mdrcnt,
+static bool api_Unsupported(int cnum, char *param, char *data, int mdrcnt,
                             int mprcnt, char **rdata, char **rparam,
                             int *rdata_len, int *rparam_len);
-static BOOL api_TooSmall(int cnum, char *param, char *data, int mdrcnt,
+static bool api_TooSmall(int cnum, char *param, char *data, int mdrcnt,
                          int mprcnt, char **rdata, char **rparam,
                          int *rdata_len, int *rparam_len);
 
@@ -115,7 +115,7 @@ static int StrlenExpanded(int cnum, int snum, char *s)
 /*******************************************************************
   check a API string for validity when we only need to check the prefix
   ******************************************************************/
-static BOOL prefix_ok(char *str, char *prefix)
+static bool prefix_ok(char *str, char *prefix)
 {
 	return (strncmp(str, prefix, strlen(prefix)) == 0);
 }
@@ -144,7 +144,7 @@ static void send_trans_reply(char *outbuf, char *data, char *param,
 #endif
 
 	set_message(outbuf, 10 + lsetup, align + this_ldata + this_lparam,
-	            True);
+	            true);
 	if (this_lparam)
 		memcpy(smb_buf(outbuf), param, this_lparam);
 	if (this_ldata)
@@ -178,7 +178,7 @@ static void send_trans_reply(char *outbuf, char *data, char *param,
 		align = (this_lparam % 4);
 
 		set_message(outbuf, 10, this_ldata + this_lparam + align,
-		            False);
+		            false);
 		if (this_lparam)
 			memcpy(smb_buf(outbuf), param + tot_param, this_lparam);
 		if (this_ldata)
@@ -206,27 +206,27 @@ static void send_trans_reply(char *outbuf, char *data, char *param,
 /****************************************************************************
   get info level for a server list query
   ****************************************************************************/
-static BOOL check_server_info(int uLevel, char *id)
+static bool check_server_info(int uLevel, char *id)
 {
 	switch (uLevel) {
 	case 0:
 		if (strcmp(id, "B16") != 0)
-			return False;
+			return false;
 		break;
 	case 1:
 		if (strcmp(id, "B16BBDz") != 0)
-			return False;
+			return false;
 		break;
 	default:
-		return False;
+		return false;
 	}
-	return True;
+	return true;
 }
 
 /****************************************************************************
   view list of servers available (or possibly domains).
   ****************************************************************************/
-static BOOL api_RNetServerEnum(int cnum, char *param, char *data, int mdrcnt,
+static bool api_RNetServerEnum(int cnum, char *param, char *data, int mdrcnt,
                                int mprcnt, char **rdata, char **rparam,
                                int *rdata_len, int *rparam_len)
 {
@@ -238,9 +238,9 @@ static BOOL api_RNetServerEnum(int cnum, char *param, char *data, int mdrcnt,
 	p += 8;
 
 	if (!prefix_ok(str1, "WrLehD"))
-		return False;
+		return false;
 	if (!check_server_info(uLevel, str2))
-		return False;
+		return false;
 
 	*rdata_len = 0;
 
@@ -254,35 +254,35 @@ static BOOL api_RNetServerEnum(int cnum, char *param, char *data, int mdrcnt,
 
 	DEBUG(3, ("NetServerEnum\n"));
 
-	return (True);
+	return (true);
 }
 
 /****************************************************************************
   get info about a share
   ****************************************************************************/
-static BOOL check_share_info(int uLevel, char *id)
+static bool check_share_info(int uLevel, char *id)
 {
 	switch (uLevel) {
 	case 0:
 		if (strcmp(id, "B13") != 0)
-			return False;
+			return false;
 		break;
 	case 1:
 		if (strcmp(id, "B13BWz") != 0)
-			return False;
+			return false;
 		break;
 	case 2:
 		if (strcmp(id, "B13BWzWWWzB9B") != 0)
-			return False;
+			return false;
 		break;
 	case 91:
 		if (strcmp(id, "B13BWzWWWzB9BB9BWzWWzWW") != 0)
-			return False;
+			return false;
 		break;
 	default:
-		return False;
+		return false;
 	}
-	return True;
+	return true;
 }
 
 static int fill_share_info(int cnum, int snum, int uLevel, char **buf,
@@ -387,7 +387,7 @@ static int fill_share_info(int cnum, int snum, int uLevel, char **buf,
 	return len;
 }
 
-static BOOL api_RNetShareGetInfo(int cnum, char *param, char *data, int mdrcnt,
+static bool api_RNetShareGetInfo(int cnum, char *param, char *data, int mdrcnt,
                                  int mprcnt, char **rdata, char **rparam,
                                  int *rdata_len, int *rparam_len)
 {
@@ -399,19 +399,19 @@ static BOOL api_RNetShareGetInfo(int cnum, char *param, char *data, int mdrcnt,
 	int snum = find_service(netname);
 
 	if (snum < 0)
-		return False;
+		return false;
 
 	/* check it's a supported varient */
 	if (!prefix_ok(str1, "zWrLh"))
-		return False;
+		return false;
 	if (!check_share_info(uLevel, str2))
-		return False;
+		return false;
 
 	*rdata = REALLOC(*rdata, mdrcnt);
 	p = *rdata;
 	*rdata_len = fill_share_info(cnum, snum, uLevel, &p, &mdrcnt, 0, 0, 0);
 	if (*rdata_len < 0)
-		return False;
+		return false;
 
 	*rparam_len = 6;
 	*rparam = REALLOC(*rparam, *rparam_len);
@@ -419,13 +419,13 @@ static BOOL api_RNetShareGetInfo(int cnum, char *param, char *data, int mdrcnt,
 	SSVAL(*rparam, 2, 0); /* converter word */
 	SSVAL(*rparam, 4, *rdata_len);
 
-	return (True);
+	return (true);
 }
 
 /****************************************************************************
   view list of shares available
   ****************************************************************************/
-static BOOL api_RNetShareEnum(int cnum, char *param, char *data, int mdrcnt,
+static bool api_RNetShareEnum(int cnum, char *param, char *data, int mdrcnt,
                               int mprcnt, char **rdata, char **rparam,
                               int *rdata_len, int *rparam_len)
 {
@@ -437,15 +437,15 @@ static BOOL api_RNetShareEnum(int cnum, char *param, char *data, int mdrcnt,
 	char *p2;
 	int count = lp_numservices();
 	int total = 0, counted = 0;
-	BOOL missed = False;
+	bool missed = false;
 	int i;
 	int data_len, fixed_len, string_len;
 	int f_len = 0, s_len = 0;
 
 	if (!prefix_ok(str1, "WrLeh"))
-		return False;
+		return false;
 	if (!check_share_info(uLevel, str2))
-		return False;
+		return false;
 
 	data_len = fixed_len = string_len = 0;
 	for (i = 0; i < count; i++)
@@ -458,7 +458,7 @@ static BOOL api_RNetShareEnum(int cnum, char *param, char *data, int mdrcnt,
 				fixed_len += f_len;
 				string_len += s_len;
 			} else
-				missed = True;
+				missed = true;
 		}
 	*rdata_len = fixed_len + string_len;
 	*rdata = REALLOC(*rdata, *rdata_len);
@@ -485,13 +485,13 @@ static BOOL api_RNetShareEnum(int cnum, char *param, char *data, int mdrcnt,
 
 	DEBUG(3, ("RNetShareEnum gave %d entries of %d (%d %d %d %d)\n",
 	          counted, total, uLevel, buf_len, *rdata_len, mdrcnt));
-	return (True);
+	return (true);
 }
 
 /****************************************************************************
   get the time of day info
   ****************************************************************************/
-static BOOL api_NetRemoteTOD(int cnum, char *param, char *data, int mdrcnt,
+static bool api_NetRemoteTOD(int cnum, char *param, char *data, int mdrcnt,
                              int mprcnt, char **rdata, char **rparam,
                              int *rdata_len, int *rparam_len)
 {
@@ -535,13 +535,13 @@ static BOOL api_NetRemoteTOD(int cnum, char *param, char *data, int mdrcnt,
 		CVAL(p, 20) = t->tm_wday;
 	}
 
-	return (True);
+	return (true);
 }
 
 /****************************************************************************
   get info about the server
   ****************************************************************************/
-static BOOL api_RNetServerGetInfo(int cnum, char *param, char *data, int mdrcnt,
+static bool api_RNetServerGetInfo(int cnum, char *param, char *data, int mdrcnt,
                                   int mprcnt, char **rdata, char **rparam,
                                   int *rdata_len, int *rparam_len)
 {
@@ -556,16 +556,16 @@ static BOOL api_RNetServerGetInfo(int cnum, char *param, char *data, int mdrcnt,
 
 	/* check it's a supported varient */
 	if (!prefix_ok(str1, "WrLh"))
-		return False;
+		return false;
 	switch (uLevel) {
 	case 0:
 		if (strcmp(str2, "B16") != 0)
-			return False;
+			return false;
 		struct_len = 16;
 		break;
 	case 1:
 		if (strcmp(str2, "B16BBDz") != 0)
-			return False;
+			return false;
 		struct_len = 26;
 		break;
 	case 2:
@@ -573,27 +573,27 @@ static BOOL api_RNetServerGetInfo(int cnum, char *param, char *data, int mdrcnt,
 		        str2,
 		        "B16BBDzDDDWWzWWWWWWWBB21zWWWWWWWWWWWWWWWWWWWWWWz") !=
 		    0)
-			return False;
+			return false;
 		struct_len = 134;
 		break;
 	case 3:
 		if (strcmp(str2, "B16BBDzDDDWWzWWWWWWWBB21zWWWWWWWWWWWWWWWWWWWW"
 		                 "WWzDWz") != 0)
-			return False;
+			return false;
 		struct_len = 144;
 		break;
 	case 20:
 		if (strcmp(str2, "DN") != 0)
-			return False;
+			return false;
 		struct_len = 6;
 		break;
 	case 50:
 		if (strcmp(str2, "B16BBDzWWzzz") != 0)
-			return False;
+			return false;
 		struct_len = 42;
 		break;
 	default:
-		return False;
+		return false;
 	}
 
 	*rdata_len = mdrcnt;
@@ -623,7 +623,7 @@ static BOOL api_RNetServerGetInfo(int cnum, char *param, char *data, int mdrcnt,
 		}
 	}
 	if (uLevel > 1) {
-		return False; /* not yet implemented */
+		return false; /* not yet implemented */
 	}
 
 	*rdata_len = PTR_DIFF(p2, *rdata);
@@ -634,13 +634,13 @@ static BOOL api_RNetServerGetInfo(int cnum, char *param, char *data, int mdrcnt,
 	SSVAL(*rparam, 2, 0); /* converter word */
 	SSVAL(*rparam, 4, *rdata_len);
 
-	return (True);
+	return (true);
 }
 
 /****************************************************************************
   get info about the server
   ****************************************************************************/
-static BOOL api_NetWkstaGetInfo(int cnum, char *param, char *data, int mdrcnt,
+static bool api_NetWkstaGetInfo(int cnum, char *param, char *data, int mdrcnt,
                                 int mprcnt, char **rdata, char **rparam,
                                 int *rdata_len, int *rparam_len)
 {
@@ -659,7 +659,7 @@ static BOOL api_NetWkstaGetInfo(int cnum, char *param, char *data, int mdrcnt,
 	/* check it's a supported varient */
 	if (!(level == 10 && strcsequal(str1, "WrLh") &&
 	      strcsequal(str2, "zzzBBzz")))
-		return (False);
+		return (false);
 
 	*rdata_len = mdrcnt + 1024;
 	*rdata = REALLOC(*rdata, *rdata_len);
@@ -705,13 +705,13 @@ static BOOL api_NetWkstaGetInfo(int cnum, char *param, char *data, int mdrcnt,
 
 	SSVAL(*rparam, 4, *rdata_len);
 
-	return (True);
+	return (true);
 }
 
 /****************************************************************************
   the buffer was too small
   ****************************************************************************/
-static BOOL api_TooSmall(int cnum, char *param, char *data, int mdrcnt,
+static bool api_TooSmall(int cnum, char *param, char *data, int mdrcnt,
                          int mprcnt, char **rdata, char **rparam,
                          int *rdata_len, int *rparam_len)
 {
@@ -724,13 +724,13 @@ static BOOL api_TooSmall(int cnum, char *param, char *data, int mdrcnt,
 
 	DEBUG(3, ("Supplied buffer too small in API command\n"));
 
-	return (True);
+	return (true);
 }
 
 /****************************************************************************
   the request is not supported
   ****************************************************************************/
-static BOOL api_Unsupported(int cnum, char *param, char *data, int mdrcnt,
+static bool api_Unsupported(int cnum, char *param, char *data, int mdrcnt,
                             int mprcnt, char **rdata, char **rparam,
                             int *rdata_len, int *rparam_len)
 {
@@ -744,13 +744,13 @@ static BOOL api_Unsupported(int cnum, char *param, char *data, int mdrcnt,
 
 	DEBUG(3, ("Unsupported API command\n"));
 
-	return (True);
+	return (true);
 }
 
 struct {
 	char *name;
 	int id;
-	BOOL (*fn)(int, char *, char *, int, int, char **, char **, int *,
+	bool (*fn)(int, char *, char *, int, int, char **, char **, int *,
 	           int *);
 	int flags;
 } api_commands[] = {{"RNetShareEnum", 0, api_RNetShareEnum, 0},
@@ -772,7 +772,7 @@ static int api_reply(int cnum, char *outbuf, char *data, char *params,
 	char *rparam = NULL;
 	int rdata_len = 0;
 	int rparam_len = 0;
-	BOOL reply = False;
+	bool reply = false;
 	int i;
 
 	DEBUG(3, ("Got API command %d of form <%s> <%s> "
@@ -801,7 +801,7 @@ static int api_reply(int cnum, char *outbuf, char *data, char *params,
 		                     &rparam, &rdata_len, &rparam_len);
 	}
 
-	/* if we get False back then it's actually unsupported */
+	/* if we get false back then it's actually unsupported */
 	if (!reply)
 		api_Unsupported(cnum, params, data, mdrcnt, mprcnt, &rdata,
 		                &rparam, &rdata_len, &rparam_len);
@@ -855,8 +855,8 @@ int reply_trans(char *inbuf, char *outbuf, int size, int bufsize)
 	int mprcnt = SVAL(inbuf, smb_vwv2);
 	int mdrcnt = SVAL(inbuf, smb_vwv3);
 	int msrcnt = CVAL(inbuf, smb_vwv4);
-	BOOL close_on_completion = BITSETW(inbuf + smb_vwv5, 0);
-	BOOL one_way = BITSETW(inbuf + smb_vwv5, 1);
+	bool close_on_completion = BITSETW(inbuf + smb_vwv5, 0);
+	bool one_way = BITSETW(inbuf + smb_vwv5, 1);
 	int pscnt = SVAL(inbuf, smb_vwv9);
 	int psoff = SVAL(inbuf, smb_vwv10);
 	int dscnt = SVAL(inbuf, smb_vwv11);
@@ -889,14 +889,14 @@ int reply_trans(char *inbuf, char *outbuf, int size, int bufsize)
 	if (pscnt < tpscnt || dscnt < tdscnt) {
 		/* We need to send an interim response then receive the rest
 		   of the parameter/data bytes */
-		outsize = set_message(outbuf, 0, 0, True);
+		outsize = set_message(outbuf, 0, 0, true);
 		show_msg(outbuf);
 		send_smb(Client, outbuf);
 	}
 
 	/* receive the rest of the trans packet */
 	while (pscnt < tpscnt || dscnt < tdscnt) {
-		BOOL ret;
+		bool ret;
 		int pcnt, poff, dcnt, doff, pdisp, ddisp;
 
 		ret = receive_next_smb(Client, inbuf, bufsize,

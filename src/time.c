@@ -303,11 +303,11 @@ void put_long_date(char *p, time_t t)
 /****************************************************************************
 check if it's a null mtime
 ****************************************************************************/
-BOOL null_mtime(time_t mtime)
+bool null_mtime(time_t mtime)
 {
 	if (mtime == 0 || mtime == 0xFFFFFFFF || mtime == (time_t) -1)
-		return (True);
-	return (False);
+		return (true);
+	return (false);
 }
 
 /*******************************************************************

@@ -45,8 +45,8 @@ int last_message = -1;
 extern pstring scope;
 extern int DEBUGLEVEL;
 extern int case_default;
-extern BOOL case_sensitive;
-extern BOOL short_case_preserve;
+extern bool case_sensitive;
+extern bool short_case_preserve;
 time_t smb_last_time = (time_t) 0;
 
 extern int smb_read_error;
@@ -328,9 +328,9 @@ int file_utime(int cnum, char *fname, struct utimbuf *times)
 		      current_user.uid == sb.st_uid))) {
 			/* We are allowed to become root and change the
 			 * filetime. */
-			become_root(False);
+			become_root(false);
 			ret = sys_utime(fname, times);
-			unbecome_root(False);
+			unbecome_root(false);
 		}
 	}
 
@@ -341,12 +341,12 @@ int file_utime(int cnum, char *fname, struct utimbuf *times)
 Change a filetime - possibly allowing DOS semantics.
 *******************************************************************/
 
-BOOL set_filetime(int cnum, char *fname, time_t mtime)
+bool set_filetime(int cnum, char *fname, time_t mtime)
 {
 	struct utimbuf times;
 
 	if (null_mtime(mtime))
-		return (True);
+		return (true);
 
 	times.modtime = times.actime = mtime;
 
@@ -355,7 +355,7 @@ BOOL set_filetime(int cnum, char *fname, time_t mtime)
 		          strerror(errno)));
 	}
 
-	return (True);
+	return (true);
 }
 
 /****************************************************************************
@@ -363,14 +363,14 @@ check if two filenames are equal
 
 this needs to be careful about whether we are case sensitive
 ****************************************************************************/
-static BOOL fname_equal(char *name1, char *name2)
+static bool fname_equal(char *name1, char *name2)
 {
 	int l1 = strlen(name1);
 	int l2 = strlen(name2);
 
 	/* handle filenames ending in a single dot */
 	if (l1 - l2 == 1 && name1[l1 - 1] == '.' && lp_strip_dot()) {
-		BOOL ret;
+		bool ret;
 		name1[l1 - 1] = 0;
 		ret = fname_equal(name1, name2);
 		name1[l1 - 1] = '.';
@@ -378,7 +378,7 @@ static BOOL fname_equal(char *name1, char *name2)
 	}
 
 	if (l2 - l1 == 1 && name2[l2 - 1] == '.' && lp_strip_dot()) {
-		BOOL ret;
+		bool ret;
 		name2[l2 - 1] = 0;
 		ret = fname_equal(name1, name2);
 		name2[l2 - 1] = '.';
@@ -395,12 +395,12 @@ static BOOL fname_equal(char *name1, char *name2)
 /****************************************************************************
 mangle the 2nd name and check if it is then equal to the first name
 ****************************************************************************/
-static BOOL mangled_equal(char *name1, char *name2)
+static bool mangled_equal(char *name1, char *name2)
 {
 	pstring tmpname;
 
-	if (is_8_3(name2, True))
-		return (False);
+	if (is_8_3(name2, true))
+		return (false);
 
 	pstrcpy(tmpname, name2);
 	mangle_name_83(tmpname, sizeof(pstring) - 1);
@@ -413,11 +413,11 @@ scan a directory to find a filename, matching without case sensitivity
 
 If the name looks like a mangled name then try via the mangling functions
 ****************************************************************************/
-static BOOL scan_directory(char *path, char *name, int cnum, BOOL docache)
+static bool scan_directory(char *path, char *name, int cnum, bool docache)
 {
 	void *cur_dir;
 	char *dname;
-	BOOL mangled;
+	bool mangled;
 	pstring name2;
 
 	mangled = is_mangled(name);
@@ -428,7 +428,7 @@ static BOOL scan_directory(char *path, char *name, int cnum, BOOL docache)
 
 	if (docache && (dname = DirCacheCheck(path, name, SNUM(cnum)))) {
 		pstrcpy(name, dname);
-		return (True);
+		return (true);
 	}
 
 	/*
@@ -444,7 +444,7 @@ static BOOL scan_directory(char *path, char *name, int cnum, BOOL docache)
 	/* open the directory */
 	if (!(cur_dir = OpenDir(cnum, path))) {
 		DEBUG(3, ("scan dir didn't open dir [%s]\n", path));
-		return (False);
+		return (false);
 	}
 
 	/* now scan for matching names */
@@ -454,7 +454,7 @@ static BOOL scan_directory(char *path, char *name, int cnum, BOOL docache)
 			continue;
 
 		pstrcpy(name2, dname);
-		name_map_mangle(name2, False, SNUM(cnum));
+		name_map_mangle(name2, false, SNUM(cnum));
 
 		if ((mangled && mangled_equal(name, name2)) ||
 		    fname_equal(name, name2)) {
@@ -463,12 +463,12 @@ static BOOL scan_directory(char *path, char *name, int cnum, BOOL docache)
 				DirCacheAdd(path, name, dname, SNUM(cnum));
 			pstrcpy(name, dname);
 			CloseDir(cur_dir);
-			return (True);
+			return (true);
 		}
 	}
 
 	CloseDir(cur_dir);
-	return (False);
+	return (false);
 }
 
 /****************************************************************************
@@ -479,7 +479,7 @@ changes etc.
 We assume that we have already done a chdir() to the right "root" directory
 for this service.
 
-The function will return False if some part of the name except for the last
+The function will return false if some part of the name except for the last
 part cannot be resolved
 
 If the saved_last_component != 0, then the unmodified last component
@@ -487,13 +487,13 @@ of the pathname is returned there. This is used in an exceptional
 case in reply_mv (so far). If saved_last_component == 0 then nothing
 is returned there.
 
-The bad_path arg is set to True if the filename walk failed. This is
+The bad_path arg is set to true if the filename walk failed. This is
 used to pick the correct error code to return between ENOENT and ENOTDIR
 as Windows applications depend on ERRbadpath being returned if a component
 of a pathname does not exist.
 ****************************************************************************/
-BOOL unix_convert(char *name, int cnum, pstring saved_last_component,
-                  BOOL *bad_path)
+bool unix_convert(char *name, int cnum, pstring saved_last_component,
+                  bool *bad_path)
 {
 	struct stat st;
 	char *start, *end;
@@ -501,7 +501,7 @@ BOOL unix_convert(char *name, int cnum, pstring saved_last_component,
 	int saved_errno;
 
 	*dirpath = 0;
-	*bad_path = False;
+	*bad_path = false;
 
 	if (saved_last_component)
 		*saved_last_component = 0;
@@ -525,12 +525,12 @@ BOOL unix_convert(char *name, int cnum, pstring saved_last_component,
 			pstrcpy(saved_last_component, name);
 	}
 
-	if (!case_sensitive && is_8_3(name, False) && !short_case_preserve)
+	if (!case_sensitive && is_8_3(name, false) && !short_case_preserve)
 		strnorm(name);
 
 	/* stat the name - if it exists then we are all done! */
 	if (sys_stat(name, &st) == 0)
-		return (True);
+		return (true);
 
 	saved_errno = errno;
 
@@ -540,7 +540,7 @@ BOOL unix_convert(char *name, int cnum, pstring saved_last_component,
 	   sensitive then searching won't help */
 	if (case_sensitive && !is_mangled(name) && !lp_strip_dot() &&
 	    saved_errno != ENOENT)
-		return (False);
+		return (false);
 
 	/* now we need to recursively match the name against the real
 	   directory structure */
@@ -571,7 +571,7 @@ BOOL unix_convert(char *name, int cnum, pstring saved_last_component,
 				 * directory */
 				DEBUG(5, ("Not a dir %s\n", start));
 				*end = '/';
-				return (False);
+				return (false);
 			}
 		} else {
 			pstring rest;
@@ -586,7 +586,7 @@ BOOL unix_convert(char *name, int cnum, pstring saved_last_component,
 			/* try to find this part of the path in the directory */
 			if (strchr(start, '?') || strchr(start, '*') ||
 			    !scan_directory(dirpath, start, cnum,
-			                    end ? True : False)) {
+			                    end ? true : false)) {
 				if (end) {
 					/* an intermediate part of the name
 					 * can't be found */
@@ -601,8 +601,8 @@ BOOL unix_convert(char *name, int cnum, pstring saved_last_component,
 					   the difference between these two
 					   errors.
 					 */
-					*bad_path = True;
-					return (False);
+					*bad_path = true;
+					return (false);
 				}
 
 				/* just the last part of the name doesn't exist
@@ -614,7 +614,7 @@ BOOL unix_convert(char *name, int cnum, pstring saved_last_component,
 					check_mangled_stack(start);
 
 				DEBUG(5, ("New file %s\n", start));
-				return (True);
+				return (true);
 			}
 
 			/* restore the rest of the string */
@@ -636,7 +636,7 @@ BOOL unix_convert(char *name, int cnum, pstring saved_last_component,
 
 	/* the name has been resolved */
 	DEBUG(5, ("conversion finished %s\n", name));
-	return (True);
+	return (true);
 }
 
 /****************************************************************************
@@ -658,7 +658,7 @@ wrap it to get filenames right
 ****************************************************************************/
 int sys_disk_free(char *path, int *bsize, int *dfree, int *dsize)
 {
-	return (disk_free(dos2unix_format(path, False), bsize, dfree, dsize));
+	return (disk_free(dos2unix_format(path, false), bsize, dfree, dsize));
 }
 
 /****************************************************************************
@@ -668,9 +668,9 @@ This is called by every routine before it allows an operation on a filename.
 It does any final confirmation necessary to ensure that the filename is
 a valid one for the user to access.
 ****************************************************************************/
-BOOL check_name(char *name, int cnum)
+bool check_name(char *name, int cnum)
 {
-	BOOL ret;
+	bool ret;
 
 	errno = 0;
 
@@ -882,7 +882,7 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 	files_struct *fsp = &Files[fnum];
 	int accmode = (flags & (O_RDONLY | O_WRONLY | O_RDWR));
 
-	fsp->open = False;
+	fsp->open = false;
 	fsp->fd_ptr = 0;
 	errno = EPERM;
 
@@ -1058,14 +1058,14 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 		gettimeofday(&fsp->open_time, NULL);
 		fsp->size = 0;
 		fsp->pos = -1;
-		fsp->open = True;
+		fsp->open = true;
 		fsp->mmap_ptr = NULL;
 		fsp->mmap_size = 0;
-		fsp->can_lock = True;
+		fsp->can_lock = true;
 		fsp->can_read = ((flags & O_WRONLY) == 0);
 		fsp->can_write = ((flags & (O_WRONLY | O_RDWR)) != 0);
 		fsp->share_mode = 0;
-		fsp->modified = False;
+		fsp->modified = false;
 		fsp->cnum = cnum;
 		/*
 		 * Note that the file name here is the *untranslated* name
@@ -1108,14 +1108,14 @@ operation otherwise it came as the result of some other operation such as
 the closing of the connection. In the latter case printing and
 magic scripts are not run
 ****************************************************************************/
-void close_file(int fnum, BOOL normal_close)
+void close_file(int fnum, bool normal_close)
 {
 	files_struct *fs_p = &Files[fnum];
 	int cnum = fs_p->cnum;
 
-	Files[fnum].reserved = False;
+	Files[fnum].reserved = false;
 
-	fs_p->open = False;
+	fs_p->open = false;
 	Connections[cnum].num_files_open--;
 	if (fs_p->wbmpx_ptr) {
 		free((char *) fs_p->wbmpx_ptr);
@@ -1149,13 +1149,13 @@ void close_file(int fnum, BOOL normal_close)
   Truncate a file after checking locking; close file if locked.
   **************************************************************************/
 static void truncate_unless_locked(int fnum, int cnum, int token,
-                                   BOOL *share_locked)
+                                   bool *share_locked)
 {
 	if (Files[fnum].can_write) {
 		if (is_locked(fnum, cnum, 0x3FFFFFFF, 0, F_WRLCK)) {
-			close_file(fnum, False);
+			close_file(fnum, false);
 			/* Share mode no longer locked. */
-			*share_locked = False;
+			*share_locked = false;
 			errno = EACCES;
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRlock;
@@ -1175,12 +1175,12 @@ void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
 	int flags2 = 0;
 	int deny_mode = (share_mode >> 4) & 7;
 	struct stat sbuf;
-	BOOL file_existed = file_exist(fname, &sbuf);
-	BOOL share_locked = False;
-	BOOL fcbopen = False;
+	bool file_existed = file_exist(fname, &sbuf);
+	bool share_locked = false;
+	bool fcbopen = false;
 	int token;
 
-	fs_p->open = False;
+	fs_p->open = false;
 	fs_p->fd_ptr = 0;
 
 	/* this is for OS/2 EAs - try and say we don't support them */
@@ -1209,7 +1209,7 @@ void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
 		flags = O_WRONLY;
 		break;
 	case 0xF:
-		fcbopen = True;
+		fcbopen = true;
 		flags = O_RDWR;
 		break;
 	case 2:
@@ -1350,7 +1350,7 @@ int write_file(int fnum, char *data, int n)
 
 	if (!Files[fnum].modified) {
 		struct stat st;
-		Files[fnum].modified = True;
+		Files[fnum].modified = true;
 		if (fstat(Files[fnum].fd_ptr->fd, &st) == 0) {
 			int dosmode =
 			    dos_mode(Files[fnum].cnum, Files[fnum].name, &st);
@@ -1368,14 +1368,14 @@ int write_file(int fnum, char *data, int n)
 /****************************************************************************
 load parameters specific to a connection/service
 ****************************************************************************/
-BOOL become_service(int cnum, BOOL do_chdir)
+bool become_service(int cnum, bool do_chdir)
 {
 	static int last_cnum = -1;
 	int snum;
 
 	if (!OPEN_CNUM(cnum)) {
 		last_cnum = -1;
-		return (False);
+		return (false);
 	}
 
 	Connections[cnum].lastused = smb_last_time;
@@ -1386,18 +1386,18 @@ BOOL become_service(int cnum, BOOL do_chdir)
 	    ChDir(Connections[cnum].origpath) != 0) {
 		DEBUG(0, ("%s chdir (%s) failed cnum=%d\n", timestring(),
 		          Connections[cnum].connectpath, cnum));
-		return (False);
+		return (false);
 	}
 
 	if (cnum == last_cnum)
-		return (True);
+		return (true);
 
 	last_cnum = cnum;
 
 	case_default = lp_defaultcase(snum);
 	short_case_preserve = lp_shortpreservecase(snum);
 	case_sensitive = lp_casesensitive(snum);
-	return (True);
+	return (true);
 }
 
 /****************************************************************************
@@ -1520,7 +1520,7 @@ int unix_error_packet(char *inbuf, char *outbuf, int def_class, uint32 def_code,
 int error_packet(char *inbuf, char *outbuf, int error_class, uint32 error_code,
                  int line)
 {
-	int outsize = set_message(outbuf, 0, 0, True);
+	int outsize = set_message(outbuf, 0, 0, true);
 
 	CVAL(outbuf, smb_rcls) = error_class;
 	SSVAL(outbuf, smb_err, error_code);
@@ -1550,7 +1550,7 @@ static int sig_cld(void)
 	}
 	depth++;
 
-	BlockSignals(True, SIGCLD);
+	BlockSignals(true, SIGCLD);
 	DEBUG(5, ("got SIGCLD\n"));
 
 #ifdef USE_WAITPID
@@ -1578,7 +1578,7 @@ static int sig_cld(void)
 		;
 #endif
 	depth--;
-	BlockSignals(False, SIGCLD);
+	BlockSignals(false, SIGCLD);
 	return 0;
 }
 #endif
@@ -1588,7 +1588,7 @@ static int sig_cld(void)
   **************************************************************************/
 static int sig_pipe(void)
 {
-	BlockSignals(True, SIGPIPE);
+	BlockSignals(true, SIGPIPE);
 
 	exit_server("Got sigpipe\n");
 	return (0);
@@ -1608,7 +1608,7 @@ static void set_keepalive_option(int fd)
 /****************************************************************************
   open the socket communication
 ****************************************************************************/
-static BOOL open_sockets(BOOL is_daemon, int port)
+static bool open_sockets(bool is_daemon, int port)
 {
 	extern int Client;
 
@@ -1629,14 +1629,14 @@ static BOOL open_sockets(BOOL is_daemon, int port)
 		server_socket = open_socket_in(
 		    SOCK_STREAM, port, 0, interpret_addr(lp_socket_address()));
 		if (server_socket == -1)
-			return (False);
+			return (false);
 
 		/* ready to listen */
 		if (listen(server_socket, 5) == -1) {
 			DEBUG(0,
 			      ("open_sockets: listen: %s\n", strerror(errno)));
 			close(server_socket);
-			return False;
+			return false;
 		}
 
 		/* now accept incoming connections - forking a new process
@@ -1692,7 +1692,7 @@ static BOOL open_sockets(BOOL is_daemon, int port)
 				   that client substitutions will be done
 				   correctly in the process. */
 				reset_globals_after_fork();
-				return True;
+				return true;
 			}
 			close(Client); /* The parent doesn't need this socket */
 
@@ -1726,7 +1726,7 @@ static BOOL open_sockets(BOOL is_daemon, int port)
 		set_keepalive_option(Client);
 	}
 
-	return True;
+	return true;
 }
 
 /****************************************************************************
@@ -1771,10 +1771,10 @@ static void process_smb(char *inbuf, char *outbuf)
 Get the next SMB packet, doing the local message processing automatically.
 ****************************************************************************/
 
-BOOL receive_next_smb(int smbfd, char *inbuf, int bufsize, int timeout)
+bool receive_next_smb(int smbfd, char *inbuf, int bufsize, int timeout)
 {
-	BOOL got_smb = False;
-	BOOL ret;
+	bool got_smb = false;
+	bool ret;
 
 	do {
 		ret = receive_message_or_smb(smbfd, inbuf, bufsize, timeout,
@@ -1782,7 +1782,7 @@ BOOL receive_next_smb(int smbfd, char *inbuf, int bufsize, int timeout)
 
 		if (ret && (CVAL(inbuf, 0) == 0x85)) {
 			/* Keepalive packet. */
-			got_smb = False;
+			got_smb = false;
 		}
 
 	} while (ret && !got_smb);
@@ -1793,43 +1793,43 @@ BOOL receive_next_smb(int smbfd, char *inbuf, int bufsize, int timeout)
 /****************************************************************************
 check if a snum is in use
 ****************************************************************************/
-BOOL snum_used(int snum)
+bool snum_used(int snum)
 {
 	int i;
 	for (i = 0; i < MAX_CONNECTIONS; i++)
 		if (OPEN_CNUM(i) && (SNUM(i) == snum))
-			return (True);
-	return (False);
+			return (true);
+	return (false);
 }
 
 /****************************************************************************
   reload the services file
   **************************************************************************/
-BOOL reload_services(BOOL test)
+bool reload_services(bool test)
 {
-	BOOL ret;
+	bool ret;
 
 	if (lp_loaded()) {
 		pstring fname;
 		pstrcpy(fname, lp_configfile());
 		if (file_exist(fname, NULL) && !strcsequal(fname, servicesf)) {
 			pstrcpy(servicesf, fname);
-			test = False;
+			test = false;
 		}
 	}
 
 	reopen_logs();
 
 	if (test && !lp_file_list_changed())
-		return (True);
+		return (true);
 
 	lp_killunused(snum_used);
 
-	ret = lp_load(servicesf, False);
+	ret = lp_load(servicesf, false);
 
 	/* perhaps the config filename is now set */
 	if (!test)
-		reload_services(True);
+		reload_services(true);
 
 	reopen_logs();
 
@@ -1843,7 +1843,7 @@ BOOL reload_services(BOOL test)
 	reset_mangled_stack(MANGLED_STACK_SIZE);
 
 	/* this forces service parameters to be flushed */
-	become_service(-1, True);
+	become_service(-1, true);
 
 	return (ret);
 }
@@ -1851,11 +1851,11 @@ BOOL reload_services(BOOL test)
 /****************************************************************************
 this prevents zombie child processes
 ****************************************************************************/
-static BOOL reload_after_sighup = False;
+static bool reload_after_sighup = false;
 
 static int sig_hup(void)
 {
-	BlockSignals(True, SIGHUP);
+	BlockSignals(true, SIGHUP);
 	DEBUG(0, ("Got SIGHUP\n"));
 
 	/*
@@ -1864,11 +1864,11 @@ static int sig_hup(void)
 	 * is a *BIG* no-no.
 	 */
 
-	reload_after_sighup = True;
+	reload_after_sighup = true;
 #ifndef DONT_REINSTALL_SIG
 	signal(SIGHUP, SIGNAL_CAST sig_hup);
 #endif
-	BlockSignals(False, SIGHUP);
+	BlockSignals(false, SIGHUP);
 	return (0);
 }
 
@@ -1922,7 +1922,7 @@ int make_connection(char *service, char *dev)
 	bzero((char *) pcon, sizeof(*pcon));
 
 	/* find out some info about the user */
-	pass = Get_Pwnam(user, True);
+	pass = Get_Pwnam(user, true);
 
 	if (pass == NULL) {
 		DEBUG(0, ("%s couldn't find account %s\n", timestring(), user));
@@ -1935,7 +1935,7 @@ int make_connection(char *service, char *dev)
 	pcon->num_files_open = 0;
 	pcon->lastused = time(NULL);
 	pcon->service = snum;
-	pcon->used = True;
+	pcon->used = true;
 	pcon->dirptr = NULL;
 	string_set(&pcon->dirpath, "");
 	string_set(&pcon->user, user);
@@ -1948,18 +1948,18 @@ int make_connection(char *service, char *dev)
 		DEBUG(3, ("Connect path is %s\n", s));
 	}
 
-	pcon->open = True;
+	pcon->open = true;
 
 	if (!become_user(&Connections[cnum], cnum)) {
 		DEBUG(0, ("Can't become connected user!\n"));
-		pcon->open = False;
+		pcon->open = false;
 		return (-1);
 	}
 
 	if (ChDir(pcon->connectpath) != 0) {
 		DEBUG(0, ("Can't change directory to %s (%s)\n",
 		          pcon->connectpath, strerror(errno)));
-		pcon->open = False;
+		pcon->open = false;
 		unbecome_user();
 		return (-5);
 	}
@@ -2019,7 +2019,7 @@ int find_free_file(void)
 		if (!Files[i].open && !Files[i].reserved) {
 			memset(&Files[i], 0, sizeof(Files[i]));
 			first_file = i + 1;
-			Files[i].reserved = True;
+			Files[i].reserved = true;
 			return (i);
 		}
 
@@ -2028,7 +2028,7 @@ int find_free_file(void)
 		if (!Files[i].open && !Files[i].reserved) {
 			memset(&Files[i], 0, sizeof(Files[i]));
 			first_file = i + 1;
-			Files[i].reserved = True;
+			Files[i].reserved = true;
 			return (i);
 		}
 
@@ -2045,7 +2045,7 @@ thinking the server is still available.
 static int find_free_connection(int hash)
 {
 	int i;
-	BOOL used = False;
+	bool used = false;
 	hash = (hash % (MAX_CONNECTIONS - 2)) + 1;
 
 again:
@@ -2074,7 +2074,7 @@ reply for the core protocol
 ****************************************************************************/
 int reply_corep(char *outbuf)
 {
-	int outsize = set_message(outbuf, 1, 0, True);
+	int outsize = set_message(outbuf, 1, 0, true);
 
 	Protocol = PROTOCOL_CORE;
 
@@ -2087,7 +2087,7 @@ reply for the coreplus protocol
 int reply_coreplus(char *outbuf)
 {
 	int raw = (lp_readraw() ? 1 : 0) | (lp_writeraw() ? 2 : 0);
-	int outsize = set_message(outbuf, 13, 0, True);
+	int outsize = set_message(outbuf, 13, 0, true);
 	SSVAL(outbuf, smb_vwv5, raw); /* tell redirector we support
 	                                 readbraw and writebraw (possibly) */
 	CVAL(outbuf, smb_flg) =
@@ -2108,7 +2108,7 @@ int reply_lanman1(char *outbuf)
 	int secword = 0;
 	time_t t = time(NULL);
 
-	set_message(outbuf, 13, 0, True);
+	set_message(outbuf, 13, 0, true);
 	SSVAL(outbuf, smb_vwv1, secword);
 
 	Protocol = PROTOCOL_LANMAN1;
@@ -2138,7 +2138,7 @@ int reply_lanman2(char *outbuf)
 	time_t t = time(NULL);
 	char crypt_len = 0;
 
-	set_message(outbuf, 13, crypt_len, True);
+	set_message(outbuf, 13, crypt_len, true);
 	SSVAL(outbuf, smb_vwv1, secword);
 	SIVAL(outbuf, smb_vwv6, getpid());
 
@@ -2183,7 +2183,7 @@ int reply_nt1(char *outbuf)
 	 */
 	data_len = crypt_len + strlen(myworkgroup) + 1;
 
-	set_message(outbuf, 17, data_len, True);
+	set_message(outbuf, 17, data_len, true);
 	pstrcpy(smb_buf(outbuf) + crypt_len, myworkgroup);
 
 	CVAL(outbuf, smb_vwv1) = secword;
@@ -2288,7 +2288,7 @@ struct {
 ****************************************************************************/
 static int reply_negprot(char *inbuf, char *outbuf, int size, int bufsize)
 {
-	int outsize = set_message(outbuf, 1, 0, True);
+	int outsize = set_message(outbuf, 1, 0, true);
 	int Index = 0;
 	int choice = -1;
 	int protocol;
@@ -2303,7 +2303,7 @@ static int reply_negprot(char *inbuf, char *outbuf, int size, int bufsize)
 	}
 
 	/* possibly reload - change of architecture */
-	reload_services(True);
+	reload_services(true);
 
 	/* Check for protocols, most desirable first */
 	for (protocol = 0; supported_protocols[protocol].proto_name;
@@ -2325,7 +2325,7 @@ static int reply_negprot(char *inbuf, char *outbuf, int size, int bufsize)
 	if (choice != -1) {
 		extern fstring remote_proto;
 		fstrcpy(remote_proto, supported_protocols[protocol].short_name);
-		reload_services(True);
+		reload_services(true);
 		outsize = supported_protocols[protocol].proto_reply_fn(outbuf);
 		DEBUG(3, ("Selected protocol %s\n",
 		          supported_protocols[protocol].proto_name));
@@ -2347,7 +2347,7 @@ static void close_open_files(int cnum)
 	int i;
 	for (i = 0; i < MAX_OPEN_FILES; i++)
 		if (Files[i].cnum == cnum && Files[i].open) {
-			close_file(i, False);
+			close_file(i, false);
 		}
 }
 
@@ -2373,7 +2373,7 @@ void close_cnum(int cnum)
 
 	unbecome_user();
 
-	Connections[cnum].open = False;
+	Connections[cnum].open = false;
 	num_connections_open--;
 
 	string_set(&Connections[cnum].user, "");
@@ -2385,7 +2385,7 @@ void close_cnum(int cnum)
 /*******************************************************************
 prepare to dump a core file - carefully!
 ********************************************************************/
-static BOOL dump_core(void)
+static bool dump_core(void)
 {
 	char *p;
 	pstring dname;
@@ -2397,7 +2397,7 @@ static BOOL dump_core(void)
 	sys_chown(dname, getuid(), getgid());
 	chmod(dname, 0700);
 	if (chdir(dname))
-		return (False);
+		return (false);
 	umask(~(0700));
 
 #ifdef RLIMIT_CORE
@@ -2413,7 +2413,7 @@ static BOOL dump_core(void)
 #endif
 
 	DEBUG(0, ("Dumping core in %s\n", dname));
-	return (True);
+	return (true);
 }
 #endif
 
@@ -2720,7 +2720,7 @@ static int switch_message(int type, char *inbuf, char *outbuf, int size,
 			/* load service specific parameters */
 			if (OPEN_CNUM(cnum) &&
 			    !become_service(cnum,
-			                    (flags & AS_USER) ? True : False))
+			                    (flags & AS_USER) ? true : false))
 				return (ERROR(ERRSRV, ERRaccess));
 
 			/* does this protocol need to be run as guest? */
@@ -2815,7 +2815,7 @@ int chain_reply(char *inbuf, char *outbuf, int size, int bufsize)
 
 	/* create the out buffer */
 	bzero(outbuf2, smb_size);
-	set_message(outbuf2, 0, 0, True);
+	set_message(outbuf2, 0, 0, true);
 	CVAL(outbuf2, smb_com) = CVAL(inbuf2, smb_com);
 
 	memcpy(outbuf2 + 4, inbuf2 + 4, 4);
@@ -2877,7 +2877,7 @@ int construct_reply(char *inbuf, char *outbuf, int size, int bufsize)
 		return (reply_special(inbuf, outbuf));
 
 	CVAL(outbuf, smb_com) = CVAL(inbuf, smb_com);
-	set_message(outbuf, 0, 0, True);
+	set_message(outbuf, 0, 0, true);
 
 	memcpy(outbuf + 4, inbuf + 4, 4);
 	CVAL(outbuf, smb_rcls) = SMB_SUCCESS;
@@ -2932,11 +2932,11 @@ static void process(void)
 	/* re-initialise the timezone */
 	TimeInit();
 
-	while (True) {
+	while (true) {
 		int deadtime = lp_deadtime() * 60;
 		int counter;
 		int service_load_counter = 0;
-		BOOL got_smb = False;
+		bool got_smb = false;
 
 		if (deadtime <= 0)
 			deadtime = DEFAULT_SMBD_TIMEOUT;
@@ -2949,7 +2949,7 @@ static void process(void)
 		     counter += SMBD_SELECT_LOOP) {
 			int i;
 			time_t t;
-			BOOL allidle = True;
+			bool allidle = true;
 
 			if (counter > 365 * 3600) /* big number of seconds. */
 			{
@@ -2979,19 +2979,19 @@ static void process(void)
 				service_load_counter = counter;
 
 				/* reload services, if files have changed. */
-				reload_services(True);
+				reload_services(true);
 			}
 
 			/*
-			 * If reload_after_sighup == True then we got a SIGHUP
+			 * If reload_after_sighup == true then we got a SIGHUP
 			 * and are being asked to reload. Fix from
 			 * <branko.cibej@hermes.si>
 			 */
 
 			if (reload_after_sighup) {
 				DEBUG(0, ("Reloading services after SIGHUP\n"));
-				reload_services(False);
-				reload_after_sighup = False;
+				reload_services(false);
+				reload_after_sighup = false;
 			}
 
 			/* automatic timeout if all connections are closed */
@@ -3014,7 +3014,7 @@ static void process(void)
 					if (Connections[i].num_files_open > 0 ||
 					    (t - Connections[i].lastused) <
 					        deadtime)
-						allidle = False;
+						allidle = false;
 				}
 
 			if (allidle && num_connections_open > 0) {
@@ -3038,10 +3038,10 @@ static void init_structs(void)
 	get_myname(myhostname, NULL);
 
 	for (i = 0; i < MAX_CONNECTIONS; i++) {
-		Connections[i].open = False;
+		Connections[i].open = false;
 		Connections[i].num_files_open = 0;
 		Connections[i].lastused = 0;
-		Connections[i].used = False;
+		Connections[i].used = false;
 		string_init(&Connections[i].user, "");
 		string_init(&Connections[i].dirpath, "");
 		string_init(&Connections[i].connectpath, "");
@@ -3049,7 +3049,7 @@ static void init_structs(void)
 	}
 
 	for (i = 0; i < MAX_OPEN_FILES; i++) {
-		Files[i].open = False;
+		Files[i].open = false;
 		string_init(&Files[i].name, "");
 	}
 
@@ -3094,9 +3094,9 @@ static void usage(char *pname)
 ****************************************************************************/
 int main(int argc, char *argv[])
 {
-	extern BOOL append_log;
+	extern bool append_log;
 	/* shall I run as a daemon */
-	BOOL is_daemon = False;
+	bool is_daemon = false;
 	int port = SMB_PORT;
 	int opt;
 	extern char *optarg;
@@ -3108,7 +3108,7 @@ int main(int argc, char *argv[])
 	set_auth_parameters(argc, argv);
 #endif
 
-	append_log = True;
+	append_log = true;
 
 	TimeInit();
 
@@ -3116,7 +3116,7 @@ int main(int argc, char *argv[])
 
 	pstrcpy(remote_machine, "smb");
 
-	setup_logging(argv[0], False);
+	setup_logging(argv[0], false);
 
 	init_dos_char_table();
 
@@ -3157,8 +3157,8 @@ int main(int argc, char *argv[])
 			pstrcpy(scope, optarg);
 			break;
 		case 'P': {
-			extern BOOL passive;
-			passive = True;
+			extern bool passive;
+			passive = true;
 		} break;
 		case 's':
 			pstrcpy(servicesf, optarg);
@@ -3167,11 +3167,11 @@ int main(int argc, char *argv[])
 			pstrcpy(debugf, optarg);
 			break;
 		case 'a': {
-			extern BOOL append_log;
+			extern bool append_log;
 			append_log = !append_log;
 		} break;
 		case 'D':
-			is_daemon = True;
+			is_daemon = true;
 			break;
 		case 'd':
 			if (*optarg == 'A')
@@ -3226,7 +3226,7 @@ int main(int argc, char *argv[])
 
 	init_structs();
 
-	if (!reload_services(False))
+	if (!reload_services(false))
 		return (-1);
 
 	pstrcpy(myworkgroup, lp_workgroup());
@@ -3243,7 +3243,7 @@ int main(int argc, char *argv[])
 	if (!is_daemon && !is_a_socket(0)) {
 		DEBUG(0,
 		      ("standard input is not a socket, assuming -D option\n"));
-		is_daemon = True;
+		is_daemon = true;
 	}
 
 	if (is_daemon) {
@@ -3265,7 +3265,7 @@ int main(int argc, char *argv[])
 			          strerror(errno)));
 			exit(1);
 		}
-		if (fcntl_lock(fd, F_SETLK, 0, 1, F_WRLCK) == False) {
+		if (fcntl_lock(fd, F_SETLK, 0, 1, F_WRLCK) == false) {
 			DEBUG(0, ("ERROR: smbd is already running\n"));
 			exit(1);
 		}
@@ -3282,7 +3282,7 @@ int main(int argc, char *argv[])
 		exit(1);
 
 	/* possibly reload the services file. */
-	reload_services(True);
+	reload_services(true);
 
 	max_recv = MIN(lp_maxxmit(), BUFFER_SIZE);
 

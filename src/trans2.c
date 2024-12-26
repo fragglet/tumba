@@ -28,7 +28,7 @@ extern int DEBUGLEVEL;
 extern int Protocol;
 extern connection_struct Connections[];
 extern files_struct Files[];
-extern BOOL case_sensitive;
+extern bool case_sensitive;
 extern int Client;
 extern int smb_read_error;
 extern fstring local_machine;
@@ -60,7 +60,7 @@ static int send_trans2_replies(char *outbuf, int bufsize, char *params,
 
 	/* Initially set the wcnt area to be 10 - this is true for all
 	   trans2 replies */
-	set_message(outbuf, 10, 0, True);
+	set_message(outbuf, 10, 0, true);
 
 	/* If there genuinely are no parameters or data to send just send
 	   the empty packet */
@@ -96,7 +96,7 @@ static int send_trans2_replies(char *outbuf, int bufsize, char *params,
 		/* We can never send more than useable_space */
 		total_sent_thistime = MIN(total_sent_thistime, useable_space);
 
-		set_message(outbuf, 10, total_sent_thistime, True);
+		set_message(outbuf, 10, total_sent_thistime, true);
 
 		/* Set total params and data to be sent */
 		SSVAL(outbuf, smb_tprcnt, paramsize);
@@ -202,7 +202,7 @@ static int call_trans2open(char *inbuf, char *outbuf, int bufsize, int cnum,
 	int32 inode = 0;
 	struct stat sbuf;
 	int smb_action = 0;
-	BOOL bad_path = False;
+	bool bad_path = false;
 
 	StrnCpy(fname, pname, namelen);
 
@@ -222,7 +222,7 @@ static int call_trans2open(char *inbuf, char *outbuf, int bufsize, int cnum,
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
-		Files[fnum].reserved = False;
+		Files[fnum].reserved = false;
 		return (UNIXERROR(ERRDOS, ERRnoaccess));
 	}
 
@@ -236,12 +236,12 @@ static int call_trans2open(char *inbuf, char *outbuf, int bufsize, int cnum,
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
-		Files[fnum].reserved = False;
+		Files[fnum].reserved = false;
 		return (UNIXERROR(ERRDOS, ERRnoaccess));
 	}
 
 	if (fstat(Files[fnum].fd_ptr->fd, &sbuf) != 0) {
-		close_file(fnum, False);
+		close_file(fnum, false);
 		return (ERROR(ERRDOS, ERRnoaccess));
 	}
 
@@ -250,7 +250,7 @@ static int call_trans2open(char *inbuf, char *outbuf, int bufsize, int cnum,
 	mtime = sbuf.st_mtime;
 	inode = sbuf.st_ino;
 	if (fmode & aDIR) {
-		close_file(fnum, False);
+		close_file(fnum, false);
 		return (ERROR(ERRDOS, ERRnoaccess));
 	}
 
@@ -282,11 +282,11 @@ static int call_trans2open(char *inbuf, char *outbuf, int bufsize, int cnum,
 static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
                                  int info_level, int requires_resume_key,
                                  char **ppdata, char *base_data,
-                                 int space_remaining, BOOL *out_of_space,
+                                 int space_remaining, bool *out_of_space,
                                  int *last_name_off)
 {
 	char *dname;
-	BOOL found = False;
+	bool found = false;
 	struct stat sbuf;
 	pstring mask;
 	pstring pathreal;
@@ -298,20 +298,20 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 	uint32 size = 0, len;
 	uint32 mdate = 0, adate = 0, cdate = 0;
 	char *nameptr;
-	BOOL isrootdir = (strequal(Connections[cnum].dirpath, "./") ||
+	bool isrootdir = (strequal(Connections[cnum].dirpath, "./") ||
 	                  strequal(Connections[cnum].dirpath, ".") ||
 	                  strequal(Connections[cnum].dirpath, "/"));
-	BOOL was_8_3;
+	bool was_8_3;
 	int nt_extmode; /* Used for NT connections instead of mode */
-	BOOL needslash =
+	bool needslash =
 	    (Connections[cnum].dirpath[strlen(Connections[cnum].dirpath) - 1] !=
 	     '/');
 
 	*fname = 0;
-	*out_of_space = False;
+	*out_of_space = false;
 
 	if (!Connections[cnum].dirptr)
-		return (False);
+		return (false);
 
 	p = strrchr(path_mask, '/');
 	if (p != NULL) {
@@ -342,12 +342,12 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 		          TellDir(Connections[cnum].dirptr)));
 
 		if (!dname)
-			return (False);
+			return (false);
 
 		pstrcpy(fname, dname);
 
-		if (mask_match(fname, mask, case_sensitive, True)) {
-			BOOL isdots =
+		if (mask_match(fname, mask, case_sensitive, true)) {
+			bool isdots =
 			    (strequal(fname, "..") || strequal(fname, "."));
 
 			if (isrootdir && isdots)
@@ -382,11 +382,11 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 			DEBUG(5, ("get_lanman2_dir_entry found %s fname=%s\n",
 			          pathreal, fname));
 
-			found = True;
+			found = true;
 		}
 	}
 
-	name_map_mangle(fname, False, SNUM(cnum));
+	name_map_mangle(fname, false, SNUM(cnum));
 
 	p = pdata;
 	nameptr = p;
@@ -464,7 +464,7 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 		break;
 
 	case SMB_FIND_FILE_BOTH_DIRECTORY_INFO:
-		was_8_3 = is_8_3(fname, True);
+		was_8_3 = is_8_3(fname, true);
 		len = 94 + strlen(fname);
 		len = (len + 3) & ~3;
 		SIVAL(p, 0, len);
@@ -491,7 +491,7 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 		p += 4;
 		if (!was_8_3) {
 			pstrcpy(p + 2, fname);
-			name_map_mangle(p + 2, True, SNUM(cnum));
+			name_map_mangle(p + 2, true, SNUM(cnum));
 		} else
 			*(p + 2) = 0;
 		strupper(p + 2);
@@ -573,15 +573,15 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 		break;
 
 	default:
-		return (False);
+		return (false);
 	}
 
 	if (PTR_DIFF(p, pdata) > space_remaining) {
 		/* Move the dirptr back to prev_dirpos */
 		SeekDir(Connections[cnum].dirptr, prev_dirpos);
-		*out_of_space = True;
+		*out_of_space = true;
 		DEBUG(9, ("get_lanman2_dir_entry: out of space\n"));
-		return False; /* Not finished - just out of space */
+		return false; /* Not finished - just out of space */
 	}
 
 	/* Setup the last_filename pointer, as an offset from base_data */
@@ -637,9 +637,9 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 	char *pdata = *ppdata;
 	int dirtype = SVAL(params, 0);
 	int maxentries = SVAL(params, 2);
-	BOOL close_after_first = BITSETW(params + 4, 0);
-	BOOL close_if_end = BITSETW(params + 4, 1);
-	BOOL requires_resume_key = BITSETW(params + 4, 2);
+	bool close_after_first = BITSETW(params + 4, 0);
+	bool close_if_end = BITSETW(params + 4, 1);
+	bool requires_resume_key = BITSETW(params + 4, 2);
 	int info_level = SVAL(params, 6);
 	pstring directory;
 	pstring mask;
@@ -648,10 +648,10 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 	int dptr_num = -1;
 	int numentries = 0;
 	int i;
-	BOOL finished = False;
-	BOOL out_of_space = False;
+	bool finished = false;
+	bool out_of_space = false;
 	int space_remaining;
-	BOOL bad_path = False;
+	bool bad_path = false;
 
 	*directory = *mask = 0;
 
@@ -711,7 +711,7 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 	if (params == NULL)
 		return (ERROR(ERRDOS, ERRnomem));
 
-	dptr_num = dptr_create(cnum, directory, True, SVAL(inbuf, smb_pid));
+	dptr_num = dptr_create(cnum, directory, true, SVAL(inbuf, smb_pid));
 	if (dptr_num < 0)
 		return (ERROR(ERRDOS, ERRbadfile));
 
@@ -734,7 +734,7 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 
 	p = pdata;
 	space_remaining = max_data_bytes;
-	out_of_space = False;
+	out_of_space = false;
 
 	for (i = 0; (i < maxentries) && !finished && !out_of_space; i++) {
 
@@ -742,8 +742,8 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 		   absolutely necessary. It allows for a filename of about 40
 		   chars */
 		if (space_remaining < DIRLEN_GUESS && numentries > 0) {
-			out_of_space = True;
-			finished = False;
+			out_of_space = true;
+			finished = false;
 		} else {
 			finished = !get_lanman2_dir_entry(
 			    cnum, mask, dirtype, info_level,
@@ -752,7 +752,7 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 		}
 
 		if (finished && out_of_space)
-			finished = False;
+			finished = false;
 
 		if (!finished && !out_of_space)
 			numentries++;
@@ -818,10 +818,10 @@ static int call_trans2findnext(char *inbuf, char *outbuf, int length,
 	int maxentries = SVAL(params, 2);
 	uint16 info_level = SVAL(params, 4);
 	uint32 resume_key = IVAL(params, 6);
-	BOOL close_after_request = BITSETW(params + 10, 0);
-	BOOL close_if_end = BITSETW(params + 10, 1);
-	BOOL requires_resume_key = BITSETW(params + 10, 2);
-	BOOL continue_bit = BITSETW(params + 10, 3);
+	bool close_after_request = BITSETW(params + 10, 0);
+	bool close_if_end = BITSETW(params + 10, 1);
+	bool requires_resume_key = BITSETW(params + 10, 2);
+	bool continue_bit = BITSETW(params + 10, 3);
 	pstring resume_name;
 	pstring mask;
 	pstring directory;
@@ -829,8 +829,8 @@ static int call_trans2findnext(char *inbuf, char *outbuf, int length,
 	uint16 dirtype;
 	int numentries = 0;
 	int i, last_name_off = 0;
-	BOOL finished = False;
-	BOOL out_of_space = False;
+	bool finished = false;
+	bool out_of_space = false;
 	int space_remaining;
 
 	*mask = *directory = *resume_name = 0;
@@ -894,7 +894,7 @@ resume_key = %d resume name = %s continue=%d level = %d\n",
 
 	p = pdata;
 	space_remaining = max_data_bytes;
-	out_of_space = False;
+	out_of_space = false;
 
 	/*
 	 * Seek to the correct position. We no longer use the resume key but
@@ -933,7 +933,7 @@ resume_key = %d resume name = %s continue=%d level = %d\n",
 			 */
 
 			if (dname != NULL)
-				name_map_mangle(dname, False, SNUM(cnum));
+				name_map_mangle(dname, false, SNUM(cnum));
 
 			if (dname && strcsequal(resume_name, dname)) {
 				SeekDir(dirptr, current_pos + 1);
@@ -964,7 +964,7 @@ resume_key = %d resume name = %s continue=%d level = %d\n",
 				 */
 
 				if (dname != NULL)
-					name_map_mangle(dname, False,
+					name_map_mangle(dname, false,
 					                SNUM(cnum));
 
 				if (dname && strcsequal(resume_name, dname)) {
@@ -983,8 +983,8 @@ resume_key = %d resume name = %s continue=%d level = %d\n",
 		   absolutely necessary. It allows for a filename of about 40
 		   chars */
 		if (space_remaining < DIRLEN_GUESS && numentries > 0) {
-			out_of_space = True;
-			finished = False;
+			out_of_space = true;
+			finished = false;
 		} else {
 			finished = !get_lanman2_dir_entry(
 			    cnum, mask, dirtype, info_level,
@@ -993,7 +993,7 @@ resume_key = %d resume name = %s continue=%d level = %d\n",
 		}
 
 		if (finished && out_of_space)
-			finished = False;
+			finished = false;
 
 		if (!finished && !out_of_space)
 			numentries++;
@@ -1159,7 +1159,7 @@ static int call_trans2setfsinfo(char *inbuf, char *outbuf, int length,
 	if (!CAN_WRITE(cnum))
 		return (ERROR(ERRSRV, ERRaccess));
 
-	outsize = set_message(outbuf, 10, 0, True);
+	outsize = set_message(outbuf, 10, 0, true);
 
 	return outsize;
 }
@@ -1183,7 +1183,7 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
 	char *fname;
 	char *p;
 	int l, pos;
-	BOOL bad_path = False;
+	bool bad_path = false;
 
 	if (tran_call == TRANSACT2_QFILEINFO) {
 		int16 fnum = SVALS(params, 0);
@@ -1316,8 +1316,8 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
 		pstring short_name;
 		pstrcpy(short_name, fname);
 		/* Mangle if not already 8.3 */
-		if (!is_8_3(short_name, True)) {
-			name_map_mangle(short_name, True, SNUM(cnum));
+		if (!is_8_3(short_name, true)) {
+			name_map_mangle(short_name, true, SNUM(cnum));
 		}
 		strncpy(pdata + 4, short_name, 12);
 		(pdata + 4)[12] = 0;
@@ -1406,7 +1406,7 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 	pstring fname1;
 	char *fname;
 	int fd = -1;
-	BOOL bad_path = False;
+	bool bad_path = false;
 
 	if (!CAN_WRITE(cnum))
 		return (ERROR(ERRSRV, ERRaccess));
@@ -1592,7 +1592,7 @@ static int call_trans2mkdir(char *inbuf, char *outbuf, int length, int bufsize,
 	char *params = *pparams;
 	pstring directory;
 	int ret = -1;
-	BOOL bad_path = False;
+	bool bad_path = false;
 
 	if (!CAN_WRITE(cnum))
 		return (ERROR(ERRSRV, ERRaccess));
@@ -1708,7 +1708,7 @@ int reply_findclose(char *inbuf, char *outbuf, int length, int bufsize)
 
 	dptr_close(dptr_num);
 
-	outsize = set_message(outbuf, 0, 0, True);
+	outsize = set_message(outbuf, 0, 0, true);
 
 	DEBUG(3, ("%s SMBfindclose cnum=%d, dptr_num = %d\n", timestring(),
 	          cnum, dptr_num));
@@ -1735,7 +1735,7 @@ int reply_findnclose(char *inbuf, char *outbuf, int length, int bufsize)
 	   findnotifyfirst - so any dptr_num is ok here.
 	   Just ignore it. */
 
-	outsize = set_message(outbuf, 0, 0, True);
+	outsize = set_message(outbuf, 0, 0, true);
 
 	DEBUG(3, ("%s SMB_findnclose cnum=%d, dptr_num = %d\n", timestring(),
 	          cnum, dptr_num));
@@ -1766,7 +1766,7 @@ int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize)
 	char *params = NULL, *data = NULL;
 	int num_params, num_params_sofar, num_data, num_data_sofar;
 
-	outsize = set_message(outbuf, 0, 0, True);
+	outsize = set_message(outbuf, 0, 0, true);
 
 	/* All trans2 messages we handle have smb_sucnt == 1 - ensure this
 	   is so as a sanity check */
@@ -1800,19 +1800,19 @@ int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize)
 	if (num_data_sofar < total_data || num_params_sofar < total_params) {
 		/* We need to send an interim response then receive the rest
 		   of the parameter/data bytes */
-		outsize = set_message(outbuf, 0, 0, True);
+		outsize = set_message(outbuf, 0, 0, true);
 		send_smb(Client, outbuf);
 
 		while (num_data_sofar < total_data ||
 		       num_params_sofar < total_params) {
-			BOOL ret;
+			bool ret;
 
 			ret = receive_next_smb(Client, inbuf, bufsize,
 			                       SMB_SECONDARY_WAIT);
 
 			if ((ret && (CVAL(inbuf, smb_com) != SMBtranss2)) ||
 			    !ret) {
-				outsize = set_message(outbuf, 0, 0, True);
+				outsize = set_message(outbuf, 0, 0, true);
 				if (ret)
 					DEBUG(0, ("reply_trans2: Invalid "
 					          "secondary trans2 packet\n"));
