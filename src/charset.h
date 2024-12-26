@@ -27,36 +27,7 @@ extern char *lower_char_map;
 extern void add_char_string(char *s);
 extern void charset_initialise(void);
 
-#ifdef toupper
-#undef toupper
-#endif
-
-#ifdef tolower
-#undef tolower
-#endif
-
-#ifdef isupper
-#undef isupper
-#endif
-
-#ifdef islower
-#undef islower
-#endif
-
-#ifdef isdoschar
-#undef isdoschar
-#endif
-
-#ifdef isspace
-#undef isspace
-#endif
-
-#define toupper(c) (upper_char_map[(c & 0xff)] & 0xff)
-#define tolower(c) (lower_char_map[(c & 0xff)] & 0xff)
-#define isupper(c) ((c & 0xff) != tolower(c & 0xff))
-#define islower(c) ((c & 0xff) != toupper(c & 0xff))
 #define isdoschar(c) (dos_char_map[(c & 0xff)] != 0)
-#define isspace(c) ((c) == ' ' || (c) == '\t')
 
 /* this is used to determine if a character is safe to use in
    something that may be put on a command line */
