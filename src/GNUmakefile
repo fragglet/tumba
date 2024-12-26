@@ -21,7 +21,6 @@ DEFINES = -DCODEPAGEDIR=\"$(CODEPAGEDIR)\" \
 CFLAGS = -MMD -Wall $(DEFINES)
 
 OBJECTS = \
-	charcnv.o            \
 	dir.o                \
 	fault.o              \
 	ipc.o                \
