@@ -234,8 +234,6 @@ int reply_lanman1(char *outbuf);
 int reply_lanman2(char *outbuf);
 int reply_nt1(char *outbuf);
 void close_cnum(int cnum);
-BOOL yield_connection(int cnum, char *name, int max_connections);
-BOOL claim_connection(int cnum, char *name, int max_connections, BOOL Clear);
 void exit_server(char *reason);
 void standard_sub(int cnum, char *str);
 char *smb_fn_name(int type);
