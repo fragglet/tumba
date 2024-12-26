@@ -121,28 +121,6 @@
 
 #else /* not _KANJI_C_ */
 
-/*
- * The following is needed for AIX systems that have
- * their own #defines for strchr, strrchr, strstr
- * and strtok.
- */
-
-#ifdef strchr
-#undef strchr
-#endif /* strchr */
-
-#ifdef strrchr
-#undef strrchr
-#endif /* strrchr */
-
-#ifdef strstr
-#undef strstr
-#endif /* strstr */
-
-#ifdef strtok
-#undef strtok
-#endif /* strtok */
-
 /* Ensure we use our definitions in all other files than kanji.c. */
 
 /* Function pointers we will replace. */
@@ -154,10 +132,6 @@ extern char *(*_dos_to_unix)(char *str, BOOL overwrite);
 extern char *(*_unix_to_dos)(char *str, BOOL overwrite);
 extern BOOL (*is_multibyte_char)(char c);
 
-#define strchr(s1, c) ((*multibyte_strchr)((s1), (c)))
-#define strrchr(s1, c) ((*multibyte_strrchr)((s1), (c)))
-#define strstr(s1, s2) ((*multibyte_strstr)((s1), (s2)))
-#define strtok(s1, s2) ((*multibyte_strtok)((s1), (s2)))
 #define dos_to_unix(x, y) ((*_dos_to_unix)((x), (y)))
 #define unix_to_dos(x, y) ((*_unix_to_dos)((x), (y)))
 
