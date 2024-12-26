@@ -355,11 +355,6 @@ for code page %d failed. Using default client codepage 850\n",
 		client_codepage = MSDOS_LATIN_1_CODEPAGE;
 	}
 
-	/*
-	 * Setup the function pointers for the loaded codepage.
-	 */
-	initialize_multibyte_vectors(client_codepage);
-
 	if (cp) {
 		for (i = 0; !((cp[i][0] == '\0') && (cp[i][1] == '\0')); i++)
 			add_dos_char(cp[i][0], (BOOL) cp[i][2], cp[i][1],
