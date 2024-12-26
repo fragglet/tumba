@@ -57,7 +57,6 @@ char *lp_configfile(void);
 char *lp_serverstring(void);
 char *lp_defaultservice(void);
 char *lp_workgroup(void);
-char *lp_character_set(void);
 char *lp_socket_address(void);
 bool lp_readbmpx(void);
 bool lp_readraw(void);

@@ -97,7 +97,6 @@ typedef struct {
 	char *szLogFile;
 	char *szConfigFile;
 	char *szWorkGroup;
-	char *szCharacterSet;
 	char *szSocketAddress;
 	int max_log_size;
 	int max_xmit;
@@ -191,7 +190,6 @@ static bool bGlobalOnly = false;
 /* prototypes for the special type handlers */
 static bool handle_include(char *pszParmValue, char **ptr);
 static bool handle_copy(char *pszParmValue, char **ptr);
-static bool handle_character_set(char *pszParmValue, char **ptr);
 
 struct enum_list {
 	int value;
@@ -225,8 +223,6 @@ static struct parm_struct {
      NULL},
     {"default", P_STRING, P_GLOBAL, &Globals.szDefaultService, NULL, NULL},
     {"workgroup", P_USTRING, P_GLOBAL, &Globals.szWorkGroup, NULL, NULL},
-    {"character set", P_STRING, P_GLOBAL, &Globals.szCharacterSet,
-     handle_character_set, NULL},
     {"socket address", P_STRING, P_GLOBAL, &Globals.szSocketAddress, NULL,
      NULL},
     {"max log size", P_INTEGER, P_GLOBAL, &Globals.max_log_size, NULL, NULL},
@@ -407,7 +403,6 @@ FN_GLOBAL_STRING(lp_configfile, &Globals.szConfigFile)
 FN_GLOBAL_STRING(lp_serverstring, &Globals.szServerString)
 FN_GLOBAL_STRING(lp_defaultservice, &Globals.szDefaultService)
 FN_GLOBAL_STRING(lp_workgroup, &Globals.szWorkGroup)
-FN_GLOBAL_STRING(lp_character_set, &Globals.szCharacterSet)
 FN_GLOBAL_STRING(lp_socket_address, &Globals.szSocketAddress)
 
 FN_GLOBAL_BOOL(lp_readbmpx, &Globals.bReadbmpx)
@@ -825,16 +820,6 @@ bool lp_file_list_changed(void)
 		f = f->next;
 	}
 	return (false);
-}
-
-/***************************************************************************
-handle the interpretation of the character set system parameter
-***************************************************************************/
-static bool handle_character_set(char *pszParmValue, char **ptr)
-{
-	string_set(ptr, pszParmValue);
-	interpret_character_set(pszParmValue);
-	return (true);
 }
 
 /***************************************************************************
