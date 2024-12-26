@@ -339,8 +339,8 @@ int reply_sesssetup_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 		smb_apasswd[smb_apasslen] = 0;
 		pstrcpy(user, smb_buf(inbuf) + smb_apasslen);
 	} else {
-		uint16 passlen1 = SVAL(inbuf, smb_vwv7);
-		uint16 passlen2 = SVAL(inbuf, smb_vwv8);
+		uint16_t passlen1 = SVAL(inbuf, smb_vwv7);
+		uint16_t passlen2 = SVAL(inbuf, smb_vwv8);
 
 		char *p = smb_buf(inbuf);
 
@@ -492,7 +492,7 @@ int reply_getatr(char *inbuf, char *outbuf, int in_size, int buffsize)
 	struct stat sbuf;
 	bool ok = false;
 	int mode = 0;
-	uint32 size = 0;
+	uint32_t size = 0;
 	time_t mtime = 0;
 	bool bad_path = false;
 
@@ -540,7 +540,7 @@ int reply_getatr(char *inbuf, char *outbuf, int in_size, int buffsize)
 
 	if (Protocol >= PROTOCOL_NT1) {
 		char *p = strrchr(fname, '/');
-		uint16 flg2 = SVAL(outbuf, smb_flg2);
+		uint16_t flg2 = SVAL(outbuf, smb_flg2);
 		if (!p)
 			p = fname;
 		if (!is_8_3(fname, true))
@@ -832,7 +832,7 @@ SearchEmpty:
 	SSVAL(smb_buf(outbuf), 1, numentries * DIR_STRUCT_SIZE);
 
 	if (Protocol >= PROTOCOL_NT1) {
-		uint16 flg2 = SVAL(outbuf, smb_flg2);
+		uint16_t flg2 = SVAL(outbuf, smb_flg2);
 		SSVAL(outbuf, smb_flg2, flg2 | 0x40); /* IS_LONG_NAME */
 	}
 
@@ -1355,7 +1355,7 @@ int reply_readbraw(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 {
 	int cnum, maxcount, mincount, fnum;
 	int nread = 0;
-	uint32 startpos;
+	uint32_t startpos;
 	char *header = outbuf;
 	int ret = 0;
 
@@ -1440,9 +1440,9 @@ int reply_lockread(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	int nread = -1;
 	char *data;
 	int outsize = 0;
-	uint32 startpos, numtoread;
+	uint32_t startpos, numtoread;
 	int eclass;
-	uint32 ecode;
+	uint32_t ecode;
 
 	cnum = SVAL(inbuf, smb_tid);
 	fnum = GETFNUM(inbuf, smb_vwv0);
@@ -1485,7 +1485,7 @@ int reply_read(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	int cnum, numtoread, fnum;
 	int nread = 0;
 	char *data;
-	uint32 startpos;
+	uint32_t startpos;
 	int outsize = 0;
 
 	cnum = SVAL(inbuf, smb_tid);
@@ -1529,7 +1529,7 @@ int reply_read(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 int reply_read_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 {
 	int fnum = GETFNUM(inbuf, smb_vwv2);
-	uint32 smb_offs = IVAL(inbuf, smb_vwv3);
+	uint32_t smb_offs = IVAL(inbuf, smb_vwv3);
 	int smb_maxcnt = SVAL(inbuf, smb_vwv5);
 	int smb_mincnt = SVAL(inbuf, smb_vwv6);
 	int cnum;
@@ -1681,9 +1681,9 @@ int reply_writeunlock(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	int nwritten = -1;
 	int outsize = 0;
 	char *data;
-	uint32 numtowrite, startpos;
+	uint32_t numtowrite, startpos;
 	int eclass;
-	uint32 ecode;
+	uint32_t ecode;
 
 	cnum = SVAL(inbuf, smb_tid);
 	fnum = GETFNUM(inbuf, smb_vwv0);
@@ -1786,7 +1786,7 @@ int reply_write(char *inbuf, char *outbuf, int dum1, int dum2)
 int reply_write_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 {
 	int fnum = GETFNUM(inbuf, smb_vwv2);
-	uint32 smb_offs = IVAL(inbuf, smb_vwv3);
+	uint32_t smb_offs = IVAL(inbuf, smb_vwv3);
 	int smb_dsize = SVAL(inbuf, smb_vwv10);
 	int smb_doff = SVAL(inbuf, smb_vwv11);
 	int cnum;
@@ -1841,8 +1841,8 @@ int reply_write_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 int reply_lseek(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 {
 	int cnum, fnum;
-	uint32 startpos;
-	int32 res = -1;
+	uint32_t startpos;
+	int32_t res = -1;
 	int mode, umode;
 	int outsize = 0;
 
@@ -1921,7 +1921,7 @@ int reply_close(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	int fnum, cnum;
 	int outsize = 0;
 	time_t mtime;
-	int32 eclass = 0, err = 0;
+	int32_t eclass = 0, err = 0;
 
 	outsize = set_message(outbuf, 0, 0, true);
 
@@ -2010,9 +2010,9 @@ int reply_lock(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 {
 	int fnum, cnum;
 	int outsize = set_message(outbuf, 0, 0, true);
-	uint32 count, offset;
+	uint32_t count, offset;
 	int eclass;
-	uint32 ecode;
+	uint32_t ecode;
 
 	cnum = SVAL(inbuf, smb_tid);
 	fnum = GETFNUM(inbuf, smb_vwv0);
@@ -2039,9 +2039,9 @@ int reply_unlock(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 {
 	int fnum, cnum;
 	int outsize = set_message(outbuf, 0, 0, true);
-	uint32 count, offset;
+	uint32_t count, offset;
 	int eclass;
-	uint32 ecode;
+	uint32_t ecode;
 
 	cnum = SVAL(inbuf, smb_tid);
 	fnum = GETFNUM(inbuf, smb_vwv0);
@@ -2736,14 +2736,14 @@ int reply_lockingX(char *inbuf, char *outbuf, int length, int bufsize)
 {
 	int fnum = GETFNUM(inbuf, smb_vwv2);
 	unsigned char locktype = CVAL(inbuf, smb_vwv3);
-	uint16 num_ulocks = SVAL(inbuf, smb_vwv6);
-	uint16 num_locks = SVAL(inbuf, smb_vwv7);
-	uint32 count, offset;
+	uint16_t num_ulocks = SVAL(inbuf, smb_vwv6);
+	uint16_t num_locks = SVAL(inbuf, smb_vwv7);
+	uint32_t count, offset;
 
 	int cnum;
 	int i;
 	char *data;
-	uint32 ecode = 0, dummy2;
+	uint32_t ecode = 0, dummy2;
 	int eclass = 0, dummy1;
 
 	cnum = SVAL(inbuf, smb_tid);
@@ -2818,7 +2818,7 @@ int reply_readbmpx(char *inbuf, char *outbuf, int length, int bufsize)
 	int nread = -1;
 	int total_read;
 	char *data;
-	uint32 startpos;
+	uint32_t startpos;
 	int outsize, maxcount;
 	int max_per_packet;
 	int tcount;
@@ -2887,7 +2887,7 @@ int reply_writebmpx(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	int cnum, numtowrite, fnum;
 	int nwritten = -1;
 	int outsize = 0;
-	uint32 startpos;
+	uint32_t startpos;
 	int tcount, write_through, smb_doff;
 	char *data;
 
@@ -2976,7 +2976,7 @@ int reply_writebs(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	int cnum, numtowrite, fnum;
 	int nwritten = -1;
 	int outsize = 0;
-	int32 startpos;
+	int32_t startpos;
 	int tcount, write_through, smb_doff;
 	char *data;
 	write_bmpx_struct *wbms;

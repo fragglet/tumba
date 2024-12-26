@@ -124,7 +124,7 @@ static bool prefix_ok(char *str, char *prefix)
   send a trans reply
   ****************************************************************************/
 static void send_trans_reply(char *outbuf, char *data, char *param,
-                             uint16 *setup, int ldata, int lparam, int lsetup)
+                             uint16_t *setup, int ldata, int lparam, int lsetup)
 {
 	int i;
 	int this_ldata, this_lparam;
@@ -820,7 +820,7 @@ static int api_reply(int cnum, char *outbuf, char *data, char *params,
 /****************************************************************************
   handle named pipe commands
   ****************************************************************************/
-static int named_pipe(int cnum, char *outbuf, char *name, uint16 *setup,
+static int named_pipe(int cnum, char *outbuf, char *name, uint16_t *setup,
                       char *data, char *params, int suwcnt, int tdscnt,
                       int tpscnt, int msrcnt, int mdrcnt, int mprcnt)
 {
@@ -846,7 +846,7 @@ int reply_trans(char *inbuf, char *outbuf, int size, int bufsize)
 	fstring name;
 
 	char *data = NULL, *params = NULL;
-	uint16 *setup = NULL;
+	uint16_t *setup = NULL;
 
 	int outsize = 0;
 	int cnum = SVAL(inbuf, smb_tid);
@@ -881,7 +881,7 @@ int reply_trans(char *inbuf, char *outbuf, int size, int bufsize)
 
 	if (suwcnt) {
 		int i;
-		setup = (uint16 *) malloc(suwcnt * sizeof(setup[0]));
+		setup = (uint16_t *) malloc(suwcnt * sizeof(setup[0]));
 		for (i = 0; i < suwcnt; i++)
 			setup[i] = SVAL(inbuf, smb_vwv14 + i * SIZEOFWORD);
 	}

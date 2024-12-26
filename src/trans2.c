@@ -188,18 +188,18 @@ static int call_trans2open(char *inbuf, char *outbuf, int bufsize, int cnum,
                            char **pparams, char **ppdata)
 {
 	char *params = *pparams;
-	int16 open_mode = SVAL(params, 2);
-	int16 open_attr = SVAL(params, 6);
-	int16 open_ofun = SVAL(params, 12);
-	int32 open_size = IVAL(params, 14);
+	int16_t open_mode = SVAL(params, 2);
+	int16_t open_attr = SVAL(params, 6);
+	int16_t open_ofun = SVAL(params, 12);
+	int32_t open_size = IVAL(params, 14);
 	char *pname = &params[28];
-	int16 namelen = strlen(pname) + 1;
+	int16_t namelen = strlen(pname) + 1;
 
 	pstring fname;
 	int fnum = -1;
 	int unixmode;
 	int size = 0, fmode = 0, mtime = 0, rmode;
-	int32 inode = 0;
+	int32_t inode = 0;
 	struct stat sbuf;
 	int smb_action = 0;
 	bool bad_path = false;
@@ -292,11 +292,11 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 	pstring pathreal;
 	pstring fname;
 	char *p, *pdata = *ppdata;
-	uint32 reskey = 0;
+	uint32_t reskey = 0;
 	int prev_dirpos = 0;
 	int mode = 0;
-	uint32 size = 0, len;
-	uint32 mdate = 0, adate = 0, cdate = 0;
+	uint32_t size = 0, len;
+	uint32_t mdate = 0, adate = 0, cdate = 0;
 	char *nameptr;
 	bool isrootdir = (strequal(Connections[cnum].dirpath, "./") ||
 	                  strequal(Connections[cnum].dirpath, ".") ||
@@ -632,7 +632,7 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 	   maxentries then so be it. We assume that the redirector has
 	   enough room for the fixed number of parameter bytes it has
 	   requested. */
-	uint32 max_data_bytes = SVAL(inbuf, smb_mdrcnt);
+	uint32_t max_data_bytes = SVAL(inbuf, smb_mdrcnt);
 	char *params = *pparams;
 	char *pdata = *ppdata;
 	int dirtype = SVAL(params, 0);
@@ -814,10 +814,10 @@ static int call_trans2findnext(char *inbuf, char *outbuf, int length,
 	int max_data_bytes = SVAL(inbuf, smb_mdrcnt);
 	char *params = *pparams;
 	char *pdata = *ppdata;
-	int16 dptr_num = SVAL(params, 0);
+	int16_t dptr_num = SVAL(params, 0);
 	int maxentries = SVAL(params, 2);
-	uint16 info_level = SVAL(params, 4);
-	uint32 resume_key = IVAL(params, 6);
+	uint16_t info_level = SVAL(params, 4);
+	uint32_t resume_key = IVAL(params, 6);
 	bool close_after_request = BITSETW(params + 10, 0);
 	bool close_if_end = BITSETW(params + 10, 1);
 	bool requires_resume_key = BITSETW(params + 10, 2);
@@ -826,7 +826,7 @@ static int call_trans2findnext(char *inbuf, char *outbuf, int length,
 	pstring mask;
 	pstring directory;
 	char *p;
-	uint16 dirtype;
+	uint16_t dirtype;
 	int numentries = 0;
 	int i, last_name_off = 0;
 	bool finished = false;
@@ -1038,7 +1038,7 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
 {
 	char *pdata = *ppdata;
 	char *params = *pparams;
-	uint16 info_level = SVAL(params, 0);
+	uint16_t info_level = SVAL(params, 0);
 	int data_len;
 	struct stat st;
 	char *vname = volume_label(SNUM(cnum));
@@ -1173,8 +1173,8 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
 {
 	char *params = *pparams;
 	char *pdata = *ppdata;
-	uint16 tran_call = SVAL(inbuf, smb_setup0);
-	uint16 info_level;
+	uint16_t tran_call = SVAL(inbuf, smb_setup0);
+	uint16_t info_level;
 	int mode = 0;
 	int size = 0;
 	unsigned int data_size;
@@ -1186,7 +1186,7 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
 	bool bad_path = false;
 
 	if (tran_call == TRANSACT2_QFILEINFO) {
-		int16 fnum = SVALS(params, 0);
+		int16_t fnum = SVALS(params, 0);
 		info_level = SVAL(params, 2);
 
 		CHECK_FNUM(fnum, cnum);
@@ -1397,8 +1397,8 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 {
 	char *params = *pparams;
 	char *pdata = *ppdata;
-	uint16 tran_call = SVAL(inbuf, smb_setup0);
-	uint16 info_level;
+	uint16_t tran_call = SVAL(inbuf, smb_setup0);
+	uint16_t info_level;
 	int mode = 0;
 	int size = 0;
 	struct utimbuf tvs;
@@ -1412,7 +1412,7 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 		return (ERROR(ERRSRV, ERRaccess));
 
 	if (tran_call == TRANSACT2_SETFILEINFO) {
-		int16 fnum = SVALS(params, 0);
+		int16_t fnum = SVALS(params, 0);
 		info_level = SVAL(params, 2);
 
 		CHECK_FNUM(fnum, cnum);
@@ -1634,9 +1634,9 @@ static int call_trans2findnotifyfirst(char *inbuf, char *outbuf, int length,
                                       int bufsize, int cnum, char **pparams,
                                       char **ppdata)
 {
-	static uint16 fnf_handle = 257;
+	static uint16_t fnf_handle = 257;
 	char *params = *pparams;
-	uint16 info_level = SVAL(params, 4);
+	uint16_t info_level = SVAL(params, 4);
 
 	DEBUG(3, ("call_trans2findnotifyfirst - info_level %d\n", info_level));
 
@@ -1699,7 +1699,7 @@ int reply_findclose(char *inbuf, char *outbuf, int length, int bufsize)
 {
 	int cnum;
 	int outsize = 0;
-	int16 dptr_num = SVALS(inbuf, smb_vwv0);
+	int16_t dptr_num = SVALS(inbuf, smb_vwv0);
 
 	cnum = SVAL(inbuf, smb_tid);
 
@@ -1849,7 +1849,7 @@ int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize)
 	}
 
 	if (Protocol >= PROTOCOL_NT1) {
-		uint16 flg2 = SVAL(outbuf, smb_flg2);
+		uint16_t flg2 = SVAL(outbuf, smb_flg2);
 		SSVAL(outbuf, smb_flg2, flg2 | 0x40); /* IS_LONG_NAME */
 	}
 

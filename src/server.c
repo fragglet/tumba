@@ -769,8 +769,8 @@ static file_fd_struct *fd_get_already_open(struct stat *sbuf)
 	for (i = 0; i <= max_file_fd_used; i++) {
 		fd_ptr = &FileFd[i];
 		if ((fd_ptr->ref_count > 0) &&
-		    (((uint32) sbuf->st_dev) == fd_ptr->dev) &&
-		    (((uint32) sbuf->st_ino) == fd_ptr->inode)) {
+		    (((uint32_t) sbuf->st_dev) == fd_ptr->dev) &&
+		    (((uint32_t) sbuf->st_ino) == fd_ptr->inode)) {
 			fd_ptr->ref_count++;
 			DEBUG(3, ("Re-used file_fd_struct %d, dev = %x, inode "
 			          "= %x, ref_count = %d\n",
@@ -795,8 +795,8 @@ static file_fd_struct *fd_get_new(void)
 	for (i = 0; i < MAX_OPEN_FILES; i++) {
 		fd_ptr = &FileFd[i];
 		if (fd_ptr->ref_count == 0) {
-			fd_ptr->dev = (uint32) -1;
-			fd_ptr->inode = (uint32) -1;
+			fd_ptr->dev = (uint32_t) -1;
+			fd_ptr->inode = (uint32_t) -1;
 			fd_ptr->fd = -1;
 			fd_ptr->fd_readonly = -1;
 			fd_ptr->fd_writeonly = -1;
@@ -862,8 +862,8 @@ static int fd_attempt_close(file_fd_struct *fd_ptr)
 			fd_ptr->fd_readonly = -1;
 			fd_ptr->fd_writeonly = -1;
 			fd_ptr->real_open_flags = -1;
-			fd_ptr->dev = (uint32) -1;
-			fd_ptr->inode = (uint32) -1;
+			fd_ptr->dev = (uint32_t) -1;
+			fd_ptr->inode = (uint32_t) -1;
 		}
 	}
 	return fd_ptr->ref_count;
@@ -1049,8 +1049,8 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 		}
 
 		/* Set the correct entries in fd_ptr. */
-		fd_ptr->dev = (uint32) sbuf->st_dev;
-		fd_ptr->inode = (uint32) sbuf->st_ino;
+		fd_ptr->dev = (uint32_t) sbuf->st_dev;
+		fd_ptr->inode = (uint32_t) sbuf->st_ino;
 
 		fsp->fd_ptr = fd_ptr;
 		Connections[cnum].num_files_open++;
@@ -1281,9 +1281,9 @@ void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
 /****************************************************************************
 seek a file. Try to avoid the seek if possible
 ****************************************************************************/
-int seek_file(int fnum, uint32 pos)
+int seek_file(int fnum, uint32_t pos)
 {
-	uint32 offset = 0;
+	uint32_t offset = 0;
 
 	Files[fnum].pos =
 	    (int) (lseek(Files[fnum].fd_ptr->fd, pos + offset, SEEK_SET) -
@@ -1294,7 +1294,7 @@ int seek_file(int fnum, uint32 pos)
 /****************************************************************************
 read from a file
 ****************************************************************************/
-int read_file(int fnum, char *data, uint32 pos, int n)
+int read_file(int fnum, char *data, uint32_t pos, int n)
 {
 	int ret = 0, readret;
 
@@ -1447,8 +1447,8 @@ int cached_error_packet(char *inbuf, char *outbuf, int fnum, int line)
 {
 	write_bmpx_struct *wbmpx = Files[fnum].wbmpx_ptr;
 
-	int32 eclass = wbmpx->wr_errclass;
-	int32 err = wbmpx->wr_error;
+	int32_t eclass = wbmpx->wr_errclass;
+	int32_t err = wbmpx->wr_error;
 
 	/* We can now delete the auxiliary struct */
 	free((char *) wbmpx);
@@ -1481,7 +1481,7 @@ struct {
 /****************************************************************************
   create an error packet from errno
 ****************************************************************************/
-int unix_error_packet(char *inbuf, char *outbuf, int def_class, uint32 def_code,
+int unix_error_packet(char *inbuf, char *outbuf, int def_class, uint32_t def_code,
                       int line)
 {
 	int eclass = def_class;
@@ -1510,7 +1510,7 @@ int unix_error_packet(char *inbuf, char *outbuf, int def_class, uint32 def_code,
 /****************************************************************************
   create an error packet. Normally called using the ERROR() macro
 ****************************************************************************/
-int error_packet(char *inbuf, char *outbuf, int error_class, uint32 error_code,
+int error_packet(char *inbuf, char *outbuf, int error_class, uint32_t error_code,
                  int line)
 {
 	int outsize = set_message(outbuf, 0, 0, true);
@@ -1732,7 +1732,7 @@ static void process_smb(char *inbuf, char *outbuf)
 	extern int Client;
 	static int trans_num;
 	int msg_type = CVAL(inbuf, 0);
-	int32 len = smb_len(inbuf);
+	int32_t len = smb_len(inbuf);
 	int nread = len + 4;
 
 	DEBUG(6, ("got message type 0x%x of len 0x%x\n", msg_type, len));
@@ -3049,8 +3049,8 @@ static void init_structs(void)
 	for (i = 0; i < MAX_OPEN_FILES; i++) {
 		file_fd_struct *fd_ptr = &FileFd[i];
 		fd_ptr->ref_count = 0;
-		fd_ptr->dev = (int32) -1;
-		fd_ptr->inode = (int32) -1;
+		fd_ptr->dev = (int32_t) -1;
+		fd_ptr->inode = (int32_t) -1;
 		fd_ptr->fd = -1;
 		fd_ptr->fd_readonly = -1;
 		fd_ptr->fd_writeonly = -1;
@@ -3211,7 +3211,7 @@ int main(int argc, char *argv[])
 	DEBUG(2, ("uid=%d gid=%d euid=%d egid=%d\n", getuid(), getgid(),
 	          geteuid(), getegid()));
 
-	if (sizeof(uint16) < 2 || sizeof(uint32) < 4) {
+	if (sizeof(uint16_t) < 2 || sizeof(uint32_t) < 4) {
 		DEBUG(0, ("ERROR: Samba is not configured correctly for the "
 		          "word size on your machine\n"));
 		exit(1);

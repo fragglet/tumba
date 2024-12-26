@@ -21,7 +21,7 @@
 
 #include "includes.h"
 
-static uint8 valid_dos_chars[32];
+static uint8_t valid_dos_chars[32];
 
 pstring scope = "";
 
@@ -477,7 +477,7 @@ bool directory_exist(char *dname, struct stat *st)
 /*******************************************************************
 returns the size in bytes of the named file
 ********************************************************************/
-uint32 file_size(char *file_name)
+uint32_t file_size(char *file_name)
 {
 	struct stat buf;
 	buf.st_size = 0;
@@ -1582,7 +1582,7 @@ char *name_ptr(char *buf, int ofs)
 	unsigned char c = *(unsigned char *) (buf + ofs);
 
 	if ((c & 0xC0) == 0xC0) {
-		uint16 l;
+		uint16_t l;
 		char p[2];
 		memcpy(p, buf + ofs, 2);
 		p[0] &= ~0xC0;
@@ -2203,7 +2203,7 @@ bool get_myname(char *my_name, struct in_addr *ip)
 /****************************************************************************
 open a socket of the specified type, port and address for incoming data
 ****************************************************************************/
-int open_socket_in(int type, int port, int dlevel, uint32 socket_addr)
+int open_socket_in(int type, int port, int dlevel, uint32_t socket_addr)
 {
 	struct hostent *hp;
 	struct sockaddr_in sock;
@@ -2271,10 +2271,10 @@ int open_socket_in(int type, int port, int dlevel, uint32 socket_addr)
 /****************************************************************************
 interpret an internet address or name into an IP address in 4 byte form
 ****************************************************************************/
-uint32 interpret_addr(char *str)
+uint32_t interpret_addr(char *str)
 {
 	struct hostent *hp;
-	uint32 res;
+	uint32_t res;
 	int i;
 	bool pure_address = true;
 
@@ -2307,7 +2307,7 @@ uint32 interpret_addr(char *str)
 		res = ((struct in_addr *) hp->h_addr)->s_addr;
 	}
 
-	if (res == (uint32) -1)
+	if (res == (uint32_t) -1)
 		return (0);
 
 	return (res);
@@ -2319,7 +2319,7 @@ uint32 interpret_addr(char *str)
 struct in_addr *interpret_addr2(char *str)
 {
 	static struct in_addr ret;
-	uint32 a = interpret_addr(str);
+	uint32_t a = interpret_addr(str);
 	ret.s_addr = a;
 	return (&ret);
 }
@@ -2511,13 +2511,13 @@ char *readdirname(void *p)
 /****************************************************************************
 routine to do file locking
 ****************************************************************************/
-bool fcntl_lock(int fd, int op, uint32 offset, uint32 count, int type)
+bool fcntl_lock(int fd, int op, uint32_t offset, uint32_t count, int type)
 {
 	struct flock lock;
 	int ret;
-	uint32 mask = ((unsigned) 1 << 31);
-	int32 s_count = (int32) count;   /* Signed count. */
-	int32 s_offset = (int32) offset; /* Signed offset. */
+	uint32_t mask = ((unsigned) 1 << 31);
+	int32_t s_count = (int32_t) count;   /* Signed count. */
+	int32_t s_offset = (int32_t) offset; /* Signed offset. */
 
 	/* interpret negative counts as large numbers */
 	if (s_count < 0)
@@ -2533,8 +2533,8 @@ bool fcntl_lock(int fd, int op, uint32 offset, uint32 count, int type)
 		mask = mask >> 1;
 	}
 
-	offset = (uint32) s_offset;
-	count = (uint32) s_count;
+	offset = (uint32_t) s_offset;
+	count = (uint32_t) s_count;
 
 	DEBUG(8, ("fcntl_lock %d %d %d %d %d\n", fd, op, (int) offset,
 	          (int) count, type));

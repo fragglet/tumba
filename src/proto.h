@@ -6,8 +6,8 @@ void init_dptrs(void);
 char *dptr_path(int key);
 char *dptr_wcard(int key);
 bool dptr_set_wcard(int key, char *wcard);
-bool dptr_set_attr(int key, uint16 attr);
-uint16 dptr_attr(int key);
+bool dptr_set_attr(int key, uint16_t attr);
+uint16_t dptr_attr(int key);
 void dptr_close(int key);
 void dptr_closecnum(int cnum);
 void dptr_idlecnum(int cnum);
@@ -100,11 +100,11 @@ char *volume_label(int snum);
 
 /*The following definitions come from  locking.c  */
 
-bool is_locked(int fnum, int cnum, uint32 count, uint32 offset, int lock_type);
-bool do_lock(int fnum, int cnum, uint32 count, uint32 offset, int lock_type,
-             int *eclass, uint32 *ecode);
-bool do_unlock(int fnum, int cnum, uint32 count, uint32 offset, int *eclass,
-               uint32 *ecode);
+bool is_locked(int fnum, int cnum, uint32_t count, uint32_t offset, int lock_type);
+bool do_lock(int fnum, int cnum, uint32_t count, uint32_t offset, int lock_type,
+             int *eclass, uint32_t *ecode);
+bool do_unlock(int fnum, int cnum, uint32_t count, uint32_t offset, int *eclass,
+               uint32_t *ecode);
 bool locking_end(void);
 
 /*The following definitions come from  mangle.c  */
@@ -192,15 +192,15 @@ bool check_name(char *name, int cnum);
 void close_file(int fnum, bool normal_close);
 void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
                       int mode, int *Access, int *action);
-int seek_file(int fnum, uint32 pos);
-int read_file(int fnum, char *data, uint32 pos, int n);
+int seek_file(int fnum, uint32_t pos);
+int read_file(int fnum, char *data, uint32_t pos, int n);
 int write_file(int fnum, char *data, int n);
 bool become_service(int cnum, bool do_chdir);
 int find_service(char *service);
 int cached_error_packet(char *inbuf, char *outbuf, int fnum, int line);
-int unix_error_packet(char *inbuf, char *outbuf, int def_class, uint32 def_code,
+int unix_error_packet(char *inbuf, char *outbuf, int def_class, uint32_t def_code,
                       int line);
-int error_packet(char *inbuf, char *outbuf, int error_class, uint32 error_code,
+int error_packet(char *inbuf, char *outbuf, int error_class, uint32_t error_code,
                  int line);
 bool receive_next_smb(int smbfd, char *inbuf, int bufsize, int timeout);
 bool snum_used(int snum);
@@ -282,7 +282,7 @@ char *StrnCpy(char *dest, char *src, int n);
 bool file_exist(char *fname, struct stat *sbuf);
 time_t file_modtime(char *fname);
 bool directory_exist(char *dname, struct stat *st);
-uint32 file_size(char *file_name);
+uint32_t file_size(char *file_name);
 int StrCaseCmp(char *s, char *t);
 int isdoschar(int c);
 void init_dos_char_table(void);
@@ -341,8 +341,8 @@ void become_daemon(void);
 int set_filelen(int fd, long len);
 void *Realloc(void *p, int size);
 bool get_myname(char *my_name, struct in_addr *ip);
-int open_socket_in(int type, int port, int dlevel, uint32 socket_addr);
-uint32 interpret_addr(char *str);
+int open_socket_in(int type, int port, int dlevel, uint32_t socket_addr);
+uint32_t interpret_addr(char *str);
 struct in_addr *interpret_addr2(char *str);
 void reset_globals_after_fork(void);
 char *client_addr(void);
@@ -352,7 +352,7 @@ char *gidtoname(int gid);
 void BlockSignals(bool block, int signum);
 void ajt_panic(void);
 char *readdirname(void *p);
-bool fcntl_lock(int fd, int op, uint32 offset, uint32 count, int type);
+bool fcntl_lock(int fd, int op, uint32_t offset, uint32_t count, int type);
 char *safe_strcpy(char *dest, char *src, int maxlength);
 char *safe_strcat(char *dest, char *src, int maxlength);
 void print_asc(int level, unsigned char *buf, int len);

@@ -39,43 +39,6 @@
 /* limiting size of ipc replies */
 #define REALLOC(ptr, size) Realloc(ptr, MAX((size), 4 * 1024))
 
-/*
-   Samba needs type definitions for int16, int32, uint16 and uint32.
-
-   Normally these are signed and unsigned 16 and 32 bit integers, but
-   they actually only need to be at least 16 and 32 bits
-   respectively. Thus if your word size is 8 bytes just defining them
-   as signed and unsigned int will work.
-*/
-
-typedef short int16;
-typedef int int32;
-
-#ifndef uint8
-typedef unsigned char uint8;
-#endif
-
-#ifndef uint16
-typedef unsigned short uint16;
-#endif
-
-#ifndef uint32
-typedef unsigned int uint32;
-#endif
-
-#ifndef uchar
-#define uchar unsigned char
-#endif
-#ifndef int16
-#define int16 short
-#endif
-#ifndef uint16
-#define uint16 unsigned short
-#endif
-#ifndef uint32
-#define uint32 unsigned int
-#endif
-
 #define SIZEOFWORD 2
 
 #ifndef DEF_CREATE_MASK
@@ -237,7 +200,7 @@ typedef char fstring[128];
 
 /* 32 bit time (sec) since 01jan1970 - cifs6.txt, section 3.5, page 30 */
 typedef struct time_info {
-	uint32 time;
+	uint32_t time;
 
 } UTIME;
 
@@ -259,7 +222,7 @@ struct smb_passwd {
 	char *smb_name;
 	unsigned char *smb_passwd;    /* Null if no password */
 	unsigned char *smb_nt_passwd; /* Null if no password */
-	uint16 acct_ctrl;
+	uint16_t acct_ctrl;
 	/* Other fields / flags may be added later */
 };
 
@@ -284,9 +247,9 @@ typedef struct {
 /* Structure used when SMBwritebmpx is active */
 typedef struct {
 	int wr_total_written; /* So we know when to discard this */
-	int32 wr_timeout;
-	int32 wr_errclass;
-	int32 wr_error;  /* Cached errors */
+	int32_t wr_timeout;
+	int32_t wr_errclass;
+	int32_t wr_error;  /* Cached errors */
 	bool wr_mode;    /* write through mode) */
 	bool wr_discard; /* discard all further data */
 } write_bmpx_struct;
@@ -298,9 +261,9 @@ typedef struct {
  */
 
 typedef struct {
-	uint16 ref_count;
-	uint32 dev;
-	uint32 inode;
+	uint16_t ref_count;
+	uint32_t dev;
+	uint32_t inode;
 	int fd;
 	int fd_readonly;
 	int fd_writeonly;
@@ -311,10 +274,10 @@ typedef struct {
 	int cnum;
 	file_fd_struct *fd_ptr;
 	int pos;
-	uint32 size;
+	uint32_t size;
 	int mode;
 	char *mmap_ptr;
-	uint32 mmap_size;
+	uint32_t mmap_size;
 	write_bmpx_struct *wbmpx_ptr;
 	struct timeval open_time;
 	bool open;
@@ -348,7 +311,7 @@ typedef struct {
 
 /* DOM_CHAL - challenge info */
 typedef struct chal_info {
-	uchar data[8]; /* credentials */
+	uint8_t data[8]; /* credentials */
 } DOM_CHAL;
 
 /* DOM_CREDs - timestamped client or server credentials */
@@ -365,8 +328,8 @@ struct dcinfo {
 	DOM_CRED clnt_cred; /* Last client credential */
 	DOM_CRED srv_cred;  /* Last server credential */
 
-	uchar sess_key[8]; /* Session key */
-	uchar md4pw[16];   /* md4(machine password) */
+	uint8_t sess_key[8]; /* Session key */
+	uint8_t md4pw[16];   /* md4(machine password) */
 };
 
 /* End of NTDOMAIN defines needed here. */
@@ -388,7 +351,7 @@ typedef struct {
 /* used for server information: client, nameserv and ipc */
 struct server_info_struct {
 	fstring name;
-	uint32 type;
+	uint32_t type;
 	fstring comment;
 };
 
@@ -403,8 +366,8 @@ struct interface {
 /* struct returned by get_share_modes */
 typedef struct {
 	int pid;
-	uint16 op_port;
-	uint16 op_type;
+	uint16_t op_port;
+	uint16_t op_type;
 	int share_mode;
 	struct timeval time;
 } share_mode_entry;
@@ -426,19 +389,19 @@ struct connect_record {
 struct connection_options {
 	int protocol;
 	/* Connection-Options */
-	uint32 max_xmit;
-	uint16 server_uid;
-	uint16 tid;
+	uint32_t max_xmit;
+	uint16_t server_uid;
+	uint16_t tid;
 	/* The following are LANMAN 1.0 options */
-	uint16 sec_mode;
-	uint16 max_mux;
-	uint16 max_vcs;
-	uint16 rawmode;
-	uint32 sesskey;
+	uint16_t sec_mode;
+	uint16_t max_mux;
+	uint16_t max_vcs;
+	uint16_t rawmode;
+	uint32_t sesskey;
 	/* The following are NT LM 0.12 options */
-	uint32 maxraw;
-	uint32 capabilities;
-	uint16 serverzone;
+	uint32_t maxraw;
+	uint32_t capabilities;
+	uint16_t serverzone;
 };
 
 #ifndef LOCKING_VERSION
@@ -987,8 +950,8 @@ enum RPC_PKT_TYPE {
 
 /* 64 bit time (100usec) since ????? - cifs6.txt, section 3.5, page 30 */
 typedef struct nttime_info {
-	uint32 low;
-	uint32 high;
+	uint32_t low;
+	uint32_t high;
 
 } NTTIME;
 
@@ -996,25 +959,25 @@ typedef struct nttime_info {
 
 /* DOM_SID - security id */
 typedef struct sid_info {
-	uint8 sid_rev_num;             /* SID revision number */
-	uint8 num_auths;               /* number of sub-authorities */
-	uint8 id_auth[6];              /* Identifier Authority */
-	uint32 sub_auths[MAXSUBAUTHS]; /* pointer to sub-authorities. */
+	uint8_t sid_rev_num;             /* SID revision number */
+	uint8_t num_auths;               /* number of sub-authorities */
+	uint8_t id_auth[6];              /* Identifier Authority */
+	uint32_t sub_auths[MAXSUBAUTHS]; /* pointer to sub-authorities. */
 
 } DOM_SID;
 
 /* UNIHDR - unicode string header */
 typedef struct unihdr_info {
-	uint16 uni_max_len;
-	uint16 uni_str_len;
-	uint32 undoc; /* usually has a value of 4 */
+	uint16_t uni_max_len;
+	uint16_t uni_str_len;
+	uint32_t undoc; /* usually has a value of 4 */
 
 } UNIHDR;
 
 /* UNIHDR2 - unicode string header and undocumented buffer */
 typedef struct unihdr2_info {
 	UNIHDR unihdr;
-	uint32 undoc_buffer; /* undocumented 32 bit buffer pointer */
+	uint32_t undoc_buffer; /* undocumented 32 bit buffer pointer */
 
 } UNIHDR2;
 
@@ -1023,25 +986,25 @@ typedef struct unihdr2_info {
 
 /* UNISTR - unicode string size and buffer */
 typedef struct unistr_info {
-	uint16 buffer[MAX_UNISTRLEN]; /* unicode characters. ***MUST*** be
+	uint16_t buffer[MAX_UNISTRLEN]; /* unicode characters. ***MUST*** be
 	                                 null-terminated */
 
 } UNISTR;
 
 /* UNISTR2 - unicode string size and buffer */
 typedef struct unistr2_info {
-	uint32 uni_max_len;
-	uint32 undoc;
-	uint32 uni_str_len;
-	uint16 buffer[MAX_UNISTRLEN]; /* unicode characters. **NOT** necessarily
+	uint32_t uni_max_len;
+	uint32_t undoc;
+	uint32_t uni_str_len;
+	uint16_t buffer[MAX_UNISTRLEN]; /* unicode characters. **NOT** necessarily
 	                                 null-terminated */
 
 } UNISTR2;
 
 /* DOM_SID2 - domain SID structure - SIDs stored in unicode */
 typedef struct domsid2_info {
-	uint32 type;  /* value is 5 */
-	uint32 undoc; /* value is 0 */
+	uint32_t type;  /* value is 5 */
+	uint32_t undoc; /* value is 0 */
 
 	UNIHDR2 hdr; /* XXXX conflict between hdr and str for length */
 	UNISTR str;  /* XXXX conflict between hdr and str for length */
@@ -1050,37 +1013,37 @@ typedef struct domsid2_info {
 
 /* DOM_RID2 - domain RID structure for ntlsa pipe */
 typedef struct domrid2_info {
-	uint32 type;  /* value is 5 */
-	uint32 undoc; /* value is non-zero */
-	uint32 rid;
-	uint32 rid_idx; /* don't know what this is */
+	uint32_t type;  /* value is 5 */
+	uint32_t undoc; /* value is non-zero */
+	uint32_t rid;
+	uint32_t rid_idx; /* don't know what this is */
 
 } DOM_RID2;
 
 /* DOM_RID3 - domain RID structure for samr pipe */
 typedef struct domrid3_info {
-	uint32 rid;      /* domain-relative (to a SID) id */
-	uint32 type1;    /* value is 0x1 */
-	uint32 ptr_type; /* undocumented pointer */
-	uint32 type2;    /* value is 0x1 */
+	uint32_t rid;      /* domain-relative (to a SID) id */
+	uint32_t type1;    /* value is 0x1 */
+	uint32_t ptr_type; /* undocumented pointer */
+	uint32_t type2;    /* value is 0x1 */
 
 } DOM_RID3;
 
 /* DOM_CLNT_SRV - client / server names */
 typedef struct clnt_srv_info {
-	uint32 undoc_buffer;   /* undocumented 32 bit buffer pointer */
+	uint32_t undoc_buffer;   /* undocumented 32 bit buffer pointer */
 	UNISTR2 uni_logon_srv; /* logon server name */
-	uint32 undoc_buffer2;  /* undocumented 32 bit buffer pointer */
+	uint32_t undoc_buffer2;  /* undocumented 32 bit buffer pointer */
 	UNISTR2 uni_comp_name; /* client machine name */
 
 } DOM_CLNT_SRV;
 
 /* DOM_LOG_INFO - login info */
 typedef struct log_info {
-	uint32 undoc_buffer;   /* undocumented 32 bit buffer pointer */
+	uint32_t undoc_buffer;   /* undocumented 32 bit buffer pointer */
 	UNISTR2 uni_logon_srv; /* logon server name */
 	UNISTR2 uni_acct_name; /* account name */
-	uint16 sec_chan;       /* secure channel type */
+	uint16_t sec_chan;       /* secure channel type */
 	UNISTR2 uni_comp_name; /* client machine name */
 
 } DOM_LOG_INFO;
@@ -1095,29 +1058,29 @@ typedef struct clnt_info {
 /* DOM_CLNT_INFO2 - client info */
 typedef struct clnt_info2 {
 	DOM_CLNT_SRV login;
-	uint32 ptr_cred;
+	uint32_t ptr_cred;
 	DOM_CRED cred;
 
 } DOM_CLNT_INFO2;
 
 /* DOM_LOGON_ID - logon id */
 typedef struct logon_info {
-	uint32 low;
-	uint32 high;
+	uint32_t low;
+	uint32_t high;
 
 } DOM_LOGON_ID;
 
 /* ARC4_OWF */
 typedef struct arc4_owf_info {
-	uint8 data[16];
+	uint8_t data[16];
 
 } ARC4_OWF;
 
 /* DOM_ID_INFO_1 */
 typedef struct id_info_1 {
-	uint32 ptr_id_info1;     /* pointer to id_info_1 */
+	uint32_t ptr_id_info1;     /* pointer to id_info_1 */
 	UNIHDR hdr_domain_name;  /* domain name unicode header */
-	uint32 param_ctrl;       /* param control */
+	uint32_t param_ctrl;       /* param control */
 	DOM_LOGON_ID logon_id;   /* logon ID */
 	UNIHDR hdr_user_name;    /* user name unicode header */
 	UNIHDR hdr_wksta_name;   /* workgroup name unicode header */
@@ -1132,10 +1095,10 @@ typedef struct id_info_1 {
 /* SAM_INFO - sam logon/off id structure */
 typedef struct sam_info {
 	DOM_CLNT_INFO2 client;
-	uint32 ptr_rtn_cred; /* pointer to return credentials */
+	uint32_t ptr_rtn_cred; /* pointer to return credentials */
 	DOM_CRED rtn_cred;   /* return credentials */
-	uint16 logon_level;
-	uint16 switch_value;
+	uint16_t logon_level;
+	uint16_t switch_value;
 
 	union {
 		DOM_ID_INFO_1 *id1; /* auth-level 1 */
@@ -1146,22 +1109,22 @@ typedef struct sam_info {
 
 /* DOM_GID - group id + user attributes */
 typedef struct gid_info {
-	uint32 g_rid; /* a group RID */
-	uint32 attr;
+	uint32_t g_rid; /* a group RID */
+	uint32_t attr;
 
 } DOM_GID;
 
 /* RPC_HDR - ms rpc header */
 typedef struct rpc_hdr_info {
-	uint8 major;      /* 5 - RPC major version */
-	uint8 minor;      /* 0 - RPC minor version */
-	uint8 pkt_type;   /* 2 - RPC response packet */
-	uint8 frag;       /* 3 - first frag + last frag */
-	uint32 pack_type; /* 0x1000 0000 - packed data representation */
-	uint16 frag_len;  /* fragment length - data size (bytes) inc header and
+	uint8_t major;      /* 5 - RPC major version */
+	uint8_t minor;      /* 0 - RPC minor version */
+	uint8_t pkt_type;   /* 2 - RPC response packet */
+	uint8_t frag;       /* 3 - first frag + last frag */
+	uint32_t pack_type; /* 0x1000 0000 - packed data representation */
+	uint16_t frag_len;  /* fragment length - data size (bytes) inc header and
 	                     tail. */
-	uint16 auth_len;  /* 0 - authentication length  */
-	uint32 call_id; /* call identifier.  matches 12th uint32 of incoming RPC
+	uint16_t auth_len;  /* 0 - authentication length  */
+	uint32_t call_id; /* call identifier.  matches 12th uint32_t of incoming RPC
 	                   data. */
 
 } RPC_HDR;
@@ -1170,11 +1133,11 @@ typedef struct rpc_hdr_info {
 typedef struct rpc_hdr_rr_info {
 	RPC_HDR hdr;
 
-	uint32 alloc_hint;  /* allocation hint - data size (bytes) minus header
+	uint32_t alloc_hint;  /* allocation hint - data size (bytes) minus header
 	                       and tail. */
-	uint16 context_id;  /* 0 - presentation context identifier */
-	uint8 cancel_count; /* 0 - cancel count */
-	uint8 opnum;        /* request: 0 - reserved.  response: opnum */
+	uint16_t context_id;  /* 0 - presentation context identifier */
+	uint8_t cancel_count; /* 0 - cancel count */
+	uint8_t opnum;        /* request: 0 - reserved.  response: opnum */
 
 } RPC_HDR_RR;
 
@@ -1186,8 +1149,8 @@ typedef struct rpc_hdr_rr_info {
  */
 /* RPC_IFACE */
 typedef struct rpc_iface_info {
-	uint8 data[16]; /* 16 bytes of number */
-	uint32 version; /* the interface number */
+	uint8_t data[16]; /* 16 bytes of number */
+	uint32_t version; /* the interface number */
 
 } RPC_IFACE;
 
@@ -1200,16 +1163,16 @@ typedef struct rpc_iface_info {
  */
 /* RPC_ADDR_STR */
 typedef struct rpc_addr_info {
-	uint16 len;  /* length of the string including null terminator */
+	uint16_t len;  /* length of the string including null terminator */
 	fstring str; /* the string above in single byte, null terminated form */
 
 } RPC_ADDR_STR;
 
 /* RPC_HDR_BBA */
 typedef struct rpc_hdr_bba_info {
-	uint16 max_tsize; /* maximum transmission fragment size (0x1630) */
-	uint16 max_rsize; /* max receive fragment size (0x1630) */
-	uint32 assoc_gid; /* associated group id (0x0) */
+	uint16_t max_tsize; /* maximum transmission fragment size (0x1630) */
+	uint16_t max_rsize; /* max receive fragment size (0x1630) */
+	uint32_t assoc_gid; /* associated group id (0x0) */
 
 } RPC_HDR_BBA;
 
@@ -1217,9 +1180,9 @@ typedef struct rpc_hdr_bba_info {
 typedef struct rpc_bind_req_info {
 	RPC_HDR_BBA bba;
 
-	uint32 num_elements; /* the number of elements (0x1) */
-	uint16 context_id;   /* presentation context identifier (0x0) */
-	uint8
+	uint32_t num_elements; /* the number of elements (0x1) */
+	uint16_t context_id;   /* presentation context identifier (0x0) */
+	uint8_t
 	    num_syntaxes; /* the number of syntaxes (has always been 1?)(0x1) */
 
 	RPC_IFACE abstract; /* num and vers. of interface client is using */
@@ -1229,14 +1192,14 @@ typedef struct rpc_bind_req_info {
 
 /* RPC_RESULTS - can only cope with one reason, right now... */
 typedef struct rpc_results_info {
-	/* uint8[] # 4-byte alignment padding, against SMB header */
+	/* uint8_t[] # 4-byte alignment padding, against SMB header */
 
-	uint8 num_results; /* the number of results (0x01) */
+	uint8_t num_results; /* the number of results (0x01) */
 
-	/* uint8[] # 4-byte alignment padding, against SMB header */
+	/* uint8_t[] # 4-byte alignment padding, against SMB header */
 
-	uint16 result; /* result (0x00 = accept) */
-	uint16 reason; /* reason (0x00 = no reason specified) */
+	uint16_t result; /* result (0x00 = accept) */
+	uint16_t reason; /* reason (0x00 = no reason specified) */
 
 } RPC_RESULTS;
 
@@ -1253,11 +1216,11 @@ typedef struct rpc_hdr_ba_info {
 
 /* DOM_QUERY - info class 3 and 5 LSA Query response */
 typedef struct dom_query_info {
-	uint16 uni_dom_max_len; /* domain name string length * 2 */
-	uint16 uni_dom_str_len; /* domain name string length * 2 */
-	uint32 buffer_dom_name; /* undocumented domain name string buffer
+	uint16_t uni_dom_max_len; /* domain name string length * 2 */
+	uint16_t uni_dom_str_len; /* domain name string length * 2 */
+	uint32_t buffer_dom_name; /* undocumented domain name string buffer
 	                           pointer */
-	uint32
+	uint32_t
 	    buffer_dom_sid; /* undocumented domain SID string buffer pointer */
 	UNISTR2 uni_domain_name; /* domain name (unicode string) */
 	DOM_SID dom_sid;         /* domain SID */
@@ -1272,28 +1235,28 @@ typedef DOM_QUERY DOM_QUERY_5;
 
 /* LSA_POL_HND */
 typedef struct lsa_policy_info {
-	uint8 data[POL_HND_SIZE]; /* policy handle */
+	uint8_t data[POL_HND_SIZE]; /* policy handle */
 
 } LSA_POL_HND;
 
 /* OBJ_ATTR (object attributes) */
 typedef struct object_attributes_info {
-	uint32 len; /* 0x18 - length (in bytes) inc. the length field. */
-	uint32 ptr_root_dir; /* 0 - root directory (pointer) */
-	uint32 ptr_obj_name; /* 0 - object name (pointer) */
-	uint32 attributes;   /* 0 - attributes (undocumented) */
-	uint32 ptr_sec_desc; /* 0 - security descriptior (pointer) */
-	uint32 sec_qos;      /* 0 - security quality of service */
+	uint32_t len; /* 0x18 - length (in bytes) inc. the length field. */
+	uint32_t ptr_root_dir; /* 0 - root directory (pointer) */
+	uint32_t ptr_obj_name; /* 0 - object name (pointer) */
+	uint32_t attributes;   /* 0 - attributes (undocumented) */
+	uint32_t ptr_sec_desc; /* 0 - security descriptior (pointer) */
+	uint32_t sec_qos;      /* 0 - security quality of service */
 
 } LSA_OBJ_ATTR;
 
 /* LSA_Q_OPEN_POL - LSA Query Open Policy */
 typedef struct lsa_q_open_pol_info {
-	uint32 ptr;              /* undocumented buffer pointer */
+	uint32_t ptr;              /* undocumented buffer pointer */
 	UNISTR2 uni_server_name; /* server name, starting with two '\'s */
 	LSA_OBJ_ATTR attr;       /* object attributes */
 
-	uint32 des_access; /* desired access attributes */
+	uint32_t des_access; /* desired access attributes */
 
 } LSA_Q_OPEN_POL;
 
@@ -1301,21 +1264,21 @@ typedef struct lsa_q_open_pol_info {
 typedef struct lsa_r_open_pol_info {
 	LSA_POL_HND pol; /* policy handle */
 
-	uint32 status; /* return code */
+	uint32_t status; /* return code */
 
 } LSA_R_OPEN_POL;
 
 /* LSA_Q_QUERY_INFO - LSA query info policy */
 typedef struct lsa_query_info {
 	LSA_POL_HND pol;   /* policy handle */
-	uint16 info_class; /* info class */
+	uint16_t info_class; /* info class */
 
 } LSA_Q_QUERY_INFO;
 
 /* LSA_R_QUERY_INFO - response to LSA query info policy */
 typedef struct lsa_r_query_info {
-	uint32 undoc_buffer; /* undocumented buffer pointer */
-	uint16 info_class;   /* info class (same as info class in request) */
+	uint32_t undoc_buffer; /* undocumented buffer pointer */
+	uint16_t info_class;   /* info class (same as info class in request) */
 
 	union {
 		DOM_QUERY_3 id3;
@@ -1323,15 +1286,15 @@ typedef struct lsa_r_query_info {
 
 	} dom;
 
-	uint32 status; /* return code */
+	uint32_t status; /* return code */
 
 } LSA_R_QUERY_INFO;
 
 /* LSA_Q_ENUM_TRUST_DOM - LSA enumerate trusted domains */
 typedef struct lsa_enum_trust_dom_info {
 	LSA_POL_HND pol;      /* policy handle */
-	uint32 enum_context;  /* enumeration context handle */
-	uint32 preferred_len; /* preferred maximum length */
+	uint32_t enum_context;  /* enumeration context handle */
+	uint32_t preferred_len; /* preferred maximum length */
 
 } LSA_Q_ENUM_TRUST_DOM;
 
@@ -1339,7 +1302,7 @@ typedef struct lsa_enum_trust_dom_info {
 typedef struct lsa_r_enum_trust_dom_info {
 	LSA_POL_HND pol; /* policy handle */
 
-	uint32 status; /* return code */
+	uint32_t status; /* return code */
 
 } LSA_R_ENUM_TRUST_DOM;
 
@@ -1353,7 +1316,7 @@ typedef struct lsa_q_close_info {
 typedef struct lsa_r_close_info {
 	LSA_POL_HND pol; /* policy handle.  should be all zeros. */
 
-	uint32 status; /* return code */
+	uint32_t status; /* return code */
 
 } LSA_R_CLOSE;
 
@@ -1361,11 +1324,11 @@ typedef struct lsa_r_close_info {
 
 /* DOM_R_REF */
 typedef struct dom_ref_info {
-	uint32 undoc_buffer;    /* undocumented buffer pointer. */
-	uint32 num_ref_doms_1;  /* num referenced domains? */
-	uint32 buffer_dom_name; /* undocumented domain name buffer pointer. */
-	uint32 max_entries;     /* 32 - max number of entries */
-	uint32 num_ref_doms_2;  /* 4 - num referenced domains? */
+	uint32_t undoc_buffer;    /* undocumented buffer pointer. */
+	uint32_t num_ref_doms_1;  /* num referenced domains? */
+	uint32_t buffer_dom_name; /* undocumented domain name buffer pointer. */
+	uint32_t max_entries;     /* 32 - max number of entries */
+	uint32_t num_ref_doms_2;  /* 4 - num referenced domains? */
 
 	UNIHDR2 hdr_dom_name; /* domain name unicode string header */
 	UNIHDR2 hdr_ref_dom[MAX_REF_DOMAINS]; /* referenced domain unicode
@@ -1381,14 +1344,14 @@ typedef struct dom_ref_info {
 /* LSA_Q_LOOKUP_SIDS - LSA Lookup SIDs */
 typedef struct lsa_q_lookup_sids {
 	LSA_POL_HND pol_hnd; /* policy handle */
-	uint32 num_entries;
-	uint32 buffer_dom_sid;  /* undocumented domain SID buffer pointer */
-	uint32 buffer_dom_name; /* undocumented domain name buffer pointer */
-	uint32
+	uint32_t num_entries;
+	uint32_t buffer_dom_sid;  /* undocumented domain SID buffer pointer */
+	uint32_t buffer_dom_name; /* undocumented domain name buffer pointer */
+	uint32_t
 	    buffer_lookup_sids[MAX_LOOKUP_SIDS]; /* undocumented domain SID
 	                                            pointers to be looked up. */
 	DOM_SID dom_sids[MAX_LOOKUP_SIDS]; /* domain SIDs to be looked up. */
-	uint8 undoc[16]; /* completely undocumented 16 bytes */
+	uint8_t undoc[16]; /* completely undocumented 16 bytes */
 
 } LSA_Q_LOOKUP_SIDS;
 
@@ -1396,21 +1359,21 @@ typedef struct lsa_q_lookup_sids {
 typedef struct lsa_r_lookup_sids {
 	DOM_R_REF dom_ref; /* domain reference info */
 
-	uint32 num_entries;
-	uint32 undoc_buffer; /* undocumented buffer pointer */
-	uint32 num_entries2;
+	uint32_t num_entries;
+	uint32_t undoc_buffer; /* undocumented buffer pointer */
+	uint32_t num_entries2;
 
 	DOM_SID2 dom_sid[MAX_LOOKUP_SIDS]; /* domain SIDs being looked up */
 
-	uint32 num_entries3;
+	uint32_t num_entries3;
 
-	uint32 status; /* return code */
+	uint32_t status; /* return code */
 
 } LSA_R_LOOKUP_SIDS;
 
 /* DOM_NAME - XXXX not sure about this structure */
 typedef struct dom_name_info {
-	uint32 uni_str_len;
+	uint32_t uni_str_len;
 	UNISTR str;
 
 } DOM_NAME;
@@ -1421,12 +1384,12 @@ typedef struct dom_name_info {
 typedef struct lsa_q_lookup_rids {
 
 	LSA_POL_HND pol_hnd; /* policy handle */
-	uint32 num_entries;
-	uint32 num_entries2;
-	uint32 buffer_dom_sid;  /* undocumented domain SID buffer pointer */
-	uint32 buffer_dom_name; /* undocumented domain name buffer pointer */
+	uint32_t num_entries;
+	uint32_t num_entries2;
+	uint32_t buffer_dom_sid;  /* undocumented domain SID buffer pointer */
+	uint32_t buffer_dom_name; /* undocumented domain name buffer pointer */
 	DOM_NAME lookup_name[MAX_LOOKUP_SIDS]; /* names to be looked up */
-	uint8 undoc[UNKNOWN_LEN]; /* completely undocumented bytes of unknown
+	uint8_t undoc[UNKNOWN_LEN]; /* completely undocumented bytes of unknown
 	                             length */
 
 } LSA_Q_LOOKUP_RIDS;
@@ -1435,27 +1398,27 @@ typedef struct lsa_q_lookup_rids {
 typedef struct lsa_r_lookup_rids {
 	DOM_R_REF dom_ref; /* domain reference info */
 
-	uint32 num_entries;
-	uint32 undoc_buffer; /* undocumented buffer pointer */
+	uint32_t num_entries;
+	uint32_t undoc_buffer; /* undocumented buffer pointer */
 
-	uint32 num_entries2;
+	uint32_t num_entries2;
 	DOM_RID2 dom_rid[MAX_LOOKUP_SIDS]; /* domain RIDs being looked up */
 
-	uint32 num_entries3;
+	uint32_t num_entries3;
 
-	uint32 status; /* return code */
+	uint32_t status; /* return code */
 
 } LSA_R_LOOKUP_RIDS;
 
 /* NEG_FLAGS */
 typedef struct lsa_neg_flags_info {
-	uint32 neg_flags; /* negotiated flags */
+	uint32_t neg_flags; /* negotiated flags */
 
 } NEG_FLAGS;
 
 /* LSA_Q_REQ_CHAL */
 typedef struct lsa_q_req_chal_info {
-	uint32 undoc_buffer;    /* undocumented buffer pointer */
+	uint32_t undoc_buffer;    /* undocumented buffer pointer */
 	UNISTR2 uni_logon_srv;  /* logon server unicode string */
 	UNISTR2 uni_logon_clnt; /* logon client unicode string */
 	DOM_CHAL clnt_chal;     /* client challenge */
@@ -1466,7 +1429,7 @@ typedef struct lsa_q_req_chal_info {
 typedef struct lsa_r_req_chal_info {
 	DOM_CHAL srv_chal; /* server challenge */
 
-	uint32 status; /* return code */
+	uint32_t status; /* return code */
 
 } LSA_R_REQ_CHAL;
 
@@ -1484,7 +1447,7 @@ typedef struct lsa_r_auth2_info {
 	DOM_CHAL srv_chal;  /* server-calculated credentials */
 	NEG_FLAGS srv_flgs; /* usually 0x0000 01ff */
 
-	uint32 status; /* return code */
+	uint32_t status; /* return code */
 
 } LSA_R_AUTH_2;
 
@@ -1499,7 +1462,7 @@ typedef struct lsa_q_srv_pwset_info {
 typedef struct lsa_r_srv_pwset_info {
 	DOM_CRED srv_cred; /* server-calculated credentials */
 
-	uint32 status; /* return code */
+	uint32_t status; /* return code */
 
 } LSA_R_SRV_PWSET;
 
@@ -1508,7 +1471,7 @@ typedef struct lsa_r_srv_pwset_info {
 
 /* LSA_USER_INFO */
 typedef struct lsa_q_user_info {
-	uint32 ptr_user_info;
+	uint32_t ptr_user_info;
 
 	NTTIME logon_time;            /* logon time */
 	NTTIME logoff_time;           /* logoff time */
@@ -1524,25 +1487,25 @@ typedef struct lsa_q_user_info {
 	UNIHDR hdr_home_dir;     /* home directory unicode string header */
 	UNIHDR hdr_dir_drive; /* home directory drive unicode string header */
 
-	uint16 logon_count;  /* logon count */
-	uint16 bad_pw_count; /* bad password count */
+	uint16_t logon_count;  /* logon count */
+	uint16_t bad_pw_count; /* bad password count */
 
-	uint32 user_id;       /* User ID */
-	uint32 group_id;      /* Group ID */
-	uint32 num_groups;    /* num groups */
-	uint32 buffer_groups; /* undocumented buffer pointer to groups. */
-	uint32 user_flgs;     /* user flags */
+	uint32_t user_id;       /* User ID */
+	uint32_t group_id;      /* Group ID */
+	uint32_t num_groups;    /* num groups */
+	uint32_t buffer_groups; /* undocumented buffer pointer to groups. */
+	uint32_t user_flgs;     /* user flags */
 
 	char user_sess_key[16]; /* unused user session key */
 
 	UNIHDR hdr_logon_srv; /* logon server unicode string header */
 	UNIHDR hdr_logon_dom; /* logon domain unicode string header */
 
-	uint32 buffer_dom_id; /* undocumented logon domain id pointer */
+	uint32_t buffer_dom_id; /* undocumented logon domain id pointer */
 	char padding[40];     /* unused padding bytes.  expansion room */
 
-	uint32 num_other_sids;    /* 0 - num_sids */
-	uint32 buffer_other_sids; /* NULL - undocumented pointer to SIDs. */
+	uint32_t num_other_sids;    /* 0 - num_sids */
+	uint32_t buffer_other_sids; /* NULL - undocumented pointer to SIDs. */
 
 	UNISTR2 uni_user_name;    /* username unicode string */
 	UNISTR2 uni_full_name;    /* user's full name unicode string */
@@ -1551,7 +1514,7 @@ typedef struct lsa_q_user_info {
 	UNISTR2 uni_home_dir;     /* home directory unicode string */
 	UNISTR2 uni_dir_drive;    /* home directory drive unicode string */
 
-	uint32 num_groups2;           /* num groups */
+	uint32_t num_groups2;           /* num groups */
 	DOM_GID gids[LSA_MAX_GROUPS]; /* group info */
 
 	UNISTR2 uni_logon_srv; /* logon server unicode string */
@@ -1570,16 +1533,16 @@ typedef struct lsa_q_sam_logon_info {
 
 /* LSA_R_SAM_LOGON */
 typedef struct lsa_r_sam_logon_info {
-	uint32 buffer_creds; /* undocumented buffer pointer */
+	uint32_t buffer_creds; /* undocumented buffer pointer */
 	DOM_CRED srv_creds; /* server credentials.  server time stamp appears to
 	                       be ignored. */
 
-	uint16 switch_value; /* 3 - indicates type of USER INFO */
+	uint16_t switch_value; /* 3 - indicates type of USER INFO */
 	LSA_USER_INFO *user;
 
-	uint32 auth_resp; /* 1 - Authoritative response; 0 - Non-Auth? */
+	uint32_t auth_resp; /* 1 - Authoritative response; 0 - Non-Auth? */
 
-	uint32 status; /* return code */
+	uint32_t status; /* return code */
 
 } LSA_R_SAM_LOGON;
 
@@ -1591,19 +1554,19 @@ typedef struct lsa_q_sam_logoff_info {
 
 /* LSA_R_SAM_LOGOFF */
 typedef struct lsa_r_sam_logoff_info {
-	uint32 buffer_creds; /* undocumented buffer pointer */
+	uint32_t buffer_creds; /* undocumented buffer pointer */
 	DOM_CRED srv_creds; /* server credentials.  server time stamp appears to
 	                       be ignored. */
 
-	uint32 status; /* return code */
+	uint32_t status; /* return code */
 
 } LSA_R_SAM_LOGOFF;
 
 /* SH_INFO_1 (pointers to level 1 share info strings) */
 typedef struct ptr_share_info1 {
-	uint32 ptr_netname; /* pointer to net name. */
-	uint32 type;        /* type of share.  0 - undocumented. */
-	uint32 ptr_remark;  /* pointer to comment. */
+	uint32_t ptr_netname; /* pointer to net name. */
+	uint32_t type;        /* type of share.  0 - undocumented. */
+	uint32_t ptr_remark;  /* pointer to comment. */
 
 } SH_INFO_1;
 
@@ -1615,52 +1578,52 @@ typedef struct str_share_info1 {
 } SH_INFO_1_STR;
 
 /* oops - this is going to take up a *massive* amount of stack. */
-/* the UNISTR2s already have 1024 uint16 chars in them... */
+/* the UNISTR2s already have 1024 uint16_t chars in them... */
 #define MAX_SHARE_ENTRIES 32
 
 /* SHARE_INFO_1_CONTAINER  */
 typedef struct share_info_ctr {
-	uint32 num_entries_read;                     /* EntriesRead */
-	uint32 ptr_share_info;                       /* Buffer */
-	uint32 num_entries_read2;                    /* EntriesRead */
+	uint32_t num_entries_read;                     /* EntriesRead */
+	uint32_t ptr_share_info;                       /* Buffer */
+	uint32_t num_entries_read2;                    /* EntriesRead */
 	SH_INFO_1 info_1[MAX_SHARE_ENTRIES];         /* share entry pointers */
 	SH_INFO_1_STR info_1_str[MAX_SHARE_ENTRIES]; /* share entry strings */
-	uint32 num_entries_read3;                    /* EntriesRead2 */
-	uint32 padding;                              /* padding */
+	uint32_t num_entries_read3;                    /* EntriesRead2 */
+	uint32_t padding;                              /* padding */
 
 } SHARE_INFO_1_CTR;
 
 /* SRV_Q_NET_SHARE_ENUM */
 typedef struct q_net_share_enum_info {
-	uint32 ptr_srv_name;  /* pointer (to server name?) */
+	uint32_t ptr_srv_name;  /* pointer (to server name?) */
 	UNISTR2 uni_srv_name; /* server name */
 
-	uint32 share_level;  /* share level */
-	uint32 switch_value; /* switch value */
+	uint32_t share_level;  /* share level */
+	uint32_t switch_value; /* switch value */
 
-	uint32 ptr_share_info; /* pointer to SHARE_INFO_1_CTR */
+	uint32_t ptr_share_info; /* pointer to SHARE_INFO_1_CTR */
 
 	union {
 		SHARE_INFO_1_CTR info1; /* share info with 0 entries */
 
 	} share;
 
-	uint32 preferred_len; /* preferred maximum length (0xffff ffff) */
+	uint32_t preferred_len; /* preferred maximum length (0xffff ffff) */
 
 } SRV_Q_NET_SHARE_ENUM;
 
 /* SRV_R_NET_SHARE_ENUM */
 typedef struct r_net_share_enum_info {
-	uint32 share_level;  /* share level */
-	uint32 switch_value; /* switch value */
+	uint32_t share_level;  /* share level */
+	uint32_t switch_value; /* switch value */
 
-	uint32 ptr_share_info; /* pointer to SHARE_INFO_1_CTR */
+	uint32_t ptr_share_info; /* pointer to SHARE_INFO_1_CTR */
 	union {
 		SHARE_INFO_1_CTR info1; /* share info container */
 
 	} share;
 
-	uint32 status; /* return status */
+	uint32_t status; /* return status */
 
 } SRV_R_NET_SHARE_ENUM;
 
@@ -1673,7 +1636,7 @@ typedef struct q_samr_close_info {
 /* SAMR_R_CLOSE - probably a policy handle close */
 typedef struct r_samr_close_info {
 	LSA_POL_HND pol; /* policy handle */
-	uint32 status;   /* return status */
+	uint32_t status;   /* return status */
 
 } SAMR_R_CLOSE;
 
@@ -1689,7 +1652,7 @@ SAMR_Q_OPEN_SECRET - unknown_0 values seen associated with SIDs:
 /* SAMR_Q_OPEN_SECRET - probably an open secret */
 typedef struct q_samr_open_secret_info {
 	LSA_POL_HND pol;  /* policy handle */
-	uint32 unknown_0; /* 0x2000 0000; 0x0000 0211; 0x0000 0280; 0x0000 0200
+	uint32_t unknown_0; /* 0x2000 0000; 0x0000 0211; 0x0000 0280; 0x0000 0200
 	                     - unknown */
 	DOM_SID dom_sid;  /* domain SID */
 
@@ -1698,7 +1661,7 @@ typedef struct q_samr_open_secret_info {
 /* SAMR_R_OPEN_SECRET - probably an open */
 typedef struct r_samr_open_secret_info {
 	LSA_POL_HND pol; /* policy handle associated with the SID */
-	uint32 status;   /* return status */
+	uint32_t status;   /* return status */
 
 } SAMR_R_OPEN_SECRET;
 
@@ -1713,10 +1676,10 @@ itself.  the response to the lookup rids is relative to this SID.
 typedef struct q_samr_lookup_names_info {
 	LSA_POL_HND pol; /* policy handle */
 
-	uint32 num_rids1; /* 1          - number of rids being looked up */
-	uint32 rid;       /* 0000 03e8  - RID of the server being queried? */
-	uint32 ptr;       /* 0          - 32 bit unknown */
-	uint32 num_rids2; /* 1          - number of rids being looked up */
+	uint32_t num_rids1; /* 1          - number of rids being looked up */
+	uint32_t rid;       /* 0000 03e8  - RID of the server being queried? */
+	uint32_t ptr;       /* 0          - 32 bit unknown */
+	uint32_t num_rids2; /* 1          - number of rids being looked up */
 
 	UNIHDR hdr_mach_acct;  /* unicode machine account name header */
 	UNISTR2 uni_mach_acct; /* unicode machine account name */
@@ -1725,76 +1688,76 @@ typedef struct q_samr_lookup_names_info {
 
 /* SAMR_R_LOOKUP_RIDS - probably an open */
 typedef struct r_samr_lookup_names_info {
-	uint32 num_entries;
-	uint32 undoc_buffer; /* undocumented buffer pointer */
+	uint32_t num_entries;
+	uint32_t undoc_buffer; /* undocumented buffer pointer */
 
-	uint32 num_entries2;
+	uint32_t num_entries2;
 	DOM_RID3 dom_rid[MAX_LOOKUP_SIDS]; /* domain RIDs being looked up */
 
-	uint32 num_entries3;
+	uint32_t num_entries3;
 
-	uint32 status; /* return code */
+	uint32_t status; /* return code */
 
 } SAMR_R_LOOKUP_RIDS;
 
 /* SAMR_Q_UNKNOWN_22 - probably an open */
 typedef struct q_samr_unknown_22_info {
 	LSA_POL_HND pol;     /* policy handle */
-	uint32 unknown_id_0; /* 0x0000 03E8 - 32 bit unknown id */
+	uint32_t unknown_id_0; /* 0x0000 03E8 - 32 bit unknown id */
 
 } SAMR_Q_UNKNOWN_22;
 
 /* SAMR_R_UNKNOWN_22 - probably an open */
 typedef struct r_samr_unknown_22_info {
 	LSA_POL_HND pol; /* policy handle associated with unknown id */
-	uint32 status;   /* return status */
+	uint32_t status;   /* return status */
 
 } SAMR_R_UNKNOWN_22;
 
 /* SAMR_Q_UNKNOWN_24 - probably a get sam info */
 typedef struct q_samr_unknown_24_info {
 	LSA_POL_HND pol;  /* policy handle associated with unknown id */
-	uint16 unknown_0; /* 0x0015 or 0x0011 - 16 bit unknown */
+	uint16_t unknown_0; /* 0x0015 or 0x0011 - 16 bit unknown */
 
 } SAMR_Q_UNKNOWN_24;
 
 /* SAMR_R_UNKNOWN_24 - probably a get sam info */
 typedef struct r_samr_unknown_24_info {
-	uint32 ptr; /* pointer */
-	uint16
+	uint32_t ptr; /* pointer */
+	uint16_t
 	    unknown_0; /* 0x0015 or 0x0011 - 16 bit unknown (same as above) */
-	uint16 unknown_1;    /* 0x8b73 - 16 bit unknown */
-	uint8 padding_0[16]; /* 0 - padding 16 bytes */
+	uint16_t unknown_1;    /* 0x8b73 - 16 bit unknown */
+	uint8_t padding_0[16]; /* 0 - padding 16 bytes */
 	NTTIME expiry;       /* expiry time or something? */
-	uint8 padding_1[24]; /* 0 - padding 24 bytes */
+	uint8_t padding_1[24]; /* 0 - padding 24 bytes */
 
 	UNIHDR hdr_mach_acct; /* unicode header for machine account */
-	uint32 padding_2;     /* 0 - padding 4 bytes */
+	uint32_t padding_2;     /* 0 - padding 4 bytes */
 
-	uint32 ptr_1;        /* pointer */
-	uint8 padding_3[32]; /* 0 - padding 32 bytes */
-	uint32 padding_4;    /* 0 - padding 4 bytes */
+	uint32_t ptr_1;        /* pointer */
+	uint8_t padding_3[32]; /* 0 - padding 32 bytes */
+	uint32_t padding_4;    /* 0 - padding 4 bytes */
 
-	uint32 ptr_2;     /* pointer */
-	uint32 padding_5; /* 0 - padding 4 bytes */
+	uint32_t ptr_2;     /* pointer */
+	uint32_t padding_5; /* 0 - padding 4 bytes */
 
-	uint32 ptr_3;        /* pointer */
-	uint8 padding_6[32]; /* 0 - padding 32 bytes */
+	uint32_t ptr_3;        /* pointer */
+	uint8_t padding_6[32]; /* 0 - padding 32 bytes */
 
-	uint32 unknown_id_0; /* unknown id associated with policy handle */
-	uint16 unknown_2;    /* 0x0201      - 16 bit unknown */
-	uint32 unknown_3;    /* 0x0000 0080 - 32 bit unknown */
-	uint16 unknown_4;    /* 0x003f      - 16 bit unknown */
-	uint16 unknown_5;    /* 0x003c      - 16 bit unknown */
+	uint32_t unknown_id_0; /* unknown id associated with policy handle */
+	uint16_t unknown_2;    /* 0x0201      - 16 bit unknown */
+	uint32_t unknown_3;    /* 0x0000 0080 - 32 bit unknown */
+	uint16_t unknown_4;    /* 0x003f      - 16 bit unknown */
+	uint16_t unknown_5;    /* 0x003c      - 16 bit unknown */
 
-	uint8 padding_7[16]; /* 0 - padding 16 bytes */
-	uint32 padding_8;    /* 0 - padding 4 bytes */
+	uint8_t padding_7[16]; /* 0 - padding 16 bytes */
+	uint32_t padding_8;    /* 0 - padding 4 bytes */
 
 	UNISTR2 uni_mach_acct; /* unicode string for machine account */
 
-	uint8 padding_9[48]; /* 0 - padding 48 bytes */
+	uint8_t padding_9[48]; /* 0 - padding 48 bytes */
 
-	uint32 status; /* return status */
+	uint32_t status; /* return status */
 
 } SAMR_R_UNKNOWN_24;
 
@@ -1805,61 +1768,61 @@ typedef struct q_samr_unknown_32_info {
 	UNIHDR hdr_mach_acct;  /* unicode machine account name header */
 	UNISTR2 uni_mach_acct; /* unicode machine account name */
 
-	uint32 unknown_0; /* 32 bit unknown */
-	uint16 unknown_1; /* 16 bit unknown */
-	uint16 unknown_2; /* 16 bit unknown */
+	uint32_t unknown_0; /* 32 bit unknown */
+	uint16_t unknown_1; /* 16 bit unknown */
+	uint16_t unknown_2; /* 16 bit unknown */
 
 } SAMR_Q_UNKNOWN_32;
 
 /* SAMR_R_UNKNOWN_32 - probably a "create SAM entry" */
 typedef struct r_samr_unknown_32_info {
 	LSA_POL_HND pol;  /* policy handle */
-	uint32 unknown_0; /* 0x0000 0030 - 32 bit unknown */
-	uint32 padding;   /* 0           - 4 byte padding */
+	uint32_t unknown_0; /* 0x0000 0030 - 32 bit unknown */
+	uint32_t padding;   /* 0           - 4 byte padding */
 
-	uint32 status; /* return status - 0xC000 0099: user exists */
+	uint32_t status; /* return status - 0xC000 0099: user exists */
 
 } SAMR_R_UNKNOWN_32;
 
 /* SAMR_Q_OPEN_POLICY - probably an open */
 typedef struct q_samr_open_policy_info {
-	uint32 ptr_srv_name;  /* pointer (to server name?) */
+	uint32_t ptr_srv_name;  /* pointer (to server name?) */
 	UNISTR2 uni_srv_name; /* unicode server name starting with '\\' */
 
-	uint32 unknown_0; /* 32 bit unknown */
+	uint32_t unknown_0; /* 32 bit unknown */
 
 } SAMR_Q_OPEN_POLICY;
 
 /* SAMR_R_OPEN_POLICY - probably an open */
 typedef struct r_samr_open_policy_info {
 	LSA_POL_HND pol; /* policy handle */
-	uint32 status;   /* return status */
+	uint32_t status;   /* return status */
 
 } SAMR_R_OPEN_POLICY;
 
 /* WKS_Q_UNKNOWN_0 - probably a capabilities request */
 typedef struct q_wks_unknown_0_info {
-	uint32 ptr_srv_name;  /* pointer (to server name?) */
+	uint32_t ptr_srv_name;  /* pointer (to server name?) */
 	UNISTR2 uni_srv_name; /* unicode server name starting with '\\' */
 
-	uint32 unknown_0; /* 0x64 - 32 bit unknown */
-	uint16 unknown_1; /* 16 bit unknown */
+	uint32_t unknown_0; /* 0x64 - 32 bit unknown */
+	uint16_t unknown_1; /* 16 bit unknown */
 
 } WKS_Q_UNKNOWN_0;
 
 /* WKS_R_UNKNOWN_0 - probably a capabilities request */
 typedef struct r_wks_unknown_0_info {
-	uint32 unknown_0;    /* 64 - unknown */
-	uint32 ptr_1;        /* pointer 1 */
-	uint32 unknown_1;    /* 0x0000 01f4 - unknown */
-	uint32 ptr_srv_name; /* pointer to server name */
-	uint32 ptr_dom_name; /* pointer to domain name */
-	uint32 unknown_2;    /* 4 - unknown */
-	uint32 unknown_3;    /* 0 - unknown */
+	uint32_t unknown_0;    /* 64 - unknown */
+	uint32_t ptr_1;        /* pointer 1 */
+	uint32_t unknown_1;    /* 0x0000 01f4 - unknown */
+	uint32_t ptr_srv_name; /* pointer to server name */
+	uint32_t ptr_dom_name; /* pointer to domain name */
+	uint32_t unknown_2;    /* 4 - unknown */
+	uint32_t unknown_3;    /* 0 - unknown */
 
 	UNISTR2 uni_srv_name; /* unicode server name */
 	UNISTR2 uni_dom_name; /* unicode domainn name */
-	uint32 status;        /* return status */
+	uint32_t status;        /* return status */
 
 } WKS_R_UNKNOWN_0;
 

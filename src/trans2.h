@@ -30,10 +30,10 @@
  For DosFindFirst/DosFindNext - level 1
 
 MAXFILENAMELEN = 255;
-FDATE == uint16
-FTIME == uint16
-ULONG == uint32
-USHORT == uint16
+FDATE == uint16_t
+FTIME == uint16_t
+ULONG == uint32_t
+USHORT == uint16_t
 
 typedef struct _FILEFINDBUF {
 Byte offset   Type     name                description

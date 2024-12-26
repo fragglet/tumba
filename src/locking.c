@@ -75,7 +75,7 @@ static int map_lock_type(files_struct *fsp, int lock_type)
  Utility function called to see if a file region is locked.
 ****************************************************************************/
 
-bool is_locked(int fnum, int cnum, uint32 count, uint32 offset, int lock_type)
+bool is_locked(int fnum, int cnum, uint32_t count, uint32_t offset, int lock_type)
 {
 	int snum = SNUM(cnum);
 	files_struct *fsp = &Files[fnum];
@@ -99,8 +99,8 @@ bool is_locked(int fnum, int cnum, uint32 count, uint32 offset, int lock_type)
  Utility function called by locking requests.
 ****************************************************************************/
 
-bool do_lock(int fnum, int cnum, uint32 count, uint32 offset, int lock_type,
-             int *eclass, uint32 *ecode)
+bool do_lock(int fnum, int cnum, uint32_t count, uint32_t offset, int lock_type,
+             int *eclass, uint32_t *ecode)
 {
 	bool ok = false;
 	files_struct *fsp = &Files[fnum];
@@ -130,8 +130,8 @@ bool do_lock(int fnum, int cnum, uint32 count, uint32 offset, int lock_type,
  Utility function called by unlocking requests.
 ****************************************************************************/
 
-bool do_unlock(int fnum, int cnum, uint32 count, uint32 offset, int *eclass,
-               uint32 *ecode)
+bool do_unlock(int fnum, int cnum, uint32_t count, uint32_t offset, int *eclass,
+               uint32_t *ecode)
 {
 	bool ok = false;
 	files_struct *fsp = &Files[fnum];

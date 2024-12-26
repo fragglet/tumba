@@ -28,21 +28,21 @@ extern connection_struct Connections[];
    This module implements directory related functions for Samba.
 */
 
-uint32 dircounter = 0;
+uint32_t dircounter = 0;
 
 #define NUMDIRPTRS 256
 
 static struct dptr_struct {
 	int pid;
 	int cnum;
-	uint32 lastused;
+	uint32_t lastused;
 	void *ptr;
 	bool valid;
 	bool finished;
 	bool expect_close;
 	char *wcard; /* Field only used for lanman2 trans2_findfirst/next
 	                searches */
-	uint16 attr; /* Field only used for lanman2 trans2_findfirst/next
+	uint16_t attr; /* Field only used for lanman2 trans2_findfirst/next
 	                searches */
 	char *path;
 } dirptrs[NUMDIRPTRS];
@@ -87,7 +87,7 @@ idle the oldest dptr
 static void dptr_idleoldest(void)
 {
 	int i;
-	uint32 old = dircounter + 1;
+	uint32_t old = dircounter + 1;
 	int oldi = -1;
 	for (i = 0; i < NUMDIRPTRS; i++)
 		if (dirptrs[i].valid && dirptrs[i].ptr &&
@@ -104,7 +104,7 @@ static void dptr_idleoldest(void)
 /****************************************************************************
 get the dir ptr for a dir index
 ****************************************************************************/
-static void *dptr_get(int key, uint32 lastused)
+static void *dptr_get(int key, uint32_t lastused)
 {
 	struct dptr_struct *dp = &dirptrs[key];
 
@@ -160,7 +160,7 @@ bool dptr_set_wcard(int key, char *wcard)
 set the dir attrib for a dir index (lanman2 specific)
 Returns 0 on ok, 1 on fail.
 ****************************************************************************/
-bool dptr_set_attr(int key, uint16 attr)
+bool dptr_set_attr(int key, uint16_t attr)
 {
 	if (dirptrs[key].valid) {
 		dirptrs[key].attr = attr;
@@ -172,7 +172,7 @@ bool dptr_set_attr(int key, uint16 attr)
 /****************************************************************************
 get the dir attrib for a dir index (lanman2 specific)
 ****************************************************************************/
-uint16 dptr_attr(int key)
+uint16_t dptr_attr(int key)
 {
 	if (dirptrs[key].valid)
 		return (dirptrs[key].attr);
@@ -275,7 +275,7 @@ create a new dir ptr
 int dptr_create(int cnum, char *path, bool expect_close, int pid)
 {
 	int i;
-	uint32 old;
+	uint32_t old;
 	int oldi;
 
 	if (!start_dir(cnum, path))
@@ -340,7 +340,7 @@ int dptr_create(int cnum, char *path, bool expect_close, int pid)
 	return (i);
 }
 
-#define DPTR_MASK ((uint32) (((uint32) 1) << 31))
+#define DPTR_MASK ((uint32_t) (((uint32_t) 1) << 31))
 
 /****************************************************************************
 fill the 5 byte server reserved dptr field
@@ -349,7 +349,7 @@ bool dptr_fill(char *buf1, unsigned int key)
 {
 	unsigned char *buf = (unsigned char *) buf1;
 	void *p = dptr_get(key, 0);
-	uint32 offset;
+	uint32_t offset;
 	if (!p) {
 		DEBUG(1, ("filling null dirptr %d\n", key));
 		return (false);
@@ -376,7 +376,7 @@ void *dptr_fetch(char *buf, int *num)
 {
 	unsigned int key = *(unsigned char *) buf;
 	void *p = dptr_get(key, dircounter++);
-	uint32 offset;
+	uint32_t offset;
 	if (!p) {
 		DEBUG(3, ("fetched null dirptr %d\n", key));
 		return (NULL);

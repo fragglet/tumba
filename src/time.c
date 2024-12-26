@@ -238,7 +238,7 @@ time_t interpret_long_date(char *p)
 {
 	double d;
 	time_t ret;
-	uint32 tlow, thigh;
+	uint32_t tlow, thigh;
 	/* The next two lines are a fix needed for the
 	   broken SCO compiler. JRA. */
 	time_t l_time_min = TIME_T_MIN;
@@ -275,7 +275,7 @@ This takes real GMT as input and converts to kludge-GMT
 ****************************************************************************/
 void put_long_date(char *p, time_t t)
 {
-	uint32 tlow, thigh;
+	uint32_t tlow, thigh;
 	double d;
 
 	if (t == 0) {
@@ -293,8 +293,8 @@ void put_long_date(char *p, time_t t)
 
 	d *= 1.0e7;
 
-	thigh = (uint32) (d * (1.0 / (4.0 * (double) (1 << 30))));
-	tlow = (uint32) (d - ((double) thigh) * 4.0 * (double) (1 << 30));
+	thigh = (uint32_t) (d * (1.0 / (4.0 * (double) (1 << 30))));
+	tlow = (uint32_t) (d - ((double) thigh) * 4.0 * (double) (1 << 30));
 
 	SIVAL(p, 0, tlow);
 	SIVAL(p, 4, thigh);
@@ -313,9 +313,9 @@ bool null_mtime(time_t mtime)
 /*******************************************************************
   create a 16 bit dos packed date
 ********************************************************************/
-static uint16 make_dos_date1(time_t unixdate, struct tm *t)
+static uint16_t make_dos_date1(time_t unixdate, struct tm *t)
 {
-	uint16 ret = 0;
+	uint16_t ret = 0;
 	ret = (((unsigned) (t->tm_mon + 1)) >> 3) | ((t->tm_year - 80) << 1);
 	ret =
 	    ((ret & 0xFF) << 8) | (t->tm_mday | (((t->tm_mon + 1) & 0x7) << 5));
@@ -325,9 +325,9 @@ static uint16 make_dos_date1(time_t unixdate, struct tm *t)
 /*******************************************************************
   create a 16 bit dos packed time
 ********************************************************************/
-static uint16 make_dos_time1(time_t unixdate, struct tm *t)
+static uint16_t make_dos_time1(time_t unixdate, struct tm *t)
 {
-	uint16 ret = 0;
+	uint16_t ret = 0;
 	ret = ((((unsigned) t->tm_min >> 3) & 0x7) |
 	       (((unsigned) t->tm_hour) << 3));
 	ret =
@@ -339,10 +339,10 @@ static uint16 make_dos_time1(time_t unixdate, struct tm *t)
   create a 32 bit dos packed date/time from some parameters
   This takes a GMT time and returns a packed localtime structure
 ********************************************************************/
-static uint32 make_dos_date(time_t unixdate)
+static uint32_t make_dos_date(time_t unixdate)
 {
 	struct tm *t;
-	uint32 ret = 0;
+	uint32_t ret = 0;
 
 	t = LocalTime(&unixdate);
 	if (!t)
@@ -360,7 +360,7 @@ This takes GMT time and puts local time in the buffer
 ********************************************************************/
 void put_dos_date(char *buf, int offset, time_t unixdate)
 {
-	uint32 x = make_dos_date(unixdate);
+	uint32_t x = make_dos_date(unixdate);
 	SIVAL(buf, offset, x);
 }
 
@@ -370,7 +370,7 @@ This takes GMT time and puts local time in the buffer
 ********************************************************************/
 void put_dos_date2(char *buf, int offset, time_t unixdate)
 {
-	uint32 x = make_dos_date(unixdate);
+	uint32_t x = make_dos_date(unixdate);
 	x = ((x & 0xFFFF) << 16) | ((x & 0xFFFF0000) >> 16);
 	SIVAL(buf, offset, x);
 }
@@ -390,10 +390,10 @@ void put_dos_date3(char *buf, int offset, time_t unixdate)
 /*******************************************************************
   interpret a 32 bit dos packed date/time to some parameters
 ********************************************************************/
-static void interpret_dos_date(uint32 date, int *year, int *month, int *day,
+static void interpret_dos_date(uint32_t date, int *year, int *month, int *day,
                                int *hour, int *minute, int *second)
 {
-	uint32 p0, p1, p2, p3;
+	uint32_t p0, p1, p2, p3;
 
 	p0 = date & 0xFF;
 	p1 = ((date & 0xFF00) >> 8) & 0xFF;
@@ -414,7 +414,7 @@ static void interpret_dos_date(uint32 date, int *year, int *month, int *day,
 ********************************************************************/
 time_t make_unix_date(void *date_ptr)
 {
-	uint32 dos_date = 0;
+	uint32_t dos_date = 0;
 	struct tm t;
 	time_t ret;
 
@@ -438,7 +438,7 @@ like make_unix_date() but the words are reversed
 ********************************************************************/
 time_t make_unix_date2(void *date_ptr)
 {
-	uint32 x, x2;
+	uint32_t x, x2;
 
 	x = IVAL(date_ptr, 0);
 	x2 = ((x & 0xFFFF) << 16) | ((x & 0xFFFF0000) >> 16);
