@@ -287,9 +287,9 @@ determine if a file descriptor is in fact a socket
 ****************************************************************************/
 bool is_a_socket(int fd)
 {
-	int v, l;
-	l = sizeof(int);
-	return (getsockopt(fd, SOL_SOCKET, SO_TYPE, (char *) &v, &l) == 0);
+	int v;
+	socklen_t l = sizeof(int);
+	return (getsockopt(fd, SOL_SOCKET, SO_TYPE, &v, &l) == 0);
 }
 
 static char *last_ptr = NULL;
@@ -2339,8 +2339,8 @@ void reset_globals_after_fork(void)
 char *client_addr(void)
 {
 	struct sockaddr_in sockin;
-	int length = sizeof(sockin);
 	static fstring addr_buf;
+	socklen_t length = sizeof(sockin);
 
 	if (global_client_addr_done)
 		return addr_buf;
