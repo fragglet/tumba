@@ -104,7 +104,6 @@ typedef struct {
 	int deadtime;
 	int syslog;
 	int ReadSize;
-	int client_code_page;
 	BOOL bStripDot;
 	BOOL bReadRaw;
 	BOOL bWriteRaw;
@@ -235,8 +234,6 @@ static struct parm_struct {
     {"deadtime", P_INTEGER, P_GLOBAL, &Globals.deadtime, NULL, NULL},
     {"time offset", P_INTEGER, P_GLOBAL, &extra_time_offset, NULL, NULL},
     {"read size", P_INTEGER, P_GLOBAL, &Globals.ReadSize, NULL, NULL},
-    {"client code page", P_INTEGER, P_GLOBAL, &Globals.client_code_page, NULL,
-     NULL},
     {"-valid", P_BOOL, P_LOCAL, &sDefault.valid, NULL, NULL},
     {"comment", P_STRING, P_LOCAL, &sDefault.comment, NULL, NULL},
     {"copy", P_STRING, P_LOCAL, &sDefault.szCopy, handle_copy, NULL},
@@ -317,7 +314,6 @@ static void init_globals(void)
 	Globals.syslog = 1;
 	Globals.bSyslogOnly = False;
 	Globals.ReadSize = 16 * 1024;
-	Globals.client_code_page = DEFAULT_CLIENT_CODE_PAGE;
 }
 
 /***************************************************************************
@@ -425,7 +421,6 @@ FN_GLOBAL_INTEGER(lp_maxxmit, &Globals.max_xmit)
 FN_GLOBAL_INTEGER(lp_readsize, &Globals.ReadSize)
 FN_GLOBAL_INTEGER(lp_deadtime, &Globals.deadtime)
 FN_GLOBAL_INTEGER(lp_syslog, &Globals.syslog)
-FN_GLOBAL_INTEGER(lp_client_code_page, &Globals.client_code_page)
 
 FN_LOCAL_STRING(lp_servicename, szService)
 FN_LOCAL_STRING(lp_pathname, szPath)

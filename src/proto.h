@@ -78,7 +78,6 @@ int lp_maxxmit(void);
 int lp_readsize(void);
 int lp_deadtime(void);
 int lp_syslog(void);
-int lp_client_code_page(void);
 char *lp_servicename(int);
 char *lp_pathname(int);
 char *lp_guestaccount(int);

@@ -3229,8 +3229,6 @@ int main(int argc, char *argv[])
 	if (!reload_services(False))
 		return (-1);
 
-	codepage_initialise(lp_client_code_page());
-
 	pstrcpy(myworkgroup, lp_workgroup());
 
 #ifndef NO_SIGNAL_TEST
