@@ -149,7 +149,6 @@ typedef struct {
 	int iCreate_force_mode;
 	int iDir_mask;
 	int iDir_force_mode;
-	int iMaxConnections;
 	int iDefaultCase;
 	BOOL bCaseSensitive;
 	BOOL bShortCasePreserve;
@@ -182,7 +181,6 @@ static service sDefault = {
     0000,       /* iCreate_force_mode */
     0755,       /* iDir_mask */
     0000,       /* iDir_force_mode */
-    0,          /* iMaxConnections */
     CASE_LOWER, /* iDefaultCase */
     False,      /* case sensitive */
     False,      /* short case preserve */
@@ -283,8 +281,6 @@ static struct parm_struct {
     {"write ok", P_BOOLREV, P_LOCAL, &sDefault.bRead_only, NULL, NULL},
     {"writeable", P_BOOLREV, P_LOCAL, &sDefault.bRead_only, NULL, NULL},
     {"writable", P_BOOLREV, P_LOCAL, &sDefault.bRead_only, NULL, NULL},
-    {"max connections", P_INTEGER, P_LOCAL, &sDefault.iMaxConnections, NULL,
-     NULL},
     {"create mask", P_OCTAL, P_LOCAL, &sDefault.iCreate_mask, NULL, NULL},
     {"create mode", P_OCTAL, P_LOCAL, &sDefault.iCreate_mask, NULL, NULL},
     {"force create mode", P_OCTAL, P_LOCAL, &sDefault.iCreate_force_mode, NULL,
@@ -491,7 +487,6 @@ FN_LOCAL_INTEGER(lp_create_mode, iCreate_mask)
 FN_LOCAL_INTEGER(lp_force_create_mode, iCreate_force_mode)
 FN_LOCAL_INTEGER(lp_dir_mode, iDir_mask)
 FN_LOCAL_INTEGER(lp_force_dir_mode, iDir_force_mode)
-FN_LOCAL_INTEGER(lp_max_connections, iMaxConnections)
 FN_LOCAL_INTEGER(lp_defaultcase, iDefaultCase)
 
 /* local prototypes */
@@ -617,7 +612,6 @@ static BOOL lp_add_ipc(void)
 	string_set(&iSERVICE(i).szPath, tmpdir());
 	string_set(&iSERVICE(i).comment, comment);
 	iSERVICE(i).status = False;
-	iSERVICE(i).iMaxConnections = 0;
 	iSERVICE(i).bRead_only = True;
 
 	DEBUG(3, ("adding IPC service\n"));
