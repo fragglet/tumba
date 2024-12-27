@@ -92,7 +92,6 @@ extern int extra_time_offset;
  * This structure describes global (ie., server-wide) parameters.
  */
 typedef struct {
-	char *szDefaultService;
 	char *szServerString;
 	char *szLogFile;
 	char *szConfigFile;
@@ -219,9 +218,6 @@ static struct parm_struct {
     {"log file", P_STRING, P_GLOBAL, &Globals.szLogFile, NULL, NULL},
     {"config file", P_STRING, P_GLOBAL, &Globals.szConfigFile, NULL, NULL},
     {"server string", P_STRING, P_GLOBAL, &Globals.szServerString, NULL, NULL},
-    {"default service", P_STRING, P_GLOBAL, &Globals.szDefaultService, NULL,
-     NULL},
-    {"default", P_STRING, P_GLOBAL, &Globals.szDefaultService, NULL, NULL},
     {"workgroup", P_USTRING, P_GLOBAL, &Globals.szWorkGroup, NULL, NULL},
     {"socket address", P_STRING, P_GLOBAL, &Globals.szSocketAddress, NULL,
      NULL},
@@ -401,7 +397,6 @@ char *lp_string(char *s)
 FN_GLOBAL_STRING(lp_logfile, &Globals.szLogFile)
 FN_GLOBAL_STRING(lp_configfile, &Globals.szConfigFile)
 FN_GLOBAL_STRING(lp_serverstring, &Globals.szServerString)
-FN_GLOBAL_STRING(lp_defaultservice, &Globals.szDefaultService)
 FN_GLOBAL_STRING(lp_workgroup, &Globals.szWorkGroup)
 FN_GLOBAL_STRING(lp_socket_address, &Globals.szSocketAddress)
 
