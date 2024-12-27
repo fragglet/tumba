@@ -453,15 +453,17 @@ void init_dos_char_table(void)
 	for (i = 0; i <= 127; i++) {
 		if (isalnum((char) i) ||
 		    strchr("._^$~!#%&-{}()@'`", (char) i)) {
-			valid_dos_chars[i / 8] |= i % 8;
+			valid_dos_chars[i / 8] |= 1 << (i % 8);
 		}
 	}
 }
 
 int isdoschar(int c)
 {
+	unsigned int bit;
 	c &= 0xff;
-	return (valid_dos_chars[c / 8] & (c % 8)) != 0;
+	bit = c % 8;
+	return (valid_dos_chars[c / 8] & (1 << bit)) != 0;
 }
 
 /*******************************************************************
