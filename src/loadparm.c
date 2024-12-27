@@ -105,9 +105,6 @@ typedef struct {
 	bool status;
 	bool bHideDotFiles;
 	bool bRead_only;
-	bool bMap_system;
-	bool bMap_hidden;
-	bool bMap_archive;
 	bool bLocking;
 	bool bStrictLocking;
 	bool bWidelinks;
@@ -137,9 +134,6 @@ static service sDefault = {
     true,       /* status */
     true,       /* bHideDotFiles */
     true,       /* bRead_only */
-    false,      /* bMap_system */
-    false,      /* bMap_hidden */
-    true,       /* bMap_archive */
     true,       /* bLocking */
     false,      /* bStrictLocking */
     true,       /* bWidelinks */
@@ -203,9 +197,6 @@ static struct parm_struct {
      NULL},
     {"status", P_BOOL, P_LOCAL, &sDefault.status, NULL, NULL},
     {"hide dot files", P_BOOL, P_LOCAL, &sDefault.bHideDotFiles, NULL, NULL},
-    {"map system", P_BOOL, P_LOCAL, &sDefault.bMap_system, NULL, NULL},
-    {"map hidden", P_BOOL, P_LOCAL, &sDefault.bMap_hidden, NULL, NULL},
-    {"map archive", P_BOOL, P_LOCAL, &sDefault.bMap_archive, NULL, NULL},
     {"locking", P_BOOL, P_LOCAL, &sDefault.bLocking, NULL, NULL},
     {"strict locking", P_BOOL, P_LOCAL, &sDefault.bStrictLocking, NULL, NULL},
     {"wide links", P_BOOL, P_LOCAL, &sDefault.bWidelinks, NULL, NULL},
@@ -312,13 +303,10 @@ FN_LOCAL_BOOL(lp_shortpreservecase, bShortCasePreserve)
 FN_LOCAL_BOOL(lp_status, status)
 FN_LOCAL_BOOL(lp_hide_dot_files, bHideDotFiles)
 FN_LOCAL_BOOL(lp_readonly, bRead_only)
-FN_LOCAL_BOOL(lp_map_hidden, bMap_hidden)
-FN_LOCAL_BOOL(lp_map_archive, bMap_archive)
 FN_LOCAL_BOOL(lp_locking, bLocking)
 FN_LOCAL_BOOL(lp_strict_locking, bStrictLocking)
 FN_LOCAL_BOOL(lp_widelinks, bWidelinks)
 FN_LOCAL_BOOL(lp_symlinks, bSymlinks)
-FN_LOCAL_BOOL(lp_map_system, bMap_system)
 FN_LOCAL_BOOL(lp_dos_filetimes, bDosFiletimes)
 
 FN_LOCAL_INTEGER(lp_create_mode, iCreate_mask)

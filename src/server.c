@@ -125,15 +125,10 @@ void killkids(void)
     base permission for files:
          everybody gets read bit set
          dos readonly is represented in unix by removing everyone's write bit
-         dos archive is represented in unix by the user's execute bit
-         dos system is represented in unix by the group's execute bit
-         dos hidden is represented in unix by the other's execute bit
-         Then apply create mask,
-         then add force bits.
+         Then apply create mask, then add force bits.
     base permission for directories:
          dos directory is represented in unix by unix's dir bit and the exec bit
-         Then apply create mask,
-         then add force bits.
+         Then apply create mask, then add force bits.
 ****************************************************************************/
 mode_t unix_mode(int cnum, int dosmode)
 {
@@ -152,15 +147,6 @@ mode_t unix_mode(int cnum, int dosmode)
 		/* Add in force bits */
 		result |= lp_force_dir_mode(SNUM(cnum));
 	} else {
-		if (MAP_ARCHIVE(cnum) && IS_DOS_ARCHIVE(dosmode))
-			result |= S_IXUSR;
-
-		if (MAP_SYSTEM(cnum) && IS_DOS_SYSTEM(dosmode))
-			result |= S_IXGRP;
-
-		if (MAP_HIDDEN(cnum) && IS_DOS_HIDDEN(dosmode))
-			result |= S_IXOTH;
-
 		/* Apply mode mask */
 		result &= lp_create_mode(SNUM(cnum));
 		/* Add in force bits */
@@ -189,14 +175,7 @@ int dos_mode(int cnum, char *path, struct stat *sbuf)
 		result |= aRONLY;
 	}
 
-	if (MAP_ARCHIVE(cnum) && ((sbuf->st_mode & S_IXUSR) != 0))
-		result |= aARCH;
-
-	if (MAP_SYSTEM(cnum) && ((sbuf->st_mode & S_IXGRP) != 0))
-		result |= aSYSTEM;
-
-	if (MAP_HIDDEN(cnum) && ((sbuf->st_mode & S_IXOTH) != 0))
-		result |= aHIDDEN;
+	/* TODO: Read DOS attributes from xattr */
 
 	if (S_ISDIR(sbuf->st_mode))
 		result = aDIR | (result & aRONLY);
@@ -262,14 +241,7 @@ int dos_chmod(int cnum, char *fname, int dosmode, struct stat *st)
 #ifdef S_ISVTX
 	mask |= S_ISVTX;
 #endif
-
-	/* possibly preserve the x bits */
-	if (!MAP_ARCHIVE(cnum))
-		mask |= S_IXUSR;
-	if (!MAP_SYSTEM(cnum))
-		mask |= S_IXGRP;
-	if (!MAP_HIDDEN(cnum))
-		mask |= S_IXOTH;
+	/* TODO: Save DOS attributes in an xattr */
 
 	unixmode |= (st->st_mode & mask);
 
@@ -1347,8 +1319,7 @@ int write_file(int fnum, char *data, int n)
 		if (fstat(Files[fnum].fd_ptr->fd, &st) == 0) {
 			int dosmode =
 			    dos_mode(Files[fnum].cnum, Files[fnum].name, &st);
-			if (MAP_ARCHIVE(Files[fnum].cnum) &&
-			    !IS_DOS_ARCHIVE(dosmode)) {
+			if (!IS_DOS_ARCHIVE(dosmode)) {
 				dos_chmod(Files[fnum].cnum, Files[fnum].name,
 				          dosmode | aARCH, &st);
 			}
