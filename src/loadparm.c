@@ -350,27 +350,6 @@ char *lp_string(char *s)
    parameters from the rest of the program are defined
 */
 
-#define FN_GLOBAL_STRING(fn_name, ptr)                                         \
-	char *fn_name(void)                                                    \
-	{                                                                      \
-		return (lp_string(*(char **) (ptr) ? *(char **) (ptr) : ""));  \
-	}
-#define FN_GLOBAL_BOOL(fn_name, ptr)                                           \
-	bool fn_name(void)                                                     \
-	{                                                                      \
-		return (*(bool *) (ptr));                                      \
-	}
-#define FN_GLOBAL_CHAR(fn_name, ptr)                                           \
-	char fn_name(void)                                                     \
-	{                                                                      \
-		return (*(char *) (ptr));                                      \
-	}
-#define FN_GLOBAL_INTEGER(fn_name, ptr)                                        \
-	int fn_name(void)                                                      \
-	{                                                                      \
-		return (*(int *) (ptr));                                       \
-	}
-
 #define FN_LOCAL_STRING(fn_name, val)                                          \
 	char *fn_name(int i)                                                   \
 	{                                                                      \
@@ -393,24 +372,6 @@ char *lp_string(char *s)
 	{                                                                      \
 		return (LP_SNUM_OK(i) ? pSERVICE(i)->val : sDefault.val);      \
 	}
-
-FN_GLOBAL_STRING(lp_logfile, &Globals.szLogFile)
-FN_GLOBAL_STRING(lp_configfile, &Globals.szConfigFile)
-FN_GLOBAL_STRING(lp_serverstring, &Globals.szServerString)
-FN_GLOBAL_STRING(lp_workgroup, &Globals.szWorkGroup)
-FN_GLOBAL_STRING(lp_socket_address, &Globals.szSocketAddress)
-
-FN_GLOBAL_BOOL(lp_readbmpx, &Globals.bReadbmpx)
-FN_GLOBAL_BOOL(lp_readraw, &Globals.bReadRaw)
-FN_GLOBAL_BOOL(lp_writeraw, &Globals.bWriteRaw)
-FN_GLOBAL_BOOL(lp_strip_dot, &Globals.bStripDot)
-FN_GLOBAL_BOOL(lp_syslog_only, &Globals.bSyslogOnly)
-
-FN_GLOBAL_INTEGER(lp_max_log_size, &Globals.max_log_size)
-FN_GLOBAL_INTEGER(lp_maxxmit, &Globals.max_xmit)
-FN_GLOBAL_INTEGER(lp_readsize, &Globals.ReadSize)
-FN_GLOBAL_INTEGER(lp_deadtime, &Globals.deadtime)
-FN_GLOBAL_INTEGER(lp_syslog, &Globals.syslog)
 
 FN_LOCAL_STRING(lp_servicename, szService)
 FN_LOCAL_STRING(lp_pathname, szPath)

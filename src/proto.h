@@ -45,23 +45,6 @@ int reply_trans(char *inbuf, char *outbuf, int size, int bufsize);
 
 /*The following definitions come from  loadparm.c  */
 
-char *lp_string(char *s);
-char *lp_logfile(void);
-char *lp_configfile(void);
-char *lp_serverstring(void);
-char *lp_workgroup(void);
-char *lp_socket_address(void);
-bool lp_readbmpx(void);
-bool lp_readraw(void);
-bool lp_writeraw(void);
-bool lp_strip_dot(void);
-bool lp_syslog_only(void);
-bool lp_time_server(void);
-int lp_max_log_size(void);
-int lp_maxxmit(void);
-int lp_readsize(void);
-int lp_deadtime(void);
-int lp_syslog(void);
 char *lp_servicename(int);
 char *lp_pathname(int);
 char *lp_guestaccount(int);

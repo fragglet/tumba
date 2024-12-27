@@ -102,6 +102,7 @@
 
 /***** automatically generated prototypes *****/
 #include "proto.h"
+#include "config.h"
 
 #ifndef EDQUOT
 #define EDQUOT ENOSPC
