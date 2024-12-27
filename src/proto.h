@@ -74,7 +74,7 @@ bool lp_do_parameter(int snum, char *pszParmName, char *pszParmValue);
 bool lp_snum_ok(int iService);
 bool lp_loaded(void);
 void lp_killunused(bool (*snumused)(int));
-bool lp_load(char *pszFname, bool global_only);
+bool lp_load(char *pszFname);
 int lp_numservices(void);
 void lp_dump(FILE *f);
 int lp_servicenumber(char *pszServiceName);

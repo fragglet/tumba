@@ -1796,7 +1796,7 @@ bool reload_services(bool test)
 
 	lp_killunused(snum_used);
 
-	ret = lp_load(servicesf, false);
+	ret = lp_load(servicesf);
 
 	/* perhaps the config filename is now set */
 	if (!test)

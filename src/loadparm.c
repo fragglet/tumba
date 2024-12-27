@@ -54,10 +54,6 @@ bool bLoaded = false;
 extern int DEBUGLEVEL;
 extern pstring myname;
 
-#ifndef GLOBAL_NAME
-#define GLOBAL_NAME "global"
-#endif
-
 /* some helpful bits */
 #define pSERVICE(i) ServicePtrs[i]
 #define iSERVICE(i) (*pSERVICE(i))
@@ -82,19 +78,10 @@ typedef enum {
 
 typedef enum {
 	P_LOCAL,
-	P_GLOBAL,
 	P_NONE
 } parm_class;
 
 extern int extra_time_offset;
-
-/*
- * This structure describes global (ie., server-wide) parameters.
- */
-typedef struct {
-} global;
-
-static global Globals;
 
 /*
  * This structure describes a single service.
@@ -166,8 +153,6 @@ static service sDefault = {
 static service **ServicePtrs = NULL;
 static int iNumServices = 0;
 static int iServiceIndex = 0;
-static bool bInGlobalSection = true;
-static bool bGlobalOnly = false;
 
 #define NUMPARAMETERS (sizeof(parm_table) / sizeof(struct parm_struct))
 
@@ -235,11 +220,9 @@ Initialise the global parameter structure.
 static void init_globals(void)
 {
 	static bool done_init = false;
-	pstring s;
 
 	if (!done_init) {
 		int i;
-		bzero((void *) &Globals, sizeof(Globals));
 
 		for (i = 0; parm_table[i].label; i++)
 			if ((parm_table[i].type == P_STRING ||
@@ -818,20 +801,8 @@ bool lp_do_parameter(int snum, char *pszParmName, char *pszParmValue)
 
 	def_ptr = parm_table[parmnum].ptr;
 
-	/* we might point at a service, the default service or a global */
-	if (snum < 0) {
-		parm_ptr = def_ptr;
-	} else {
-		if (parm_table[parmnum].class == P_GLOBAL) {
-			DEBUG(
-			    0,
-			    ("Global parameter %s found in service section!\n",
-			     pszParmName));
-			return (true);
-		}
-		parm_ptr =
-		    ((char *) pSERVICE(snum)) + PTR_DIFF(def_ptr, &sDefault);
-	}
+	parm_ptr =
+	    ((char *) pSERVICE(snum)) + PTR_DIFF(def_ptr, &sDefault);
 
 	if (snum >= 0) {
 		if (!iSERVICE(snum).copymap)
@@ -911,13 +882,9 @@ Process a parameter.
 ***************************************************************************/
 static bool do_parameter(char *pszParmName, char *pszParmValue)
 {
-	if (!bInGlobalSection && bGlobalOnly)
-		return (true);
-
 	DEBUG(3, ("doing parameter %s = %s\n", pszParmName, pszParmValue));
 
-	return lp_do_parameter(bInGlobalSection ? -2 : iServiceIndex,
-	                       pszParmName, pszParmValue);
+	return lp_do_parameter(iServiceIndex, pszParmName, pszParmValue);
 }
 
 /***************************************************************************
@@ -1018,25 +985,7 @@ Returns true on success, false on failure.
 static bool do_section(char *pszSectionName)
 {
 	bool bRetval;
-	bool isglobal = ((strwicmp(pszSectionName, GLOBAL_NAME) == 0) ||
-	                 (strwicmp(pszSectionName, GLOBAL_NAME2) == 0));
 	bRetval = false;
-
-	/* if we were in a global section then do the local inits */
-	if (bInGlobalSection && !isglobal)
-		init_locals();
-
-	/* if we've just struck a global section, note the fact. */
-	bInGlobalSection = isglobal;
-
-	/* check for multiple global sections */
-	if (bInGlobalSection) {
-		DEBUG(3, ("Processing section \"[%s]\"\n", pszSectionName));
-		return (true);
-	}
-
-	if (!bInGlobalSection && bGlobalOnly)
-		return (true);
 
 	/* if we have a current service, tidy it up before moving on */
 	bRetval = true;
@@ -1060,23 +1009,6 @@ static bool do_section(char *pszSectionName)
 	}
 
 	return (bRetval);
-}
-
-/***************************************************************************
-Display the contents of the global structure.
-***************************************************************************/
-static void dump_globals(FILE *f)
-{
-	int i;
-	fprintf(f, "# Global parameters\n");
-
-	for (i = 0; parm_table[i].label; i++)
-		if (parm_table[i].class == P_GLOBAL && parm_table[i].ptr &&
-		    (i == 0 || (parm_table[i].ptr != parm_table[i - 1].ptr))) {
-			fprintf(f, "\t%s = ", parm_table[i].label);
-			print_parameter(&parm_table[i], parm_table[i].ptr, f);
-			fprintf(f, "\n");
-		}
 }
 
 /***************************************************************************
@@ -1141,7 +1073,7 @@ void lp_killunused(bool (*snumused)(int))
 Load the services array from the services file. Return true on success,
 false on failure.
 ***************************************************************************/
-bool lp_load(char *pszFname, bool global_only)
+bool lp_load(char *pszFname)
 {
 	pstring n2;
 	bool bRetval;
@@ -1149,9 +1081,6 @@ bool lp_load(char *pszFname, bool global_only)
 	add_to_file_list(pszFname);
 
 	bRetval = false;
-
-	bInGlobalSection = true;
-	bGlobalOnly = global_only;
 
 	init_globals();
 
@@ -1189,8 +1118,6 @@ Display the contents of the services array in human-readable form.
 void lp_dump(FILE *f)
 {
 	int iService;
-
-	dump_globals(f);
 
 	dump_a_service(&sDefault, f);
 

@@ -5,13 +5,6 @@
 #ifndef _LOCAL_H
 #define _LOCAL_H
 
-/* This defines the section name in the configuration file that will contain */
-/* global parameters - that is, parameters relating to the whole server, not */
-/* just services. This name is then reserved, and may not be used as a       */
-/* a service name. It will default to "global" if not defined here.          */
-#define GLOBAL_NAME "global"
-#define GLOBAL_NAME2 "globals"
-
 /* This defines the section name in the configuration file that will
    refer to the special "printers" service */
 #define PRINTERS_NAME "printers"
