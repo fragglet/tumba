@@ -182,3 +182,17 @@ int sys_rename(char *from, char *to)
 	}
 	return rcode;
 }
+
+/* Different OSes have different versions of getxattr */
+ssize_t sys_getxattr(const char *path, const char *name,
+                     void *value, size_t size)
+{
+	return getxattr(path, name, value, size);
+}
+
+/* Different OSes have different versions of setxattr */
+ssize_t sys_setxattr(const char *path, const char *name,
+                     void *value, size_t size)
+{
+	return setxattr(path, name, value, size, 0);
+}

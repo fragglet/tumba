@@ -22,6 +22,8 @@
 #include "includes.h"
 #include "trans2.h"
 
+#define DOSATTRIB_NAME "user.DOSATTRIB"
+
 #define MAX_MUX 50
 #define MANGLED_STACK_SIZE 200
 
@@ -152,7 +154,35 @@ mode_t unix_mode(int cnum, int dosmode)
 		/* Add in force bits */
 		result |= lp_force_create_mode(SNUM(cnum));
 	}
+	/* TODO: All callers of this function also need to write xattrs */
 	return (result);
+}
+
+static int read_dosattrib(const char *path)
+{
+	char buf[5];
+	ssize_t nbytes;
+
+	nbytes = sys_getxattr(path, DOSATTRIB_NAME, buf, sizeof(buf));
+	if (nbytes < 3 || nbytes > 4) {
+		return 0;
+	}
+	buf[nbytes] = '\0';
+
+	if (strncmp(buf, "0x", 2) != 0) {
+		/* TODO: Maybe support newer versions */
+		return 0;
+	}
+
+	return strtol(buf + 2, NULL, 16);
+}
+
+static void write_dosattrib(const char *path, int attrib)
+{
+	char buf[5];
+
+	snprintf(buf, sizeof(buf), "0x%02x", attrib);
+	sys_setxattr(path, DOSATTRIB_NAME, buf, strlen(buf));
 }
 
 /****************************************************************************
@@ -175,7 +205,7 @@ int dos_mode(int cnum, char *path, struct stat *sbuf)
 		result |= aRONLY;
 	}
 
-	/* TODO: Read DOS attributes from xattr */
+	result = read_dosattrib(path);
 
 	if (S_ISDIR(sbuf->st_mode))
 		result = aDIR | (result & aRONLY);
@@ -241,7 +271,7 @@ int dos_chmod(int cnum, char *fname, int dosmode, struct stat *st)
 #ifdef S_ISVTX
 	mask |= S_ISVTX;
 #endif
-	/* TODO: Save DOS attributes in an xattr */
+	write_dosattrib(fname, dosmode);
 
 	unixmode |= (st->st_mode & mask);
 
