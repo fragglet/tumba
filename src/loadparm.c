@@ -92,21 +92,6 @@ extern int extra_time_offset;
  * This structure describes global (ie., server-wide) parameters.
  */
 typedef struct {
-	char *szServerString;
-	char *szLogFile;
-	char *szConfigFile;
-	char *szWorkGroup;
-	char *szSocketAddress;
-	int max_log_size;
-	int max_xmit;
-	int deadtime;
-	int syslog;
-	int ReadSize;
-	bool bStripDot;
-	bool bReadRaw;
-	bool bWriteRaw;
-	bool bReadbmpx;
-	bool bSyslogOnly;
 } global;
 
 static global Globals;
@@ -206,26 +191,6 @@ static struct parm_struct {
 	bool (*special)(char *, char **);
 	struct enum_list *enum_list;
 } parm_table[] = {
-    {"debuglevel", P_INTEGER, P_GLOBAL, &DEBUGLEVEL, NULL, NULL},
-    {"log level", P_INTEGER, P_GLOBAL, &DEBUGLEVEL, NULL, NULL},
-    {"syslog", P_INTEGER, P_GLOBAL, &Globals.syslog, NULL, NULL},
-    {"syslog only", P_BOOL, P_GLOBAL, &Globals.bSyslogOnly, NULL, NULL},
-    {"read bmpx", P_BOOL, P_GLOBAL, &Globals.bReadbmpx, NULL, NULL},
-    {"read raw", P_BOOL, P_GLOBAL, &Globals.bReadRaw, NULL, NULL},
-    {"write raw", P_BOOL, P_GLOBAL, &Globals.bWriteRaw, NULL, NULL},
-    {"strip dot", P_BOOL, P_GLOBAL, &Globals.bStripDot, NULL, NULL},
-    {"netbios name", P_UGSTRING, P_GLOBAL, myname, NULL, NULL},
-    {"log file", P_STRING, P_GLOBAL, &Globals.szLogFile, NULL, NULL},
-    {"config file", P_STRING, P_GLOBAL, &Globals.szConfigFile, NULL, NULL},
-    {"server string", P_STRING, P_GLOBAL, &Globals.szServerString, NULL, NULL},
-    {"workgroup", P_USTRING, P_GLOBAL, &Globals.szWorkGroup, NULL, NULL},
-    {"socket address", P_STRING, P_GLOBAL, &Globals.szSocketAddress, NULL,
-     NULL},
-    {"max log size", P_INTEGER, P_GLOBAL, &Globals.max_log_size, NULL, NULL},
-    {"max xmit", P_INTEGER, P_GLOBAL, &Globals.max_xmit, NULL, NULL},
-    {"deadtime", P_INTEGER, P_GLOBAL, &Globals.deadtime, NULL, NULL},
-    {"time offset", P_INTEGER, P_GLOBAL, &extra_time_offset, NULL, NULL},
-    {"read size", P_INTEGER, P_GLOBAL, &Globals.ReadSize, NULL, NULL},
     {"-valid", P_BOOL, P_LOCAL, &sDefault.valid, NULL, NULL},
     {"comment", P_STRING, P_LOCAL, &sDefault.comment, NULL, NULL},
     {"copy", P_STRING, P_LOCAL, &sDefault.szCopy, handle_copy, NULL},
@@ -286,26 +251,6 @@ static void init_globals(void)
 
 		done_init = true;
 	}
-
-	DEBUG(3, ("Initialising global parameters\n"));
-
-	string_set(&Globals.szWorkGroup, WORKGROUP);
-	string_set(&Globals.szSocketAddress, "0.0.0.0");
-	slprintf(s, sizeof(s) - 1, "Samba %s", VERSION);
-	string_set(&Globals.szServerString, s);
-	slprintf(s, sizeof(s) - 1, "%d.%d", DEFAULT_MAJOR_VERSION,
-	         DEFAULT_MINOR_VERSION);
-
-	Globals.max_xmit = 65535;
-	Globals.deadtime = 0;
-	Globals.max_log_size = 5000;
-	Globals.bReadRaw = true;
-	Globals.bWriteRaw = true;
-	Globals.bReadbmpx = true;
-	Globals.bStripDot = false;
-	Globals.syslog = 1;
-	Globals.bSyslogOnly = false;
-	Globals.ReadSize = 16 * 1024;
 }
 
 /***************************************************************************
@@ -517,7 +462,7 @@ static bool lp_add_ipc(void)
 		return (false);
 
 	slprintf(comment, sizeof(comment), "IPC Service (%s)",
-	         Globals.szServerString);
+	         lp_serverstring());
 
 	string_set(&iSERVICE(i).szPath, tmpdir());
 	string_set(&iSERVICE(i).comment, comment);
