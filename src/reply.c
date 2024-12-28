@@ -3086,7 +3086,7 @@ not setting timestamps of 0\n",
 	}
 
 	/* Set the date on this file */
-	if (file_utime(cnum, Files[fnum].name, &unix_times))
+	if (sys_utime(Files[fnum].name, &unix_times) != 0)
 		return (ERROR(ERRDOS, ERRnoaccess));
 
 	DEBUG(3, ("%s reply_setattrE fnum=%d cnum=%d actime=%d modtime=%d\n",

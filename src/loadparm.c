@@ -105,7 +105,6 @@ typedef struct {
 	bool bStrictLocking;
 	bool bWidelinks;
 	bool bSymlinks;
-	bool bDosFiletimes;
 	char dummy[3]; /* for alignment */
 } service;
 
@@ -129,7 +128,6 @@ static service sDefault = {
     false,      /* bStrictLocking */
     true,       /* bWidelinks */
     true,       /* bSymlinks */
-    false,      /* bDosFiletimes */
     ""          /* dummy */
 };
 
@@ -182,7 +180,6 @@ static struct parm_struct {
     {"strict locking", P_BOOL, P_LOCAL, &sDefault.bStrictLocking, NULL, NULL},
     {"wide links", P_BOOL, P_LOCAL, &sDefault.bWidelinks, NULL, NULL},
     {"follow symlinks", P_BOOL, P_LOCAL, &sDefault.bSymlinks, NULL, NULL},
-    {"dos filetimes", P_BOOL, P_LOCAL, &sDefault.bDosFiletimes, NULL, NULL},
 
     {NULL, P_BOOL, P_NONE, NULL, NULL, NULL}};
 
@@ -278,7 +275,6 @@ FN_LOCAL_BOOL(lp_locking, bLocking)
 FN_LOCAL_BOOL(lp_strict_locking, bStrictLocking)
 FN_LOCAL_BOOL(lp_widelinks, bWidelinks)
 FN_LOCAL_BOOL(lp_symlinks, bSymlinks)
-FN_LOCAL_BOOL(lp_dos_filetimes, bDosFiletimes)
 
 FN_LOCAL_INTEGER(lp_create_mode, iCreate_mask)
 FN_LOCAL_INTEGER(lp_force_create_mode, iCreate_force_mode)

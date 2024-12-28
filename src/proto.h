@@ -56,7 +56,6 @@ bool lp_locking(int);
 bool lp_strict_locking(int);
 bool lp_widelinks(int);
 bool lp_symlinks(int);
-bool lp_dos_filetimes(int);
 int lp_create_mode(int);
 int lp_force_create_mode(int);
 int lp_dir_mode(int);
@@ -158,7 +157,6 @@ void *dflt_sig(void);
 mode_t unix_mode(int cnum, int dosmode);
 int dos_mode(int cnum, char *path, struct stat *sbuf);
 int dos_chmod(int cnum, char *fname, int dosmode, struct stat *st);
-int file_utime(int cnum, char *fname, struct utimbuf *times);
 bool set_filetime(int cnum, char *fname, time_t mtime);
 bool unix_convert(char *name, int cnum, pstring saved_last_component,
                   bool *bad_path);

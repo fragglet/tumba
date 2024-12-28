@@ -283,56 +283,8 @@ int dos_chmod(int cnum, char *fname, int dosmode, struct stat *st)
 }
 
 /*******************************************************************
-Wrapper around sys_utime that possibly allows DOS semantics rather
-than POSIX.
+Change a filetime
 *******************************************************************/
-
-int file_utime(int cnum, char *fname, struct utimbuf *times)
-{
-	extern struct current_user current_user;
-	struct stat sb;
-	int ret = -1;
-
-	errno = 0;
-
-	if (sys_utime(fname, times) == 0)
-		return 0;
-
-	if ((errno != EPERM) && (errno != EACCES))
-		return -1;
-
-	if (!lp_dos_filetimes(SNUM(cnum)))
-		return -1;
-
-	/* We have permission (given by the Samba admin) to
-	   break POSIX semantics and allow a user to change
-	   the time on a file they don't own but can write to
-	   (as DOS does).
-	 */
-
-	if (stat(fname, &sb) != 0)
-		return -1;
-
-	/* Check if we have write access. */
-	if (CAN_WRITE(cnum)) {
-		if (((sb.st_mode & S_IWOTH) ||
-		     ((sb.st_mode & S_IWUSR) &&
-		      current_user.uid == sb.st_uid))) {
-			/* We are allowed to become root and change the
-			 * filetime. */
-			become_root(false);
-			ret = sys_utime(fname, times);
-			unbecome_root(false);
-		}
-	}
-
-	return ret;
-}
-
-/*******************************************************************
-Change a filetime - possibly allowing DOS semantics.
-*******************************************************************/
-
 bool set_filetime(int cnum, char *fname, time_t mtime)
 {
 	struct utimbuf times;
@@ -342,7 +294,7 @@ bool set_filetime(int cnum, char *fname, time_t mtime)
 
 	times.modtime = times.actime = mtime;
 
-	if (file_utime(cnum, fname, &times)) {
+	if (sys_utime(fname, &times) != 0) {
 		DEBUG(4, ("set_filetime(%s) failed: %s\n", fname,
 		          strerror(errno)));
 	}

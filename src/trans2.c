@@ -1548,7 +1548,7 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 	   if they are different from the current values
 	 */
 	if (st.st_mtime != tvs.modtime || st.st_atime != tvs.actime) {
-		if (file_utime(cnum, fname, &tvs) != 0) {
+		if (sys_utime(fname, &tvs) != 0) {
 			return (ERROR(ERRDOS, ERRnoaccess));
 		}
 	}
