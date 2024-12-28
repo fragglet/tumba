@@ -207,7 +207,7 @@ int dos_mode(int cnum, char *path, struct stat *sbuf)
 		result |= aRONLY;
 	}
 
-	result = read_dosattrib(path);
+	result |= read_dosattrib(path);
 
 	if (S_ISDIR(sbuf->st_mode))
 		result = aDIR | (result & aRONLY);
