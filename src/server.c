@@ -1832,6 +1832,23 @@ static int sig_hup(void)
 	return (0);
 }
 
+static bool dir_world_writeable(const char *path)
+{
+	struct stat st;
+
+	if (stat(path, &st) != 0) {
+		DEBUG(8, ("failed to stat %s, assuming read-only share\n",
+		          path));
+		return false;
+	}
+
+	/* Our way of configuring a share as read-only / writeable is to set
+	   o+w permissions on the directory. Since we don't do any kind of user
+	   authentication on shares, it's reasonable that any directory
+	   writeable over smb is also writeable by local users */
+	return S_ISDIR(st.st_mode) && (st.st_mode & S_IWOTH) != 0;
+}
+
 /****************************************************************************
   make a connection to a service
 ****************************************************************************/
@@ -1892,7 +1909,7 @@ int make_connection(char *service, char *dev)
 		return (-7);
 	}
 
-	pcon->read_only = lp_readonly(snum);
+	pcon->read_only = !dir_world_writeable(lp_pathname(snum));
 	pcon->ipc = strncmp(dev, "IPC", 3) == 0;
 	pcon->uid = pass->pw_uid;
 	pcon->gid = pass->pw_gid;
