@@ -92,7 +92,6 @@ typedef struct {
 	char *szPath;
 	char *szGuestaccount;
 	char *szCopy;
-	char *szInclude;
 	char *comment;
 	int iCreate_mask;
 	int iCreate_force_mode;
@@ -118,7 +117,6 @@ static service sDefault = {
     NULL,       /* szPath */
     NULL,       /* szGuestAccount  - this is set in init_globals() */
     NULL,       /* szCopy */
-    NULL,       /* szInclude */
     NULL,       /* comment */
     0744,       /* iCreate_mask */
     0000,       /* iCreate_force_mode */
@@ -145,7 +143,6 @@ static int iServiceIndex = 0;
 #define NUMPARAMETERS (sizeof(parm_table) / sizeof(struct parm_struct))
 
 /* prototypes for the special type handlers */
-static bool handle_include(char *pszParmValue, char **ptr);
 static bool handle_copy(char *pszParmValue, char **ptr);
 
 struct enum_list {
@@ -167,7 +164,6 @@ static struct parm_struct {
     {"-valid", P_BOOL, P_LOCAL, &sDefault.valid, NULL, NULL},
     {"comment", P_STRING, P_LOCAL, &sDefault.comment, NULL, NULL},
     {"copy", P_STRING, P_LOCAL, &sDefault.szCopy, handle_copy, NULL},
-    {"include", P_STRING, P_LOCAL, &sDefault.szInclude, handle_include, NULL},
     {"default case", P_ENUM, P_LOCAL, &sDefault.iDefaultCase, NULL, enum_case},
     {"case sensitive", P_BOOL, P_LOCAL, &sDefault.bCaseSensitive, NULL, NULL},
     {"casesignames", P_BOOL, P_LOCAL, &sDefault.bCaseSensitive, NULL, NULL},
@@ -671,28 +667,6 @@ bool lp_file_list_changed(void)
 		}
 		f = f->next;
 	}
-	return (false);
-}
-
-/***************************************************************************
-handle the include operation
-***************************************************************************/
-static bool handle_include(char *pszParmValue, char **ptr)
-{
-	pstring fname;
-	pstrcpy(fname, pszParmValue);
-
-	add_to_file_list(fname);
-
-	standard_sub_basic(fname);
-
-	string_set(ptr, fname);
-
-	if (file_exist(fname, NULL))
-		return (pm_process(fname, do_section, do_parameter));
-
-	DEBUG(2, ("Can't find include file %s\n", fname));
-
 	return (false);
 }
 
