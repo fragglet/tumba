@@ -1896,7 +1896,7 @@ int make_connection(char *service, char *dev)
 	{
 		pstring s;
 		pstrcpy(s, pcon->connectpath);
-		GetWd(s);
+		getcwd(s, sizeof(pstring));
 		string_set(&pcon->connectpath, s);
 		chdir(pcon->connectpath);
 	}
@@ -3063,7 +3063,7 @@ int main(int argc, char *argv[])
 	   so set our umask to 0 */
 	umask(0);
 
-	GetWd(OriginalDir);
+	getcwd(OriginalDir, sizeof(pstring));
 
 	init_uid();
 

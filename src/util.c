@@ -757,115 +757,9 @@ void unix_clean_name(char *s)
 	trim_string(s, NULL, "/..");
 }
 
-/* number of list structures for a caching GetWd function. */
-#define MAX_GETWDCACHE (50)
-
-struct {
-	ino_t inode;
-	dev_t dev;
-	char *text;
-	bool valid;
-} ino_list[MAX_GETWDCACHE];
-
-bool use_getwd_cache = true;
-
-/*******************************************************************
-  return the absolute current directory path
-********************************************************************/
-char *GetWd(char *str)
-{
-	pstring s;
-	static bool getwd_cache_init = false;
-	struct stat st, st2;
-	int i;
-
-	*s = 0;
-
-	if (!use_getwd_cache)
-		return getcwd(str, sizeof(pstring));
-
-	/* init the cache */
-	if (!getwd_cache_init) {
-		getwd_cache_init = true;
-		for (i = 0; i < MAX_GETWDCACHE; i++) {
-			string_init(&ino_list[i].text, "");
-			ino_list[i].valid = false;
-		}
-	}
-
-	/*  Get the inode of the current directory, if this doesn't work we're
-	    in trouble :-) */
-
-	if (stat(".", &st) == -1) {
-		DEBUG(0, ("Very strange, couldn't stat \".\"\n"));
-		return getcwd(str, sizeof(pstring));
-	}
-
-	for (i = 0; i < MAX_GETWDCACHE; i++)
-		if (ino_list[i].valid) {
-
-			/*  If we have found an entry with a matching inode and
-			   dev number then find the inode number for the
-			   directory in the cached string. If this agrees with
-			   that returned by the stat for the current directory
-			   then all is o.k. (but make sure it is a directory all
-			    the same...) */
-
-			if (st.st_ino == ino_list[i].inode &&
-			    st.st_dev == ino_list[i].dev) {
-				if (stat(ino_list[i].text, &st2) == 0) {
-					if (st.st_ino == st2.st_ino &&
-					    st.st_dev == st2.st_dev &&
-					    (st2.st_mode & S_IFMT) == S_IFDIR) {
-						pstrcpy(str, ino_list[i].text);
-
-						/* promote it for future use */
-						array_promote(
-						    (char *) &ino_list[0],
-						    sizeof(ino_list[0]), i);
-						return (str);
-					} else {
-						/*  If the inode is different
-						   then something's changed,
-						    scrub the entry and start
-						   from scratch. */
-						ino_list[i].valid = false;
-					}
-				}
-			}
-		}
-
-	/*  We don't have the information to hand so rely on traditional
-	   methods. The very slow getcwd, which spawns a process on some
-	   systems, or the not quite so bad getwd. */
-
-	if (!getcwd(s, sizeof(pstring))) {
-		DEBUG(0, ("Getwd failed, errno %s\n", strerror(errno)));
-		return (NULL);
-	}
-
-	pstrcpy(str, s);
-
-	DEBUG(5, ("GetWd %s, inode %d, dev %x\n", s, (int) st.st_ino,
-	          (int) st.st_dev));
-
-	/* add it to the cache */
-	i = MAX_GETWDCACHE - 1;
-	string_set(&ino_list[i].text, s);
-	ino_list[i].dev = st.st_dev;
-	ino_list[i].inode = st.st_ino;
-	ino_list[i].valid = true;
-
-	/* put it at the top of the list */
-	array_promote((char *) &ino_list[0], sizeof(ino_list[0]), i);
-
-	return (str);
-}
-
 /*******************************************************************
 reduce a file name, removing .. elements and checking that
-it is below dir in the heirachy. This uses GetWd() and so must be run
-on the system that has the referenced file system.
+it is below dir in the hierarchy.
 
 widelinks are allowed if widelinks is true
 ********************************************************************/
@@ -908,8 +802,8 @@ bool reduce_name(char *s, char *dir, bool widelinks)
 	if (!p)
 		return (true);
 
-	if (!GetWd(wd)) {
-		DEBUG(0, ("couldn't getwd for %s %s\n", s, dir));
+	if (getcwd(wd, sizeof(pstring)) == NULL) {
+		DEBUG(0, ("couldn't getcwd for %s %s\n", s, dir));
 		return (false);
 	}
 
@@ -918,8 +812,8 @@ bool reduce_name(char *s, char *dir, bool widelinks)
 		return (false);
 	}
 
-	if (!GetWd(dir2)) {
-		DEBUG(0, ("couldn't getwd for %s\n", dir));
+	if (getcwd(dir2, sizeof(pstring)) == NULL) {
+		DEBUG(0, ("couldn't getcwd for %s\n", dir));
 		chdir(wd);
 		return (false);
 	}
@@ -939,9 +833,9 @@ bool reduce_name(char *s, char *dir, bool widelinks)
 		return (false);
 	}
 
-	if (!GetWd(newname)) {
+	if (getcwd(newname, sizeof(pstring)) == NULL) {
 		chdir(wd);
-		DEBUG(2, ("couldn't get wd for %s %s\n", s, dir2));
+		DEBUG(2, ("couldn't getcwd for %s %s\n", s, dir2));
 		return (false);
 	}
 
