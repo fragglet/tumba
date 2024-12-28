@@ -899,7 +899,6 @@ int reply_open(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	int share_mode;
 	int size = 0;
 	time_t mtime = 0;
-	int unixmode;
 	int rmode = 0;
 	struct stat sbuf;
 	bool bad_path = false;
@@ -925,9 +924,7 @@ int reply_open(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		return (UNIXERROR(ERRDOS, ERRnoaccess));
 	}
 
-	unixmode = unix_mode(cnum, aARCH);
-
-	open_file_shared(fnum, cnum, fname, share_mode, 3, unixmode, &rmode,
+	open_file_shared(fnum, cnum, fname, share_mode, 3, aARCH, &rmode,
 	                 NULL);
 
 	fsp = &Files[fnum];
@@ -978,7 +975,6 @@ int reply_open_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	int smb_mode = SVAL(inbuf, smb_vwv3);
 	int smb_attr = SVAL(inbuf, smb_vwv5);
 	int smb_ofun = SVAL(inbuf, smb_vwv8);
-	int unixmode;
 	int size = 0, fmode = 0, mtime = 0, rmode = 0;
 	struct stat sbuf;
 	int smb_action = 0;
@@ -1012,9 +1008,7 @@ int reply_open_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 		return (UNIXERROR(ERRDOS, ERRnoaccess));
 	}
 
-	unixmode = unix_mode(cnum, smb_attr | aARCH);
-
-	open_file_shared(fnum, cnum, fname, smb_mode, smb_ofun, unixmode,
+	open_file_shared(fnum, cnum, fname, smb_mode, smb_ofun, smb_attr | aARCH,
 	                 &rmode, &smb_action);
 
 	fsp = &Files[fnum];
@@ -1090,7 +1084,6 @@ int reply_mknew(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	int fnum = -1;
 	int outsize = 0;
 	int createmode;
-	mode_t unixmode;
 	int ofun = 0;
 	bool bad_path = false;
 	files_struct *fsp;
@@ -1107,8 +1100,6 @@ int reply_mknew(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		          "report this\n",
 		          fname));
 	}
-
-	unixmode = unix_mode(cnum, createmode);
 
 	fnum = find_free_file();
 	if (fnum < 0)
@@ -1134,7 +1125,7 @@ int reply_mknew(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	/* Open file in dos compatibility share mode. */
 	open_file_shared(fnum, cnum, fname, (DENY_FCB << 4) | 0xF, ofun,
-	                 unixmode, NULL, NULL);
+	                 createmode, NULL, NULL);
 
 	fsp = &Files[fnum];
 
@@ -1152,9 +1143,9 @@ int reply_mknew(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	/* Note we grant no oplocks. See comment in reply_open_and_X() */
 
 	DEBUG(2, ("new file %s\n", fname));
-	DEBUG(3, ("%s mknew %s fd=%d fnum=%d cnum=%d dmode=%d umode=%o\n",
+	DEBUG(3, ("%s mknew %s fd=%d fnum=%d cnum=%d dmode=%d\n",
 	          timestring(), fname, Files[fnum].fd_ptr->fd, fnum, cnum,
-	          createmode, unixmode));
+	          createmode));
 
 	return (outsize);
 }
@@ -1170,7 +1161,6 @@ int reply_ctemp(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	int fnum = -1;
 	int outsize = 0;
 	int createmode;
-	mode_t unixmode;
 	bool bad_path = false;
 	files_struct *fsp;
 
@@ -1179,8 +1169,6 @@ int reply_ctemp(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	pstrcpy(fname, smb_buf(inbuf) + 1);
 	pstrcat(fname, "/TMXXXXXX");
 	unix_convert(fname, cnum, 0, &bad_path);
-
-	unixmode = unix_mode(cnum, createmode);
 
 	fnum = find_free_file();
 	if (fnum < 0)
@@ -1200,7 +1188,7 @@ int reply_ctemp(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	/* Open file in dos compatibility share mode. */
 	/* We should fail if file exists. */
 	open_file_shared(fnum, cnum, fname2, (DENY_FCB << 4) | 0xF, 0x10,
-	                 unixmode, NULL, NULL);
+	                 createmode, NULL, NULL);
 
 	fsp = &Files[fnum];
 
@@ -1221,9 +1209,9 @@ int reply_ctemp(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	/* Note we grant no oplocks. See comment in reply_open_and_X() */
 
 	DEBUG(2, ("created temp file %s\n", fname2));
-	DEBUG(3, ("%s ctemp %s fd=%d fnum=%d cnum=%d dmode=%d umode=%o\n",
+	DEBUG(3, ("%s ctemp %s fd=%d fnum=%d cnum=%d dmode=%d\n",
 	          timestring(), fname2, Files[fnum].fd_ptr->fd, fnum, cnum,
-	          createmode, unixmode));
+	          createmode));
 
 	return (outsize);
 }

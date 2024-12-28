@@ -131,6 +131,9 @@ void killkids(void)
     base permission for directories:
          dos directory is represented in unix by unix's dir bit and the exec bit
          Then apply create mask, then add force bits.
+
+  IMPORTANT NOTE: this function will not convert the s, h, or a attributes;
+  they are read and written separately using {read,write}_dosattrib below.
 ****************************************************************************/
 mode_t unix_mode(int cnum, int dosmode)
 {
@@ -154,11 +157,10 @@ mode_t unix_mode(int cnum, int dosmode)
 		/* Add in force bits */
 		result |= lp_force_create_mode(SNUM(cnum));
 	}
-	/* TODO: All callers of this function also need to write xattrs */
 	return (result);
 }
 
-static int read_dosattrib(const char *path)
+int read_dosattrib(const char *path)
 {
 	char buf[5];
 	ssize_t nbytes;
@@ -177,7 +179,7 @@ static int read_dosattrib(const char *path)
 	return strtol(buf + 2, NULL, 16);
 }
 
-static void write_dosattrib(const char *path, int attrib)
+void write_dosattrib(const char *path, int attrib)
 {
 	char buf[5];
 
@@ -1163,12 +1165,13 @@ static void truncate_unless_locked(int fnum, int cnum, int token,
 open a file with a share mode
 ****************************************************************************/
 void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
-                      int mode, int *Access, int *action)
+                      int dosmode, int *Access, int *action)
 {
 	files_struct *fs_p = &Files[fnum];
 	int flags = 0;
 	int flags2 = 0;
 	int deny_mode = (share_mode >> 4) & 7;
+	int unixmode;
 	struct stat sbuf;
 	bool file_existed = file_exist(fname, &sbuf);
 	bool share_locked = false;
@@ -1235,14 +1238,15 @@ void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
 	if (deny_mode == DENY_FCB)
 		deny_mode = DENY_DOS;
 
+	unixmode = unix_mode(cnum, dosmode);
 	DEBUG(4, ("calling open_file with flags=0x%X flags2=0x%X mode=0%o\n",
-	          flags, flags2, mode));
+	          flags, flags2, unixmode));
 
-	open_file(fnum, cnum, fname, flags | (flags2 & ~(O_TRUNC)), mode,
+	open_file(fnum, cnum, fname, flags | (flags2 & ~(O_TRUNC)), unixmode,
 	          file_existed ? &sbuf : 0);
 	if (!fs_p->open && flags == O_RDWR && errno != ENOENT && fcbopen) {
 		flags = O_RDONLY;
-		open_file(fnum, cnum, fname, flags, mode,
+		open_file(fnum, cnum, fname, flags, unixmode,
 		          file_existed ? &sbuf : 0);
 	}
 
@@ -1258,6 +1262,11 @@ void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
 		default:
 			open_mode = 0;
 			break;
+		}
+
+		/* When creating a new file, we save the DOS attributes */
+		if (!file_existed || (flags & (O_CREAT|O_TRUNC)) != 0) {
+			write_dosattrib(fname, dosmode);
 		}
 
 		fs_p->share_mode = (deny_mode << 4) | open_mode;

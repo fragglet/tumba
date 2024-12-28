@@ -178,6 +178,8 @@ int write_file(int fnum, char *data, int n);
 bool become_service(int cnum, bool do_chdir);
 int find_service(char *service);
 int cached_error_packet(char *inbuf, char *outbuf, int fnum, int line);
+int read_dosattrib(const char *path);
+void write_dosattrib(const char *path, int attrib);
 int unix_error_packet(char *inbuf, char *outbuf, int def_class,
                       uint32_t def_code, int line);
 int error_packet(char *inbuf, char *outbuf, int error_class,

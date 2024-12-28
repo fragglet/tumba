@@ -197,7 +197,6 @@ static int call_trans2open(char *inbuf, char *outbuf, int bufsize, int cnum,
 
 	pstring fname;
 	int fnum = -1;
-	int unixmode;
 	int size = 0, fmode = 0, mtime = 0, rmode;
 	int32_t inode = 0;
 	struct stat sbuf;
@@ -226,10 +225,8 @@ static int call_trans2open(char *inbuf, char *outbuf, int bufsize, int cnum,
 		return (UNIXERROR(ERRDOS, ERRnoaccess));
 	}
 
-	unixmode = unix_mode(cnum, open_attr | aARCH);
-
-	open_file_shared(fnum, cnum, fname, open_mode, open_ofun, unixmode,
-	                 &rmode, &smb_action);
+	open_file_shared(fnum, cnum, fname, open_mode, open_ofun,
+	                 open_attr | aARCH, &rmode, &smb_action);
 
 	if (!Files[fnum].open) {
 		if ((errno == ENOENT) && bad_path) {
