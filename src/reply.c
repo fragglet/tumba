@@ -924,8 +924,7 @@ int reply_open(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		return (UNIXERROR(ERRDOS, ERRnoaccess));
 	}
 
-	open_file_shared(fnum, cnum, fname, share_mode, 3, aARCH, &rmode,
-	                 NULL);
+	open_file_shared(fnum, cnum, fname, share_mode, 3, aARCH, &rmode, NULL);
 
 	fsp = &Files[fnum];
 
@@ -992,7 +991,7 @@ int reply_open_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	   introduce a brief pause. */
 	if (IS_IPC(cnum)) {
 		DEBUG(1, ("Tried to open IPC %s\n", fname));
-		return(ERROR(ERRSRV,ERRinvdevice));
+		return (ERROR(ERRSRV, ERRinvdevice));
 	}
 
 	fnum = find_free_file();
@@ -1008,8 +1007,8 @@ int reply_open_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 		return (UNIXERROR(ERRDOS, ERRnoaccess));
 	}
 
-	open_file_shared(fnum, cnum, fname, smb_mode, smb_ofun, smb_attr | aARCH,
-	                 &rmode, &smb_action);
+	open_file_shared(fnum, cnum, fname, smb_mode, smb_ofun,
+	                 smb_attr | aARCH, &rmode, &smb_action);
 
 	fsp = &Files[fnum];
 
@@ -1143,9 +1142,8 @@ int reply_mknew(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	/* Note we grant no oplocks. See comment in reply_open_and_X() */
 
 	DEBUG(2, ("new file %s\n", fname));
-	DEBUG(3, ("%s mknew %s fd=%d fnum=%d cnum=%d dmode=%d\n",
-	          timestring(), fname, Files[fnum].fd_ptr->fd, fnum, cnum,
-	          createmode));
+	DEBUG(3, ("%s mknew %s fd=%d fnum=%d cnum=%d dmode=%d\n", timestring(),
+	          fname, Files[fnum].fd_ptr->fd, fnum, cnum, createmode));
 
 	return (outsize);
 }
@@ -1209,9 +1207,8 @@ int reply_ctemp(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	/* Note we grant no oplocks. See comment in reply_open_and_X() */
 
 	DEBUG(2, ("created temp file %s\n", fname2));
-	DEBUG(3, ("%s ctemp %s fd=%d fnum=%d cnum=%d dmode=%d\n",
-	          timestring(), fname2, Files[fnum].fd_ptr->fd, fnum, cnum,
-	          createmode));
+	DEBUG(3, ("%s ctemp %s fd=%d fnum=%d cnum=%d dmode=%d\n", timestring(),
+	          fname2, Files[fnum].fd_ptr->fd, fnum, cnum, createmode));
 
 	return (outsize);
 }

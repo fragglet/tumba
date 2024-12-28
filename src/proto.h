@@ -205,10 +205,10 @@ int sys_select(fd_set *fds, struct timeval *tval);
 int sys_select(fd_set *fds, struct timeval *tval);
 int sys_utime(char *fname, struct utimbuf *times);
 int sys_rename(char *from, char *to);
-ssize_t sys_getxattr(const char *path, const char *name,
-                     void *value, size_t size);
-ssize_t sys_setxattr(const char *path, const char *name,
-                     void *value, size_t size);
+ssize_t sys_getxattr(const char *path, const char *name, void *value,
+                     size_t size);
+ssize_t sys_setxattr(const char *path, const char *name, void *value,
+                     size_t size);
 
 /*The following definitions come from  time.c  */
 

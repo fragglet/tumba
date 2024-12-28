@@ -416,7 +416,7 @@ struct connection_options {
 #define OPEN_CNUM(cnum) (VALID_CNUM(cnum) && Connections[cnum].open)
 #define FNUM_OK(fnum, c) (OPEN_FNUM(fnum) && (c) == Files[fnum].cnum)
 
-#define IS_IPC(cnum)       (VALID_CNUM(cnum) && Connections[cnum].ipc)
+#define IS_IPC(cnum) (VALID_CNUM(cnum) && Connections[cnum].ipc)
 
 #define CHECK_FNUM(fnum, c)                                                    \
 	if (!FNUM_OK(fnum, c))                                                 \

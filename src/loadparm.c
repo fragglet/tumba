@@ -657,8 +657,7 @@ bool lp_do_parameter(int snum, char *pszParmName, char *pszParmValue)
 
 	def_ptr = parm_table[parmnum].ptr;
 
-	parm_ptr =
-	    ((char *) pSERVICE(snum)) + PTR_DIFF(def_ptr, &sDefault);
+	parm_ptr = ((char *) pSERVICE(snum)) + PTR_DIFF(def_ptr, &sDefault);
 
 	/* if it is a special case then go ahead */
 	if (parm_table[parmnum].special) {

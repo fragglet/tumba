@@ -176,7 +176,7 @@ int read_dosattrib(const char *path)
 		return 0;
 	}
 
-	return strtol(buf + 2, NULL, 16) & (aARCH|aSYSTEM|aHIDDEN);
+	return strtol(buf + 2, NULL, 16) & (aARCH | aSYSTEM | aHIDDEN);
 }
 
 void write_dosattrib(const char *path, int attrib)
@@ -1205,7 +1205,7 @@ void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
 		}
 
 		/* When creating a new file, we save the DOS attributes */
-		if (!file_existed || (flags & (O_CREAT|O_TRUNC)) != 0) {
+		if (!file_existed || (flags & (O_CREAT | O_TRUNC)) != 0) {
 			write_dosattrib(fname, dosmode);
 		}
 
