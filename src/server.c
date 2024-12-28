@@ -176,7 +176,7 @@ int read_dosattrib(const char *path)
 		return 0;
 	}
 
-	return strtol(buf + 2, NULL, 16);
+	return strtol(buf + 2, NULL, 16) & (aARCH|aSYSTEM|aHIDDEN);
 }
 
 void write_dosattrib(const char *path, int attrib)
