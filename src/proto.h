@@ -240,8 +240,6 @@ void init_uid(void);
 bool become_guest(void);
 bool become_user(connection_struct *conn, int cnum);
 bool unbecome_user(void);
-void become_root(bool save_dir);
-void unbecome_root(bool restore_dir);
 
 /*The following definitions come from  username.c  */
 
