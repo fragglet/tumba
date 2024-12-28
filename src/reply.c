@@ -413,7 +413,7 @@ int reply_sesssetup_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 		p = smb_buf(outbuf);
 		pstrcpy(p, "Unix");
 		p = skip_string(p, 1);
-		pstrcpy(p, "Samba ");
+		pstrcpy(p, "Rumba ");
 		pstrcat(p, VERSION);
 		p = skip_string(p, 1);
 		pstrcpy(p, myworkgroup);
