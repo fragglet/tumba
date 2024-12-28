@@ -49,7 +49,6 @@ char *lp_servicename(int);
 char *lp_pathname(int);
 char *lp_guestaccount(int);
 char *lp_comment(int);
-char *lp_volume(int);
 bool lp_casesensitive(int);
 bool lp_shortpreservecase(int);
 bool lp_status(int);
@@ -74,7 +73,6 @@ bool lp_load(char *pszFname);
 int lp_numservices(void);
 void lp_dump(FILE *f);
 int lp_servicenumber(char *pszServiceName);
-char *volume_label(int snum);
 
 /*The following definitions come from  locking.c  */
 

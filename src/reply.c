@@ -776,7 +776,7 @@ int reply_search(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 			if ((dirtype & 0x1F) == aVOLID) {
 				memcpy(p, status, 21);
 				make_dir_struct(p, "???????????",
-				                volume_label(SNUM(cnum)), 0,
+				                lp_servicename(SNUM(cnum)), 0,
 				                aVOLID, 0);
 				dptr_fill(p + 12, dptr_num);
 				if (dptr_zero(p + 12) && (status_len == 0))

@@ -1038,7 +1038,7 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
 	uint16_t info_level = SVAL(params, 0);
 	int data_len;
 	struct stat st;
-	char *vname = volume_label(SNUM(cnum));
+	char *vname = lp_servicename(SNUM(cnum));
 	int snum = SNUM(cnum);
 
 	DEBUG(3, ("call_trans2qfsinfo: cnum = %d, level = %d\n", cnum,

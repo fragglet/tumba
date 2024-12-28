@@ -94,7 +94,6 @@ typedef struct {
 	char *szCopy;
 	char *szInclude;
 	char *comment;
-	char *volume;
 	int iCreate_mask;
 	int iCreate_force_mode;
 	int iDir_mask;
@@ -122,7 +121,6 @@ static service sDefault = {
     NULL,       /* szCopy */
     NULL,       /* szInclude */
     NULL,       /* comment */
-    NULL,       /* volume */
     0744,       /* iCreate_mask */
     0000,       /* iCreate_force_mode */
     0755,       /* iDir_mask */
@@ -180,7 +178,6 @@ static struct parm_struct {
     {"path", P_STRING, P_LOCAL, &sDefault.szPath, NULL, NULL},
     {"directory", P_STRING, P_LOCAL, &sDefault.szPath, NULL, NULL},
     {"guest account", P_STRING, P_LOCAL, &sDefault.szGuestaccount, NULL, NULL},
-    {"volume", P_STRING, P_LOCAL, &sDefault.volume, NULL, NULL},
     {"read only", P_BOOL, P_LOCAL, &sDefault.bRead_only, NULL, NULL},
     {"write ok", P_BOOLREV, P_LOCAL, &sDefault.bRead_only, NULL, NULL},
     {"writeable", P_BOOLREV, P_LOCAL, &sDefault.bRead_only, NULL, NULL},
@@ -286,7 +283,6 @@ FN_LOCAL_STRING(lp_servicename, szService)
 FN_LOCAL_STRING(lp_pathname, szPath)
 FN_LOCAL_STRING(lp_guestaccount, szGuestaccount)
 FN_LOCAL_STRING(lp_comment, comment)
-FN_LOCAL_STRING(lp_volume, volume)
 
 FN_LOCAL_BOOL(lp_casesensitive, bCaseSensitive)
 FN_LOCAL_BOOL(lp_shortpreservecase, bShortCasePreserve)
@@ -1127,15 +1123,4 @@ int lp_servicenumber(char *pszServiceName)
 		      ("lp_servicenumber: couldn't find %s\n", pszServiceName));
 
 	return (iService);
-}
-
-/*******************************************************************
-  a useful volume label function
-  ******************************************************************/
-char *volume_label(int snum)
-{
-	char *ret = lp_volume(snum);
-	if (!*ret)
-		return (lp_servicename(snum));
-	return (ret);
 }
