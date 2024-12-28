@@ -101,7 +101,6 @@ typedef struct {
 	int iDefaultCase;
 	bool bCaseSensitive;
 	bool bShortCasePreserve;
-	bool status;
 	bool bRead_only;
 	bool bLocking;
 	bool bStrictLocking;
@@ -128,7 +127,6 @@ static service sDefault = {
     CASE_LOWER, /* iDefaultCase */
     false,      /* case sensitive */
     false,      /* short case preserve */
-    true,       /* status */
     true,       /* bRead_only */
     true,       /* bLocking */
     false,      /* bStrictLocking */
@@ -190,7 +188,6 @@ static struct parm_struct {
     {"directory mode", P_OCTAL, P_LOCAL, &sDefault.iDir_mask, NULL, NULL},
     {"force directory mode", P_OCTAL, P_LOCAL, &sDefault.iDir_force_mode, NULL,
      NULL},
-    {"status", P_BOOL, P_LOCAL, &sDefault.status, NULL, NULL},
     {"locking", P_BOOL, P_LOCAL, &sDefault.bLocking, NULL, NULL},
     {"strict locking", P_BOOL, P_LOCAL, &sDefault.bStrictLocking, NULL, NULL},
     {"wide links", P_BOOL, P_LOCAL, &sDefault.bWidelinks, NULL, NULL},
@@ -286,7 +283,6 @@ FN_LOCAL_STRING(lp_comment, comment)
 
 FN_LOCAL_BOOL(lp_casesensitive, bCaseSensitive)
 FN_LOCAL_BOOL(lp_shortpreservecase, bShortCasePreserve)
-FN_LOCAL_BOOL(lp_status, status)
 FN_LOCAL_BOOL(lp_readonly, bRead_only)
 FN_LOCAL_BOOL(lp_locking, bLocking)
 FN_LOCAL_BOOL(lp_strict_locking, bStrictLocking)
@@ -422,7 +418,6 @@ static bool lp_add_ipc(void)
 
 	string_set(&iSERVICE(i).szPath, tmpdir());
 	string_set(&iSERVICE(i).comment, comment);
-	iSERVICE(i).status = false;
 	iSERVICE(i).bRead_only = true;
 
 	DEBUG(3, ("adding IPC service\n"));
