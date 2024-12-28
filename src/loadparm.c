@@ -100,7 +100,6 @@ typedef struct {
 	int iDefaultCase;
 	bool bCaseSensitive;
 	bool bShortCasePreserve;
-	bool bRead_only;
 	bool bLocking;
 	bool bStrictLocking;
 	bool bWidelinks;
@@ -123,7 +122,6 @@ static service sDefault = {
     CASE_LOWER, /* iDefaultCase */
     false,      /* case sensitive */
     false,      /* short case preserve */
-    true,       /* bRead_only */
     true,       /* bLocking */
     false,      /* bStrictLocking */
     true,       /* bWidelinks */
@@ -164,10 +162,6 @@ static struct parm_struct {
     {"path", P_STRING, P_LOCAL, &sDefault.szPath, NULL, NULL},
     {"directory", P_STRING, P_LOCAL, &sDefault.szPath, NULL, NULL},
     {"guest account", P_STRING, P_LOCAL, &sDefault.szGuestaccount, NULL, NULL},
-    {"read only", P_BOOL, P_LOCAL, &sDefault.bRead_only, NULL, NULL},
-    {"write ok", P_BOOLREV, P_LOCAL, &sDefault.bRead_only, NULL, NULL},
-    {"writeable", P_BOOLREV, P_LOCAL, &sDefault.bRead_only, NULL, NULL},
-    {"writable", P_BOOLREV, P_LOCAL, &sDefault.bRead_only, NULL, NULL},
     {"create mask", P_OCTAL, P_LOCAL, &sDefault.iCreate_mask, NULL, NULL},
     {"create mode", P_OCTAL, P_LOCAL, &sDefault.iCreate_mask, NULL, NULL},
     {"force create mode", P_OCTAL, P_LOCAL, &sDefault.iCreate_force_mode, NULL,
@@ -270,7 +264,6 @@ FN_LOCAL_STRING(lp_comment, comment)
 
 FN_LOCAL_BOOL(lp_casesensitive, bCaseSensitive)
 FN_LOCAL_BOOL(lp_shortpreservecase, bShortCasePreserve)
-FN_LOCAL_BOOL(lp_readonly, bRead_only)
 FN_LOCAL_BOOL(lp_locking, bLocking)
 FN_LOCAL_BOOL(lp_strict_locking, bStrictLocking)
 FN_LOCAL_BOOL(lp_widelinks, bWidelinks)
@@ -398,7 +391,6 @@ static bool lp_add_ipc(void)
 
 	string_set(&iSERVICE(i).szPath, tmpdir());
 	string_set(&iSERVICE(i).comment, comment);
-	iSERVICE(i).bRead_only = true;
 
 	DEBUG(3, ("adding IPC service\n"));
 
