@@ -3143,12 +3143,6 @@ int main(int argc, char *argv[])
 	DEBUG(2, ("uid=%d gid=%d euid=%d egid=%d\n", getuid(), getgid(),
 	          geteuid(), getegid()));
 
-	if (sizeof(uint16_t) < 2 || sizeof(uint32_t) < 4) {
-		DEBUG(0, ("ERROR: Samba is not configured correctly for the "
-		          "word size on your machine\n"));
-		exit(1);
-	}
-
 	init_structs();
 
 	if (!reload_services(false))
