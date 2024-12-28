@@ -1325,8 +1325,8 @@ bool become_service(int cnum, bool do_chdir)
 
 	snum = SNUM(cnum);
 
-	if (do_chdir && ChDir(Connections[cnum].connectpath) != 0 &&
-	    ChDir(Connections[cnum].origpath) != 0) {
+	if (do_chdir && chdir(Connections[cnum].connectpath) != 0 &&
+	    chdir(Connections[cnum].origpath) != 0) {
 		DEBUG(0, ("%s chdir (%s) failed cnum=%d\n", timestring(),
 		          Connections[cnum].connectpath, cnum));
 		return (false);
@@ -1881,7 +1881,7 @@ int make_connection(char *service, char *dev)
 		return (-1);
 	}
 
-	if (ChDir(pcon->connectpath) != 0) {
+	if (chdir(pcon->connectpath) != 0) {
 		DEBUG(0, ("Can't change directory to %s (%s)\n",
 		          pcon->connectpath, strerror(errno)));
 		pcon->open = false;
@@ -1898,7 +1898,7 @@ int make_connection(char *service, char *dev)
 		pstrcpy(s, pcon->connectpath);
 		GetWd(s);
 		string_set(&pcon->connectpath, s);
-		ChDir(pcon->connectpath);
+		chdir(pcon->connectpath);
 	}
 #endif
 

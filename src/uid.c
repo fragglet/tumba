@@ -49,7 +49,7 @@ void init_uid(void)
 
 	current_user.cnum = -1;
 
-	ChDir(OriginalDir);
+	chdir(OriginalDir);
 }
 
 /****************************************************************************
@@ -207,7 +207,7 @@ bool unbecome_user(void)
 	if (current_user.cnum == -1)
 		return (false);
 
-	ChDir(OriginalDir);
+	chdir(OriginalDir);
 
 	if (initial_uid == 0) {
 		if (seteuid(initial_uid) != 0)
@@ -228,7 +228,7 @@ bool unbecome_user(void)
 	current_user.uid = initial_uid;
 	current_user.gid = initial_gid;
 
-	if (ChDir(OriginalDir) != 0)
+	if (chdir(OriginalDir) != 0)
 		DEBUG(0, ("%s chdir(%s) failed in unbecome_user\n",
 		          timestring(), OriginalDir));
 

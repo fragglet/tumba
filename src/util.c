@@ -757,26 +757,6 @@ void unix_clean_name(char *s)
 	trim_string(s, NULL, "/..");
 }
 
-/*******************************************************************
-a wrapper for the normal chdir() function
-********************************************************************/
-int ChDir(char *path)
-{
-	int res;
-	static pstring LastDir = "";
-
-	if (strcsequal(path, "."))
-		return (0);
-
-	if (*path == '/' && strcsequal(LastDir, path))
-		return (0);
-	DEBUG(3, ("chdir to %s\n", path));
-	res = chdir(path);
-	if (!res)
-		pstrcpy(LastDir, path);
-	return (res);
-}
-
 /* number of list structures for a caching GetWd function. */
 #define MAX_GETWDCACHE (50)
 
@@ -933,14 +913,14 @@ bool reduce_name(char *s, char *dir, bool widelinks)
 		return (false);
 	}
 
-	if (ChDir(dir) != 0) {
+	if (chdir(dir) != 0) {
 		DEBUG(0, ("couldn't chdir to %s\n", dir));
 		return (false);
 	}
 
 	if (!GetWd(dir2)) {
 		DEBUG(0, ("couldn't getwd for %s\n", dir));
-		ChDir(wd);
+		chdir(wd);
 		return (false);
 	}
 
@@ -952,15 +932,15 @@ bool reduce_name(char *s, char *dir, bool widelinks)
 			*p = '/';
 	}
 
-	if (ChDir(base_name) != 0) {
-		ChDir(wd);
+	if (chdir(base_name) != 0) {
+		chdir(wd);
 		DEBUG(3, ("couldn't chdir for %s %s basename=%s\n", s, dir,
 		          base_name));
 		return (false);
 	}
 
 	if (!GetWd(newname)) {
-		ChDir(wd);
+		chdir(wd);
 		DEBUG(2, ("couldn't get wd for %s %s\n", s, dir2));
 		return (false);
 	}
@@ -976,7 +956,7 @@ bool reduce_name(char *s, char *dir, bool widelinks)
 			l--;
 
 		if (strncmp(newname, dir2, l) != 0) {
-			ChDir(wd);
+			chdir(wd);
 			DEBUG(2, ("Bad access attempt? s=%s dir=%s newname=%s "
 			          "l=%d\n",
 			          s, dir2, newname, l));
@@ -992,7 +972,7 @@ bool reduce_name(char *s, char *dir, bool widelinks)
 			pstrcpy(s, newname);
 	}
 
-	ChDir(wd);
+	chdir(wd);
 
 	if (strlen(s) == 0)
 		pstrcpy(s, "./");
