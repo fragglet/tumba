@@ -181,10 +181,49 @@ int read_dosattrib(const char *path)
 
 void write_dosattrib(const char *path, int attrib)
 {
+	struct stat st;
 	char buf[5];
+	int result, new_mode;
 
 	snprintf(buf, sizeof(buf), "0x%02x", attrib);
-	sys_setxattr(path, DOSATTRIB_NAME, buf, strlen(buf));
+	result = sys_setxattr(path, DOSATTRIB_NAME, buf, strlen(buf));
+	if (result != 0) {
+		DEBUG(8, ("setxattr on %s returned %d (errno=%d)\n", path, result,
+		          errno));
+	}
+	if (result == 0 || errno != EACCES) {
+		return;
+	}
+
+	DEBUG(8, ("permission denied setting DOSATTRIB on %s, "
+	          "trying mode switch workaround\n", path));
+	/* We got permission denied trying to set the xattr. This may be
+	   because the file is write-protected. So set the permissions to
+	   allow writes and try again. */
+	if (stat(path, &st) != 0) {
+		DEBUG(8, ("failed to stat %s\n", path));
+		return;
+	}
+	new_mode = st.st_mode | S_IWUSR;
+	if (st.st_mode == new_mode) {
+		/* We got permission denied for a different reason */
+		DEBUG(8, ("failed to stat %s\n", path));
+		return;
+	}
+	if (chmod(path, new_mode) != 0) {
+		DEBUG(8, ("failed to chmod %s to %o\n", path, new_mode));
+		return;
+	}
+	result = sys_setxattr(path, DOSATTRIB_NAME, buf, strlen(buf));
+	if (result != 0) {
+		DEBUG(8, ("setxattr on %s failed (second attempt)\n", path));
+	} else {
+		DEBUG(8, ("mode switch workaround succeeded\n"));
+	}
+	/* Change back to the old permissions */
+	if (chmod(path, st.st_mode) != 0) {
+		DEBUG(8, ("failed to chmod %s back to %o\n", path, st.st_mode));
+	}
 }
 
 /****************************************************************************
