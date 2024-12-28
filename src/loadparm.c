@@ -105,7 +105,6 @@ typedef struct {
 	bool bStrictLocking;
 	bool bWidelinks;
 	bool bSymlinks;
-	bool *copymap;
 	bool bDosFiletimes;
 	char dummy[3]; /* for alignment */
 } service;
@@ -130,7 +129,6 @@ static service sDefault = {
     false,      /* bStrictLocking */
     true,       /* bWidelinks */
     true,       /* bSymlinks */
-    NULL,       /* copymap */
     false,      /* bDosFiletimes */
     ""          /* dummy */
 };
@@ -141,9 +139,6 @@ static int iNumServices = 0;
 static int iServiceIndex = 0;
 
 #define NUMPARAMETERS (sizeof(parm_table) / sizeof(struct parm_struct))
-
-/* prototypes for the special type handlers */
-static bool handle_copy(char *pszParmValue, char **ptr);
 
 struct enum_list {
 	int value;
@@ -163,7 +158,6 @@ static struct parm_struct {
 } parm_table[] = {
     {"-valid", P_BOOL, P_LOCAL, &sDefault.valid, NULL, NULL},
     {"comment", P_STRING, P_LOCAL, &sDefault.comment, NULL, NULL},
-    {"copy", P_STRING, P_LOCAL, &sDefault.szCopy, handle_copy, NULL},
     {"default case", P_ENUM, P_LOCAL, &sDefault.iDefaultCase, NULL, enum_case},
     {"case sensitive", P_BOOL, P_LOCAL, &sDefault.bCaseSensitive, NULL, NULL},
     {"casesignames", P_BOOL, P_LOCAL, &sDefault.bCaseSensitive, NULL, NULL},
@@ -296,13 +290,11 @@ FN_LOCAL_INTEGER(lp_defaultcase, iDefaultCase)
 static int strwicmp(char *psz1, char *psz2);
 static int map_parameter(char *pszParmName);
 static bool set_boolean(bool *pb, char *pszParmValue);
-static int getservicebyname(char *pszServiceName, service *pserviceDest);
-static void copy_service(service *pserviceDest, service *pserviceSource,
-                         bool *pcopymapDest);
+static int getservicebyname(char *pszServiceName);
+static void copy_service(service *pserviceDest, service *pserviceSource);
 static bool service_ok(int iService);
 static bool do_parameter(char *pszParmName, char *pszParmValue);
 static bool do_section(char *pszSectionName);
-static void init_copymap(service *pservice);
 
 /***************************************************************************
 initialise a service to the defaults
@@ -310,7 +302,7 @@ initialise a service to the defaults
 static void init_service(service *pservice)
 {
 	bzero((char *) pservice, sizeof(service));
-	copy_service(pservice, &sDefault, NULL);
+	copy_service(pservice, &sDefault);
 }
 
 /***************************************************************************
@@ -327,10 +319,6 @@ static void free_service(service *pservice)
 		          pservice->szService));
 
 	string_free(&pservice->szService);
-	if (pservice->copymap) {
-		free(pservice->copymap);
-		pservice->copymap = NULL;
-	}
 
 	for (i = 0; parm_table[i].label; i++)
 		if ((parm_table[i].type == P_STRING ||
@@ -355,7 +343,7 @@ static int add_a_service(service *pservice, char *name)
 
 	/* it might already exist */
 	if (name) {
-		i = getservicebyname(name, NULL);
+		i = getservicebyname(name);
 		if (i >= 0)
 			return (i);
 	}
@@ -383,7 +371,7 @@ static int add_a_service(service *pservice, char *name)
 	pSERVICE(i)->valid = true;
 
 	init_service(pSERVICE(i));
-	copy_service(pSERVICE(i), &tservice, NULL);
+	copy_service(pSERVICE(i), &tservice);
 	if (name)
 		string_set(&iSERVICE(i).szService, name);
 
@@ -499,16 +487,13 @@ static bool set_boolean(bool *pb, char *pszParmValue)
 /***************************************************************************
 Find a service by name. Otherwise works like get_service.
 ***************************************************************************/
-static int getservicebyname(char *pszServiceName, service *pserviceDest)
+static int getservicebyname(char *pszServiceName)
 {
 	int iService;
 
 	for (iService = iNumServices - 1; iService >= 0; iService--)
 		if (VALID(iService) && strwicmp(iSERVICE(iService).szService,
 		                                pszServiceName) == 0) {
-			if (pserviceDest != NULL)
-				copy_service(pserviceDest, pSERVICE(iService),
-				             NULL);
 			break;
 		}
 
@@ -517,18 +502,13 @@ static int getservicebyname(char *pszServiceName, service *pserviceDest)
 
 /***************************************************************************
 Copy a service structure to another
-
-If pcopymapDest is NULL then copy all fields
 ***************************************************************************/
-static void copy_service(service *pserviceDest, service *pserviceSource,
-                         bool *pcopymapDest)
+static void copy_service(service *pserviceDest, service *pserviceSource)
 {
 	int i;
-	bool bcopyall = (pcopymapDest == NULL);
 
 	for (i = 0; parm_table[i].label; i++)
-		if (parm_table[i].ptr && parm_table[i].class == P_LOCAL &&
-		    (bcopyall || pcopymapDest[i])) {
+		if (parm_table[i].ptr && parm_table[i].class == P_LOCAL) {
 			void *def_ptr = parm_table[i].ptr;
 			void *src_ptr = ((char *) pserviceSource) +
 			                PTR_DIFF(def_ptr, &sDefault);
@@ -563,14 +543,6 @@ static void copy_service(service *pserviceDest, service *pserviceSource,
 				break;
 			}
 		}
-
-	if (bcopyall) {
-		init_copymap(pserviceDest);
-		if (pserviceSource->copymap)
-			memcpy((void *) pserviceDest->copymap,
-			       (void *) pserviceSource->copymap,
-			       sizeof(bool) * NUMPARAMETERS);
-	}
 }
 
 /***************************************************************************
@@ -671,60 +643,6 @@ bool lp_file_list_changed(void)
 }
 
 /***************************************************************************
-handle the interpretation of the copy parameter
-***************************************************************************/
-static bool handle_copy(char *pszParmValue, char **ptr)
-{
-	bool bRetval;
-	int iTemp;
-	service serviceTemp;
-
-	string_set(ptr, pszParmValue);
-
-	init_service(&serviceTemp);
-
-	bRetval = false;
-
-	DEBUG(3, ("Copying service from service %s\n", pszParmValue));
-
-	if ((iTemp = getservicebyname(pszParmValue, &serviceTemp)) >= 0) {
-		if (iTemp == iServiceIndex) {
-			DEBUG(0,
-			      ("Can't copy service %s - unable to copy self!\n",
-			       pszParmValue));
-		} else {
-			copy_service(pSERVICE(iServiceIndex), &serviceTemp,
-			             iSERVICE(iServiceIndex).copymap);
-			bRetval = true;
-		}
-	} else {
-		DEBUG(0, ("Unable to copy service - source not found: %s\n",
-		          pszParmValue));
-		bRetval = false;
-	}
-
-	free_service(&serviceTemp);
-	return (bRetval);
-}
-
-/***************************************************************************
-initialise a copymap
-***************************************************************************/
-static void init_copymap(service *pservice)
-{
-	int i;
-	if (pservice->copymap)
-		free(pservice->copymap);
-	pservice->copymap = (bool *) malloc(sizeof(bool) * NUMPARAMETERS);
-	if (!pservice->copymap)
-		DEBUG(0, ("Couldn't allocate copymap!! (size %d)\n",
-		          NUMPARAMETERS));
-
-	for (i = 0; i < NUMPARAMETERS; i++)
-		pservice->copymap[i] = true;
-}
-
-/***************************************************************************
 Process a parameter for a particular service number. If snum < 0
 then assume we are in the globals
 ***************************************************************************/
@@ -745,17 +663,6 @@ bool lp_do_parameter(int snum, char *pszParmName, char *pszParmValue)
 
 	parm_ptr =
 	    ((char *) pSERVICE(snum)) + PTR_DIFF(def_ptr, &sDefault);
-
-	if (snum >= 0) {
-		if (!iSERVICE(snum).copymap)
-			init_copymap(pSERVICE(snum));
-
-		/* this handles the aliases - set the copymap for other entries
-		   with the same data pointer */
-		for (i = 0; parm_table[i].label; i++)
-			if (parm_table[i].ptr == parm_table[parmnum].ptr)
-				iSERVICE(snum).copymap[i] = false;
-	}
 
 	/* if it is a special case then go ahead */
 	if (parm_table[parmnum].special) {
