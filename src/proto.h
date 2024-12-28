@@ -53,7 +53,6 @@ char *lp_volume(int);
 bool lp_casesensitive(int);
 bool lp_shortpreservecase(int);
 bool lp_status(int);
-bool lp_hide_dot_files(int);
 bool lp_readonly(int);
 bool lp_locking(int);
 bool lp_strict_locking(int);

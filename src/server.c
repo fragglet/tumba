@@ -212,18 +212,6 @@ int dos_mode(int cnum, char *path, struct stat *sbuf)
 	if (S_ISDIR(sbuf->st_mode))
 		result = aDIR | (result & aRONLY);
 
-	/* hide files with a name starting with a . */
-	if (lp_hide_dot_files(SNUM(cnum))) {
-		char *p = strrchr(path, '/');
-		if (p)
-			p++;
-		else
-			p = path;
-
-		if (p[0] == '.' && p[1] != '.' && p[1] != 0)
-			result |= aHIDDEN;
-	}
-
 	DEBUG(8, ("dos_mode returning "));
 
 	if (result & aHIDDEN)

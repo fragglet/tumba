@@ -103,7 +103,6 @@ typedef struct {
 	bool bCaseSensitive;
 	bool bShortCasePreserve;
 	bool status;
-	bool bHideDotFiles;
 	bool bRead_only;
 	bool bLocking;
 	bool bStrictLocking;
@@ -132,7 +131,6 @@ static service sDefault = {
     false,      /* case sensitive */
     false,      /* short case preserve */
     true,       /* status */
-    true,       /* bHideDotFiles */
     true,       /* bRead_only */
     true,       /* bLocking */
     false,      /* bStrictLocking */
@@ -196,7 +194,6 @@ static struct parm_struct {
     {"force directory mode", P_OCTAL, P_LOCAL, &sDefault.iDir_force_mode, NULL,
      NULL},
     {"status", P_BOOL, P_LOCAL, &sDefault.status, NULL, NULL},
-    {"hide dot files", P_BOOL, P_LOCAL, &sDefault.bHideDotFiles, NULL, NULL},
     {"locking", P_BOOL, P_LOCAL, &sDefault.bLocking, NULL, NULL},
     {"strict locking", P_BOOL, P_LOCAL, &sDefault.bStrictLocking, NULL, NULL},
     {"wide links", P_BOOL, P_LOCAL, &sDefault.bWidelinks, NULL, NULL},
@@ -301,7 +298,6 @@ FN_LOCAL_STRING(lp_volume, volume)
 FN_LOCAL_BOOL(lp_casesensitive, bCaseSensitive)
 FN_LOCAL_BOOL(lp_shortpreservecase, bShortCasePreserve)
 FN_LOCAL_BOOL(lp_status, status)
-FN_LOCAL_BOOL(lp_hide_dot_files, bHideDotFiles)
 FN_LOCAL_BOOL(lp_readonly, bRead_only)
 FN_LOCAL_BOOL(lp_locking, bLocking)
 FN_LOCAL_BOOL(lp_strict_locking, bStrictLocking)
