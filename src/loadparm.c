@@ -224,13 +224,6 @@ static void init_globals(void)
 	}
 }
 
-/***************************************************************************
-Initialise the sDefault parameter structure.
-***************************************************************************/
-static void init_locals(void)
-{
-}
-
 /******************************************************************* a
 convenience routine to grab string parameters into a rotating buffer,
 and run standard_sub_basic on them. The buffers can be written to by
