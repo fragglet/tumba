@@ -1,0 +1,13 @@
+# systemd service file for Rumba
+[Unit]
+Description=Rumba SMB server
+
+[Service]
+User=nobody
+ExecStart=rumba_smbd
+Restart=on-failure
+PrivateTmp=true
+SocketBindAllow=ipv4:tcp:139
+
+[Install]
+WantedBy=default.target
