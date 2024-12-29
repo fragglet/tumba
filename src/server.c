@@ -1423,8 +1423,7 @@ bool become_service(int cnum, bool do_chdir)
 
 	snum = SNUM(cnum);
 
-	if (do_chdir && chdir(Connections[cnum].connectpath) != 0 &&
-	    chdir(Connections[cnum].origpath) != 0) {
+	if (do_chdir && chdir(Connections[cnum].connectpath) != 0) {
 		DEBUG(0, ("%s chdir (%s) failed cnum=%d\n", timestring(),
 		          Connections[cnum].connectpath, cnum));
 		return (false);
@@ -2014,8 +2013,6 @@ int make_connection(char *service, char *dev)
 		unbecome_user();
 		return (-5);
 	}
-
-	string_set(&pcon->origpath, pcon->connectpath);
 
 	num_connections_open++;
 
@@ -3085,7 +3082,6 @@ static void init_structs(void)
 		string_init(&Connections[i].user, "");
 		string_init(&Connections[i].dirpath, "");
 		string_init(&Connections[i].connectpath, "");
-		string_init(&Connections[i].origpath, "");
 	}
 
 	for (i = 0; i < MAX_OPEN_FILES; i++) {

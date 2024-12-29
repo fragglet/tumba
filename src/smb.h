@@ -298,7 +298,6 @@ typedef struct {
 	bool read_only;
 	char *dirpath;
 	char *connectpath;
-	char *origpath;
 	char *user; /* name of user who *opened* this connection */
 	int uid;    /* uid of user who *opened* this connection */
 	int gid;    /* gid of user who *opened* this connection */
