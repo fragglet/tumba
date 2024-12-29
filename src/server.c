@@ -188,15 +188,16 @@ void write_dosattrib(const char *path, int attrib)
 	snprintf(buf, sizeof(buf), "0x%02x", attrib);
 	result = sys_setxattr(path, DOSATTRIB_NAME, buf, strlen(buf));
 	if (result != 0) {
-		DEBUG(8, ("setxattr on %s returned %d (errno=%d)\n", path, result,
-		          errno));
+		DEBUG(8, ("setxattr on %s returned %d (errno=%d)\n", path,
+		          result, errno));
 	}
 	if (result == 0 || errno != EACCES) {
 		return;
 	}
 
 	DEBUG(8, ("permission denied setting DOSATTRIB on %s, "
-	          "trying mode switch workaround\n", path));
+	          "trying mode switch workaround\n",
+	          path));
 	/* We got permission denied trying to set the xattr. This may be
 	   because the file is write-protected. So set the permissions to
 	   allow writes and try again. */
@@ -647,9 +648,8 @@ int sys_disk_free(char *path, int *bsize, int *dfree, int *dsize)
 static bool path_within(const char *path, const char *top)
 {
 	size_t top_len = strlen(top);
-	return strlen(path) >= top_len
-	    && strncmp(top, path, top_len) == 0
-	    && (path[top_len] == '/' || path[top_len] == '\0');
+	return strlen(path) >= top_len && strncmp(top, path, top_len) == 0 &&
+	       (path[top_len] == '/' || path[top_len] == '\0');
 }
 
 static void set_parent_dir(char *parent, char *path)
@@ -684,13 +684,13 @@ bool check_name(char *name, int cnum)
 		return true;
 	}
 	if (getcwd(old_wd, sizeof(old_wd)) == NULL) {
-		DEBUG(3, ("check_name: denied: getcwd() errno=%d\n",
-		          top, errno));
+		DEBUG(3,
+		      ("check_name: denied: getcwd() errno=%d\n", top, errno));
 		return false;
 	}
 	if (chdir(top) != 0) {
-		DEBUG(3, ("check_name: denied: chdir(%s) errno=%d\n",
-		          top, errno));
+		DEBUG(3,
+		      ("check_name: denied: chdir(%s) errno=%d\n", top, errno));
 		return false;
 	}
 
@@ -715,13 +715,15 @@ bool check_name(char *name, int cnum)
 		set_parent_dir(parent, name);
 		canon_path = realpath(parent, NULL);
 		if (canon_path == NULL) {
-			DEBUG(3, ("check_name: realpath(%s) errno=%d (parent)\n",
-			          parent, errno));
+			DEBUG(3,
+			      ("check_name: realpath(%s) errno=%d (parent)\n",
+			       parent, errno));
 		}
 		success = canon_path != NULL && path_within(canon_path, top);
 		if (success) {
 			DEBUG(3, ("check_name: no file %s but parent %s "
-			          "within %s\n", name, parent, top));
+			          "within %s\n",
+			          name, parent, top));
 		}
 		free(canon_path);
 	}
@@ -732,8 +734,8 @@ bool check_name(char *name, int cnum)
 	}
 
 	if (chdir(old_wd) != 0) {
-		DEBUG(3, ("check_name: ending chdir(%s) errno=%d\n",
-		          old_wd, errno));
+		DEBUG(3, ("check_name: ending chdir(%s) errno=%d\n", old_wd,
+		          errno));
 	}
 
 	return success;
@@ -1895,8 +1897,8 @@ static bool dir_world_writeable(const char *path)
 	struct stat st;
 
 	if (stat(path, &st) != 0) {
-		DEBUG(8, ("failed to stat %s, assuming read-only share\n",
-		          path));
+		DEBUG(8,
+		      ("failed to stat %s, assuming read-only share\n", path));
 		return false;
 	}
 
