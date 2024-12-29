@@ -694,6 +694,9 @@ bool check_name(char *name, int cnum)
 		return false;
 	}
 
+	/* TODO: There should maybe be an option to allow symlinks to certain
+	   allow-listed directories. */
+
 	/* To check it's a valid path, we check the realpath()-expanded
 	   filename (with all symlinks removed) is either equal to the
 	   top-level directory or is a subpath. This guarantees that it is

@@ -53,8 +53,6 @@ bool lp_casesensitive(int);
 bool lp_shortpreservecase(int);
 bool lp_locking(int);
 bool lp_strict_locking(int);
-bool lp_widelinks(int);
-bool lp_symlinks(int);
 int lp_create_mode(int);
 int lp_force_create_mode(int);
 int lp_dir_mode(int);

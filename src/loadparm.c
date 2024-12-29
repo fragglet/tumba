@@ -102,8 +102,6 @@ typedef struct {
 	bool bShortCasePreserve;
 	bool bLocking;
 	bool bStrictLocking;
-	bool bWidelinks;
-	bool bSymlinks;
 	char dummy[3]; /* for alignment */
 } service;
 
@@ -124,8 +122,6 @@ static service sDefault = {
     false,      /* short case preserve */
     true,       /* bLocking */
     false,      /* bStrictLocking */
-    true,       /* bWidelinks */
-    true,       /* bSymlinks */
     ""          /* dummy */
 };
 
@@ -172,8 +168,6 @@ static struct parm_struct {
      NULL},
     {"locking", P_BOOL, P_LOCAL, &sDefault.bLocking, NULL, NULL},
     {"strict locking", P_BOOL, P_LOCAL, &sDefault.bStrictLocking, NULL, NULL},
-    {"wide links", P_BOOL, P_LOCAL, &sDefault.bWidelinks, NULL, NULL},
-    {"follow symlinks", P_BOOL, P_LOCAL, &sDefault.bSymlinks, NULL, NULL},
 
     {NULL, P_BOOL, P_NONE, NULL, NULL, NULL}};
 
@@ -266,8 +260,6 @@ FN_LOCAL_BOOL(lp_casesensitive, bCaseSensitive)
 FN_LOCAL_BOOL(lp_shortpreservecase, bShortCasePreserve)
 FN_LOCAL_BOOL(lp_locking, bLocking)
 FN_LOCAL_BOOL(lp_strict_locking, bStrictLocking)
-FN_LOCAL_BOOL(lp_widelinks, bWidelinks)
-FN_LOCAL_BOOL(lp_symlinks, bSymlinks)
 
 FN_LOCAL_INTEGER(lp_create_mode, iCreate_mask)
 FN_LOCAL_INTEGER(lp_force_create_mode, iCreate_force_mode)
