@@ -101,7 +101,6 @@ typedef struct {
 	bool bCaseSensitive;
 	bool bShortCasePreserve;
 	bool bLocking;
-	bool bStrictLocking;
 	char dummy[3]; /* for alignment */
 } service;
 
@@ -121,7 +120,6 @@ static service sDefault = {
     false,      /* case sensitive */
     false,      /* short case preserve */
     true,       /* bLocking */
-    false,      /* bStrictLocking */
     ""          /* dummy */
 };
 
@@ -167,7 +165,6 @@ static struct parm_struct {
     {"force directory mode", P_OCTAL, P_LOCAL, &sDefault.iDir_force_mode, NULL,
      NULL},
     {"locking", P_BOOL, P_LOCAL, &sDefault.bLocking, NULL, NULL},
-    {"strict locking", P_BOOL, P_LOCAL, &sDefault.bStrictLocking, NULL, NULL},
 
     {NULL, P_BOOL, P_NONE, NULL, NULL, NULL}};
 
@@ -259,7 +256,6 @@ FN_LOCAL_STRING(lp_comment, comment)
 FN_LOCAL_BOOL(lp_casesensitive, bCaseSensitive)
 FN_LOCAL_BOOL(lp_shortpreservecase, bShortCasePreserve)
 FN_LOCAL_BOOL(lp_locking, bLocking)
-FN_LOCAL_BOOL(lp_strict_locking, bStrictLocking)
 
 FN_LOCAL_INTEGER(lp_create_mode, iCreate_mask)
 FN_LOCAL_INTEGER(lp_force_create_mode, iCreate_force_mode)

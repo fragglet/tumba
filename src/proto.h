@@ -52,7 +52,6 @@ char *lp_comment(int);
 bool lp_casesensitive(int);
 bool lp_shortpreservecase(int);
 bool lp_locking(int);
-bool lp_strict_locking(int);
 int lp_create_mode(int);
 int lp_force_create_mode(int);
 int lp_dir_mode(int);
@@ -71,8 +70,6 @@ int lp_servicenumber(char *pszServiceName);
 
 /*The following definitions come from  locking.c  */
 
-bool is_locked(int fnum, int cnum, uint32_t count, uint32_t offset,
-               int lock_type);
 bool do_lock(int fnum, int cnum, uint32_t count, uint32_t offset, int lock_type,
              int *eclass, uint32_t *ecode);
 bool do_unlock(int fnum, int cnum, uint32_t count, uint32_t offset, int *eclass,

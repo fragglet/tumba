@@ -1189,15 +1189,7 @@ static void truncate_unless_locked(int fnum, int cnum, int token,
                                    bool *share_locked)
 {
 	if (Files[fnum].can_write) {
-		if (is_locked(fnum, cnum, 0x3FFFFFFF, 0, F_WRLCK)) {
-			close_file(fnum, false);
-			/* Share mode no longer locked. */
-			*share_locked = false;
-			errno = EACCES;
-			unix_ERR_class = ERRDOS;
-			unix_ERR_code = ERRlock;
-		} else
-			ftruncate(Files[fnum].fd_ptr->fd, 0);
+		ftruncate(Files[fnum].fd_ptr->fd, 0);
 	}
 }
 

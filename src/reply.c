@@ -1348,7 +1348,7 @@ int reply_unlink(char *inbuf, char *outbuf, int dum_size, int dum_bufsize)
 int reply_readbraw(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 {
 	int cnum, maxcount, mincount, fnum;
-	int nread = 0;
+	int nread = 0, size, sizeneeded;
 	uint32_t startpos;
 	char *header = outbuf;
 	int ret = 0;
@@ -1372,20 +1372,18 @@ int reply_readbraw(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		return (-1);
 	}
 
-	if (!is_locked(fnum, cnum, maxcount, startpos, F_RDLCK)) {
-		int size = Files[fnum].size;
-		int sizeneeded = startpos + maxcount;
+	size = Files[fnum].size;
+	sizeneeded = startpos + maxcount;
 
-		if (size < sizeneeded) {
-			struct stat st;
-			if (fstat(Files[fnum].fd_ptr->fd, &st) == 0)
-				size = st.st_size;
-			if (!Files[fnum].can_write)
-				Files[fnum].size = size;
-		}
-
-		nread = MIN(maxcount, (int) (size - startpos));
+	if (size < sizeneeded) {
+		struct stat st;
+		if (fstat(Files[fnum].fd_ptr->fd, &st) == 0)
+			size = st.st_size;
+		if (!Files[fnum].can_write)
+			Files[fnum].size = size;
 	}
+
+	nread = MIN(maxcount, (int) (size - startpos));
 
 	if (nread < mincount)
 		nread = 0;
@@ -1496,9 +1494,6 @@ int reply_read(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	numtoread = MIN(BUFFER_SIZE - outsize, numtoread);
 	data = smb_buf(outbuf) + 3;
 
-	if (is_locked(fnum, cnum, numtoread, startpos, F_RDLCK))
-		return (ERROR(ERRDOS, ERRlock));
-
 	if (numtoread > 0)
 		nread = read_file(fnum, data, startpos, numtoread);
 
@@ -1539,8 +1534,6 @@ int reply_read_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	set_message(outbuf, 12, 0, true);
 	data = smb_buf(outbuf);
 
-	if (is_locked(fnum, cnum, smb_maxcnt, smb_offs, F_RDLCK))
-		return (ERROR(ERRDOS, ERRlock));
 	nread = read_file(fnum, data, smb_offs, smb_maxcnt);
 
 	if (nread < 0)
@@ -1597,9 +1590,6 @@ int reply_writebraw(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	/* force the error type */
 	CVAL(inbuf, smb_com) = SMBwritec;
 	CVAL(outbuf, smb_com) = SMBwritec;
-
-	if (is_locked(fnum, cnum, tcount, startpos, F_WRLCK))
-		return (ERROR(ERRDOS, ERRlock));
 
 	if (seek_file(fnum, startpos) != startpos)
 		DEBUG(0, ("couldn't seek to %d in writebraw\n", startpos));
@@ -1690,9 +1680,6 @@ int reply_writeunlock(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	startpos = IVAL(inbuf, smb_vwv2);
 	data = smb_buf(inbuf) + 3;
 
-	if (is_locked(fnum, cnum, numtowrite, startpos, F_WRLCK))
-		return (ERROR(ERRDOS, ERRlock));
-
 	seek_file(fnum, startpos);
 
 	/* The special X/Open SMB protocol handling of
@@ -1743,9 +1730,6 @@ int reply_write(char *inbuf, char *outbuf, int dum1, int dum2)
 	startpos = IVAL(inbuf, smb_vwv2);
 	data = smb_buf(inbuf) + 3;
 
-	if (is_locked(fnum, cnum, numtowrite, startpos, F_WRLCK))
-		return (ERROR(ERRDOS, ERRlock));
-
 	seek_file(fnum, startpos);
 
 	/* X/Open SMB protocol says that if smb_vwv1 is
@@ -1794,9 +1778,6 @@ int reply_write_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	CHECK_ERROR(fnum);
 
 	data = smb_base(inbuf) + smb_doff;
-
-	if (is_locked(fnum, cnum, smb_dsize, smb_offs, F_WRLCK))
-		return (ERROR(ERRDOS, ERRlock));
 
 	seek_file(fnum, smb_offs);
 
@@ -1971,9 +1952,6 @@ int reply_writeclose(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	startpos = IVAL(inbuf, smb_vwv2);
 	mtime = make_unix_date3(inbuf + smb_vwv4);
 	data = smb_buf(inbuf) + 1;
-
-	if (is_locked(fnum, cnum, numtowrite, startpos, F_WRLCK))
-		return (ERROR(ERRDOS, ERRlock));
 
 	seek_file(fnum, startpos);
 
@@ -2844,9 +2822,6 @@ int reply_readbmpx(char *inbuf, char *outbuf, int length, int bufsize)
 	tcount = maxcount;
 	total_read = 0;
 
-	if (is_locked(fnum, cnum, maxcount, startpos, F_RDLCK))
-		return (ERROR(ERRDOS, ERRlock));
-
 	do {
 		int N = MIN(max_per_packet, tcount - total_read);
 
@@ -2903,9 +2878,6 @@ int reply_writebmpx(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	/* If this fails we need to send an SMBwriteC response,
 	   not an SMBwritebmpx - set this up now so we don't forget */
 	CVAL(outbuf, smb_com) = SMBwritec;
-
-	if (is_locked(fnum, cnum, tcount, startpos, F_WRLCK))
-		return (ERROR(ERRDOS, ERRlock));
 
 	seek_file(fnum, startpos);
 	nwritten = write_file(fnum, data, numtowrite);
