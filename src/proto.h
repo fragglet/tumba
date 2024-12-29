@@ -51,7 +51,6 @@ char *lp_guestaccount(int);
 char *lp_comment(int);
 bool lp_casesensitive(int);
 bool lp_shortpreservecase(int);
-bool lp_locking(int);
 int lp_create_mode(int);
 int lp_force_create_mode(int);
 int lp_dir_mode(int);

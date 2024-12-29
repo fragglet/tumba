@@ -81,9 +81,6 @@ bool do_lock(int fnum, int cnum, uint32_t count, uint32_t offset, int lock_type,
 	bool ok = false;
 	files_struct *fsp = &Files[fnum];
 
-	if (!lp_locking(SNUM(cnum)))
-		return (true);
-
 	if (count == 0) {
 		*eclass = ERRDOS;
 		*ecode = ERRnoaccess;
@@ -111,9 +108,6 @@ bool do_unlock(int fnum, int cnum, uint32_t count, uint32_t offset, int *eclass,
 {
 	bool ok = false;
 	files_struct *fsp = &Files[fnum];
-
-	if (!lp_locking(SNUM(cnum)))
-		return (true);
 
 	if (OPEN_FNUM(fnum) && fsp->can_lock && (fsp->cnum == cnum))
 		ok = fcntl_lock(fsp->fd_ptr->fd, F_SETLK, offset, count,
