@@ -644,6 +644,27 @@ int sys_disk_free(char *path, int *bsize, int *dfree, int *dsize)
 	return disk_free(path, bsize, dfree, dsize);
 }
 
+static bool path_within(const char *path, const char *top)
+{
+	size_t top_len = strlen(top);
+	return strlen(path) >= top_len
+	    && strncmp(top, path, top_len) == 0
+	    && (path[top_len] == '/' || path[top_len] == '\0');
+}
+
+static void set_parent_dir(char *parent, char *path)
+{
+	char *p;
+
+	pstrcpy(parent, path);
+	p = strrchr(parent, '/');
+	if (p != NULL) {
+		*p = '\0';
+	} else {
+		pstrcpy(parent, ".");
+	}
+}
+
 /****************************************************************************
 check a filename - possibly caling reducename
 
@@ -653,31 +674,66 @@ a valid one for the user to access.
 ****************************************************************************/
 bool check_name(char *name, int cnum)
 {
-	bool ret;
+	char *canon_path;
+	const char *top = Connections[cnum].connectpath;
+	char old_wd[PATH_MAX];
+	bool success = false;
 
-	errno = 0;
-
-	ret = reduce_name(name, Connections[cnum].connectpath,
-	                  lp_widelinks(SNUM(cnum)));
-
-	/* Check if we are allowing users to follow symlinks */
-	/* Patch from David Clerc <David.Clerc@cui.unige.ch>
-	   University of Geneva */
-	if (!lp_symlinks(SNUM(cnum))) {
-		struct stat statbuf;
-		if ((lstat(name, &statbuf) != -1) &&
-		    (S_ISLNK(statbuf.st_mode))) {
-			DEBUG(3, ("check_name: denied: file path name %s is a "
-			          "symlink\n",
-			          name));
-			ret = 0;
-		}
+	/* A weird corner case that is probably a bad idea, but ... */
+	if (!strcmp(top, "/")) {
+		return true;
+	}
+	if (getcwd(old_wd, sizeof(old_wd)) == NULL) {
+		DEBUG(3, ("check_name: denied: getcwd() errno=%d\n",
+		          top, errno));
+		return false;
+	}
+	if (chdir(top) != 0) {
+		DEBUG(3, ("check_name: denied: chdir(%s) errno=%d\n",
+		          top, errno));
+		return false;
 	}
 
-	if (!ret)
-		DEBUG(5, ("check_name on %s failed\n", name));
+	/* To check it's a valid path, we check the realpath()-expanded
+	   filename (with all symlinks removed) is either equal to the
+	   top-level directory or is a subpath. This guarantees that it is
+	   never possible to use a symlink to escape from the share dir. */
+	canon_path = realpath(name, NULL);
+	if (canon_path != NULL) {
+		/* We have a path to a real file or directory. */
+		success = path_within(canon_path, top);
+		free(canon_path);
+	} else if (errno == ENOENT) {
+		pstring parent;
 
-	return (ret);
+		/* The file doesn't exist, but we aren't done; for example,
+		   "*.*" is used for directory listings. Check the enclosing
+		   directory is valid. */
+		set_parent_dir(parent, name);
+		canon_path = realpath(parent, NULL);
+		if (canon_path == NULL) {
+			DEBUG(3, ("check_name: realpath(%s) errno=%d (parent)\n",
+			          parent, errno));
+		}
+		success = canon_path != NULL && path_within(canon_path, top);
+		if (success) {
+			DEBUG(3, ("check_name: no file %s but parent %s "
+			          "within %s\n", name, parent, top));
+		}
+		free(canon_path);
+	}
+
+	if (!success) {
+		DEBUG(3, ("check_name: denied: %s not within %s subtree\n",
+		          name, top));
+	}
+
+	if (chdir(old_wd) != 0) {
+		DEBUG(3, ("check_name: ending chdir(%s) errno=%d\n",
+		          old_wd, errno));
+	}
+
+	return success;
 }
 
 /****************************************************************************

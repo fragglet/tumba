@@ -281,7 +281,6 @@ int smb_offset(char *p, char *buf);
 char *skip_string(char *buf, int n);
 bool trim_string(char *s, char *front, char *back);
 void unix_clean_name(char *s);
-bool reduce_name(char *s, char *dir, bool widelinks);
 bool strhasupper(char *s);
 bool strhaslower(char *s);
 int count_chars(char *s, char c);
