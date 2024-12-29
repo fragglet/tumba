@@ -1978,11 +1978,22 @@ int make_connection(char *service, char *dev)
 	string_set(&pcon->user, user);
 
 	{
+		char *canon_path;
 		pstring s;
 		pstrcpy(s, lp_pathname(snum));
 		standard_sub(cnum, s);
-		string_set(&pcon->connectpath, s);
-		DEBUG(3, ("Connect path is %s\n", s));
+		/* Convert path to its canonical form (no ../ or symlinks,
+		   etc.). This is important because check_name() does the same
+		   thing and expects all files to be subpaths. */
+		canon_path = realpath(s, NULL);
+		if (canon_path == NULL) {
+			DEBUG(3, ("realpath(%s) failed, errno=%d\n", s, errno));
+			pcon->open = false;
+			return -1;
+		}
+		string_set(&pcon->connectpath, canon_path);
+		DEBUG(3, ("Connect path is %s\n", canon_path));
+		free(canon_path);
 	}
 
 	pcon->open = true;
@@ -2002,17 +2013,6 @@ int make_connection(char *service, char *dev)
 	}
 
 	string_set(&pcon->origpath, pcon->connectpath);
-
-#if SOFTLINK_OPTIMISATION
-	/* resolve any soft links early */
-	{
-		pstring s;
-		pstrcpy(s, pcon->connectpath);
-		getcwd(s, sizeof(pstring));
-		string_set(&pcon->connectpath, s);
-		chdir(pcon->connectpath);
-	}
-#endif
 
 	num_connections_open++;
 
