@@ -2890,13 +2890,9 @@ static void process(void)
 	TimeInit();
 
 	while (true) {
-		int deadtime = lp_deadtime() * 60;
 		int counter;
 		int service_load_counter = 0;
 		bool got_smb = false;
-
-		if (deadtime <= 0)
-			deadtime = DEFAULT_SMBD_TIMEOUT;
 
 		errno = 0;
 
@@ -2967,7 +2963,7 @@ static void process(void)
 
 					if (Connections[i].num_files_open > 0 ||
 					    (t - Connections[i].lastused) <
-					        deadtime)
+					        DEFAULT_SMBD_TIMEOUT)
 						allidle = false;
 				}
 

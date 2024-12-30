@@ -89,15 +89,6 @@ static inline int lp_readsize(void)
 	return 16 * 1024;
 }
 
-// The value of the parameter (a decimal integer) represents the number of
-// minutes of inactivity before a connection is considered dead, and it is
-// disconnected. The deadtime only takes effect if the number of open files is
-// zero.
-static inline int lp_deadtime(void)
-{
-	return 0;
-}
-
 // This parameter maps how Samba debug messages are logged onto the system
 // syslog logging levels.
 static inline int lp_syslog(void)
