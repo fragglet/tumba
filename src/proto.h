@@ -227,10 +227,6 @@ int reply_findnclose(char *inbuf, char *outbuf, int length, int bufsize);
 int reply_transs2(char *inbuf, char *outbuf, int length, int bufsize);
 int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize);
 
-/*The following definitions come from  username.c  */
-
-struct passwd *Get_Pwnam(char *user, bool allow_change);
-
 /*The following definitions come from  util.c  */
 
 void setup_logging(char *pname, bool interactive);

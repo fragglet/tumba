@@ -31,7 +31,6 @@ OBJECTS = \
 	system.o             \
 	time.o               \
 	trans2.o             \
-	username.o           \
 	util.o
 
 DEPS = $(patsubst %.o,%.d,$(OBJECTS))
