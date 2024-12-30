@@ -1502,43 +1502,6 @@ typedef struct lsa_q_user_info {
 
 } LSA_USER_INFO;
 
-/* LSA_Q_SAM_LOGON */
-typedef struct lsa_q_sam_logon_info {
-	DOM_SAM_INFO sam_id;
-
-} LSA_Q_SAM_LOGON;
-
-/* LSA_R_SAM_LOGON */
-typedef struct lsa_r_sam_logon_info {
-	uint32_t buffer_creds; /* undocumented buffer pointer */
-	DOM_CRED srv_creds; /* server credentials.  server time stamp appears to
-	                       be ignored. */
-
-	uint16_t switch_value; /* 3 - indicates type of USER INFO */
-	LSA_USER_INFO *user;
-
-	uint32_t auth_resp; /* 1 - Authoritative response; 0 - Non-Auth? */
-
-	uint32_t status; /* return code */
-
-} LSA_R_SAM_LOGON;
-
-/* LSA_Q_SAM_LOGOFF */
-typedef struct lsa_q_sam_logoff_info {
-	DOM_SAM_INFO sam_id;
-
-} LSA_Q_SAM_LOGOFF;
-
-/* LSA_R_SAM_LOGOFF */
-typedef struct lsa_r_sam_logoff_info {
-	uint32_t buffer_creds; /* undocumented buffer pointer */
-	DOM_CRED srv_creds; /* server credentials.  server time stamp appears to
-	                       be ignored. */
-
-	uint32_t status; /* return code */
-
-} LSA_R_SAM_LOGOFF;
-
 /* SH_INFO_1 (pointers to level 1 share info strings) */
 typedef struct ptr_share_info1 {
 	uint32_t ptr_netname; /* pointer to net name. */

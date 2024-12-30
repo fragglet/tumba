@@ -58,10 +58,6 @@ fstring local_machine = "";
 fstring remote_proto = "UNKNOWN";
 pstring myhostname = "";
 
-pstring samlogon_user = "";
-
-bool sam_logon_in_ssb = false;
-
 pstring myname = "";
 fstring myworkgroup = "";
 
