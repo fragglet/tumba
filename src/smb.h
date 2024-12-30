@@ -226,11 +226,6 @@ struct smb_passwd {
 	/* Other fields / flags may be added later */
 };
 
-struct current_user {
-	int cnum;
-	int uid, gid;
-};
-
 typedef struct {
 	int size;
 	int mode;
