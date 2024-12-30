@@ -1994,24 +1994,14 @@ int make_connection(char *service, char *dev)
 
 	pcon->open = true;
 
-	if (!become_user(&Connections[cnum], cnum)) {
-		DEBUG(0, ("Can't become connected user!\n"));
-		pcon->open = false;
-		return (-1);
-	}
-
 	if (chdir(pcon->connectpath) != 0) {
 		DEBUG(0, ("Can't change directory to %s (%s)\n",
 		          pcon->connectpath, strerror(errno)));
 		pcon->open = false;
-		unbecome_user();
 		return (-5);
 	}
 
 	num_connections_open++;
-
-	/* we've finished with the sensitive stuff */
-	unbecome_user();
 
 	{
 		DEBUG(1, ("%s %s (%s) connect to service %s as user %s "
@@ -2389,8 +2379,6 @@ void close_cnum(int cnum)
 {
 	DirCacheFlush(SNUM(cnum));
 
-	unbecome_user();
-
 	if (!OPEN_CNUM(cnum)) {
 		DEBUG(0, ("Can't close cnum %d\n", cnum));
 		return;
@@ -2401,8 +2389,6 @@ void close_cnum(int cnum)
 
 	close_open_files(cnum);
 	dptr_closecnum(cnum);
-
-	unbecome_user();
 
 	Connections[cnum].open = false;
 	num_connections_open--;
@@ -2460,7 +2446,6 @@ void exit_server(char *reason)
 		exit(0);
 	firsttime = 0;
 
-	unbecome_user();
 	DEBUG(2, ("Closing connections\n"));
 	for (i = 0; i < MAX_CONNECTIONS; i++)
 		if (Connections[i].open)
@@ -2724,26 +2709,6 @@ static int switch_message(int type, char *inbuf, char *outbuf, int size,
 			 */
 			SSVAL(inbuf, smb_uid, UID_FIELD_INVALID);
 
-			/* does this protocol need to be run as root? */
-			if (!(flags & AS_USER))
-				unbecome_user();
-
-			/* does this protocol need to be run as the connected
-			 * user? */
-			if ((flags & AS_USER) &&
-			    !become_user(&Connections[cnum], cnum)) {
-				if (flags & AS_GUEST)
-					flags &= ~AS_USER;
-				else
-					return (ERROR(ERRSRV, ERRinvnid));
-			}
-			/* this code is to work around a bug is MS client 3
-			   without introducing a security hole - it needs to be
-			   able to do print queue checks as guest if it isn't
-			   logged in properly */
-			if (flags & AS_USER)
-				flags &= ~AS_GUEST;
-
 			/* does it need write permission? */
 			if ((flags & NEED_WRITE) && !CAN_WRITE(cnum))
 				return (ERROR(ERRSRV, ERRaccess));
@@ -2752,10 +2717,6 @@ static int switch_message(int type, char *inbuf, char *outbuf, int size,
 			if (OPEN_CNUM(cnum) &&
 			    !become_service(cnum,
 			                    (flags & AS_USER) ? true : false))
-				return (ERROR(ERRSRV, ERRaccess));
-
-			/* does this protocol need to be run as guest? */
-			if ((flags & AS_GUEST) && !become_guest())
 				return (ERROR(ERRSRV, ERRaccess));
 
 			last_inbuf = inbuf;
@@ -3000,9 +2961,6 @@ static void process(void)
 			}
 
 			t = time(NULL);
-
-			/* become root again if waiting */
-			unbecome_user();
 
 			/* check for smb.conf reload */
 			if (counter >=
