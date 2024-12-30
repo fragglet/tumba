@@ -60,13 +60,6 @@ static inline bool lp_strip_dot(void)
 	return false;
 }
 
-// If this parameter is set then Samba debug messages are logged into the
-// system syslog only, and not to the debug log files.
-static inline bool lp_syslog_only(void)
-{
-	return false;
-}
-
 // This option (an integer in kilobytes) specifies the max size the log file
 // should grow to. Samba periodically checks the size and if it is exceeded it
 // will rename the file, adding a .old extension.

@@ -195,23 +195,18 @@ int Debug1(char *format_str, ...)
 		return (0);
 	}
 
-#ifdef SYSLOG
-	if (!lp_syslog_only())
-#endif
-	{
-		if (!dbf) {
-			int oldumask = umask(022);
-			if (append_log)
-				dbf = fopen(debugf, "a");
-			else
-				dbf = fopen(debugf, "w");
-			umask(oldumask);
-			if (dbf) {
-				setbuf(dbf, NULL);
-			} else {
-				errno = old_errno;
-				return (0);
-			}
+	if (!dbf) {
+		int oldumask = umask(022);
+		if (append_log)
+			dbf = fopen(debugf, "a");
+		else
+			dbf = fopen(debugf, "w");
+		umask(oldumask);
+		if (dbf) {
+			setbuf(dbf, NULL);
+		} else {
+			errno = old_errno;
+			return (0);
 		}
 	}
 
@@ -247,15 +242,10 @@ int Debug1(char *format_str, ...)
 	}
 #endif
 
-#ifdef SYSLOG
-	if (!lp_syslog_only())
-#endif
-	{
-		va_start(ap, format_str);
-		vfprintf(dbf, format_str, ap);
-		va_end(ap);
-		fflush(dbf);
-	}
+	va_start(ap, format_str);
+	vfprintf(dbf, format_str, ap);
+	va_end(ap);
+	fflush(dbf);
 
 	check_log_size();
 
