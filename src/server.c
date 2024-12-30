@@ -85,8 +85,6 @@ static int num_connections_open = 0;
 
 extern fstring remote_machine;
 
-extern pstring OriginalDir;
-
 /* these can be set by some functions to override the error codes */
 int unix_ERR_class = SMB_SUCCESS;
 int unix_ERR_code = 0;
@@ -3119,8 +3117,6 @@ int main(int argc, char *argv[])
 	/* we want total control over the permissions on created files,
 	   so set our umask to 0 */
 	umask(0);
-
-	getcwd(OriginalDir, sizeof(pstring));
 
 	init_uid();
 
