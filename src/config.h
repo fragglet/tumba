@@ -38,11 +38,6 @@ static inline char *lp_socket_address(void)
 	return "0.0.0.0";
 }
 
-static inline bool lp_readbmpx(void)
-{
-	return true;
-}
-
 // This parameter controls whether or not the server will support raw reads
 // when transferring data to clients.
 static inline bool lp_readraw(void)

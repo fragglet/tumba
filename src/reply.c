@@ -2712,66 +2712,7 @@ int reply_lockingX(char *inbuf, char *outbuf, int length, int bufsize)
 ****************************************************************************/
 int reply_readbmpx(char *inbuf, char *outbuf, int length, int bufsize)
 {
-	int cnum, fnum;
-	int nread = -1;
-	int total_read;
-	char *data;
-	uint32_t startpos;
-	int outsize, maxcount;
-	int max_per_packet;
-	int tcount;
-	int pad;
-
-	/* this function doesn't seem to work - disable by default */
-	if (!lp_readbmpx())
-		return (ERROR(ERRSRV, ERRuseSTD));
-
-	outsize = set_message(outbuf, 8, 0, true);
-
-	cnum = SVAL(inbuf, smb_tid);
-	fnum = GETFNUM(inbuf, smb_vwv0);
-
-	CHECK_FNUM(fnum, cnum);
-	CHECK_READ(fnum);
-	CHECK_ERROR(fnum);
-
-	startpos = IVAL(inbuf, smb_vwv1);
-	maxcount = SVAL(inbuf, smb_vwv3);
-
-	data = smb_buf(outbuf);
-	pad = ((long) data) % 4;
-	if (pad)
-		pad = 4 - pad;
-	data += pad;
-
-	max_per_packet = bufsize - (outsize + pad);
-	tcount = maxcount;
-	total_read = 0;
-
-	do {
-		int N = MIN(max_per_packet, tcount - total_read);
-
-		nread = read_file(fnum, data, startpos, N);
-
-		if (nread <= 0)
-			nread = 0;
-
-		if (nread < N)
-			tcount = total_read + nread;
-
-		set_message(outbuf, 8, nread, false);
-		SIVAL(outbuf, smb_vwv0, startpos);
-		SSVAL(outbuf, smb_vwv2, tcount);
-		SSVAL(outbuf, smb_vwv6, nread);
-		SSVAL(outbuf, smb_vwv7, smb_offset(data, outbuf));
-
-		send_smb(Client, outbuf);
-
-		total_read += nread;
-		startpos += nread;
-	} while (total_read < tcount);
-
-	return (-1);
+	return (ERROR(ERRSRV, ERRuseSTD));
 }
 
 /****************************************************************************
