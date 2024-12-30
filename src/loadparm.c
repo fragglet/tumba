@@ -90,7 +90,6 @@ typedef struct {
 	bool valid;
 	char *szService;
 	char *szPath;
-	char *szGuestaccount;
 	char *szCopy;
 	char *comment;
 	int iCreate_mask;
@@ -108,7 +107,6 @@ static service sDefault = {
     true,       /* valid */
     NULL,       /* szService */
     NULL,       /* szPath */
-    NULL,       /* szGuestAccount  - this is set in init_globals() */
     NULL,       /* szCopy */
     NULL,       /* comment */
     0744,       /* iCreate_mask */
@@ -153,7 +151,6 @@ static struct parm_struct {
      NULL},
     {"path", P_STRING, P_LOCAL, &sDefault.szPath, NULL, NULL},
     {"directory", P_STRING, P_LOCAL, &sDefault.szPath, NULL, NULL},
-    {"guest account", P_STRING, P_LOCAL, &sDefault.szGuestaccount, NULL, NULL},
     {"create mask", P_OCTAL, P_LOCAL, &sDefault.iCreate_mask, NULL, NULL},
     {"create mode", P_OCTAL, P_LOCAL, &sDefault.iCreate_mask, NULL, NULL},
     {"force create mode", P_OCTAL, P_LOCAL, &sDefault.iCreate_force_mode, NULL,
@@ -181,7 +178,6 @@ static void init_globals(void)
 			    parm_table[i].ptr)
 				string_init(parm_table[i].ptr, "");
 
-		string_set(&sDefault.szGuestaccount, GUEST_ACCOUNT);
 
 		done_init = true;
 	}
@@ -247,7 +243,6 @@ char *lp_string(char *s)
 
 FN_LOCAL_STRING(lp_servicename, szService)
 FN_LOCAL_STRING(lp_pathname, szPath)
-FN_LOCAL_STRING(lp_guestaccount, szGuestaccount)
 FN_LOCAL_STRING(lp_comment, comment)
 
 FN_LOCAL_BOOL(lp_casesensitive, bCaseSensitive)

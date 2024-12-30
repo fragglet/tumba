@@ -47,7 +47,6 @@ int reply_trans(char *inbuf, char *outbuf, int size, int bufsize);
 
 char *lp_servicename(int);
 char *lp_pathname(int);
-char *lp_guestaccount(int);
 char *lp_comment(int);
 bool lp_casesensitive(int);
 bool lp_shortpreservecase(int);
