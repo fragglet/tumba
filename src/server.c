@@ -59,6 +59,8 @@ files_struct Files[MAX_OPEN_FILES];
 /*
  * Indirection for file fd's. Needed as POSIX locking
  * is based on file/process, not fd/process.
+ * Context: <https://www.samba.org/samba/news/articles/low_point/tale_two_stds_os2.html>
+ * TODO: The 2024 POSIX spec now includes OFD locks, so this can be replaced
  */
 file_fd_struct FileFd[MAX_OPEN_FILES];
 int max_file_fd_used = 0;
