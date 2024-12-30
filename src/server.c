@@ -2494,11 +2494,9 @@ Note that I don't set NEED_WRITE on some write operations because they
 are used by some brain-dead clients when printing, and I don't want to
 force write permissions on print services.
 */
-#define AS_USER (1 << 0)
 #define NEED_WRITE (1 << 1)
 #define TIME_INIT (1 << 2)
 #define CAN_IPC (1 << 3)
-#define AS_GUEST (1 << 5)
 #define QUEUE_IN_OPLOCK (1 << 6)
 
 /*
@@ -2529,91 +2527,91 @@ struct smb_message_struct {
     {SMBtconX, "SMBtconX", reply_tcon_and_X, 0},
     {SMBulogoffX, "SMBulogoffX", reply_ulogoffX,
      0}, /* ulogoff doesn't give a valid TID */
-    {SMBgetatr, "SMBgetatr", reply_getatr, AS_USER},
-    {SMBsetatr, "SMBsetatr", reply_setatr, AS_USER | NEED_WRITE},
-    {SMBchkpth, "SMBchkpth", reply_chkpth, AS_USER},
-    {SMBsearch, "SMBsearch", reply_search, AS_USER},
-    {SMBopen, "SMBopen", reply_open, AS_USER | QUEUE_IN_OPLOCK},
+    {SMBgetatr, "SMBgetatr", reply_getatr, 0},
+    {SMBsetatr, "SMBsetatr", reply_setatr, NEED_WRITE},
+    {SMBchkpth, "SMBchkpth", reply_chkpth, 0},
+    {SMBsearch, "SMBsearch", reply_search, 0},
+    {SMBopen, "SMBopen", reply_open, QUEUE_IN_OPLOCK},
 
     /* note that SMBmknew and SMBcreate are deliberately overloaded */
-    {SMBcreate, "SMBcreate", reply_mknew, AS_USER},
-    {SMBmknew, "SMBmknew", reply_mknew, AS_USER},
+    {SMBcreate, "SMBcreate", reply_mknew, 0},
+    {SMBmknew, "SMBmknew", reply_mknew, 0},
 
     {SMBunlink, "SMBunlink", reply_unlink,
-     AS_USER | NEED_WRITE | QUEUE_IN_OPLOCK},
-    {SMBread, "SMBread", reply_read, AS_USER},
-    {SMBwrite, "SMBwrite", reply_write, AS_USER},
-    {SMBclose, "SMBclose", reply_close, AS_USER | CAN_IPC},
-    {SMBmkdir, "SMBmkdir", reply_mkdir, AS_USER | NEED_WRITE},
-    {SMBrmdir, "SMBrmdir", reply_rmdir, AS_USER | NEED_WRITE},
-    {SMBdskattr, "SMBdskattr", reply_dskattr, AS_USER},
-    {SMBmv, "SMBmv", reply_mv, AS_USER | NEED_WRITE | QUEUE_IN_OPLOCK},
+     NEED_WRITE | QUEUE_IN_OPLOCK},
+    {SMBread, "SMBread", reply_read, 0},
+    {SMBwrite, "SMBwrite", reply_write, 0},
+    {SMBclose, "SMBclose", reply_close, CAN_IPC},
+    {SMBmkdir, "SMBmkdir", reply_mkdir, NEED_WRITE},
+    {SMBrmdir, "SMBrmdir", reply_rmdir, NEED_WRITE},
+    {SMBdskattr, "SMBdskattr", reply_dskattr, 0},
+    {SMBmv, "SMBmv", reply_mv, NEED_WRITE | QUEUE_IN_OPLOCK},
 
     /* this is a Pathworks specific call, allowing the
        changing of the root path */
-    {pSETDIR, "pSETDIR", reply_setdir, AS_USER},
+    {pSETDIR, "pSETDIR", reply_setdir, 0},
 
-    {SMBlseek, "SMBlseek", reply_lseek, AS_USER},
-    {SMBflush, "SMBflush", reply_flush, AS_USER},
-    {SMBctemp, "SMBctemp", reply_ctemp, AS_USER | QUEUE_IN_OPLOCK},
-    {SMBsplopen, "SMBsplopen", reply_printopen, AS_USER | QUEUE_IN_OPLOCK},
-    {SMBsplclose, "SMBsplclose", reply_printclose, AS_USER},
-    {SMBsplretq, "SMBsplretq", reply_printqueue, AS_USER | AS_GUEST},
-    {SMBsplwr, "SMBsplwr", reply_printwrite, AS_USER},
-    {SMBlock, "SMBlock", reply_lock, AS_USER},
-    {SMBunlock, "SMBunlock", reply_unlock, AS_USER},
+    {SMBlseek, "SMBlseek", reply_lseek, 0},
+    {SMBflush, "SMBflush", reply_flush, 0},
+    {SMBctemp, "SMBctemp", reply_ctemp, QUEUE_IN_OPLOCK},
+    {SMBsplopen, "SMBsplopen", reply_printopen, QUEUE_IN_OPLOCK},
+    {SMBsplclose, "SMBsplclose", reply_printclose, 0},
+    {SMBsplretq, "SMBsplretq", reply_printqueue, 0},
+    {SMBsplwr, "SMBsplwr", reply_printwrite, 0},
+    {SMBlock, "SMBlock", reply_lock, 0},
+    {SMBunlock, "SMBunlock", reply_unlock, 0},
 
     /* CORE+ PROTOCOL FOLLOWS */
 
-    {SMBreadbraw, "SMBreadbraw", reply_readbraw, AS_USER},
-    {SMBwritebraw, "SMBwritebraw", reply_writebraw, AS_USER},
-    {SMBwriteclose, "SMBwriteclose", reply_writeclose, AS_USER},
-    {SMBlockread, "SMBlockread", reply_lockread, AS_USER},
-    {SMBwriteunlock, "SMBwriteunlock", reply_writeunlock, AS_USER},
+    {SMBreadbraw, "SMBreadbraw", reply_readbraw, 0},
+    {SMBwritebraw, "SMBwritebraw", reply_writebraw, 0},
+    {SMBwriteclose, "SMBwriteclose", reply_writeclose, 0},
+    {SMBlockread, "SMBlockread", reply_lockread, 0},
+    {SMBwriteunlock, "SMBwriteunlock", reply_writeunlock, 0},
 
     /* LANMAN1.0 PROTOCOL FOLLOWS */
 
-    {SMBreadBmpx, "SMBreadBmpx", reply_readbmpx, AS_USER},
-    {SMBreadBs, "SMBreadBs", NULL, AS_USER},
-    {SMBwriteBmpx, "SMBwriteBmpx", reply_writebmpx, AS_USER},
-    {SMBwriteBs, "SMBwriteBs", reply_writebs, AS_USER},
-    {SMBwritec, "SMBwritec", NULL, AS_USER},
-    {SMBsetattrE, "SMBsetattrE", reply_setattrE, AS_USER | NEED_WRITE},
-    {SMBgetattrE, "SMBgetattrE", reply_getattrE, AS_USER},
-    {SMBtrans, "SMBtrans", reply_trans, AS_USER | CAN_IPC},
-    {SMBtranss, "SMBtranss", NULL, AS_USER | CAN_IPC},
-    {SMBioctls, "SMBioctls", NULL, AS_USER},
-    {SMBcopy, "SMBcopy", reply_copy, AS_USER | NEED_WRITE | QUEUE_IN_OPLOCK},
-    {SMBmove, "SMBmove", NULL, AS_USER | NEED_WRITE | QUEUE_IN_OPLOCK},
+    {SMBreadBmpx, "SMBreadBmpx", reply_readbmpx, 0},
+    {SMBreadBs, "SMBreadBs", NULL, 0},
+    {SMBwriteBmpx, "SMBwriteBmpx", reply_writebmpx, 0},
+    {SMBwriteBs, "SMBwriteBs", reply_writebs, 0},
+    {SMBwritec, "SMBwritec", NULL, 0},
+    {SMBsetattrE, "SMBsetattrE", reply_setattrE, NEED_WRITE},
+    {SMBgetattrE, "SMBgetattrE", reply_getattrE, 0},
+    {SMBtrans, "SMBtrans", reply_trans, CAN_IPC},
+    {SMBtranss, "SMBtranss", NULL, CAN_IPC},
+    {SMBioctls, "SMBioctls", NULL, 0},
+    {SMBcopy, "SMBcopy", reply_copy, NEED_WRITE | QUEUE_IN_OPLOCK},
+    {SMBmove, "SMBmove", NULL, NEED_WRITE | QUEUE_IN_OPLOCK},
 
     {SMBopenX, "SMBopenX", reply_open_and_X,
-     AS_USER | CAN_IPC | QUEUE_IN_OPLOCK},
-    {SMBreadX, "SMBreadX", reply_read_and_X, AS_USER},
-    {SMBwriteX, "SMBwriteX", reply_write_and_X, AS_USER},
-    {SMBlockingX, "SMBlockingX", reply_lockingX, AS_USER},
+     CAN_IPC | QUEUE_IN_OPLOCK},
+    {SMBreadX, "SMBreadX", reply_read_and_X, 0},
+    {SMBwriteX, "SMBwriteX", reply_write_and_X, 0},
+    {SMBlockingX, "SMBlockingX", reply_lockingX, 0},
 
-    {SMBffirst, "SMBffirst", reply_search, AS_USER},
-    {SMBfunique, "SMBfunique", reply_search, AS_USER},
-    {SMBfclose, "SMBfclose", reply_fclose, AS_USER},
+    {SMBffirst, "SMBffirst", reply_search, 0},
+    {SMBfunique, "SMBfunique", reply_search, 0},
+    {SMBfclose, "SMBfclose", reply_fclose, 0},
 
     /* LANMAN2.0 PROTOCOL FOLLOWS */
-    {SMBfindnclose, "SMBfindnclose", reply_findnclose, AS_USER},
-    {SMBfindclose, "SMBfindclose", reply_findclose, AS_USER},
-    {SMBtrans2, "SMBtrans2", reply_trans2, AS_USER},
-    {SMBtranss2, "SMBtranss2", reply_transs2, AS_USER},
+    {SMBfindnclose, "SMBfindnclose", reply_findnclose, 0},
+    {SMBfindclose, "SMBfindclose", reply_findclose, 0},
+    {SMBtrans2, "SMBtrans2", reply_trans2, 0},
+    {SMBtranss2, "SMBtranss2", reply_transs2, 0},
 
     /* messaging routines */
-    {SMBsends, "SMBsends", NULL, AS_GUEST},
-    {SMBsendstrt, "SMBsendstrt", NULL, AS_GUEST},
-    {SMBsendend, "SMBsendend", NULL, AS_GUEST},
-    {SMBsendtxt, "SMBsendtxt", NULL, AS_GUEST},
+    {SMBsends, "SMBsends", NULL, 0},
+    {SMBsendstrt, "SMBsendstrt", NULL, 0},
+    {SMBsendend, "SMBsendend", NULL, 0},
+    {SMBsendtxt, "SMBsendtxt", NULL, 0},
 
     /* NON-IMPLEMENTED PARTS OF THE CORE PROTOCOL */
 
-    {SMBsendb, "SMBsendb", NULL, AS_GUEST},
-    {SMBfwdname, "SMBfwdname", NULL, AS_GUEST},
-    {SMBcancelf, "SMBcancelf", NULL, AS_GUEST},
-    {SMBgetmac, "SMBgetmac", NULL, AS_GUEST}};
+    {SMBsendb, "SMBsendb", NULL, 0},
+    {SMBfwdname, "SMBfwdname", NULL, 0},
+    {SMBcancelf, "SMBcancelf", NULL, 0},
+    {SMBgetmac, "SMBgetmac", NULL, 0}};
 
 /****************************************************************************
 return a string containing the function name of a SMB command
@@ -2690,10 +2688,9 @@ static int switch_message(int type, char *inbuf, char *outbuf, int size,
 				return (ERROR(ERRSRV, ERRaccess));
 
 			/* load service specific parameters */
-			if (OPEN_CNUM(cnum) &&
-			    !become_service(cnum,
-			                    (flags & AS_USER) ? true : false))
+			if (OPEN_CNUM(cnum) && !become_service(cnum, false)) {
 				return (ERROR(ERRSRV, ERRaccess));
+			}
 
 			last_inbuf = inbuf;
 
