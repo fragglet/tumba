@@ -293,7 +293,6 @@ typedef struct {
 	bool read_only;
 	char *dirpath;
 	char *connectpath;
-	char *user; /* name of user who *opened* this connection */
 
 	time_t lastused;
 	bool used;

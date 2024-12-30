@@ -1106,9 +1106,9 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 		string_set(&fsp->name, fname);
 		fsp->wbmpx_ptr = NULL;
 
-		DEBUG(2, ("%s %s opened file %s read=%s write=%s (numopen=%d "
+		DEBUG(2, ("%s opened file %s read=%s write=%s (numopen=%d "
 		          "fnum=%d)\n",
-		          timestring(), Connections[cnum].user, fname,
+		          timestring(), fname,
 		          BOOLSTR(fsp->can_read), BOOLSTR(fsp->can_write),
 		          Connections[cnum].num_files_open, fnum));
 	}
@@ -1160,9 +1160,8 @@ void close_file(int fnum, bool normal_close)
 
 	fd_attempt_close(fs_p->fd_ptr);
 
-	DEBUG(2, ("%s %s closed file %s (numopen=%d)\n", timestring(),
-	          Connections[cnum].user, fs_p->name,
-	          Connections[cnum].num_files_open));
+	DEBUG(2, ("%s closed file %s (numopen=%d)\n", timestring(),
+	          fs_p->name, Connections[cnum].num_files_open));
 
 	if (fs_p->name) {
 		string_free(&fs_p->name);
@@ -1898,7 +1897,6 @@ static bool dir_world_writeable(const char *path)
 ****************************************************************************/
 int make_connection(char *service, char *dev)
 {
-	char *user = lp_guestaccount(-1);
 	int cnum;
 	int snum;
 	connection_struct *pcon;
@@ -1935,7 +1933,7 @@ int make_connection(char *service, char *dev)
 		return (-6);
 	}
 
-	cnum = find_free_connection(str_checksum(service) + str_checksum(user));
+	cnum = find_free_connection(str_checksum(service));
 	if (cnum < 0) {
 		DEBUG(0, ("%s couldn't find free connection\n", timestring()));
 		return (-1);
@@ -1952,7 +1950,6 @@ int make_connection(char *service, char *dev)
 	pcon->used = true;
 	pcon->dirptr = NULL;
 	string_set(&pcon->dirpath, "");
-	string_set(&pcon->user, user);
 
 	{
 		char *canon_path;
@@ -1985,10 +1982,9 @@ int make_connection(char *service, char *dev)
 	num_connections_open++;
 
 	{
-		DEBUG(1, ("%s %s (%s) connect to service %s as user %s "
-		          "(pid %d)\n",
+		DEBUG(1, ("%s %s (%s) connect to service %s (pid %d)\n",
 		          timestring(), remote_machine, client_addr(),
-		          lp_servicename(SNUM(cnum)), user, (int) getpid()));
+		          lp_servicename(SNUM(cnum)), (int) getpid()));
 	}
 
 	return (cnum);
@@ -2373,7 +2369,6 @@ void close_cnum(int cnum)
 	Connections[cnum].open = false;
 	num_connections_open--;
 
-	string_set(&Connections[cnum].user, "");
 	string_set(&Connections[cnum].dirpath, "");
 	string_set(&Connections[cnum].connectpath, "");
 }
@@ -2471,9 +2466,6 @@ void standard_sub(int cnum, char *str)
 				string_sub(
 				    p, "%S",
 				    lp_servicename(Connections[cnum].service));
-				break;
-			case 'u':
-				string_sub(p, "%u", Connections[cnum].user);
 				break;
 			case '\0':
 				p++;
@@ -3004,7 +2996,6 @@ static void init_structs(void)
 		Connections[i].num_files_open = 0;
 		Connections[i].lastused = 0;
 		Connections[i].used = false;
-		string_init(&Connections[i].user, "");
 		string_init(&Connections[i].dirpath, "");
 		string_init(&Connections[i].connectpath, "");
 	}
