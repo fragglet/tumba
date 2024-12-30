@@ -139,23 +139,13 @@ mode_t unix_mode(int cnum, int dosmode)
 {
 	mode_t result = (S_IRUSR | S_IRGRP | S_IROTH);
 
+	/* Note: We set bits for owner, group and other; the user can override
+	   this trivially by setting the program's umask */
 	if (!IS_DOS_READONLY(dosmode))
 		result |= (S_IWUSR | S_IWGRP | S_IWOTH);
 
 	if (IS_DOS_DIR(dosmode)) {
-		/* We never make directories read only for the owner as under
-		   DOS a user can always create a file in a read-only directory.
-		 */
-		result |= (S_IFDIR | S_IXUSR | S_IXGRP | S_IXOTH | S_IWUSR);
-		/* Apply directory mask */
-		result &= lp_dir_mode(SNUM(cnum));
-		/* Add in force bits */
-		result |= lp_force_dir_mode(SNUM(cnum));
-	} else {
-		/* Apply mode mask */
-		result &= lp_create_mode(SNUM(cnum));
-		/* Add in force bits */
-		result |= lp_force_create_mode(SNUM(cnum));
+		result |= S_IFDIR | S_IXUSR | S_IXGRP | S_IXOTH;
 	}
 	return (result);
 }
@@ -3083,10 +3073,6 @@ int main(int argc, char *argv[])
 
 	fault_setup((void (*)(void *)) exit_server);
 	signal(SIGTERM, SIGNAL_CAST dflt_sig);
-
-	/* we want total control over the permissions on created files,
-	   so set our umask to 0 */
-	umask(0);
 
 	/* this is for people who can't start the program correctly */
 	while (argc > 1 && (*argv[1] != '-')) {

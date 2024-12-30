@@ -151,14 +151,6 @@ static struct parm_struct {
      NULL},
     {"path", P_STRING, P_LOCAL, &sDefault.szPath, NULL, NULL},
     {"directory", P_STRING, P_LOCAL, &sDefault.szPath, NULL, NULL},
-    {"create mask", P_OCTAL, P_LOCAL, &sDefault.iCreate_mask, NULL, NULL},
-    {"create mode", P_OCTAL, P_LOCAL, &sDefault.iCreate_mask, NULL, NULL},
-    {"force create mode", P_OCTAL, P_LOCAL, &sDefault.iCreate_force_mode, NULL,
-     NULL},
-    {"directory mask", P_OCTAL, P_LOCAL, &sDefault.iDir_mask, NULL, NULL},
-    {"directory mode", P_OCTAL, P_LOCAL, &sDefault.iDir_mask, NULL, NULL},
-    {"force directory mode", P_OCTAL, P_LOCAL, &sDefault.iDir_force_mode, NULL,
-     NULL},
 
     {NULL, P_BOOL, P_NONE, NULL, NULL, NULL}};
 
@@ -248,10 +240,6 @@ FN_LOCAL_STRING(lp_comment, comment)
 FN_LOCAL_BOOL(lp_casesensitive, bCaseSensitive)
 FN_LOCAL_BOOL(lp_shortpreservecase, bShortCasePreserve)
 
-FN_LOCAL_INTEGER(lp_create_mode, iCreate_mask)
-FN_LOCAL_INTEGER(lp_force_create_mode, iCreate_force_mode)
-FN_LOCAL_INTEGER(lp_dir_mode, iDir_mask)
-FN_LOCAL_INTEGER(lp_force_dir_mode, iDir_force_mode)
 FN_LOCAL_INTEGER(lp_defaultcase, iDefaultCase)
 
 /* local prototypes */
