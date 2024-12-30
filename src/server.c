@@ -1901,7 +1901,6 @@ int make_connection(char *service, char *dev)
 	char *user = lp_guestaccount(-1);
 	int cnum;
 	int snum;
-	struct passwd *pass = NULL;
 	connection_struct *pcon;
 
 	strlower(service);
@@ -1945,18 +1944,8 @@ int make_connection(char *service, char *dev)
 	pcon = &Connections[cnum];
 	bzero((char *) pcon, sizeof(*pcon));
 
-	/* find out some info about the user */
-	pass = Get_Pwnam(user, true);
-
-	if (pass == NULL) {
-		DEBUG(0, ("%s couldn't find account %s\n", timestring(), user));
-		return (-7);
-	}
-
 	pcon->read_only = !dir_world_writeable(lp_pathname(snum));
 	pcon->ipc = strncmp(dev, "IPC", 3) == 0;
-	pcon->uid = pass->pw_uid;
-	pcon->gid = pass->pw_gid;
 	pcon->num_files_open = 0;
 	pcon->lastused = time(NULL);
 	pcon->service = snum;
@@ -1997,10 +1986,9 @@ int make_connection(char *service, char *dev)
 
 	{
 		DEBUG(1, ("%s %s (%s) connect to service %s as user %s "
-		          "(uid=%d,gid=%d) (pid %d)\n",
+		          "(pid %d)\n",
 		          timestring(), remote_machine, client_addr(),
-		          lp_servicename(SNUM(cnum)), user, pcon->uid,
-		          pcon->gid, (int) getpid()));
+		          lp_servicename(SNUM(cnum)), user, (int) getpid()));
 	}
 
 	return (cnum);
@@ -2483,10 +2471,6 @@ void standard_sub(int cnum, char *str)
 				string_sub(
 				    p, "%S",
 				    lp_servicename(Connections[cnum].service));
-				break;
-			case 'g':
-				string_sub(p, "%g",
-				           gidtoname(Connections[cnum].gid));
 				break;
 			case 'u':
 				string_sub(p, "%u", Connections[cnum].user);
