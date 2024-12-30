@@ -233,14 +233,12 @@ void write_dosattrib(const char *path, int attrib)
 int dos_mode(int cnum, char *path, struct stat *sbuf)
 {
 	int result = 0;
-	extern struct current_user current_user;
 
 	DEBUG(8, ("dos_mode: %d %s\n", cnum, path));
 
 	if (CAN_WRITE(cnum)) {
-		if (!((sbuf->st_mode & S_IWOTH) ||
-		      ((sbuf->st_mode & S_IWUSR) &&
-		       current_user.uid == sbuf->st_uid))) {
+		if ((sbuf->st_mode & S_IWOTH) == 0
+		 && ((sbuf->st_mode & S_IWUSR) == 0 || geteuid() == sbuf->st_uid)) {
 			result |= aRONLY;
 		}
 	} else if ((sbuf->st_mode & S_IWUSR) == 0) {
@@ -832,7 +830,6 @@ Increments the ref_count of the returned entry.
 ****************************************************************************/
 static file_fd_struct *fd_get_new(void)
 {
-	extern struct current_user current_user;
 	int i;
 	file_fd_struct *fd_ptr;
 
@@ -887,8 +884,6 @@ Decrements the ref_count and returns it.
 ****************************************************************************/
 static int fd_attempt_close(file_fd_struct *fd_ptr)
 {
-	extern struct current_user current_user;
-
 	DEBUG(3, ("fd_attempt_close on file_fd_struct %d, fd = %d, dev = %x, "
 	          "inode = %x, open_flags = %d, ref_count = %d.\n",
 	          fd_ptr - &FileFd[0], fd_ptr->fd, fd_ptr->dev, fd_ptr->inode,
@@ -919,7 +914,6 @@ open a file
 static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
                       struct stat *sbuf)
 {
-	extern struct current_user current_user;
 	pstring fname;
 	struct stat statbuf;
 	file_fd_struct *fd_ptr;
