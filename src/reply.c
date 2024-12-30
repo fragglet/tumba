@@ -37,7 +37,6 @@ extern files_struct Files[];
 extern bool case_sensitive;
 extern bool case_preserve;
 extern bool short_case_preserve;
-extern pstring sesssetup_user;
 extern fstring myworkgroup;
 extern int Client;
 
@@ -321,88 +320,15 @@ int reply_sesssetup_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	int smb_bufsize;
 	pstring smb_apasswd;
 	pstring smb_ntpasswd;
-	pstring user;
-	bool guest = false;
 	bool computer_id = false;
 	static bool done_sesssetup = false;
-	char *domain = "";
 
 	*smb_apasswd = 0;
 	*smb_ntpasswd = 0;
 
 	smb_bufsize = SVAL(inbuf, smb_vwv2);
 
-	if (Protocol < PROTOCOL_NT1) {
-		int smb_apasslen = SVAL(inbuf, smb_vwv7);
-
-		memcpy(smb_apasswd, smb_buf(inbuf), smb_apasslen);
-		smb_apasswd[smb_apasslen] = 0;
-		pstrcpy(user, smb_buf(inbuf) + smb_apasslen);
-	} else {
-		uint16_t passlen1 = SVAL(inbuf, smb_vwv7);
-		uint16_t passlen2 = SVAL(inbuf, smb_vwv8);
-
-		char *p = smb_buf(inbuf);
-
-		passlen1 = MIN(passlen1, MAX_PASS_LEN);
-		passlen2 = MIN(passlen2, MAX_PASS_LEN);
-
-		/* both Win95 and WinNT stuff up the password lengths
-		   for non-encrypting systems. Uggh.
-
-		   if passlen1==24 its a win95 system, and its setting
-		   the password length incorrectly. Luckily it still
-		   works with the default code because Win95 will null
-		   terminate the password anyway
-
-		   if passlen1>0 and passlen2>0 then maybe its a NT box
-		   and its setting passlen2 to some random value which
-		   really stuffs things up. we need to fix that one.  */
-
-		if (passlen1 > 0 && passlen2 > 0 && passlen2 != 24 &&
-		    passlen2 != 1)
-			passlen2 = 0;
-
-		p += passlen1 + passlen2;
-		fstrcpy(user, p);
-		p = skip_string(p, 1);
-		domain = p;
-
-		DEBUG(3, ("Domain=[%s]  NativeOS=[%s] NativeLanMan=[%s]\n",
-		          domain, skip_string(p, 1), skip_string(p, 2)));
-	}
-
-	DEBUG(3, ("sesssetupX:name=[%s]\n", user));
-
-	/* If name ends in $ then I think it's asking about whether a */
-	/* computer with that name (minus the $) has access. For now */
-	/* say yes to everything ending in $. */
-	if (user[strlen(user) - 1] == '$') {
-		user[strlen(user) - 1] = '\0';
-	}
-
-	/* If no username is sent use the guest account */
-	if (!*user) {
-		pstrcpy(user, lp_guestaccount(-1));
-		/* If no user and no password then set guest flag. */
-		if (*smb_apasswd == 0)
-			guest = true;
-	}
-
-	strlower(user);
-
-	/*
-	 * In share level security, only overwrite sesssetup_use if
-	 * it's a non null-session share. Helps keep %U and %G
-	 * working.
-	 */
-
-	if (*user)
-		pstrcpy(sesssetup_user, user);
-
 	reload_services(true);
-
-	guest = true;
 
 	/* it's ok - setup a reply */
 	if (Protocol < PROTOCOL_NT1) {
@@ -422,7 +348,7 @@ int reply_sesssetup_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 		/* perhaps grab OS version here?? */
 	}
 
-	if (guest && !computer_id)
+	if (!computer_id)
 		SSVAL(outbuf, smb_vwv2, 1);
 
 	SSVAL(outbuf, smb_uid, UID_FIELD_INVALID);

@@ -58,7 +58,6 @@ fstring local_machine = "";
 fstring remote_proto = "UNKNOWN";
 pstring myhostname = "";
 
-pstring sesssetup_user = "";
 pstring samlogon_user = "";
 
 bool sam_logon_in_ssb = false;
@@ -2067,7 +2066,6 @@ void standard_sub_basic(char *str)
 {
 	char *s, *p;
 	char pidstr[10];
-	char *username = sam_logon_in_ssb ? samlogon_user : sesssetup_user;
 
 	for (s = str; s && *s && (p = strchr(s, '%')); s = p) {
 		switch (*(p + 1)) {
@@ -2086,9 +2084,6 @@ void standard_sub_basic(char *str)
 			break;
 		case 'a':
 			string_sub(p, "%a", "Win95");
-			break;
-		case 'U':
-			string_sub(p, "%U", username);
 			break;
 		case 'd': {
 			slprintf(pidstr, sizeof(pidstr) - 1, "%d",

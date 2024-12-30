@@ -648,7 +648,6 @@ static bool api_NetWkstaGetInfo(int cnum, char *param, char *data, int mdrcnt,
 	char *str2 = skip_string(str1, 1);
 	char *p = skip_string(str2, 1);
 	char *p2;
-	extern pstring sesssetup_user;
 	int level = SVAL(p, 0);
 
 	DEBUG(4, ("NetWkstaGetInfo level %d\n", level));
@@ -677,7 +676,7 @@ static bool api_NetWkstaGetInfo(int cnum, char *param, char *data, int mdrcnt,
 	p += 4;
 
 	SIVAL(p, 0, PTR_DIFF(p2, *rdata));
-	pstrcpy(p2, sesssetup_user);
+	pstrcpy(p2, "user");
 	p2 = skip_string(p2, 1);
 	p += 4;
 
