@@ -50,7 +50,6 @@ pstring debugf = "";
 /* the following control case operations - they are put here so the
    client can link easily */
 bool case_sensitive;
-bool case_preserve;
 bool short_case_preserve;
 
 fstring remote_machine = "";

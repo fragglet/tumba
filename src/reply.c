@@ -35,7 +35,6 @@ extern int chain_fnum;
 extern connection_struct Connections[];
 extern files_struct Files[];
 extern bool case_sensitive;
-extern bool case_preserve;
 extern bool short_case_preserve;
 extern fstring myworkgroup;
 extern int Client;
@@ -2283,10 +2282,10 @@ int reply_mv(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 			pstrcpy(newname, tmpstr);
 		}
 
-		DEBUG(3, ("reply_mv : case_sensitive = %d, case_preserve = %d, "
+		DEBUG(3, ("reply_mv : case_sensitive = %d, "
 		          "short case preserve = %d, directory = %s, newname = "
 		          "%s, newname_last_component = %s, is_8_3 = %d\n",
-		          case_sensitive, case_preserve, short_case_preserve,
+		          case_sensitive, short_case_preserve,
 		          directory, newname, newname_last_component,
 		          is_short_name));
 
@@ -2298,10 +2297,8 @@ int reply_mv(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		 * the rename (user is trying to change the case of the
 		 * filename).
 		 */
-		if ((case_sensitive == false) &&
-		    (((case_preserve == true) && (is_short_name == false)) ||
-		     ((short_case_preserve == true) &&
-		      (is_short_name == true))) &&
+		if (!case_sensitive &&
+		    (!is_short_name || short_case_preserve) &&
 		    strcsequal(directory, newname)) {
 			pstring newname_modified_last_component;
 
