@@ -31,7 +31,6 @@ OBJECTS = \
 	system.o             \
 	time.o               \
 	trans2.o             \
-	uid.o                \
 	username.o           \
 	util.o
 

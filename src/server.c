@@ -3118,8 +3118,6 @@ int main(int argc, char *argv[])
 	   so set our umask to 0 */
 	umask(0);
 
-	init_uid();
-
 	/* this is for people who can't start the program correctly */
 	while (argc > 1 && (*argv[1] != '-')) {
 		argv++;
