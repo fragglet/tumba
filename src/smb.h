@@ -327,20 +327,6 @@ struct dcinfo {
 
 /* End of NTDOMAIN defines needed here. */
 
-typedef struct {
-	int uid; /* uid of a validated user */
-	int gid; /* gid of a validated user */
-
-	fstring requested_name; /* user name from the client */
-	fstring name;           /* unix user name of a validated user */
-	fstring real_name; /* to store real name from password file - simeon */
-	bool guest;
-
-	int n_sids;
-	int *sids;
-
-} user_struct;
-
 /* used for server information: client, nameserv and ipc */
 struct server_info_struct {
 	fstring name;
