@@ -1140,10 +1140,8 @@ void close_file(int fnum, bool normal_close)
 
 	fs_p->open = false;
 	Connections[cnum].num_files_open--;
-	if (fs_p->wbmpx_ptr) {
-		free((char *) fs_p->wbmpx_ptr);
-		fs_p->wbmpx_ptr = NULL;
-	}
+	free(fs_p->wbmpx_ptr);
+	fs_p->wbmpx_ptr = NULL;
 
 #if USE_MMAP
 	if (fs_p->mmap_ptr) {

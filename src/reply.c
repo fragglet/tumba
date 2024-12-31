@@ -2845,8 +2845,7 @@ int reply_writebs(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		if (write_through) {
 			/* We are returning an error - we can delete the aux
 			 * struct */
-			if (wbms)
-				free((char *) wbms);
+			free(wbms);
 			Files[fnum].wbmpx_ptr = NULL;
 			return (ERROR(ERRHRD, ERRdiskfull));
 		}

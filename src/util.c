@@ -1376,8 +1376,7 @@ void string_free(char **s)
 		return;
 	if (*s == null_string)
 		*s = NULL;
-	if (*s)
-		free(*s);
+	free(*s);
 	*s = NULL;
 }
 
@@ -1811,8 +1810,7 @@ void *Realloc(void *p, int size)
 	void *ret = NULL;
 
 	if (size == 0) {
-		if (p)
-			free(p);
+		free(p);
 		DEBUG(5, ("Realloc asked for 0 bytes\n"));
 		return NULL;
 	}

@@ -778,10 +778,8 @@ static int api_reply(int cnum, char *outbuf, char *data, char *params,
 	/* now send the reply */
 	send_trans_reply(outbuf, rdata, rparam, NULL, rdata_len, rparam_len, 0);
 
-	if (rdata)
-		free(rdata);
-	if (rparam)
-		free(rparam);
+	free(rdata);
+	free(rparam);
 
 	return (-1);
 }
@@ -881,12 +879,9 @@ int reply_trans(char *inbuf, char *outbuf, int size, int bufsize)
 				          (smb_read_error == READ_ERROR)
 				              ? "error"
 				              : "timeout"));
-			if (params)
-				free(params);
-			if (data)
-				free(data);
-			if (setup)
-				free(setup);
+			free(params);
+			free(data);
+			free(setup);
 			return (ERROR(ERRSRV, ERRerror));
 		}
 
@@ -929,12 +924,9 @@ int reply_trans(char *inbuf, char *outbuf, int size, int bufsize)
 		outsize = 0;
 	}
 
-	if (data)
-		free(data);
-	if (params)
-		free(params);
-	if (setup)
-		free(setup);
+	free(data);
+	free(params);
+	free(setup);
 
 	if (close_on_completion)
 		close_cnum(cnum);

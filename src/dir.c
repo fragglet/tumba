@@ -204,8 +204,7 @@ void dptr_close(int key)
 			dptrs_open--;
 		}
 		/* Lanman 2 specific code */
-		if (dirptrs[key].wcard)
-			free(dirptrs[key].wcard);
+		free(dirptrs[key].wcard);
 		dirptrs[key].valid = false;
 		string_set(&dirptrs[key].path, "");
 	}
@@ -560,8 +559,7 @@ void CloseDir(void *p)
 	Dir *dirp = (Dir *) p;
 	if (!dirp)
 		return;
-	if (dirp->data)
-		free(dirp->data);
+	free(dirp->data);
 	free(dirp);
 }
 

@@ -1900,10 +1900,8 @@ int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize)
 		/* Error in request */
 		DEBUG(2, ("%s Unknown request %d in trans2 call\n",
 		          timestring(), tran_call));
-		if (params)
-			free(params);
-		if (data)
-			free(data);
+		free(params);
+		free(data);
 		return (ERROR(ERRSRV, ERRerror));
 	}
 
@@ -1914,10 +1912,8 @@ int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize)
 	   an error packet.
 	*/
 
-	if (params)
-		free(params);
-	if (data)
-		free(data);
+	free(params);
+	free(data);
 	return outsize; /* If a correct response was needed the call_trans2xxx
 	                   calls have already sent it. If outsize != -1 then it
 	                   is returning an error packet. */
