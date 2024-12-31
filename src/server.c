@@ -265,8 +265,7 @@ int dos_chmod(int cnum, char *fname, int dosmode, struct stat *st)
 {
 	struct stat st1;
 	int mask = 0;
-	int tmp;
-	int unixmode;
+	int unixmode, um;
 
 	if (!st) {
 		st = &st1;
@@ -293,18 +292,21 @@ int dos_chmod(int cnum, char *fname, int dosmode, struct stat *st)
 
 	unixmode |= (st->st_mode & mask);
 
+	/* unix_mode sets bits for owner, group and other, so apply the
+	   process's umask like we do when creating a new file */
+	um = umask(0);
+	umask(um);
+	unixmode &= ~um;
+
 	/* if we previously had any r bits set then leave them alone */
-	if ((tmp = st->st_mode & (S_IRUSR | S_IRGRP | S_IROTH))) {
-		unixmode &= ~(S_IRUSR | S_IRGRP | S_IROTH);
-		unixmode |= tmp;
-	}
+	unixmode = (unixmode & ~(S_IRUSR | S_IRGRP | S_IROTH))
+	         | (st->st_mode & (S_IRUSR | S_IRGRP | S_IROTH));
 
 	/* if we previously had any w bits set then leave them alone
 	 if the new mode is not rdonly */
-	if (!IS_DOS_READONLY(dosmode) &&
-	    (tmp = st->st_mode & (S_IWUSR | S_IWGRP | S_IWOTH))) {
-		unixmode &= ~(S_IWUSR | S_IWGRP | S_IWOTH);
-		unixmode |= tmp;
+	if (!IS_DOS_READONLY(dosmode)) {
+		unixmode = (unixmode & ~(S_IWUSR | S_IWGRP | S_IWOTH))
+		         | (st->st_mode & (S_IWUSR | S_IWGRP | S_IWOTH));
 	}
 
 	return (chmod(fname, unixmode));
