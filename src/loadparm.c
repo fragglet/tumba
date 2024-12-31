@@ -524,76 +524,6 @@ static bool service_ok(int iService)
 	return (bRetval);
 }
 
-static struct file_lists {
-	struct file_lists *next;
-	char *name;
-	time_t modtime;
-} *file_lists = NULL;
-
-/*******************************************************************
-keep a linked list of all config files so we know when one has changed
-it's date and needs to be reloaded
-********************************************************************/
-static void add_to_file_list(char *fname)
-{
-	struct file_lists *f = file_lists;
-
-	while (f) {
-		if (f->name && !strcmp(f->name, fname))
-			break;
-		f = f->next;
-	}
-
-	if (!f) {
-		f = (struct file_lists *) malloc(sizeof(file_lists[0]));
-		if (!f)
-			return;
-		f->next = file_lists;
-		f->name = strdup(fname);
-		if (!f->name) {
-			free(f);
-			return;
-		}
-		file_lists = f;
-	}
-
-	{
-		pstring n2;
-		pstrcpy(n2, fname);
-		f->modtime = file_modtime(n2);
-	}
-}
-
-/*******************************************************************
-check if a config file has changed date
-********************************************************************/
-bool lp_file_list_changed(void)
-{
-	struct file_lists *f = file_lists;
-	DEBUG(6, ("lp_file_list_changed()\n"));
-
-	while (f) {
-		pstring n2;
-		time_t mod_time;
-
-		pstrcpy(n2, f->name);
-
-		DEBUG(6, ("file %s -> %s  last mod_time: %s\n", f->name, n2,
-		          ctime(&f->modtime)));
-
-		mod_time = file_modtime(n2);
-
-		if (f->modtime != mod_time) {
-			DEBUG(6,
-			      ("file %s modified: %s\n", n2, ctime(&mod_time)));
-			f->modtime = mod_time;
-			return (true);
-		}
-		f = f->next;
-	}
-	return (false);
-}
-
 /***************************************************************************
 Process a parameter for a particular service number. If snum < 0
 then assume we are in the globals
@@ -877,8 +807,6 @@ bool lp_load(char *pszFname)
 {
 	pstring n2;
 	bool bRetval;
-
-	add_to_file_list(pszFname);
 
 	bRetval = false;
 

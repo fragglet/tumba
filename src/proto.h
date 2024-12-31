@@ -68,7 +68,6 @@ bool lp_casesensitive(int);
 bool lp_shortpreservecase(int);
 int lp_defaultcase(int);
 int lp_add_service(char *pszService, int iDefaultService);
-bool lp_file_list_changed(void);
 bool lp_do_parameter(int snum, char *pszParmName, char *pszParmValue);
 bool lp_snum_ok(int iService);
 bool lp_loaded(void);
