@@ -2282,9 +2282,8 @@ int reply_mv(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		DEBUG(3, ("reply_mv : case_sensitive = %d, "
 		          "short case preserve = %d, directory = %s, newname = "
 		          "%s, newname_last_component = %s, is_8_3 = %d\n",
-		          case_sensitive, short_case_preserve,
-		          directory, newname, newname_last_component,
-		          is_short_name));
+		          case_sensitive, short_case_preserve, directory,
+		          newname, newname_last_component, is_short_name));
 
 		/*
 		 * Check for special case with case preserving and not

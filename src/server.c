@@ -57,9 +57,9 @@ connection_struct Connections[MAX_CONNECTIONS];
 files_struct Files[MAX_OPEN_FILES];
 
 /*
- * Indirection for file fd's. Needed as POSIX locking
- * is based on file/process, not fd/process.
- * Context: <https://www.samba.org/samba/news/articles/low_point/tale_two_stds_os2.html>
+ * Indirection for file fd's. Needed as POSIX locking is based on file/process,
+ * not fd/process. Context:
+ * <https://www.samba.org/samba/news/articles/low_point/tale_two_stds_os2.html>
  * TODO: The 2024 POSIX spec now includes OFD locks, so this can be replaced
  */
 file_fd_struct FileFd[MAX_OPEN_FILES];
@@ -227,8 +227,9 @@ int dos_mode(int cnum, char *path, struct stat *sbuf)
 	DEBUG(8, ("dos_mode: %d %s\n", cnum, path));
 
 	if (CAN_WRITE(cnum)) {
-		if ((sbuf->st_mode & S_IWOTH) == 0
-		 && ((sbuf->st_mode & S_IWUSR) == 0 || geteuid() == sbuf->st_uid)) {
+		if ((sbuf->st_mode & S_IWOTH) == 0 &&
+		    ((sbuf->st_mode & S_IWUSR) == 0 ||
+		     geteuid() == sbuf->st_uid)) {
 			result |= aRONLY;
 		}
 	} else if ((sbuf->st_mode & S_IWUSR) == 0) {
@@ -299,14 +300,14 @@ int dos_chmod(int cnum, char *fname, int dosmode, struct stat *st)
 	unixmode &= ~um;
 
 	/* if we previously had any r bits set then leave them alone */
-	unixmode = (unixmode & ~(S_IRUSR | S_IRGRP | S_IROTH))
-	         | (st->st_mode & (S_IRUSR | S_IRGRP | S_IROTH));
+	unixmode = (unixmode & ~(S_IRUSR | S_IRGRP | S_IROTH)) |
+	           (st->st_mode & (S_IRUSR | S_IRGRP | S_IROTH));
 
 	/* if we previously had any w bits set then leave them alone
 	 if the new mode is not rdonly */
 	if (!IS_DOS_READONLY(dosmode)) {
-		unixmode = (unixmode & ~(S_IWUSR | S_IWGRP | S_IWOTH))
-		         | (st->st_mode & (S_IWUSR | S_IWGRP | S_IWOTH));
+		unixmode = (unixmode & ~(S_IWUSR | S_IWGRP | S_IWOTH)) |
+		           (st->st_mode & (S_IWUSR | S_IWGRP | S_IWOTH));
 	}
 
 	return (chmod(fname, unixmode));
@@ -1102,8 +1103,8 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 
 		DEBUG(2, ("%s opened file %s read=%s write=%s (numopen=%d "
 		          "fnum=%d)\n",
-		          timestring(), fname,
-		          BOOLSTR(fsp->can_read), BOOLSTR(fsp->can_write),
+		          timestring(), fname, BOOLSTR(fsp->can_read),
+		          BOOLSTR(fsp->can_write),
 		          Connections[cnum].num_files_open, fnum));
 	}
 
@@ -1152,8 +1153,8 @@ void close_file(int fnum, bool normal_close)
 
 	fd_attempt_close(fs_p->fd_ptr);
 
-	DEBUG(2, ("%s closed file %s (numopen=%d)\n", timestring(),
-	          fs_p->name, Connections[cnum].num_files_open));
+	DEBUG(2, ("%s closed file %s (numopen=%d)\n", timestring(), fs_p->name,
+	          Connections[cnum].num_files_open));
 
 	if (fs_p->name) {
 		string_free(&fs_p->name);
@@ -2416,8 +2417,7 @@ struct smb_message_struct {
     {SMBcreate, "SMBcreate", reply_mknew, 0},
     {SMBmknew, "SMBmknew", reply_mknew, 0},
 
-    {SMBunlink, "SMBunlink", reply_unlink,
-     NEED_WRITE | QUEUE_IN_OPLOCK},
+    {SMBunlink, "SMBunlink", reply_unlink, NEED_WRITE | QUEUE_IN_OPLOCK},
     {SMBread, "SMBread", reply_read, 0},
     {SMBwrite, "SMBwrite", reply_write, 0},
     {SMBclose, "SMBclose", reply_close, CAN_IPC},
@@ -2463,8 +2463,7 @@ struct smb_message_struct {
     {SMBcopy, "SMBcopy", reply_copy, NEED_WRITE | QUEUE_IN_OPLOCK},
     {SMBmove, "SMBmove", NULL, NEED_WRITE | QUEUE_IN_OPLOCK},
 
-    {SMBopenX, "SMBopenX", reply_open_and_X,
-     CAN_IPC | QUEUE_IN_OPLOCK},
+    {SMBopenX, "SMBopenX", reply_open_and_X, CAN_IPC | QUEUE_IN_OPLOCK},
     {SMBreadX, "SMBreadX", reply_read_and_X, 0},
     {SMBwriteX, "SMBwriteX", reply_write_and_X, 0},
     {SMBlockingX, "SMBlockingX", reply_lockingX, 0},

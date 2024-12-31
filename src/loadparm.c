@@ -168,7 +168,6 @@ static void init_globals(void)
 			    parm_table[i].ptr)
 				string_init(parm_table[i].ptr, "");
 
-
 		done_init = true;
 	}
 }
@@ -181,9 +180,8 @@ static void init_globals(void)
 #define FN_LOCAL_STRING(fn_name, val)                                          \
 	char *fn_name(int i)                                                   \
 	{                                                                      \
-		return (LP_SNUM_OK(i) && pSERVICE(i)->val)                     \
-		           ? pSERVICE(i)->val                                  \
-		           : sDefault.val;                                     \
+		return (LP_SNUM_OK(i) && pSERVICE(i)->val) ? pSERVICE(i)->val  \
+		                                           : sDefault.val;     \
 	}
 #define FN_LOCAL_BOOL(fn_name, val)                                            \
 	bool fn_name(int i)                                                    \
