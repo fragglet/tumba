@@ -57,7 +57,6 @@ fstring local_machine = "";
 fstring remote_proto = "UNKNOWN";
 pstring myhostname = "";
 
-pstring myname = "";
 fstring myworkgroup = "";
 
 int smb_read_error = 0;
@@ -2110,19 +2109,6 @@ int PutUniCode(char *dst, char *src)
 	dst[ret++] = 0;
 	dst[ret++] = 0;
 	return (ret);
-}
-
-/*******************************************************************
-turn a gid into a group name
-********************************************************************/
-char *gidtoname(int gid)
-{
-	static char name[40];
-	struct group *grp = getgrgid(gid);
-	if (grp)
-		return (grp->gr_name);
-	slprintf(name, sizeof(name) - 1, "%d", gid);
-	return (name);
 }
 
 /*******************************************************************
