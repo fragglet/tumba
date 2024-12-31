@@ -1788,18 +1788,6 @@ bool receive_next_smb(int smbfd, char *inbuf, int bufsize, int timeout)
 }
 
 /****************************************************************************
-check if a snum is in use
-****************************************************************************/
-bool snum_used(int snum)
-{
-	int i;
-	for (i = 0; i < MAX_CONNECTIONS; i++)
-		if (OPEN_CNUM(i) && (SNUM(i) == snum))
-			return (true);
-	return (false);
-}
-
-/****************************************************************************
 this prevents zombie child processes
 ****************************************************************************/
 
@@ -2792,7 +2780,6 @@ static void process(void)
 
 	while (true) {
 		int counter;
-		int service_load_counter = 0;
 		bool got_smb = false;
 
 		errno = 0;
@@ -2808,7 +2795,6 @@ static void process(void)
 			if (counter > 365 * 3600) /* big number of seconds. */
 			{
 				counter = 0;
-				service_load_counter = 0;
 			}
 
 			if (smb_read_error == READ_EOF) {

@@ -378,19 +378,6 @@ bool file_exist(char *fname, struct stat *sbuf)
 }
 
 /*******************************************************************
-check a files mod time
-********************************************************************/
-time_t file_modtime(char *fname)
-{
-	struct stat st;
-
-	if (stat(fname, &st) != 0)
-		return (0);
-
-	return (st.st_mtime);
-}
-
-/*******************************************************************
   check if a directory exists
 ********************************************************************/
 bool directory_exist(char *dname, struct stat *st)

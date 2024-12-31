@@ -182,7 +182,6 @@ int unix_error_packet(char *inbuf, char *outbuf, int def_class,
 int error_packet(char *inbuf, char *outbuf, int error_class,
                  uint32_t error_code, int line);
 bool receive_next_smb(int smbfd, char *inbuf, int bufsize, int timeout);
-bool snum_used(int snum);
 int make_connection(char *service, char *dev);
 int find_free_file(void);
 int reply_corep(char *outbuf);
@@ -246,7 +245,6 @@ void array_promote(char *array, int elsize, int element);
 void close_sockets(void);
 char *StrnCpy(char *dest, char *src, int n);
 bool file_exist(char *fname, struct stat *sbuf);
-time_t file_modtime(char *fname);
 bool directory_exist(char *dname, struct stat *st);
 uint32_t file_size(char *file_name);
 int isdoschar(int c);

@@ -163,8 +163,7 @@ bool is_8_3(char *fname, bool check_case)
  * The original comments read: "keep a stack of name mangling results - just
  * so file moves and copies have a chance of working" (whatever that means).
  *
- * There are three functions to manage the stack:
- *   reset_mangled_stack() -
+ * There are two functions to manage the stack:
  *   push_mangled_name()    -
  *   check_mangled_stack()  -
  */
@@ -172,25 +171,6 @@ bool is_8_3(char *fname, bool check_case)
 fstring *mangled_stack = NULL;
 int mangled_stack_size = 0;
 int mangled_stack_len = 0;
-
-/****************************************************************************
- * create the mangled stack CRH
- ****************************************************************************/
-void reset_mangled_stack(int size)
-{
-	if (mangled_stack) {
-		free(mangled_stack);
-		mangled_stack_size = 0;
-		mangled_stack_len = 0;
-	}
-
-	if (size > 0) {
-		mangled_stack = (fstring *) malloc(sizeof(fstring) * size);
-		if (mangled_stack)
-			mangled_stack_size = size;
-	} else
-		mangled_stack = NULL;
-} /* create_mangled_stack */
 
 /****************************************************************************
  * push a mangled name onto the stack CRH
