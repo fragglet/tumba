@@ -6,7 +6,9 @@ Recent versions of Samba have
 [removed support](https://www.theregister.com/2019/07/09/samba_sans_one_smb1/)
 for the older SMBv1 protocol used in the
 Windows 3.x and 9x days. This is absolutely the right move for the
-project to have made; however, it does mean that there's no longer an easy
+project to have made (Microsoft have been
+[dropping support for it too](https://arstechnica.com/gadgets/2022/04/microsoft-enters-final-phase-of-disabling-smb1-file-sharing-in-windows-11/));
+however, it does mean that there's no longer an easy
 way to share files with vintage Windows machines. Since SMBv1 is
 Win9x's native file sharing protocol, it's useful to have an alternative that
 does support these old versions.
