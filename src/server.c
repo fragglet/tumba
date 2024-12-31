@@ -1949,7 +1949,6 @@ int make_connection(char *service, char *dev)
 		char *canon_path;
 		pstring s;
 		pstrcpy(s, lp_pathname(snum));
-		standard_sub(cnum, s);
 		/* Convert path to its canonical form (no ../ or symlinks,
 		   etc.). This is important because check_name() does the same
 		   thing and expects all files to be subpaths. */
@@ -2437,40 +2436,6 @@ void exit_server(char *reason)
 	DEBUG(3,
 	      ("%s Server exit  (%s)\n", timestring(), reason ? reason : ""));
 	exit(0);
-}
-
-/****************************************************************************
-do some standard substitutions in a string
-****************************************************************************/
-void standard_sub(int cnum, char *str)
-{
-	if (VALID_CNUM(cnum)) {
-		char *p, *s;
-
-		for (s = str; (p = strchr(s, '%')) != NULL; s = p) {
-			switch (*(p + 1)) {
-			case 'H':
-				string_sub(p, "%H", "/");
-				break;
-			case 'P':
-				string_sub(p, "%P",
-				           Connections[cnum].connectpath);
-				break;
-			case 'S':
-				string_sub(
-				    p, "%S",
-				    lp_servicename(Connections[cnum].service));
-				break;
-			case '\0':
-				p++;
-				break; /* don't run off the end of the string */
-			default:
-				p += 2;
-				break;
-			}
-		}
-	}
-	standard_sub_basic(str);
 }
 
 /*

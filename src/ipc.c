@@ -81,7 +81,6 @@ static int CopyExpanded(int cnum, int snum, char **dst, char *src, int *n)
 
 	StrnCpy(buf, src, sizeof(buf) / 2);
 	string_sub(buf, "%S", lp_servicename(snum));
-	standard_sub(cnum, buf);
 	StrnCpy(*dst, buf, *n);
 	l = strlen(*dst) + 1;
 	(*dst) += l;
@@ -108,7 +107,6 @@ static int StrlenExpanded(int cnum, int snum, char *s)
 		return (0);
 	StrnCpy(buf, s, sizeof(buf) / 2);
 	string_sub(buf, "%S", lp_servicename(snum));
-	standard_sub(cnum, buf);
 	return strlen(buf) + 1;
 }
 
@@ -617,7 +615,6 @@ static bool api_RNetServerGetInfo(int cnum, char *param, char *data, int mdrcnt,
 			pstring comment;
 			pstrcpy(comment, lp_serverstring());
 			SIVAL(p, 6, PTR_DIFF(p2, *rdata));
-			standard_sub(cnum, comment);
 			StrnCpy(p2, comment, MAX(mdrcnt - struct_len, 0));
 			p2 = skip_string(p2, 1);
 		}

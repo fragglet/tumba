@@ -201,7 +201,6 @@ char *lp_string(char *s)
 
 	trim_string(ret, "\"", "\"");
 
-	standard_sub_basic(ret);
 	return ret;
 }
 
@@ -561,7 +560,6 @@ static void add_to_file_list(char *fname)
 	{
 		pstring n2;
 		pstrcpy(n2, fname);
-		standard_sub_basic(n2);
 		f->modtime = file_modtime(n2);
 	}
 }
@@ -579,7 +577,6 @@ bool lp_file_list_changed(void)
 		time_t mod_time;
 
 		pstrcpy(n2, f->name);
-		standard_sub_basic(n2);
 
 		DEBUG(6, ("file %s -> %s  last mod_time: %s\n", f->name, n2,
 		          ctime(&f->modtime)));
@@ -888,7 +885,6 @@ bool lp_load(char *pszFname)
 	init_globals();
 
 	pstrcpy(n2, pszFname);
-	standard_sub_basic(n2);
 
 	/* We get sections first, so have to start 'behind' to make up */
 	iServiceIndex = -1;

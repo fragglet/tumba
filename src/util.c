@@ -2042,60 +2042,6 @@ char *client_addr(void)
 }
 
 /*******************************************************************
-sub strings with useful parameters
-Rewritten by Stefaan A Eeckels <Stefaan.Eeckels@ecc.lu> and
-Paul Rippin <pr3245@nopc.eurostat.cec.be>
-********************************************************************/
-void standard_sub_basic(char *str)
-{
-	char *s, *p;
-	char pidstr[10];
-
-	for (s = str; s && *s && (p = strchr(s, '%')); s = p) {
-		switch (*(p + 1)) {
-		case 'I':
-		case 'M':
-			string_sub(p, "%I", client_addr());
-			break;
-		case 'L':
-			string_sub(p, "%L", local_machine);
-			break;
-		case 'R':
-			string_sub(p, "%R", remote_proto);
-			break;
-		case 'T':
-			string_sub(p, "%T", timestring());
-			break;
-		case 'a':
-			string_sub(p, "%a", "Win95");
-			break;
-		case 'd': {
-			slprintf(pidstr, sizeof(pidstr) - 1, "%d",
-			         (int) getpid());
-			string_sub(p, "%d", pidstr);
-			break;
-		}
-		case 'h':
-			string_sub(p, "%h", myhostname);
-			break;
-		case 'm':
-			string_sub(p, "%m", remote_machine);
-			break;
-		case 'v':
-			string_sub(p, "%v", VERSION);
-			break;
-		case '\0':
-			p++;
-			break; /* don't run off end if last character is % */
-		default:
-			p += 2;
-			break;
-		}
-	}
-	return;
-}
-
-/*******************************************************************
 write a string in unicoode format
 ********************************************************************/
 int PutUniCode(char *dst, char *src)
