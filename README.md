@@ -27,3 +27,11 @@ to get a working setup. You can just use the normal Samba version of nmbd.
 issues hiding in here that have since been fixed in mainline Samba. This is
 purely for fun and personal use by hobbyists and retro enthusiasts. You should
 *not* use this for anything serious or mission critical. You have been warned.**
+
+## Tested with
+
+* Windows 3.11, 95, 98
+* Windows NT 3.51, 4
+* Windows 2000, XP
+* OS/2 Warp 4.52
+* Samba (smbclient; recent versions of Samba still support connecting to old shares)
