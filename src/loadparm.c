@@ -90,7 +90,6 @@ typedef struct {
 	bool valid;
 	char *szService;
 	char *szPath;
-	char *szCopy;
 	char *comment;
 	int iCreate_mask;
 	int iCreate_force_mode;
@@ -107,7 +106,6 @@ static service sDefault = {
     true,       /* valid */
     NULL,       /* szService */
     NULL,       /* szPath */
-    NULL,       /* szCopy */
     NULL,       /* comment */
     0744,       /* iCreate_mask */
     0000,       /* iCreate_force_mode */
