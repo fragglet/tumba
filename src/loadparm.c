@@ -104,9 +104,9 @@ typedef struct {
 /* This is a default service used to prime a services structure */
 static service sDefault = {
     true,       /* valid */
-    NULL,       /* szService */
-    NULL,       /* szPath */
-    NULL,       /* comment */
+    "",         /* szService */
+    "",         /* szPath */
+    "",         /* comment */
     0744,       /* iCreate_mask */
     0000,       /* iCreate_force_mode */
     0755,       /* iDir_mask */
@@ -173,35 +173,6 @@ static void init_globals(void)
 	}
 }
 
-/******************************************************************* a
-convenience routine to grab string parameters into a rotating buffer,
-and run standard_sub_basic on them. The buffers can be written to by
-callers without affecting the source string.
-********************************************************************/
-char *lp_string(char *s)
-{
-	static char *bufs[10];
-	static int next = 0;
-	char *ret;
-	int len = s ? strlen(s) : 0;
-
-	/* the +100 is for some substitution room */
-	bufs[next] = realloc(bufs[next], len + 100);
-	ret = &bufs[next][0];
-
-	next = (next + 1) % 10;
-
-	if (s == NULL) {
-		ret[0] = '\0';
-	} else {
-		memcpy(ret, s, len + 1);
-	}
-
-	trim_string(ret, "\"", "\"");
-
-	return ret;
-}
-
 /*
    In this section all the functions that are used to access the
    parameters from the rest of the program are defined
@@ -210,9 +181,9 @@ char *lp_string(char *s)
 #define FN_LOCAL_STRING(fn_name, val)                                          \
 	char *fn_name(int i)                                                   \
 	{                                                                      \
-		return (lp_string((LP_SNUM_OK(i) && pSERVICE(i)->val)          \
-		                      ? pSERVICE(i)->val                       \
-		                      : sDefault.val));                        \
+		return (LP_SNUM_OK(i) && pSERVICE(i)->val)                     \
+		           ? pSERVICE(i)->val                                  \
+		           : sDefault.val;                                     \
 	}
 #define FN_LOCAL_BOOL(fn_name, val)                                            \
 	bool fn_name(int i)                                                    \
