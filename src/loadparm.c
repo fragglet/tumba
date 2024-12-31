@@ -785,19 +785,6 @@ bool lp_loaded(void)
 }
 
 /***************************************************************************
-unload unused services
-***************************************************************************/
-void lp_killunused(bool (*snumused)(int))
-{
-	int i;
-	for (i = 0; i < iNumServices; i++)
-		if (VALID(i) && (!snumused || !snumused(i))) {
-			iSERVICE(i).valid = false;
-			free_service(pSERVICE(i));
-		}
-}
-
-/***************************************************************************
 Load the services array from the services file. Return true on success,
 false on failure.
 ***************************************************************************/
