@@ -184,7 +184,6 @@ int error_packet(char *inbuf, char *outbuf, int error_class,
                  uint32_t error_code, int line);
 bool receive_next_smb(int smbfd, char *inbuf, int bufsize, int timeout);
 bool snum_used(int snum);
-bool reload_services(bool test);
 int make_connection(char *service, char *dev);
 int find_free_file(void);
 int reply_corep(char *outbuf);

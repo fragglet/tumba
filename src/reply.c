@@ -96,7 +96,6 @@ int reply_special(char *inbuf, char *outbuf)
 			break;
 		}
 
-		reload_services(true);
 		reopen_logs();
 
 		break;
@@ -326,8 +325,6 @@ int reply_sesssetup_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	*smb_ntpasswd = 0;
 
 	smb_bufsize = SVAL(inbuf, smb_vwv2);
-
-	reload_services(true);
 
 	/* it's ok - setup a reply */
 	if (Protocol < PROTOCOL_NT1) {

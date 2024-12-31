@@ -1800,68 +1800,14 @@ bool snum_used(int snum)
 }
 
 /****************************************************************************
-  reload the services file
-  **************************************************************************/
-bool reload_services(bool test)
-{
-	bool ret;
-
-	if (lp_loaded()) {
-		pstring fname;
-		pstrcpy(fname, lp_configfile());
-		if (file_exist(fname, NULL) && !strcsequal(fname, servicesf)) {
-			pstrcpy(servicesf, fname);
-			test = false;
-		}
-	}
-
-	reopen_logs();
-
-	if (test && !lp_file_list_changed())
-		return (true);
-
-	lp_killunused(snum_used);
-
-	ret = lp_load(servicesf);
-
-	/* perhaps the config filename is now set */
-	if (!test)
-		reload_services(true);
-
-	reopen_logs();
-
-	{
-		extern int Client;
-		if (Client != -1) {
-			set_keepalive_option(Client);
-		}
-	}
-
-	reset_mangled_stack(MANGLED_STACK_SIZE);
-
-	/* this forces service parameters to be flushed */
-	become_service(-1, true);
-
-	return (ret);
-}
-
-/****************************************************************************
 this prevents zombie child processes
 ****************************************************************************/
-static bool reload_after_sighup = false;
 
 static int sig_hup(void)
 {
 	BlockSignals(true, SIGHUP);
 	DEBUG(0, ("Got SIGHUP\n"));
 
-	/*
-	 * Fix from <branko.cibej@hermes.si> here.
-	 * We used to reload in the signal handler - this
-	 * is a *BIG* no-no.
-	 */
-
-	reload_after_sighup = true;
 #ifndef DONT_REINSTALL_SIG
 	signal(SIGHUP, SIGNAL_CAST sig_hup);
 #endif
@@ -2292,9 +2238,6 @@ static int reply_negprot(char *inbuf, char *outbuf, int size, int bufsize)
 		p += strlen(p) + 2;
 	}
 
-	/* possibly reload - change of architecture */
-	reload_services(true);
-
 	/* Check for protocols, most desirable first */
 	for (protocol = 0; supported_protocols[protocol].proto_name;
 	     protocol++) {
@@ -2315,7 +2258,6 @@ static int reply_negprot(char *inbuf, char *outbuf, int size, int bufsize)
 	if (choice != -1) {
 		extern fstring remote_proto;
 		fstrcpy(remote_proto, supported_protocols[protocol].short_name);
-		reload_services(true);
 		outsize = supported_protocols[protocol].proto_reply_fn(outbuf);
 		DEBUG(3, ("Selected protocol %s\n",
 		          supported_protocols[protocol].proto_name));
@@ -2882,27 +2824,6 @@ static void process(void)
 
 			t = time(NULL);
 
-			/* check for smb.conf reload */
-			if (counter >=
-			    service_load_counter + SMBD_RELOAD_CHECK) {
-				service_load_counter = counter;
-
-				/* reload services, if files have changed. */
-				reload_services(true);
-			}
-
-			/*
-			 * If reload_after_sighup == true then we got a SIGHUP
-			 * and are being asked to reload. Fix from
-			 * <branko.cibej@hermes.si>
-			 */
-
-			if (reload_after_sighup) {
-				DEBUG(0, ("Reloading services after SIGHUP\n"));
-				reload_services(false);
-				reload_after_sighup = false;
-			}
-
 			/* automatic timeout if all connections are closed */
 			if (num_connections_open == 0 &&
 			    counter >= IDLE_CLOSED_TIMEOUT) {
@@ -3119,8 +3040,9 @@ int main(int argc, char *argv[])
 
 	init_structs();
 
-	if (!reload_services(false))
-		return (-1);
+	if (!lp_load(servicesf)) {
+		return -1;
+	}
 
 	pstrcpy(myworkgroup, lp_workgroup());
 
@@ -3173,9 +3095,6 @@ int main(int argc, char *argv[])
 
 	if (!open_sockets(is_daemon, port))
 		exit(1);
-
-	/* possibly reload the services file. */
-	reload_services(true);
 
 	max_recv = MIN(lp_maxxmit(), BUFFER_SIZE);
 
