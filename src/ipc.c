@@ -71,23 +71,6 @@ static bool api_TooSmall(int cnum, char *param, char *data, int mdrcnt,
                          int mprcnt, char **rdata, char **rparam,
                          int *rdata_len, int *rparam_len);
 
-static int CopyExpanded(int cnum, int snum, char **dst, char *src, int *n)
-{
-	pstring buf;
-	int l;
-
-	if (!src || !dst || !n || !(*dst))
-		return (0);
-
-	StrnCpy(buf, src, sizeof(buf) / 2);
-	string_sub(buf, "%S", lp_servicename(snum));
-	StrnCpy(*dst, buf, *n);
-	l = strlen(*dst) + 1;
-	(*dst) += l;
-	(*n) -= l;
-	return l;
-}
-
 static int CopyAndAdvance(char **dst, char *src, int *n)
 {
 	int l;
@@ -98,16 +81,6 @@ static int CopyAndAdvance(char **dst, char *src, int *n)
 	(*dst) += l;
 	(*n) -= l;
 	return l;
-}
-
-static int StrlenExpanded(int cnum, int snum, char *s)
-{
-	pstring buf;
-	if (!s)
-		return (0);
-	StrnCpy(buf, s, sizeof(buf) / 2);
-	string_sub(buf, "%S", lp_servicename(snum));
-	return strlen(buf) + 1;
 }
 
 /*******************************************************************
@@ -313,7 +286,7 @@ static int fill_share_info(int cnum, int snum, int uLevel, char **buf,
 	if (!buf) {
 		len = 0;
 		if (uLevel > 0)
-			len += StrlenExpanded(cnum, snum, lp_comment(snum));
+			len += strlen(lp_comment(snum)) + 1;
 		if (uLevel > 1)
 			len += strlen(lp_pathname(snum)) + 1;
 		if (buflen)
@@ -347,7 +320,7 @@ static int fill_share_info(int cnum, int snum, int uLevel, char **buf,
 			type = STYPE_IPC;
 		SSVAL(p, 14, type); /* device type */
 		SIVAL(p, 16, PTR_DIFF(p2, baseaddr));
-		len += CopyExpanded(cnum, snum, &p2, lp_comment(snum), &l2);
+		len += CopyAndAdvance(&p2, lp_comment(snum), &l2);
 	}
 
 	if (uLevel > 1) {
