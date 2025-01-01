@@ -69,7 +69,6 @@ bool lp_shortpreservecase(int);
 int lp_defaultcase(int);
 bool lp_snum_ok(int iService);
 bool lp_loaded(void);
-void lp_killunused(bool (*snumused)(int));
 bool lp_load(char *pszFname);
 int lp_numservices(void);
 int lp_servicenumber(char *pszServiceName);
