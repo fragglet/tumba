@@ -3007,9 +3007,6 @@ int main(int argc, char *argv[])
 	int port = SMB_PORT;
 	int opt;
 	extern char *optarg;
-	char pidFile[100];
-
-	*pidFile = '\0';
 
 #ifdef NEED_AUTH_PARAMETERS
 	set_auth_parameters(argc, argv);
@@ -3049,9 +3046,6 @@ int main(int argc, char *argv[])
 
 	while ((opt = getopt(argc, argv, "O:i:l:s:d:Dp:hPaf:")) != EOF)
 		switch (opt) {
-		case 'f':
-			strncpy(pidFile, optarg, sizeof(pidFile));
-			break;
 		case 'P': {
 			extern bool passive;
 			passive = true;
@@ -3140,33 +3134,6 @@ int main(int argc, char *argv[])
 	if (is_daemon) {
 		DEBUG(3, ("%s becoming a daemon\n", timestring()));
 		become_daemon();
-	}
-
-	if (*pidFile) {
-		int fd;
-		char buf[20];
-
-		if ((fd = open(pidFile,
-#ifdef O_NONBLOCK
-		               O_NONBLOCK |
-#endif
-		                   O_CREAT | O_WRONLY | O_TRUNC,
-		               0644)) < 0) {
-			DEBUG(0, ("ERROR: can't open %s: %s\n", pidFile,
-			          strerror(errno)));
-			exit(1);
-		}
-		if (fcntl_lock(fd, F_SETLK, 0, 1, F_WRLCK) == false) {
-			DEBUG(0, ("ERROR: smbd is already running\n"));
-			exit(1);
-		}
-		slprintf(buf, sizeof(buf) - 1, "%u\n", (unsigned int) getpid());
-		if (write(fd, buf, strlen(buf)) < 0) {
-			DEBUG(0, ("ERROR: can't write to %s: %s\n", pidFile,
-			          strerror(errno)));
-			exit(1);
-		}
-		/* Leave pid file open & locked for the duration... */
 	}
 
 	if (!open_sockets(is_daemon, port))
