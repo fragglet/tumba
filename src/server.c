@@ -1090,8 +1090,6 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 		fsp->size = 0;
 		fsp->pos = -1;
 		fsp->open = true;
-		fsp->mmap_ptr = NULL;
-		fsp->mmap_size = 0;
 		fsp->can_lock = true;
 		fsp->can_read = ((flags & O_WRONLY) == 0);
 		fsp->can_write = ((flags & (O_WRONLY | O_RDWR)) != 0);
@@ -1107,21 +1105,6 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 		          BOOLSTR(fsp->can_write),
 		          Connections[cnum].num_files_open, fnum));
 	}
-
-#if USE_MMAP
-	/* mmap it if read-only */
-	if (!fsp->can_write) {
-		fsp->mmap_size = file_size(fname);
-		fsp->mmap_ptr = (char *) mmap(NULL, fsp->mmap_size, PROT_READ,
-		                              MAP_SHARED, fsp->fd_ptr->fd, 0);
-
-		if (fsp->mmap_ptr == (char *) -1 || !fsp->mmap_ptr) {
-			DEBUG(3, ("Failed to mmap() %s - %s\n", fname,
-			          strerror(errno)));
-			fsp->mmap_ptr = NULL;
-		}
-	}
-#endif
 }
 
 /****************************************************************************
@@ -1143,13 +1126,6 @@ void close_file(int fnum, bool normal_close)
 	Connections[cnum].num_files_open--;
 	free(fs_p->wbmpx_ptr);
 	fs_p->wbmpx_ptr = NULL;
-
-#if USE_MMAP
-	if (fs_p->mmap_ptr) {
-		munmap(fs_p->mmap_ptr, fs_p->mmap_size);
-		fs_p->mmap_ptr = NULL;
-	}
-#endif
 
 	fd_attempt_close(fs_p->fd_ptr);
 
@@ -1324,22 +1300,6 @@ read from a file
 int read_file(int fnum, char *data, uint32_t pos, int n)
 {
 	int ret = 0, readret;
-
-#if USE_MMAP
-	if (Files[fnum].mmap_ptr) {
-		int num = (Files[fnum].mmap_size > pos)
-		            ? (Files[fnum].mmap_size - pos)
-		            : -1;
-		num = MIN(n, num);
-		if (num > 0) {
-			memcpy(data, Files[fnum].mmap_ptr + pos, num);
-			data += num;
-			pos += num;
-			n -= num;
-			ret += num;
-		}
-	}
-#endif
 
 	if (n <= 0)
 		return (ret);

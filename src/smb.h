@@ -271,8 +271,6 @@ typedef struct {
 	int pos;
 	uint32_t size;
 	int mode;
-	char *mmap_ptr;
-	uint32_t mmap_size;
 	write_bmpx_struct *wbmpx_ptr;
 	struct timeval open_time;
 	bool open;
