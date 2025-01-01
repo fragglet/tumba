@@ -487,7 +487,7 @@ static bool service_ok(int iService)
 Process a parameter for a particular service number. If snum < 0
 then assume we are in the globals
 ***************************************************************************/
-bool lp_do_parameter(int snum, char *pszParmName, char *pszParmValue)
+static bool lp_do_parameter(int snum, char *pszParmName, char *pszParmValue)
 {
 	int parmnum, i;
 	void *parm_ptr = NULL; /* where we are going to store the result */

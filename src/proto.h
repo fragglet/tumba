@@ -153,14 +153,12 @@ int reply_getattrE(char *inbuf, char *outbuf, int dum_size, int dum_buffsize);
 
 /*The following definitions come from  server.c  */
 
-void *dflt_sig(void);
 mode_t unix_mode(int cnum, int dosmode);
 int dos_mode(int cnum, char *path, struct stat *sbuf);
 int dos_chmod(int cnum, char *fname, int dosmode, struct stat *st);
 bool set_filetime(int cnum, char *fname, time_t mtime);
 bool unix_convert(char *name, int cnum, pstring saved_last_component,
                   bool *bad_path);
-int disk_free(char *path, int *bsize, int *dfree, int *dsize);
 int sys_disk_free(char *path, int *bsize, int *dfree, int *dsize);
 bool check_name(char *name, int cnum);
 void close_file(int fnum, bool normal_close);
@@ -171,8 +169,6 @@ int read_file(int fnum, char *data, uint32_t pos, int n);
 int write_file(int fnum, char *data, int n);
 int find_service(char *service);
 int cached_error_packet(char *inbuf, char *outbuf, int fnum, int line);
-int read_dosattrib(const char *path);
-void write_dosattrib(const char *path, int attrib);
 int unix_error_packet(char *inbuf, char *outbuf, int def_class,
                       uint32_t def_code, int line);
 int error_packet(char *inbuf, char *outbuf, int error_class,
@@ -180,16 +176,10 @@ int error_packet(char *inbuf, char *outbuf, int error_class,
 bool receive_next_smb(int smbfd, char *inbuf, int bufsize, int timeout);
 int make_connection(char *service, char *dev);
 int find_free_file(void);
-int reply_corep(char *outbuf);
-int reply_coreplus(char *outbuf);
-int reply_lanman1(char *outbuf);
-int reply_lanman2(char *outbuf);
-int reply_nt1(char *outbuf);
 void close_cnum(int cnum);
 void exit_server(char *reason);
 char *smb_fn_name(int type);
 int chain_reply(char *inbuf, char *outbuf, int size, int bufsize);
-int construct_reply(char *inbuf, char *outbuf, int size, int bufsize);
 
 /*The following definitions come from  slprintf.c  */
 
@@ -216,7 +206,6 @@ bool null_mtime(time_t mtime);
 void put_dos_date(char *buf, int offset, time_t unixdate);
 void put_dos_date2(char *buf, int offset, time_t unixdate);
 void put_dos_date3(char *buf, int offset, time_t unixdate);
-time_t make_unix_date(void *date_ptr);
 time_t make_unix_date2(void *date_ptr);
 time_t make_unix_date3(void *date_ptr);
 char *timestring(void);
@@ -250,29 +239,22 @@ void strlower(char *s);
 void strupper(char *s);
 void strnorm(char *s);
 bool strisnormal(char *s);
-void string_replace(char *s, char oldc, char newc);
 void unix_format(char *fname);
 void show_msg(char *buf);
 int smb_len(char *buf);
 void _smb_setlen(char *buf, int len);
 void smb_setlen(char *buf, int len);
 int set_message(char *buf, int num_words, int num_bytes, bool zero);
-int smb_numwords(char *buf);
 int smb_buflen(char *buf);
-int smb_buf_ofs(char *buf);
 char *smb_buf(char *buf);
 int smb_offset(char *p, char *buf);
 char *skip_string(char *buf, int n);
 bool trim_string(char *s, char *front, char *back);
 void unix_clean_name(char *s);
 bool strhasupper(char *s);
-bool strhaslower(char *s);
-int count_chars(char *s, char c);
 void make_dir_struct(char *buf, char *mask, char *fname, unsigned int size,
                      int mode, time_t date);
 void close_low_fds(void);
-int write_socket(int fd, char *buf, int len);
-int read_with_timeout(int fd, char *buf, int mincnt, int maxcnt, long time_out);
 int read_data(int fd, char *buffer, int N);
 int write_data(int fd, char *buffer, int N);
 int transfer_file(int infd, int outfd, int n, char *header, int headlen,
@@ -282,7 +264,6 @@ bool receive_smb(int fd, char *buffer, int timeout);
 bool receive_message_or_smb(int smbfd, char *buffer, int buffer_len,
                             int timeout, bool *got_smb);
 bool send_smb(int fd, char *buffer);
-char *name_ptr(char *buf, int ofs);
 int name_extract(char *buf, int ofs, char *name);
 int name_len(char *s);
 bool send_one_packet(char *buf, int len, struct in_addr ip, int port, int type);
@@ -290,7 +271,6 @@ bool string_init(char **dest, char *src);
 void string_free(char **s);
 bool string_set(char **dest, char *src);
 bool string_sub(char *s, char *pattern, char *insert);
-bool do_match(char *str, char *regexp, int case_sig);
 bool mask_match(char *str, char *regexp, int case_sig, bool trans2);
 void become_daemon(void);
 int set_filelen(int fd, long len);
@@ -309,6 +289,4 @@ char *readdirname(void *p);
 bool fcntl_lock(int fd, int op, uint32_t offset, uint32_t count, int type);
 char *safe_strcpy(char *dest, char *src, int dest_size);
 char *safe_strcat(char *dest, char *src, int dest_size);
-void print_asc(int level, unsigned char *buf, int len);
-void dump_data(int level, char *buf1, int len);
 char *tab_depth(int depth);

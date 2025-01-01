@@ -400,7 +400,7 @@ static void interpret_dos_date(uint32_t date, int *year, int *month, int *day,
   create a unix date (int GMT) from a dos date (which is actually in
   localtime)
 ********************************************************************/
-time_t make_unix_date(void *date_ptr)
+static time_t make_unix_date(void *date_ptr)
 {
 	uint32_t dos_date = 0;
 	struct tm t;

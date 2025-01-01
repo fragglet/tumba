@@ -107,7 +107,7 @@ static int find_free_connection(int hash);
 /****************************************************************************
   when exiting, take the whole family
 ****************************************************************************/
-void *dflt_sig(void)
+static void *dflt_sig(void)
 {
 	exit_server("caught signal");
 	return 0; /* Keep -Wall happy :-) */
@@ -116,7 +116,7 @@ void *dflt_sig(void)
 /****************************************************************************
   Send a SIGTERM to our process group.
 *****************************************************************************/
-void killkids(void)
+static void killkids(void)
 {
 	if (am_parent)
 		kill(0, SIGTERM);
@@ -150,7 +150,7 @@ mode_t unix_mode(int cnum, int dosmode)
 	return (result);
 }
 
-int read_dosattrib(const char *path)
+static int read_dosattrib(const char *path)
 {
 	char buf[5];
 	ssize_t nbytes;
@@ -169,7 +169,7 @@ int read_dosattrib(const char *path)
 	return strtol(buf + 2, NULL, 16) & (aARCH | aSYSTEM | aHIDDEN);
 }
 
-void write_dosattrib(const char *path, int attrib)
+static void write_dosattrib(const char *path, int attrib)
 {
 	struct stat st;
 	char buf[5];
@@ -617,7 +617,7 @@ bool unix_convert(char *name, int cnum, pstring saved_last_component,
 /****************************************************************************
   return number of 1K blocks available on a path and total number
 ****************************************************************************/
-int disk_free(char *path, int *bsize, int *dfree, int *dsize)
+static int disk_free(char *path, int *bsize, int *dfree, int *dsize)
 {
 	/* Don't bother. We always say it's a 1GiB disk with 512MiB free.
 	   Disks nowadays are so large that it would probably overflow the
@@ -1726,44 +1726,6 @@ static bool open_sockets(bool is_daemon, int port)
 }
 
 /****************************************************************************
-  process an smb from the client - split out from the process() code so
-  it can be used by the oplock break code.
-****************************************************************************/
-
-static void process_smb(char *inbuf, char *outbuf)
-{
-	extern int Client;
-	static int trans_num;
-	int msg_type = CVAL(inbuf, 0);
-	int32_t len = smb_len(inbuf);
-	int nread = len + 4;
-
-	DEBUG(6, ("got message type 0x%x of len 0x%x\n", msg_type, len));
-	DEBUG(3, ("%s Transaction %d of length %d\n", timestring(), trans_num,
-	          nread));
-
-	if (msg_type == 0)
-		show_msg(inbuf);
-	else if (msg_type == 0x85)
-		return; /* Keepalive packet. */
-
-	nread = construct_reply(inbuf, outbuf, nread, max_send);
-
-	if (nread > 0) {
-		if (CVAL(outbuf, 0) == 0)
-			show_msg(outbuf);
-
-		if (nread != smb_len(outbuf) + 4) {
-			DEBUG(0,
-			      ("ERROR: Invalid message response size! %d %d\n",
-			       nread, smb_len(outbuf)));
-		} else
-			send_smb(Client, outbuf);
-	}
-	trans_num++;
-}
-
-/****************************************************************************
 Get the next SMB packet, doing the local message processing automatically.
 ****************************************************************************/
 
@@ -1995,7 +1957,7 @@ again:
 /****************************************************************************
 reply for the core protocol
 ****************************************************************************/
-int reply_corep(char *outbuf)
+static int reply_corep(char *outbuf)
 {
 	int outsize = set_message(outbuf, 1, 0, true);
 
@@ -2007,7 +1969,7 @@ int reply_corep(char *outbuf)
 /****************************************************************************
 reply for the coreplus protocol
 ****************************************************************************/
-int reply_coreplus(char *outbuf)
+static int reply_coreplus(char *outbuf)
 {
 	int raw = (lp_readraw() ? 1 : 0) | (lp_writeraw() ? 2 : 0);
 	int outsize = set_message(outbuf, 13, 0, true);
@@ -2025,7 +1987,7 @@ int reply_coreplus(char *outbuf)
 /****************************************************************************
 reply for the lanman 1.0 protocol
 ****************************************************************************/
-int reply_lanman1(char *outbuf)
+static int reply_lanman1(char *outbuf)
 {
 	int raw = (lp_readraw() ? 1 : 0) | (lp_writeraw() ? 2 : 0);
 	int secword = 0;
@@ -2054,7 +2016,7 @@ int reply_lanman1(char *outbuf)
 /****************************************************************************
 reply for the lanman 2.0 protocol
 ****************************************************************************/
-int reply_lanman2(char *outbuf)
+static int reply_lanman2(char *outbuf)
 {
 	int raw = (lp_readraw() ? 1 : 0) | (lp_writeraw() ? 2 : 0);
 	int secword = 0;
@@ -2082,7 +2044,7 @@ int reply_lanman2(char *outbuf)
 /****************************************************************************
 reply for the nt protocol
 ****************************************************************************/
-int reply_nt1(char *outbuf)
+static int reply_nt1(char *outbuf)
 {
 	/* dual names + lock_and_read + nt SMBs + remote API calls */
 	int capabilities = CAP_NT_FIND | CAP_LOCK_AND_READ;
@@ -2702,7 +2664,7 @@ int chain_reply(char *inbuf, char *outbuf, int size, int bufsize)
 /****************************************************************************
   construct a reply to the incoming packet
 ****************************************************************************/
-int construct_reply(char *inbuf, char *outbuf, int size, int bufsize)
+static int construct_reply(char *inbuf, char *outbuf, int size, int bufsize)
 {
 	int type = CVAL(inbuf, smb_com);
 	int outsize = 0;
@@ -2742,6 +2704,44 @@ int construct_reply(char *inbuf, char *outbuf, int size, int bufsize)
 	if (outsize > 4)
 		smb_setlen(outbuf, outsize - 4);
 	return (outsize);
+}
+
+/****************************************************************************
+  process an smb from the client - split out from the process() code so
+  it can be used by the oplock break code.
+****************************************************************************/
+
+static void process_smb(char *inbuf, char *outbuf)
+{
+	extern int Client;
+	static int trans_num;
+	int msg_type = CVAL(inbuf, 0);
+	int32_t len = smb_len(inbuf);
+	int nread = len + 4;
+
+	DEBUG(6, ("got message type 0x%x of len 0x%x\n", msg_type, len));
+	DEBUG(3, ("%s Transaction %d of length %d\n", timestring(), trans_num,
+	          nread));
+
+	if (msg_type == 0)
+		show_msg(inbuf);
+	else if (msg_type == 0x85)
+		return; /* Keepalive packet. */
+
+	nread = construct_reply(inbuf, outbuf, nread, max_send);
+
+	if (nread > 0) {
+		if (CVAL(outbuf, 0) == 0)
+			show_msg(outbuf);
+
+		if (nread != smb_len(outbuf) + 4) {
+			DEBUG(0,
+			      ("ERROR: Invalid message response size! %d %d\n",
+			       nread, smb_len(outbuf)));
+		} else
+			send_smb(Client, outbuf);
+	}
+	trans_num++;
 }
 
 /****************************************************************************

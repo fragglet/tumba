@@ -21,6 +21,8 @@
 
 #include "includes.h"
 
+static bool strhaslower(char *s);
+
 static uint8_t valid_dos_chars[32];
 
 pstring scope = "";
@@ -493,7 +495,7 @@ bool strisnormal(char *s)
 /****************************************************************************
   string replace
 ****************************************************************************/
-void string_replace(char *s, char oldc, char newc)
+static void string_replace(char *s, char oldc, char newc)
 {
 	while (*s) {
 		if (oldc == *s)
@@ -514,6 +516,55 @@ void unix_format(char *fname)
 		pstrcpy(namecopy, fname);
 		pstrcpy(fname, ".");
 		pstrcat(fname, namecopy);
+	}
+}
+
+static void print_asc(int level, unsigned char *buf, int len)
+{
+	int i;
+	for (i = 0; i < len; i++)
+		DEBUG(level, ("%c", isprint(buf[i]) ? buf[i] : '.'));
+}
+
+static void dump_data(int level, char *buf1, int len)
+{
+	unsigned char *buf = (unsigned char *) buf1;
+	int i = 0;
+	if (len <= 0)
+		return;
+
+	DEBUG(level, ("[%03X] ", i));
+	for (i = 0; i < len;) {
+		DEBUG(level, ("%02X ", (int) buf[i]));
+		i++;
+		if (i % 8 == 0)
+			DEBUG(level, (" "));
+		if (i % 16 == 0) {
+			print_asc(level, &buf[i - 16], 8);
+			DEBUG(level, (" "));
+			print_asc(level, &buf[i - 8], 8);
+			DEBUG(level, ("\n"));
+			if (i < len)
+				DEBUG(level, ("[%03X] ", i));
+		}
+	}
+	if (i % 16) {
+		int n;
+
+		n = 16 - (i % 16);
+		DEBUG(level, (" "));
+		if (n > 8)
+			DEBUG(level, (" "));
+		while (n--)
+			DEBUG(level, ("   "));
+
+		n = MIN(8, i % 16);
+		print_asc(level, &buf[i - (i % 16)], n);
+		DEBUG(level, (" "));
+		n = (i % 16) - n;
+		if (n > 0)
+			print_asc(level, &buf[i - n], n);
+		DEBUG(level, ("\n"));
 	}
 }
 
@@ -603,7 +654,7 @@ int set_message(char *buf, int num_words, int num_bytes, bool zero)
 /*******************************************************************
 return the number of smb words
 ********************************************************************/
-int smb_numwords(char *buf)
+static int smb_numwords(char *buf)
 {
 	return (CVAL(buf, smb_wct));
 }
@@ -619,7 +670,7 @@ int smb_buflen(char *buf)
 /*******************************************************************
   return a pointer to the smb_buf data area
 ********************************************************************/
-int smb_buf_ofs(char *buf)
+static int smb_buf_ofs(char *buf)
 {
 	return (smb_size + CVAL(buf, smb_wct) * 2);
 }
@@ -725,7 +776,7 @@ bool strhasupper(char *s)
 /****************************************************************************
 does a string have any lowercase chars in it?
 ****************************************************************************/
-bool strhaslower(char *s)
+static bool strhaslower(char *s)
 {
 	while (*s) {
 		if (islower(*s))
@@ -738,7 +789,7 @@ bool strhaslower(char *s)
 /****************************************************************************
 find the number of chars in a string
 ****************************************************************************/
-int count_chars(char *s, char c)
+static int count_chars(char *s, char c)
 {
 	int count = 0;
 
@@ -814,7 +865,7 @@ void close_low_fds(void)
 /****************************************************************************
 write to a socket
 ****************************************************************************/
-int write_socket(int fd, char *buf, int len)
+static int write_socket(int fd, char *buf, int len)
 {
 	int ret = 0;
 
@@ -837,7 +888,7 @@ read data from a device with a timout in msec.
 mincount = if timeout, minimum to read before returning
 maxcount = number to be read.
 ****************************************************************************/
-int read_with_timeout(int fd, char *buf, int mincnt, int maxcnt, long time_out)
+static int read_with_timeout(int fd, char *buf, int mincnt, int maxcnt, long time_out)
 {
 	fd_set fds;
 	int selrtn;
@@ -1225,7 +1276,7 @@ bool send_smb(int fd, char *buffer)
 /****************************************************************************
 find a pointer to a netbios name
 ****************************************************************************/
-char *name_ptr(char *buf, int ofs)
+static char *name_ptr(char *buf, int ofs)
 {
 	unsigned char c = *(unsigned char *) (buf + ofs);
 
@@ -1414,7 +1465,7 @@ bool string_sub(char *s, char *pattern, char *insert)
  * false if failed.
  *********************************************************/
 
-bool do_match(char *str, char *regexp, int case_sig)
+static bool do_match(char *str, char *regexp, int case_sig)
 {
 	char *p;
 
@@ -2205,55 +2256,6 @@ char *safe_strcat(char *dest, char *src, int dest_size)
 	}
 
 	return dest;
-}
-
-void print_asc(int level, unsigned char *buf, int len)
-{
-	int i;
-	for (i = 0; i < len; i++)
-		DEBUG(level, ("%c", isprint(buf[i]) ? buf[i] : '.'));
-}
-
-void dump_data(int level, char *buf1, int len)
-{
-	unsigned char *buf = (unsigned char *) buf1;
-	int i = 0;
-	if (len <= 0)
-		return;
-
-	DEBUG(level, ("[%03X] ", i));
-	for (i = 0; i < len;) {
-		DEBUG(level, ("%02X ", (int) buf[i]));
-		i++;
-		if (i % 8 == 0)
-			DEBUG(level, (" "));
-		if (i % 16 == 0) {
-			print_asc(level, &buf[i - 16], 8);
-			DEBUG(level, (" "));
-			print_asc(level, &buf[i - 8], 8);
-			DEBUG(level, ("\n"));
-			if (i < len)
-				DEBUG(level, ("[%03X] ", i));
-		}
-	}
-	if (i % 16) {
-		int n;
-
-		n = 16 - (i % 16);
-		DEBUG(level, (" "));
-		if (n > 8)
-			DEBUG(level, (" "));
-		while (n--)
-			DEBUG(level, ("   "));
-
-		n = MIN(8, i % 16);
-		print_asc(level, &buf[i - (i % 16)], n);
-		DEBUG(level, (" "));
-		n = (i % 16) - n;
-		if (n > 0)
-			print_asc(level, &buf[i - n], n);
-		DEBUG(level, ("\n"));
-	}
 }
 
 char *tab_depth(int depth)
