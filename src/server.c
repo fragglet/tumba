@@ -2566,7 +2566,7 @@ static int switch_message(int type, char *inbuf, char *outbuf, int size,
 				return (ERROR(ERRSRV, ERRaccess));
 
 			/* load service specific parameters */
-			if (OPEN_CNUM(cnum) && !become_service(cnum, false)) {
+			if (OPEN_CNUM(cnum) && !become_service(cnum, true)) {
 				return (ERROR(ERRSRV, ERRaccess));
 			}
 
