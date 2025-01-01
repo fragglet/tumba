@@ -44,7 +44,6 @@ int last_message = -1;
 /* a useful macro to debug the last message processed */
 #define LAST_MESSAGE() smb_fn_name(last_message)
 
-extern pstring scope;
 extern int DEBUGLEVEL;
 extern int case_default;
 extern bool case_sensitive;
@@ -3052,9 +3051,6 @@ int main(int argc, char *argv[])
 		switch (opt) {
 		case 'f':
 			strncpy(pidFile, optarg, sizeof(pidFile));
-			break;
-		case 'i':
-			pstrcpy(scope, optarg);
 			break;
 		case 'P': {
 			extern bool passive;

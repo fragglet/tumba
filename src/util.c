@@ -25,8 +25,6 @@ static bool strhaslower(char *s);
 
 static uint8_t valid_dos_chars[32];
 
-pstring scope = "";
-
 int DEBUGLEVEL = 1;
 
 bool passive = false;
