@@ -1990,12 +1990,6 @@ void BlockSignals(bool block, int signum)
 #endif
 }
 
-#ifdef USE_DIRECT
-#define DIRECT direct
-#else
-#define DIRECT dirent
-#endif
-
 /*******************************************************************
 a readdir wrapper which just returns the file name
 also return the inode number if requested
@@ -2003,13 +1997,13 @@ also return the inode number if requested
 char *readdirname(void *p)
 {
 	static pstring buf;
-	struct DIRECT *ptr;
+	struct dirent *ptr;
 	char *dname;
 
 	if (!p)
 		return (NULL);
 
-	ptr = (struct DIRECT *) readdir(p);
+	ptr = (struct dirent *) readdir(p);
 	if (!ptr)
 		return (NULL);
 

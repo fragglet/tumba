@@ -77,10 +77,6 @@
 #define FD_SETSIZE 255
 #endif
 
-#ifdef USE_DIRECT
-#include <sys/dir.h>
-#endif
-
 /* some unixes have ENOTTY instead of TIOCNOTTY */
 #ifndef TIOCNOTTY
 #ifdef ENOTTY
