@@ -22,6 +22,7 @@
 #include "includes.h"
 #include "trans2.h"
 
+#define RUN_AS_USER "nobody"
 #define DOSATTRIB_NAME "user.DOSATTRIB"
 
 #define MAX_MUX 50
@@ -1600,6 +1601,36 @@ static void set_keepalive_option(int fd)
 	}
 }
 
+/* Detect if we are running as root and if so, drop privileges and run as an
+   unprivileged user instead. We shouldn't ever need to run as root (if
+   someone is trying, they're doing it wrong), but it can make sense to start
+   the service as root so that the privileged sockets can be opened first. */
+static void drop_privileges(void)
+{
+	struct passwd *pw;
+
+	/* Only drop privileges if we're running as root */
+	if (getuid() != 0) {
+		return;
+	}
+
+	pw = getpwnam(RUN_AS_USER);
+	if (pw == NULL) {
+		/* TODO: Should there be an option to override? */
+		DEBUG(0, ("Failed to look up user %s, cowardly refusing "
+		          "to run as root.\n", RUN_AS_USER));
+		exit(1);
+	}
+
+	DEBUG(0, ("Dropping privileges, running as user %s (uid=%d)\n",
+	          RUN_AS_USER, pw->pw_uid));
+	if (setgid(pw->pw_gid) != 0 || setegid(pw->pw_gid) != 0
+	 || setuid(pw->pw_uid) != 0 || seteuid(pw->pw_uid) != 0) {
+		DEBUG(0, ("Failed to drop privileges: %s\n", strerror(errno)));
+		exit(1);
+	}
+}
+
 /****************************************************************************
   open the socket communication
 ****************************************************************************/
@@ -1625,6 +1656,8 @@ static bool open_sockets(bool is_daemon, int port)
 		    SOCK_STREAM, port, 0, interpret_addr(lp_socket_address()));
 		if (server_socket == -1)
 			return (false);
+
+		drop_privileges();
 
 		/* ready to listen */
 		if (listen(server_socket, 5) == -1) {
@@ -1708,6 +1741,7 @@ static bool open_sockets(bool is_daemon, int port)
 	} /* end if is_daemon */
 	else {
 		/* Started from inetd. fd 0 is the socket. */
+		drop_privileges();
 		/* We will abort gracefully when the client or remote system
 		   goes away */
 #ifndef NO_SIGNAL_TEST
@@ -3122,6 +3156,8 @@ int main(int argc, char *argv[])
 
 	if (!open_sockets(is_daemon, port))
 		exit(1);
+
+	drop_privileges();
 
 	max_recv = MIN(lp_maxxmit(), BUFFER_SIZE);
 
