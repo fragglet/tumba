@@ -2991,7 +2991,6 @@ static void usage(char *pname)
 	printf("\t-d debuglevel         set the debuglevel\n");
 	printf("\t-l log basename.      Basename for log/debug files\n");
 	printf("\t-s services file.     Filename of services file\n");
-	printf("\t-P                    passive only\n");
 	printf("\t-a                    overwrite log file, don't append\n");
 	printf("\n");
 }
@@ -3046,10 +3045,6 @@ int main(int argc, char *argv[])
 
 	while ((opt = getopt(argc, argv, "O:i:l:s:d:Dp:hPaf:")) != EOF)
 		switch (opt) {
-		case 'P': {
-			extern bool passive;
-			passive = true;
-		} break;
 		case 's':
 			pstrcpy(servicesf, optarg);
 			break;

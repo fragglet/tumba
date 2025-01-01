@@ -27,8 +27,6 @@ static uint8_t valid_dos_chars[32];
 
 int DEBUGLEVEL = 1;
 
-bool passive = false;
-
 int Protocol = PROTOCOL_COREPLUS;
 
 /* these are some file handles where debug info will be stored */
@@ -867,8 +865,6 @@ static int write_socket(int fd, char *buf, int len)
 {
 	int ret = 0;
 
-	if (passive)
-		return (len);
 	DEBUG(6, ("write_socket(%d,%d)\n", fd, len));
 	ret = write_data(fd, buf, len);
 
@@ -1235,9 +1231,6 @@ bool send_one_packet(char *buf, int len, struct in_addr ip, int port, int type)
 	bool ret;
 	int out_fd;
 	struct sockaddr_in sock_out;
-
-	if (passive)
-		return (true);
 
 	/* create a socket to write to */
 	out_fd = socket(AF_INET, type, 0);
