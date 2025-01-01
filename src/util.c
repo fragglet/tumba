@@ -1103,7 +1103,7 @@ store the result in the buffer
 This version of the function will return a length of zero on receiving
 a keepalive packet.
 ****************************************************************************/
-static int read_smb_length_return_keepalive(int fd, char *inbuf, int timeout)
+int read_smb_length_return_keepalive(int fd, char *inbuf, int timeout)
 {
 	int len = 0, msg_type;
 	bool ok = false;
@@ -1150,102 +1150,6 @@ int read_smb_length(int fd, char *inbuf, int timeout)
 	}
 
 	return len;
-}
-
-/****************************************************************************
-  read an smb from a fd. Note that the buffer *MUST* be of size
-  BUFFER_SIZE+SAFETY_MARGIN.
-  The timeout is in milli seconds.
-
-  This function will return on a
-  receipt of a session keepalive packet.
-****************************************************************************/
-bool receive_smb(int fd, char *buffer, int timeout)
-{
-	int len, ret;
-
-	smb_read_error = 0;
-
-	bzero(buffer, smb_size + 100);
-
-	len = read_smb_length_return_keepalive(fd, buffer, timeout);
-	if (len < 0)
-		return (false);
-
-	if (len > BUFFER_SIZE) {
-		DEBUG(0, ("Invalid packet length! (%d bytes).\n", len));
-		if (len > BUFFER_SIZE + (SAFETY_MARGIN / 2))
-			exit(1);
-	}
-
-	if (len > 0) {
-		ret = read_data(fd, buffer + 4, len);
-		if (ret != len) {
-			smb_read_error = READ_ERROR;
-			return false;
-		}
-	}
-	return (true);
-}
-
-/****************************************************************************
-  Do a select on an two fd's - with timeout.
-
-  If a local udp message has been pushed onto the
-  queue (this can only happen during oplock break
-  processing) return this first.
-
-  If a pending smb message has been pushed onto the
-  queue (this can only happen during oplock break
-  processing) return this next.
-
-  If the first smbfd is ready then read an smb from it.
-  if the second (loopback UDP) fd is ready then read a message
-  from it and setup the buffer header to identify the length
-  and from address.
-  Returns false on timeout or error.
-  Else returns true.
-
-The timeout is in milli seconds
-****************************************************************************/
-bool receive_message_or_smb(int smbfd, char *buffer, int buffer_len,
-                            int timeout, bool *got_smb)
-{
-	fd_set fds;
-	int selrtn;
-	struct timeval to;
-
-	smb_read_error = 0;
-
-	*got_smb = false;
-
-	FD_ZERO(&fds);
-	FD_SET(smbfd, &fds);
-
-	to.tv_sec = timeout / 1000;
-	to.tv_usec = (timeout % 1000) * 1000;
-
-	selrtn = sys_select(&fds, timeout > 0 ? &to : NULL);
-
-	/* Check if error */
-	if (selrtn == -1) {
-		/* something is wrong. Maybe the socket is dead? */
-		smb_read_error = READ_ERROR;
-		return false;
-	}
-
-	/* Did we timeout ? */
-	if (selrtn == 0) {
-		smb_read_error = READ_TIMEOUT;
-		return false;
-	}
-
-	if (FD_ISSET(smbfd, &fds)) {
-		*got_smb = true;
-		return receive_smb(smbfd, buffer, 0);
-	} else {
-		return false;
-	}
 }
 
 /****************************************************************************

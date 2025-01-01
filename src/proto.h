@@ -259,10 +259,8 @@ int read_data(int fd, char *buffer, int N);
 int write_data(int fd, char *buffer, int N);
 int transfer_file(int infd, int outfd, int n, char *header, int headlen,
                   int align);
+int read_smb_length_return_keepalive(int fd, char *inbuf, int timeout);
 int read_smb_length(int fd, char *inbuf, int timeout);
-bool receive_smb(int fd, char *buffer, int timeout);
-bool receive_message_or_smb(int smbfd, char *buffer, int buffer_len,
-                            int timeout, bool *got_smb);
 bool send_smb(int fd, char *buffer);
 int name_extract(char *buf, int ofs, char *name);
 int name_len(char *s);
