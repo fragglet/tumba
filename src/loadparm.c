@@ -301,14 +301,6 @@ static int add_a_service(service *pservice, char *name)
 }
 
 /***************************************************************************
-add a new service, based on an old one
-***************************************************************************/
-int lp_add_service(char *pszService, int iDefaultService)
-{
-	return (add_a_service(pSERVICE(iDefaultService), pszService));
-}
-
-/***************************************************************************
 add the IPC service
 ***************************************************************************/
 static bool lp_add_ipc(void)
@@ -585,96 +577,6 @@ static bool do_parameter(char *pszParmName, char *pszParmValue)
 }
 
 /***************************************************************************
-print a parameter of the specified type
-***************************************************************************/
-static void print_parameter(struct parm_struct *p, void *ptr, FILE *f)
-{
-	int i;
-	switch (p->type) {
-	case P_ENUM:
-		for (i = 0; p->enum_list[i].name; i++) {
-			if (*(int *) ptr == p->enum_list[i].value) {
-				fprintf(f, "%s", p->enum_list[i].name);
-				break;
-			}
-		}
-		break;
-
-	case P_BOOL:
-		fprintf(f, "%s", BOOLSTR(*(bool *) ptr));
-		break;
-
-	case P_BOOLREV:
-		fprintf(f, "%s", BOOLSTR(!*(bool *) ptr));
-		break;
-
-	case P_INTEGER:
-		fprintf(f, "%d", *(int *) ptr);
-		break;
-
-	case P_CHAR:
-		fprintf(f, "%c", *(char *) ptr);
-		break;
-
-	case P_OCTAL:
-		fprintf(f, "0%o", *(int *) ptr);
-		break;
-
-	case P_GSTRING:
-	case P_UGSTRING:
-		if ((char *) ptr)
-			fprintf(f, "%s", (char *) ptr);
-		break;
-
-	case P_STRING:
-	case P_USTRING:
-		if (*(char **) ptr)
-			fprintf(f, "%s", *(char **) ptr);
-		break;
-	}
-}
-
-/***************************************************************************
-check if two parameters are equal
-***************************************************************************/
-static bool equal_parameter(parm_type type, void *ptr1, void *ptr2)
-{
-	switch (type) {
-	case P_BOOL:
-	case P_BOOLREV:
-		return (*((bool *) ptr1) == *((bool *) ptr2));
-
-	case P_INTEGER:
-	case P_ENUM:
-	case P_OCTAL:
-		return (*((int *) ptr1) == *((int *) ptr2));
-
-	case P_CHAR:
-		return (*((char *) ptr1) == *((char *) ptr2));
-
-	case P_GSTRING:
-	case P_UGSTRING: {
-		char *p1 = (char *) ptr1, *p2 = (char *) ptr2;
-		if (p1 && !*p1)
-			p1 = NULL;
-		if (p2 && !*p2)
-			p2 = NULL;
-		return (p1 == p2 || strequal(p1, p2));
-	}
-	case P_STRING:
-	case P_USTRING: {
-		char *p1 = *(char **) ptr1, *p2 = *(char **) ptr2;
-		if (p1 && !*p1)
-			p1 = NULL;
-		if (p2 && !*p2)
-			p2 = NULL;
-		return (p1 == p2 || strequal(p1, p2));
-	}
-	}
-	return (false);
-}
-
-/***************************************************************************
 Process a new section (service). At this stage all sections are services.
 Later we'll have special sections that permit server parameters to be set.
 Returns true on success, false on failure.
@@ -708,34 +610,6 @@ static bool do_section(char *pszSectionName)
 	return (bRetval);
 }
 
-/***************************************************************************
-Display the contents of a single services record.
-***************************************************************************/
-static void dump_a_service(service *pService, FILE *f)
-{
-	int i;
-	if (pService == &sDefault)
-		fprintf(f, "\n\n# Default service parameters\n");
-	else
-		fprintf(f, "\n[%s]\n", pService->szService);
-
-	for (i = 0; parm_table[i].label; i++)
-		if (parm_table[i].class == P_LOCAL && parm_table[i].ptr &&
-		    (*parm_table[i].label != '-') &&
-		    (i == 0 || (parm_table[i].ptr != parm_table[i - 1].ptr))) {
-			int pdiff = PTR_DIFF(parm_table[i].ptr, &sDefault);
-
-			if (pService == &sDefault ||
-			    !equal_parameter(parm_table[i].type,
-			                     ((char *) pService) + pdiff,
-			                     ((char *) &sDefault) + pdiff)) {
-				fprintf(f, "\t%s = ", parm_table[i].label);
-				print_parameter(&parm_table[i],
-				                ((char *) pService) + pdiff, f);
-				fprintf(f, "\n");
-			}
-		}
-}
 
 /***************************************************************************
 Return TRUE if the passed service number is within range.
@@ -791,24 +665,6 @@ return the max number of services
 int lp_numservices(void)
 {
 	return (iNumServices);
-}
-
-/***************************************************************************
-Display the contents of the services array in human-readable form.
-***************************************************************************/
-void lp_dump(FILE *f)
-{
-	int iService;
-
-	dump_a_service(&sDefault, f);
-
-	for (iService = 0; iService < iNumServices; iService++) {
-		if (VALID(iService)) {
-			if (iSERVICE(iService).szService[0] == '\0')
-				break;
-			dump_a_service(pSERVICE(iService), f);
-		}
-	}
 }
 
 /***************************************************************************

@@ -67,14 +67,11 @@ char *lp_comment(int);
 bool lp_casesensitive(int);
 bool lp_shortpreservecase(int);
 int lp_defaultcase(int);
-int lp_add_service(char *pszService, int iDefaultService);
-bool lp_do_parameter(int snum, char *pszParmName, char *pszParmValue);
 bool lp_snum_ok(int iService);
 bool lp_loaded(void);
 void lp_killunused(bool (*snumused)(int));
 bool lp_load(char *pszFname);
 int lp_numservices(void);
-void lp_dump(FILE *f);
 int lp_servicenumber(char *pszServiceName);
 
 /*The following definitions come from  locking.c  */
