@@ -2163,34 +2163,25 @@ bool fcntl_lock(int fd, int op, uint32_t offset, uint32_t count, int type)
 }
 
 /*******************************************************************
-safe string copy into a known length string. maxlength does not
-include the terminating zero.
+safe string copy into a known length string
+dest_size is the size of the destination buffer
 ********************************************************************/
-char *safe_strcpy(char *dest, char *src, int maxlength)
+char *safe_strcpy(char *dest, char *src, int dest_size)
 {
-	int len;
-
-	if (!dest) {
-		DEBUG(0, ("ERROR: NULL dest in safe_strcpy\n"));
-		return NULL;
-	}
+	size_t len;
 
 	if (!src) {
-		*dest = 0;
+		strlcpy(dest, "", dest_size);
 		return dest;
 	}
 
-	len = strlen(src);
-
-	if (len > maxlength) {
+	len = strlcpy(dest, src, dest_size);
+	if (len > dest_size - 1) {
 		DEBUG(0,
 		      ("ERROR: string overflow by %d in safe_strcpy [%.50s]\n",
-		       len - maxlength, src));
-		len = maxlength;
+		       len - dest_size + 1, src));
 	}
 
-	memcpy(dest, src, len);
-	dest[len] = 0;
 	return dest;
 }
 

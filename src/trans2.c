@@ -605,7 +605,7 @@ void mask_convert(char *mask)
 				*p++ = '*';
 				*p = '.';
 				safe_strcpy(p + 1, expnd,
-				            sizeof(pstring) - (p - mask) - 2);
+				            sizeof(pstring) - (p - mask) - 1);
 			} else
 				*p = '*';
 		}
