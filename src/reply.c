@@ -2318,8 +2318,9 @@ int reply_mv(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 		if (resolve_wildcards(directory, newname) &&
 		    can_rename(directory, cnum) && !file_exist(newname, NULL) &&
-		    !sys_rename(directory, newname))
+		    rename(directory, newname) != 0) {
 			count++;
+		}
 
 		DEBUG(3, ("reply_mv : %s doing rename on %s -> %s\n",
 		          (count != 0) ? "succeeded" : "failed", directory,
@@ -2376,8 +2377,9 @@ int reply_mv(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 					error = 183;
 					continue;
 				}
-				if (!sys_rename(fname, destname))
+				if (rename(fname, destname) != 0) {
 					count++;
+				}
 				DEBUG(3,
 				      ("reply_mv : doing rename on %s -> %s\n",
 				       fname, destname));
