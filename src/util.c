@@ -2186,34 +2186,24 @@ char *safe_strcpy(char *dest, char *src, int dest_size)
 }
 
 /*******************************************************************
-safe string cat into a string. maxlength does not
-include the terminating zero.
+safe string cat into a string
+dest_size is the size of the destination buffer
 ********************************************************************/
-char *safe_strcat(char *dest, char *src, int maxlength)
+char *safe_strcat(char *dest, char *src, int dest_size)
 {
-	int src_len, dest_len;
+	size_t len;
 
-	if (!dest) {
-		DEBUG(0, ("ERROR: NULL dest in safe_strcat\n"));
-		return NULL;
-	}
-
-	if (!src) {
+	if (src == NULL) {
 		return dest;
 	}
 
-	src_len = strlen(src);
-	dest_len = strlen(dest);
-
-	if (src_len + dest_len > maxlength) {
+	len = strlcat(dest, src, dest_size);
+	if (len > dest_size - 1) {
 		DEBUG(0,
 		      ("ERROR: string overflow by %d in safe_strcat [%.50s]\n",
-		       src_len + dest_len - maxlength, src));
-		src_len = maxlength - dest_len;
+		       len - dest_size + 1, src));
 	}
 
-	memcpy(&dest[dest_len], src, src_len);
-	dest[dest_len + src_len] = 0;
 	return dest;
 }
 

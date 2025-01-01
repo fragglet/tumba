@@ -312,7 +312,7 @@ void ajt_panic(void);
 char *readdirname(void *p);
 bool fcntl_lock(int fd, int op, uint32_t offset, uint32_t count, int type);
 char *safe_strcpy(char *dest, char *src, int dest_size);
-char *safe_strcat(char *dest, char *src, int maxlength);
+char *safe_strcat(char *dest, char *src, int dest_size);
 void print_asc(int level, unsigned char *buf, int len);
 void dump_data(int level, char *buf1, int len);
 char *tab_depth(int depth);

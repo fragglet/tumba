@@ -151,8 +151,8 @@ it works and getting lots of bug reports */
 #define sprintf __ERROR__XX__NEVER_USE_SPRINTF__;
 
 #define pstrcpy(d, s) safe_strcpy((d), (s), sizeof(pstring))
-#define pstrcat(d, s) safe_strcat((d), (s), sizeof(pstring) - 1)
+#define pstrcat(d, s) safe_strcat((d), (s), sizeof(pstring))
 #define fstrcpy(d, s) safe_strcpy((d), (s), sizeof(fstring))
-#define fstrcat(d, s) safe_strcat((d), (s), sizeof(fstring) - 1)
+#define fstrcat(d, s) safe_strcat((d), (s), sizeof(fstring))
 
 #endif
