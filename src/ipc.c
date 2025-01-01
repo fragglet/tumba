@@ -76,7 +76,7 @@ static int CopyAndAdvance(char **dst, char *src, int *n)
 	int l;
 	if (!src || !dst || !n || !(*dst))
 		return (0);
-	StrnCpy(*dst, src, *n);
+	strlcpy(*dst, src, *n + 1);
 	l = strlen(*dst) + 1;
 	(*dst) += l;
 	(*n) -= l;
@@ -310,7 +310,7 @@ static int fill_share_info(int cnum, int snum, int uLevel, char **buf,
 	if (!baseaddr)
 		baseaddr = p;
 
-	StrnCpy(p, lp_servicename(snum), 13);
+	strlcpy(p, lp_servicename(snum), 14);
 
 	if (uLevel > 0) {
 		int type;
@@ -573,7 +573,7 @@ static bool api_RNetServerGetInfo(int cnum, char *param, char *data, int mdrcnt,
 	p = *rdata;
 	p2 = p + struct_len;
 	if (uLevel != 20) {
-		StrnCpy(p, local_machine, 16);
+		strlcpy(p, local_machine, 17);
 		strupper(p);
 	}
 	p += 16;
@@ -588,7 +588,7 @@ static bool api_RNetServerGetInfo(int cnum, char *param, char *data, int mdrcnt,
 			pstring comment;
 			pstrcpy(comment, lp_serverstring());
 			SIVAL(p, 6, PTR_DIFF(p2, *rdata));
-			StrnCpy(p2, comment, MAX(mdrcnt - struct_len, 0));
+			strlcpy(p2, comment, MAX(mdrcnt - struct_len, 0) + 1);
 			p2 = skip_string(p2, 1);
 		}
 	}

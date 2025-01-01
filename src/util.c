@@ -306,24 +306,6 @@ void close_sockets(void)
 }
 
 /****************************************************************************
-line strncpy but always null terminates. Make sure there is room!
-****************************************************************************/
-char *StrnCpy(char *dest, char *src, int n)
-{
-	char *d = dest;
-	if (!dest)
-		return (NULL);
-	if (!src) {
-		*dest = 0;
-		return (dest);
-	}
-	while (n-- && (*d++ = *src++))
-		;
-	*d = 0;
-	return (dest);
-}
-
-/****************************************************************************
 interpret the weird netbios "name". Return the name type
 ****************************************************************************/
 static int name_interpret(char *in, char *out)
@@ -353,7 +335,7 @@ static int name_interpret(char *in, char *out)
 	while (*in) {
 		*out++ = '.'; /* Scope names are separated by periods */
 		len = *(unsigned char *) in++;
-		StrnCpy(out, in, len);
+		strlcpy(out, in, len + 1);
 		out += len;
 		*out = 0;
 		in += len;
@@ -796,7 +778,7 @@ void make_dir_struct(char *buf, char *mask, char *fname, unsigned int size,
 	put_dos_date(buf, 22, date);
 	SSVAL(buf, 26, size & 0xFFFF);
 	SSVAL(buf, 28, size >> 16);
-	StrnCpy(buf + 30, fname, 12);
+	strlcpy(buf + 30, fname, 13);
 	if (!case_sensitive)
 		strupper(buf + 30);
 	DEBUG(8, ("put name [%s] into dir struct\n", buf + 30));

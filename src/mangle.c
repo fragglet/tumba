@@ -55,7 +55,7 @@ static bool is_reserved_msdos(char *fname)
 	char upperFname[13];
 	char *p;
 
-	StrnCpy(upperFname, fname, 12);
+	strlcpy(upperFname, fname, sizeof(upperFname));
 
 	/* lpt1.txt and con.txt etc are also illegal */
 	p = strchr(upperFname, '.');
@@ -231,7 +231,7 @@ bool check_mangled_stack(char *s)
 	/* If there is a file extension, then we need to play with it, too. */
 	if (p) {
 		check_extension = true;
-		StrnCpy(extension, p, 4);
+		strlcpy(extension, p, sizeof(extension));
 		strlower(extension); /* XXXXXXX */
 	}
 

@@ -246,7 +246,7 @@ int reply_tcon_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 			*p++ = 0;
 			fstrcpy(user, p);
 		}
-		StrnCpy(devicename, path + strlen(path) + 1, 6);
+		strlcpy(devicename, path + strlen(path) + 1, 7);
 		DEBUG(4, ("Got device type %s\n", devicename));
 	}
 

@@ -243,7 +243,6 @@ char *tmpdir(void);
 bool is_a_socket(int fd);
 void array_promote(char *array, int elsize, int element);
 void close_sockets(void);
-char *StrnCpy(char *dest, char *src, int n);
 bool file_exist(char *fname, struct stat *sbuf);
 bool directory_exist(char *dname, struct stat *st);
 uint32_t file_size(char *file_name);

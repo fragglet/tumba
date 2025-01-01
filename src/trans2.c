@@ -193,7 +193,6 @@ static int call_trans2open(char *inbuf, char *outbuf, int bufsize, int cnum,
 	int16_t open_ofun = SVAL(params, 12);
 	int32_t open_size = IVAL(params, 14);
 	char *pname = &params[28];
-	int16_t namelen = strlen(pname) + 1;
 
 	pstring fname;
 	int fnum = -1;
@@ -203,7 +202,7 @@ static int call_trans2open(char *inbuf, char *outbuf, int bufsize, int cnum,
 	int smb_action = 0;
 	bool bad_path = false;
 
-	StrnCpy(fname, pname, namelen);
+	strlcpy(fname, pname, sizeof(fname));
 
 	DEBUG(3, ("trans2open %s cnum=%d mode=%d attr=%d ofun=%d size=%d\n",
 	          fname, cnum, open_mode, open_attr, open_ofun, open_size));
@@ -1081,7 +1080,7 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
 		      str_checksum(lp_servicename(snum)) ^
 		          (str_checksum(local_machine) << 16));
 		SCVAL(pdata, l2_vol_cch, volname_len);
-		StrnCpy(pdata + l2_vol_szVolLabel, vname, volname_len);
+		strlcpy(pdata + l2_vol_szVolLabel, vname, volname_len + 1);
 		DEBUG(5, ("call_trans2qfsinfo : time = %x, namelen = %d, name "
 		          "= %s\n",
 		          st.st_ctime, volname_len, pdata + l2_vol_szVolLabel));

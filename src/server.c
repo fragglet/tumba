@@ -739,7 +739,7 @@ static void check_for_pipe(char *fname)
 {
 	/* special case of pipe opens */
 	char s[10];
-	StrnCpy(s, fname, 9);
+	strlcpy(s, fname, sizeof(s));
 	strlower(s);
 	if (strstr(s, "pipe/")) {
 		DEBUG(3, ("Rejecting named pipe open for %s\n", fname));
