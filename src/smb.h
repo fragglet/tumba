@@ -617,10 +617,6 @@ struct connection_options {
 int Debug1(char *, ...);
 int slprintf(char *str, int n, char *format, ...);
 
-#if AJT
-void ajt_panic(void);
-#endif
-
 #ifndef MIN
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #endif

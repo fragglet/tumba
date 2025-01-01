@@ -1990,16 +1990,6 @@ void BlockSignals(bool block, int signum)
 #endif
 }
 
-#if AJT
-/*******************************************************************
-my own panic function - not suitable for general use
-********************************************************************/
-void ajt_panic(void)
-{
-	system("/usr/bin/X11/xedit -display solen:0 /tmp/ERROR_FAULT");
-}
-#endif
-
 #ifdef USE_DIRECT
 #define DIRECT direct
 #else

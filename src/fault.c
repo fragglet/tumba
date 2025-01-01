@@ -37,10 +37,6 @@ static void fault_report(int sig)
 	DEBUG(0, ("============================================================"
 	          "===\n"));
 
-#if AJT
-	ajt_panic();
-#endif
-
 	if (cont_fn) {
 		fault_setup(cont_fn);
 		cont_fn(NULL);
