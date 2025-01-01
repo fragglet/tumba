@@ -1387,7 +1387,7 @@ int write_file(int fnum, char *data, int n)
 /****************************************************************************
 load parameters specific to a connection/service
 ****************************************************************************/
-bool become_service(int cnum, bool do_chdir)
+static bool become_service(int cnum)
 {
 	static int last_cnum = -1;
 	int snum;
@@ -1401,7 +1401,7 @@ bool become_service(int cnum, bool do_chdir)
 
 	snum = SNUM(cnum);
 
-	if (do_chdir && chdir(Connections[cnum].connectpath) != 0) {
+	if (chdir(Connections[cnum].connectpath) != 0) {
 		DEBUG(0, ("%s chdir (%s) failed cnum=%d\n", timestring(),
 		          Connections[cnum].connectpath, cnum));
 		return (false);
@@ -2566,7 +2566,7 @@ static int switch_message(int type, char *inbuf, char *outbuf, int size,
 				return (ERROR(ERRSRV, ERRaccess));
 
 			/* load service specific parameters */
-			if (OPEN_CNUM(cnum) && !become_service(cnum, true)) {
+			if (OPEN_CNUM(cnum) && !become_service(cnum)) {
 				return (ERROR(ERRSRV, ERRaccess));
 			}
 

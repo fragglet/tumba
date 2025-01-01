@@ -172,7 +172,6 @@ void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
 int seek_file(int fnum, uint32_t pos);
 int read_file(int fnum, char *data, uint32_t pos, int n);
 int write_file(int fnum, char *data, int n);
-bool become_service(int cnum, bool do_chdir);
 int find_service(char *service);
 int cached_error_packet(char *inbuf, char *outbuf, int fnum, int line);
 int read_dosattrib(const char *path);
