@@ -3023,17 +3023,6 @@ int main(int argc, char *argv[])
 
 	init_dos_char_table();
 
-	/* make absolutely sure we run as root - to handle cases where people
-	   are crazy enough to have it setuid */
-#ifdef USE_SETRES
-	setresuid(0, 0, 0);
-#else
-	setuid(0);
-	seteuid(0);
-	setuid(0);
-	seteuid(0);
-#endif
-
 	fault_setup((void (*)(void *)) exit_server);
 	signal(SIGTERM, SIGNAL_CAST dflt_sig);
 
