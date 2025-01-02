@@ -66,7 +66,6 @@ char *lp_pathname(int);
 char *lp_comment(int);
 bool lp_casesensitive(int);
 bool lp_shortpreservecase(int);
-int lp_defaultcase(int);
 bool lp_snum_ok(int iService);
 bool lp_loaded(void);
 bool lp_load(char *pszFname);

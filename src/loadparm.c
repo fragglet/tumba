@@ -95,7 +95,6 @@ typedef struct {
 	int iCreate_force_mode;
 	int iDir_mask;
 	int iDir_force_mode;
-	int iDefaultCase;
 	bool bCaseSensitive;
 	bool bShortCasePreserve;
 	char dummy[3]; /* for alignment */
@@ -111,7 +110,6 @@ static service sDefault = {
     0000,       /* iCreate_force_mode */
     0755,       /* iDir_mask */
     0000,       /* iDir_force_mode */
-    CASE_LOWER, /* iDefaultCase */
     false,      /* case sensitive */
     false,      /* short case preserve */
     ""          /* dummy */
@@ -129,9 +127,6 @@ struct enum_list {
 	char *name;
 };
 
-static struct enum_list enum_case[] = {
-    {CASE_LOWER, "lower"}, {CASE_UPPER, "upper"}, {-1, NULL}};
-
 static struct parm_struct {
 	char *label;
 	parm_type type;
@@ -142,7 +137,6 @@ static struct parm_struct {
 } parm_table[] = {
     {"-valid", P_BOOL, P_LOCAL, &sDefault.valid, NULL, NULL},
     {"comment", P_STRING, P_LOCAL, &sDefault.comment, NULL, NULL},
-    {"default case", P_ENUM, P_LOCAL, &sDefault.iDefaultCase, NULL, enum_case},
     {"case sensitive", P_BOOL, P_LOCAL, &sDefault.bCaseSensitive, NULL, NULL},
     {"casesignames", P_BOOL, P_LOCAL, &sDefault.bCaseSensitive, NULL, NULL},
     {"short preserve case", P_BOOL, P_LOCAL, &sDefault.bShortCasePreserve, NULL,
@@ -205,8 +199,6 @@ FN_LOCAL_STRING(lp_comment, comment)
 
 FN_LOCAL_BOOL(lp_casesensitive, bCaseSensitive)
 FN_LOCAL_BOOL(lp_shortpreservecase, bShortCasePreserve)
-
-FN_LOCAL_INTEGER(lp_defaultcase, iDefaultCase)
 
 /* local prototypes */
 static int strwicmp(char *psz1, char *psz2);

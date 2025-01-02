@@ -22,7 +22,6 @@
 #include "includes.h"
 
 extern int DEBUGLEVEL;
-extern int case_default;
 
 /****************************************************************************
  * Provide a checksum on a string

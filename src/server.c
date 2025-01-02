@@ -46,7 +46,6 @@ int last_message = -1;
 #define LAST_MESSAGE() smb_fn_name(last_message)
 
 extern int DEBUGLEVEL;
-extern int case_default;
 extern bool case_sensitive;
 extern bool short_case_preserve;
 time_t smb_last_time = (time_t) 0;
@@ -1372,7 +1371,6 @@ static bool become_service(int cnum)
 
 	last_cnum = cnum;
 
-	case_default = lp_defaultcase(snum);
 	short_case_preserve = lp_shortpreservecase(snum);
 	case_sensitive = lp_casesensitive(snum);
 	return true;

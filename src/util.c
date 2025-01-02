@@ -21,8 +21,6 @@
 
 #include "includes.h"
 
-static bool strhaslower(char *s);
-
 static uint8_t valid_dos_chars[32];
 
 int DEBUGLEVEL = 1;
@@ -37,11 +35,6 @@ int Client = -1;
 
 /* this is used by the chaining code */
 int chain_size = 0;
-
-/*
-   case handling on filenames
-*/
-int case_default = CASE_LOWER;
 
 pstring debugf = "";
 
@@ -471,10 +464,7 @@ void strupper(char *s)
 ********************************************************************/
 void strnorm(char *s)
 {
-	if (case_default == CASE_UPPER)
-		strupper(s);
-	else
-		strlower(s);
+	strlower(s);
 }
 
 /*******************************************************************
@@ -482,9 +472,6 @@ check if a string is in "normal" case
 ********************************************************************/
 bool strisnormal(char *s)
 {
-	if (case_default == CASE_UPPER)
-		return !strhaslower(s);
-
 	return !strhasupper(s);
 }
 
@@ -762,19 +749,6 @@ bool strhasupper(char *s)
 {
 	while (*s) {
 		if (isupper(*s))
-			return true;
-		s++;
-	}
-	return false;
-}
-
-/****************************************************************************
-does a string have any lowercase chars in it?
-****************************************************************************/
-static bool strhaslower(char *s)
-{
-	while (*s) {
-		if (islower(*s))
 			return true;
 		s++;
 	}

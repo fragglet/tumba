@@ -705,12 +705,6 @@ enum protocol_types {
 	PROTOCOL_NT1
 };
 
-/* case handling */
-enum case_handling {
-	CASE_LOWER,
-	CASE_UPPER
-};
-
 /* Macros to get at offsets within smb_lkrng and smb_unlkrng
    structures. We cannot define these as actual structures
    due to possible differences in structure packing
