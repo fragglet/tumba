@@ -56,7 +56,7 @@ int sys_select(fd_set *fds, struct timeval *tval)
 		    select(255, SELECT_CAST fds, NULL, NULL, tval ? &t2 : NULL);
 	} while (selrtn < 0 && errno == EINTR);
 
-	return (selrtn);
+	return selrtn;
 }
 
 /*******************************************************************

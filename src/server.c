@@ -147,7 +147,7 @@ mode_t unix_mode(int cnum, int dosmode)
 	if (IS_DOS_DIR(dosmode)) {
 		result |= S_IFDIR | S_IXUSR | S_IXGRP | S_IXOTH;
 	}
-	return (result);
+	return result;
 }
 
 static int read_dosattrib(const char *path)
@@ -256,7 +256,7 @@ int dos_mode(int cnum, char *path, struct stat *sbuf)
 
 	DEBUG(8, ("\n"));
 
-	return (result);
+	return result;
 }
 
 /*******************************************************************
@@ -271,14 +271,14 @@ int dos_chmod(int cnum, char *fname, int dosmode, struct stat *st)
 	if (!st) {
 		st = &st1;
 		if (stat(fname, st))
-			return (-1);
+			return -1;
 	}
 
 	if (S_ISDIR(st->st_mode))
 		dosmode |= aDIR;
 
 	if (dos_mode(cnum, fname, st) == dosmode)
-		return (0);
+		return 0;
 
 	unixmode = unix_mode(cnum, dosmode);
 
@@ -310,7 +310,7 @@ int dos_chmod(int cnum, char *fname, int dosmode, struct stat *st)
 		           (st->st_mode & (S_IWUSR | S_IWGRP | S_IWOTH));
 	}
 
-	return (chmod(fname, unixmode));
+	return chmod(fname, unixmode);
 }
 
 /*******************************************************************
@@ -321,7 +321,7 @@ bool set_filetime(int cnum, char *fname, time_t mtime)
 	struct utimbuf times;
 
 	if (null_mtime(mtime))
-		return (true);
+		return true;
 
 	times.modtime = times.actime = mtime;
 
@@ -330,7 +330,7 @@ bool set_filetime(int cnum, char *fname, time_t mtime)
 		          strerror(errno)));
 	}
 
-	return (true);
+	return true;
 }
 
 /****************************************************************************
@@ -349,7 +349,7 @@ static bool fname_equal(char *name1, char *name2)
 		name1[l1 - 1] = 0;
 		ret = fname_equal(name1, name2);
 		name1[l1 - 1] = '.';
-		return (ret);
+		return ret;
 	}
 
 	if (l2 - l1 == 1 && name2[l2 - 1] == '.' && lp_strip_dot()) {
@@ -357,14 +357,14 @@ static bool fname_equal(char *name1, char *name2)
 		name2[l2 - 1] = 0;
 		ret = fname_equal(name1, name2);
 		name2[l2 - 1] = '.';
-		return (ret);
+		return ret;
 	}
 
 	/* now normal filename handling */
 	if (case_sensitive)
-		return (strcmp(name1, name2) == 0);
+		return strcmp(name1, name2) == 0;
 
-	return (strequal(name1, name2));
+	return strequal(name1, name2);
 }
 
 /****************************************************************************
@@ -375,12 +375,12 @@ static bool mangled_equal(char *name1, char *name2)
 	pstring tmpname;
 
 	if (is_8_3(name2, true))
-		return (false);
+		return false;
 
 	pstrcpy(tmpname, name2);
 	mangle_name_83(tmpname, sizeof(pstring) - 1);
 
-	return (strequal(name1, tmpname));
+	return strequal(name1, tmpname);
 }
 
 /****************************************************************************
@@ -403,7 +403,7 @@ static bool scan_directory(char *path, char *name, int cnum, bool docache)
 
 	if (docache && (dname = DirCacheCheck(path, name, SNUM(cnum)))) {
 		pstrcpy(name, dname);
-		return (true);
+		return true;
 	}
 
 	/*
@@ -419,7 +419,7 @@ static bool scan_directory(char *path, char *name, int cnum, bool docache)
 	/* open the directory */
 	if (!(cur_dir = OpenDir(cnum, path))) {
 		DEBUG(3, ("scan dir didn't open dir [%s]\n", path));
-		return (false);
+		return false;
 	}
 
 	/* now scan for matching names */
@@ -438,12 +438,12 @@ static bool scan_directory(char *path, char *name, int cnum, bool docache)
 				DirCacheAdd(path, name, dname, SNUM(cnum));
 			pstrcpy(name, dname);
 			CloseDir(cur_dir);
-			return (true);
+			return true;
 		}
 	}
 
 	CloseDir(cur_dir);
-	return (false);
+	return false;
 }
 
 /****************************************************************************
@@ -505,7 +505,7 @@ bool unix_convert(char *name, int cnum, pstring saved_last_component,
 
 	/* stat the name - if it exists then we are all done! */
 	if (stat(name, &st) == 0)
-		return (true);
+		return true;
 
 	saved_errno = errno;
 
@@ -515,7 +515,7 @@ bool unix_convert(char *name, int cnum, pstring saved_last_component,
 	   sensitive then searching won't help */
 	if (case_sensitive && !is_mangled(name) && !lp_strip_dot() &&
 	    saved_errno != ENOENT)
-		return (false);
+		return false;
 
 	/* now we need to recursively match the name against the real
 	   directory structure */
@@ -546,7 +546,7 @@ bool unix_convert(char *name, int cnum, pstring saved_last_component,
 				 * directory */
 				DEBUG(5, ("Not a dir %s\n", start));
 				*end = '/';
-				return (false);
+				return false;
 			}
 		} else {
 			pstring rest;
@@ -577,7 +577,7 @@ bool unix_convert(char *name, int cnum, pstring saved_last_component,
 					   errors.
 					 */
 					*bad_path = true;
-					return (false);
+					return false;
 				}
 
 				/* just the last part of the name doesn't exist
@@ -589,7 +589,7 @@ bool unix_convert(char *name, int cnum, pstring saved_last_component,
 					check_mangled_stack(start);
 
 				DEBUG(5, ("New file %s\n", start));
-				return (true);
+				return true;
 			}
 
 			/* restore the rest of the string */
@@ -611,7 +611,7 @@ bool unix_convert(char *name, int cnum, pstring saved_last_component,
 
 	/* the name has been resolved */
 	DEBUG(5, ("conversion finished %s\n", name));
-	return (true);
+	return true;
 }
 
 /****************************************************************************
@@ -1291,7 +1291,7 @@ int seek_file(int fnum, uint32_t pos)
 	Files[fnum].pos =
 	    (int) (lseek(Files[fnum].fd_ptr->fd, pos + offset, SEEK_SET) -
 	           offset);
-	return (Files[fnum].pos);
+	return Files[fnum].pos;
 }
 
 /****************************************************************************
@@ -1302,11 +1302,11 @@ int read_file(int fnum, char *data, uint32_t pos, int n)
 	int ret = 0, readret;
 
 	if (n <= 0)
-		return (ret);
+		return ret;
 
 	if (seek_file(fnum, pos) != pos) {
 		DEBUG(3, ("Failed to seek to %d\n", pos));
-		return (ret);
+		return ret;
 	}
 
 	if (n > 0) {
@@ -1315,7 +1315,7 @@ int read_file(int fnum, char *data, uint32_t pos, int n)
 			ret += readret;
 	}
 
-	return (ret);
+	return ret;
 }
 
 /****************************************************************************
@@ -1325,7 +1325,7 @@ int write_file(int fnum, char *data, int n)
 {
 	if (!Files[fnum].can_write) {
 		errno = EPERM;
-		return (0);
+		return 0;
 	}
 
 	if (!Files[fnum].modified) {
@@ -1341,7 +1341,7 @@ int write_file(int fnum, char *data, int n)
 		}
 	}
 
-	return (write_data(Files[fnum].fd_ptr->fd, data, n));
+	return write_data(Files[fnum].fd_ptr->fd, data, n);
 }
 
 /****************************************************************************
@@ -1354,7 +1354,7 @@ static bool become_service(int cnum)
 
 	if (!OPEN_CNUM(cnum)) {
 		last_cnum = -1;
-		return (false);
+		return false;
 	}
 
 	Connections[cnum].lastused = smb_last_time;
@@ -1364,18 +1364,18 @@ static bool become_service(int cnum)
 	if (chdir(Connections[cnum].connectpath) != 0) {
 		DEBUG(0, ("%s chdir (%s) failed cnum=%d\n", timestring(),
 		          Connections[cnum].connectpath, cnum));
-		return (false);
+		return false;
 	}
 
 	if (cnum == last_cnum)
-		return (true);
+		return true;
 
 	last_cnum = cnum;
 
 	case_default = lp_defaultcase(snum);
 	short_case_preserve = lp_shortpreservecase(snum);
 	case_sensitive = lp_casesensitive(snum);
-	return (true);
+	return true;
 }
 
 /****************************************************************************
@@ -1400,7 +1400,7 @@ int find_service(char *service)
 		DEBUG(3,
 		      ("find_service() failed to find service %s\n", service));
 
-	return (iService);
+	return iService;
 }
 
 /****************************************************************************
@@ -1467,7 +1467,7 @@ int unix_error_packet(char *inbuf, char *outbuf, int def_class,
 		}
 	}
 
-	return (error_packet(inbuf, outbuf, eclass, ecode, line));
+	return error_packet(inbuf, outbuf, eclass, ecode, line);
 }
 
 /****************************************************************************
@@ -1488,7 +1488,7 @@ int error_packet(char *inbuf, char *outbuf, int error_class,
 	if (errno != 0)
 		DEBUG(3, ("error string = %s\n", strerror(errno)));
 
-	return (outsize);
+	return outsize;
 }
 
 #ifndef SIGCLD_IGNORE
@@ -1502,7 +1502,7 @@ static int sig_cld(void)
 		DEBUG(0, ("ERROR: Recursion in sig_cld? Perhaps you need "
 		          "`#define USE_WAITPID'?\n"));
 		depth = 0;
-		return (0);
+		return 0;
 	}
 	depth++;
 
@@ -1547,7 +1547,7 @@ static int sig_pipe(void)
 	BlockSignals(true, SIGPIPE);
 
 	exit_server("Got sigpipe\n");
-	return (0);
+	return 0;
 }
 
 static void set_keepalive_option(int fd)
@@ -1578,14 +1578,15 @@ static void drop_privileges(void)
 	if (pw == NULL) {
 		/* TODO: Should there be an option to override? */
 		DEBUG(0, ("Failed to look up user %s, cowardly refusing "
-		          "to run as root.\n", RUN_AS_USER));
+		          "to run as root.\n",
+		          RUN_AS_USER));
 		exit(1);
 	}
 
 	DEBUG(0, ("Dropping privileges, running as user %s (uid=%d)\n",
 	          RUN_AS_USER, pw->pw_uid));
-	if (setgid(pw->pw_gid) != 0 || setegid(pw->pw_gid) != 0
-	 || setuid(pw->pw_uid) != 0 || seteuid(pw->pw_uid) != 0) {
+	if (setgid(pw->pw_gid) != 0 || setegid(pw->pw_gid) != 0 ||
+	    setuid(pw->pw_uid) != 0 || seteuid(pw->pw_uid) != 0) {
 		DEBUG(0, ("Failed to drop privileges: %s\n", strerror(errno)));
 		exit(1);
 	}
@@ -1615,7 +1616,7 @@ static bool open_sockets(bool is_daemon, int port)
 		server_socket = open_socket_in(
 		    SOCK_STREAM, port, 0, interpret_addr(lp_socket_address()));
 		if (server_socket == -1)
-			return (false);
+			return false;
 
 		drop_privileges();
 
@@ -1736,7 +1737,7 @@ static bool receive_smb(int fd, char *buffer, int timeout)
 
 	len = read_smb_length_return_keepalive(fd, buffer, timeout);
 	if (len < 0)
-		return (false);
+		return false;
 
 	if (len > BUFFER_SIZE) {
 		DEBUG(0, ("Invalid packet length! (%d bytes).\n", len));
@@ -1751,7 +1752,7 @@ static bool receive_smb(int fd, char *buffer, int timeout)
 			return false;
 		}
 	}
-	return (true);
+	return true;
 }
 
 /****************************************************************************
@@ -1814,7 +1815,6 @@ static bool receive_message_or_smb(int smbfd, char *buffer, int buffer_len,
 	}
 }
 
-
 /****************************************************************************
 Get the next SMB packet, doing the local message processing automatically.
 ****************************************************************************/
@@ -1851,7 +1851,7 @@ static int sig_hup(void)
 	signal(SIGHUP, SIGNAL_CAST sig_hup);
 #endif
 	BlockSignals(false, SIGHUP);
-	return (0);
+	return 0;
 }
 
 static bool dir_world_writeable(const char *path)
@@ -1887,15 +1887,15 @@ int make_connection(char *service, char *dev)
 		if (strequal(service, "IPC$")) {
 			DEBUG(3,
 			      ("%s refusing IPC connection\n", timestring()));
-			return (-3);
+			return -3;
 		}
 
 		DEBUG(0, ("%s %s (%s) couldn't find service %s\n", timestring(),
 		          remote_machine, client_addr(), service));
-		return (-2);
+		return -2;
 	}
 	if (!lp_snum_ok(snum)) {
-		return (-4);
+		return -4;
 	}
 
 	/* you can only connect to the IPC$ service as an ipc device */
@@ -1909,13 +1909,13 @@ int make_connection(char *service, char *dev)
 	strupper(dev);
 	if (strncmp(dev, "LPT", 3) == 0) {
 		DEBUG(1, ("Attempt to connect to non-printer as a printer\n"));
-		return (-6);
+		return -6;
 	}
 
 	cnum = find_free_connection(str_checksum(service));
 	if (cnum < 0) {
 		DEBUG(0, ("%s couldn't find free connection\n", timestring()));
-		return (-1);
+		return -1;
 	}
 
 	pcon = &Connections[cnum];
@@ -1954,7 +1954,7 @@ int make_connection(char *service, char *dev)
 		DEBUG(0, ("Can't change directory to %s (%s)\n",
 		          pcon->connectpath, strerror(errno)));
 		pcon->open = false;
-		return (-5);
+		return -5;
 	}
 
 	num_connections_open++;
@@ -1965,7 +1965,7 @@ int make_connection(char *service, char *dev)
 		          lp_servicename(SNUM(cnum)), (int) getpid()));
 	}
 
-	return (cnum);
+	return cnum;
 }
 
 /****************************************************************************
@@ -1995,7 +1995,7 @@ int find_free_file(void)
 			memset(&Files[i], 0, sizeof(Files[i]));
 			first_file = i + 1;
 			Files[i].reserved = true;
-			return (i);
+			return i;
 		}
 
 	/* returning a file handle of 0 is a bad idea - so we start at 1 */
@@ -2004,12 +2004,12 @@ int find_free_file(void)
 			memset(&Files[i], 0, sizeof(Files[i]));
 			first_file = i + 1;
 			Files[i].reserved = true;
-			return (i);
+			return i;
 		}
 
 	DEBUG(1, ("ERROR! Out of file structures - perhaps increase "
 	          "MAX_OPEN_FILES?\n"));
-	return (-1);
+	return -1;
 }
 
 /****************************************************************************
@@ -2028,7 +2028,7 @@ again:
 	for (i = hash + 1; i != hash;) {
 		if (!Connections[i].open && Connections[i].used == used) {
 			DEBUG(3, ("found free connection number %d\n", i));
-			return (i);
+			return i;
 		}
 		i++;
 		if (i == MAX_CONNECTIONS)
@@ -2041,7 +2041,7 @@ again:
 	}
 
 	DEBUG(1, ("ERROR! Out of connection structures\n"));
-	return (-1);
+	return -1;
 }
 
 /****************************************************************************
@@ -2100,7 +2100,7 @@ static int reply_lanman1(char *outbuf)
 
 	put_dos_date(outbuf, smb_vwv8, t);
 
-	return (smb_len(outbuf) + 4);
+	return smb_len(outbuf) + 4;
 }
 
 /****************************************************************************
@@ -2128,7 +2128,7 @@ static int reply_lanman2(char *outbuf)
 	SSVAL(outbuf, smb_vwv10, TimeDiff(t) / 60);
 	put_dos_date(outbuf, smb_vwv8, t);
 
-	return (smb_len(outbuf) + 4);
+	return smb_len(outbuf) + 4;
 }
 
 /****************************************************************************
@@ -2177,7 +2177,7 @@ static int reply_nt1(char *outbuf)
 	SSVAL(outbuf, smb_vwv17,
 	      data_len); /* length of challenge+domain strings */
 
-	return (smb_len(outbuf) + 4);
+	return smb_len(outbuf) + 4;
 }
 
 /* these are the protocol lists used for auto architecture detection:
@@ -2307,7 +2307,7 @@ static int reply_negprot(char *inbuf, char *outbuf, int size, int bufsize)
 
 	DEBUG(5, ("%s negprot index=%d\n", timestring(), choice));
 
-	return (outsize);
+	return outsize;
 }
 
 /****************************************************************************
@@ -2363,7 +2363,7 @@ static bool dump_core(void)
 	chown(dname, getuid(), getgid());
 	chmod(dname, 0700);
 	if (chdir(dname))
-		return (false);
+		return false;
 	umask(~(0700));
 
 #ifdef RLIMIT_CORE
@@ -2379,7 +2379,7 @@ static bool dump_core(void)
 #endif
 
 	DEBUG(0, ("Dumping core in %s\n", dname));
-	return (true);
+	return true;
 }
 #endif
 
@@ -2558,9 +2558,9 @@ char *smb_fn_name(int type)
 			break;
 
 	if (match == num_smb_messages)
-		return (unknown_name);
+		return unknown_name;
 
-	return (smb_messages[match].name);
+	return smb_messages[match].name;
 }
 
 /****************************************************************************
@@ -2592,7 +2592,7 @@ static int switch_message(int type, char *inbuf, char *outbuf, int size,
 	/* make sure this is an SMB packet */
 	if (strncmp(smb_base(inbuf), "\377SMB", 4) != 0) {
 		DEBUG(2, ("Non-SMB packet of length %d\n", smb_len(inbuf)));
-		return (-1);
+		return -1;
 	}
 
 	for (match = 0; match < num_smb_messages; match++)
@@ -2615,11 +2615,11 @@ static int switch_message(int type, char *inbuf, char *outbuf, int size,
 
 			/* does it need write permission? */
 			if ((flags & NEED_WRITE) && !CAN_WRITE(cnum))
-				return (ERROR(ERRSRV, ERRaccess));
+				return ERROR(ERRSRV, ERRaccess);
 
 			/* load service specific parameters */
 			if (OPEN_CNUM(cnum) && !become_service(cnum)) {
-				return (ERROR(ERRSRV, ERRaccess));
+				return ERROR(ERRSRV, ERRaccess);
 			}
 
 			last_inbuf = inbuf;
@@ -2649,7 +2649,7 @@ static int switch_message(int type, char *inbuf, char *outbuf, int size,
 	          (100.0 * smb_messages[match].time) / total_time));
 #endif
 
-	return (outsize);
+	return outsize;
 }
 
 /****************************************************************************
@@ -2769,7 +2769,7 @@ static int construct_reply(char *inbuf, char *outbuf, int size, int bufsize)
 	bzero(outbuf, smb_size);
 
 	if (msg_type != 0)
-		return (reply_special(inbuf, outbuf));
+		return reply_special(inbuf, outbuf);
 
 	CVAL(outbuf, smb_com) = CVAL(inbuf, smb_com);
 	set_message(outbuf, 0, 0, true);
@@ -2793,7 +2793,7 @@ static int construct_reply(char *inbuf, char *outbuf, int size, int bufsize)
 
 	if (outsize > 4)
 		smb_setlen(outbuf, outsize - 4);
-	return (outsize);
+	return outsize;
 }
 
 /****************************************************************************
@@ -3125,5 +3125,5 @@ int main(int argc, char *argv[])
 	close_sockets();
 
 	exit_server("normal exit");
-	return (0);
+	return 0;
 }

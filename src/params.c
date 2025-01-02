@@ -128,7 +128,7 @@ static int EatWhitespace(FILE *InFile)
 
 	for (c = getc(InFile); isspace(c) && ('\n' != c); c = getc(InFile))
 		;
-	return (c);
+	return c;
 } /* EatWhitespace */
 
 static int EatComment(FILE *InFile)
@@ -154,7 +154,7 @@ static int EatComment(FILE *InFile)
 	for (c = getc(InFile); ('\n' != c) && (EOF != c) && (c > 0);
 	     c = getc(InFile))
 		;
-	return (c);
+	return c;
 } /* EatComment */
 
 static int Continuation(char *line, int pos)
@@ -177,7 +177,7 @@ static int Continuation(char *line, int pos)
 	while ((pos >= 0) && isspace(line[pos]))
 		pos--;
 
-	return (((pos >= 0) && ('\\' == line[pos])) ? pos : -1);
+	return ((pos >= 0) && ('\\' == line[pos])) ? pos : -1;
 } /* Continuation */
 
 static bool Section(FILE *InFile, bool (*sfunc)(char *))
@@ -219,7 +219,7 @@ static bool Section(FILE *InFile, bool (*sfunc)(char *))
 			if (NULL == bufr) {
 				DEBUG(0, ("%s Memory re-allocation failure.",
 				          func));
-				return (false);
+				return false;
 			}
 		}
 
@@ -232,12 +232,12 @@ static bool Section(FILE *InFile, bool (*sfunc)(char *))
 				DEBUG(0, ("%s Empty section name in "
 				          "configuration file.\n",
 				          func));
-				return (false);
+				return false;
 			}
 			if (!sfunc(bufr)) /* Got a valid name.  Deal with it. */
-				return (false);
+				return false;
 			(void) EatComment(InFile); /* Finish off the line. */
-			return (true);
+			return true;
 
 		case '\n': /* Got newline before closing ']'.    */
 			i = Continuation(bufr,
@@ -247,7 +247,7 @@ static bool Section(FILE *InFile, bool (*sfunc)(char *))
 				DEBUG(0, ("%s Badly formed line in "
 				          "configuration file: %s\n",
 				          func, bufr));
-				return (false);
+				return false;
 			}
 			end = ((i > 0) && (' ' == bufr[i - 1])) ? (i - 1) : (i);
 			c = getc(InFile); /* Continue with next line.         */
@@ -271,7 +271,7 @@ static bool Section(FILE *InFile, bool (*sfunc)(char *))
 	/* We arrive here if we've met the EOF before the closing bracket. */
 	DEBUG(0, ("%s Unexpected EOF in the configuration file: %s\n", func,
 	          bufr));
-	return (false);
+	return false;
 } /* Section */
 
 static bool Parameter(FILE *InFile, bool (*pfunc)(char *, char *), int c)
@@ -315,7 +315,7 @@ static bool Parameter(FILE *InFile, bool (*pfunc)(char *, char *), int c)
 			if (NULL == bufr) {
 				DEBUG(0, ("%s Memory re-allocation failure.",
 				          func));
-				return (false);
+				return false;
 			}
 		}
 
@@ -326,7 +326,7 @@ static bool Parameter(FILE *InFile, bool (*pfunc)(char *, char *), int c)
 				DEBUG(0, ("%s Invalid parameter name in "
 				          "config. file.\n",
 				          func));
-				return (false);
+				return false;
 			}
 			bufr[end++] = '\0'; /* Mark end of string & advance. */
 			i = end;        /* New string starts here.         */
@@ -341,7 +341,7 @@ static bool Parameter(FILE *InFile, bool (*pfunc)(char *, char *), int c)
 				DEBUG(1, ("%s Ignoring badly formed line in "
 				          "configuration file: %s\n",
 				          func, bufr));
-				return (true);
+				return true;
 			}
 			end = ((i > 0) && (' ' == bufr[i - 1])) ? (i - 1) : (i);
 			c = getc(InFile); /* Read past eoln. */
@@ -352,7 +352,7 @@ static bool Parameter(FILE *InFile, bool (*pfunc)(char *, char *), int c)
 			bufr[i] = '\0';
 			DEBUG(1, ("%s Unexpected end-of-file at: %s\n", func,
 			          bufr));
-			return (true);
+			return true;
 
 		default:
 			if (isspace(c)) /* One ' ' per whitespace region. */
@@ -380,7 +380,7 @@ static bool Parameter(FILE *InFile, bool (*pfunc)(char *, char *), int c)
 			if (NULL == bufr) {
 				DEBUG(0, ("%s Memory re-allocation failure.",
 				          func));
-				return (false);
+				return false;
 			}
 		}
 
@@ -414,7 +414,7 @@ static bool Parameter(FILE *InFile, bool (*pfunc)(char *, char *), int c)
 	}
 	bufr[end] = '\0'; /* End of value. */
 
-	return (pfunc(bufr, &bufr[vstart])); /* Pass name & value to pfunc(). */
+	return pfunc(bufr, &bufr[vstart]); /* Pass name & value to pfunc(). */
 } /* Parameter */
 
 static bool Parse(FILE *InFile, bool (*sfunc)(char *),
@@ -457,7 +457,7 @@ static bool Parse(FILE *InFile, bool (*sfunc)(char *),
 
 		case '[': /* Section Header. */
 			if (!Section(InFile, sfunc))
-				return (false);
+				return false;
 			c = EatWhitespace(InFile);
 			break;
 
@@ -467,12 +467,12 @@ static bool Parse(FILE *InFile, bool (*sfunc)(char *),
 
 		default: /* Parameter line. */
 			if (!Parameter(InFile, pfunc, c))
-				return (false);
+				return false;
 			c = EatWhitespace(InFile);
 			break;
 		}
 	}
-	return (true);
+	return true;
 } /* Parse */
 
 static FILE *OpenConfFile(char *FileName)
@@ -492,7 +492,7 @@ static FILE *OpenConfFile(char *FileName)
 
 	if (NULL == FileName || 0 == *FileName) {
 		DEBUG(0, ("%s No configuration filename specified.\n", func));
-		return (NULL);
+		return NULL;
 	}
 
 	OpenedFile = fopen(FileName, "r");
@@ -502,7 +502,7 @@ static FILE *OpenConfFile(char *FileName)
 		       func, FileName, strerror(errno)));
 	}
 
-	return (OpenedFile);
+	return OpenedFile;
 } /* OpenConfFile */
 
 bool pm_process(char *FileName, bool (*sfunc)(char *),
@@ -527,7 +527,7 @@ bool pm_process(char *FileName, bool (*sfunc)(char *),
 
 	InFile = OpenConfFile(FileName); /* Open the config file. */
 	if (NULL == InFile)
-		return (false);
+		return false;
 
 	DEBUG(3, ("%s Processing configuration file \"%s\"\n", func, FileName));
 
@@ -543,7 +543,7 @@ bool pm_process(char *FileName, bool (*sfunc)(char *),
 		if (NULL == bufr) {
 			DEBUG(0, ("%s memory allocation failure.\n", func));
 			fclose(InFile);
-			return (false);
+			return false;
 		}
 		result = Parse(InFile, sfunc, pfunc);
 		free(bufr);
@@ -557,10 +557,10 @@ bool pm_process(char *FileName, bool (*sfunc)(char *),
 	{
 		DEBUG(0, ("%s Failed.  Error returned from params.c:parse().\n",
 		          func));
-		return (false);
+		return false;
 	}
 
-	return (true); /* Generic success. */
+	return true; /* Generic success. */
 } /* pm_process */
 
 /* -------------------------------------------------------------------------- */

@@ -44,7 +44,7 @@ int str_checksum(char *s)
 		s++;
 		i++;
 	}
-	return (res);
+	return res;
 } /* str_checksum */
 
 /****************************************************************************
@@ -74,9 +74,9 @@ static bool is_reserved_msdos(char *fname)
 	    (strcmp(upperFname, "LPT3") == 0) ||
 	    (strcmp(upperFname, "NUL") == 0) ||
 	    (strcmp(upperFname, "PRN") == 0))
-		return (true);
+		return true;
 
-	return (false);
+	return false;
 } /* is_reserved_msdos */
 
 /****************************************************************************
@@ -97,11 +97,11 @@ bool is_8_3(char *fname, bool check_case)
 
 	/* can't be longer than 12 chars */
 	if (len == 0 || len > 12)
-		return (false);
+		return false;
 
 	/* can't be an MS-DOS Special file such as lpt1 or even lpt1.txt */
 	if (is_reserved_msdos(fname))
-		return (false);
+		return false;
 
 	/* can't contain invalid dos chars */
 	/* Windows use the ANSI charset.
@@ -122,40 +122,40 @@ bool is_8_3(char *fname, bool check_case)
 			if (*p == '.' && !dot_pos)
 				dot_pos = (char *) p;
 			if (!isdoschar(*p))
-				return (false);
+				return false;
 			p++;
 		}
 	}
 
 	/* no dot and less than 9 means OK */
 	if (!dot_pos)
-		return (len <= 8);
+		return len <= 8;
 
 	l = PTR_DIFF(dot_pos, fname);
 
 	/* base must be at least 1 char except special cases . and .. */
 	if (l == 0)
-		return (strcmp(fname, ".") == 0 || strcmp(fname, "..") == 0);
+		return strcmp(fname, ".") == 0 || strcmp(fname, "..") == 0;
 
 	/* base can't be greater than 8 */
 	if (l > 8)
-		return (false);
+		return false;
 
 	if (lp_strip_dot() && len - l == 1 && !strchr(dot_pos + 1, '.')) {
 		*dot_pos = 0;
-		return (true);
+		return true;
 	}
 
 	/* extension must be between 1 and 3 */
 	if ((len - l < 2) || (len - l > 4))
-		return (false);
+		return false;
 
 	/* extension can't have a dot */
 	if (strchr(dot_pos + 1, '.'))
-		return (false);
+		return false;
 
 	/* must be in 8.3 format */
-	return (true);
+	return true;
 } /* is_8_3 */
 
 /* -------------------------------------------------------------------------- **
@@ -226,7 +226,7 @@ bool check_mangled_stack(char *s)
 
 	/* If the stack doesn't exist, fail. */
 	if (!mangled_stack)
-		return (false);
+		return false;
 
 	/* If there is a file extension, then we need to play with it, too. */
 	if (p) {
@@ -258,10 +258,10 @@ bool check_mangled_stack(char *s)
 		DEBUG(3, ("Found %s on mangled stack as %s\n", s,
 		          mangled_stack[i]));
 		array_promote(mangled_stack[0], sizeof(fstring), i);
-		return (true);
+		return true;
 	}
 
-	return (false);
+	return false;
 } /* check_mangled_stack */
 
 /* End of the mangled stack section.
@@ -279,15 +279,15 @@ bool is_mangled(char *s)
 	char *m = strchr(s, MAGIC_CHAR);
 
 	if (!m)
-		return (false);
+		return false;
 
 	/* we use two base 36 chars before the extension */
 	if (m[1] == '.' || m[1] == 0 || m[2] == '.' || m[2] == 0 ||
 	    (m[3] != '.' && m[3] != 0))
-		return (is_mangled(m + 1));
+		return is_mangled(m + 1);
 
 	/* it could be */
-	return (true);
+	return true;
 } /* is_mangled */
 
 /****************************************************************************
@@ -385,12 +385,12 @@ static bool illegal_name(char *name)
 
 	for (s = (unsigned char *) name; *s;) {
 		if (illegal[*s])
-			return (true);
+			return true;
 		else
 			s++;
 	}
 
-	return (false);
+	return false;
 } /* illegal_name */
 
 /****************************************************************************

@@ -213,7 +213,7 @@ static int call_trans2open(char *inbuf, char *outbuf, int bufsize, int cnum,
 
 	fnum = find_free_file();
 	if (fnum < 0)
-		return (ERROR(ERRSRV, ERRnofids));
+		return ERROR(ERRSRV, ERRnofids);
 
 	if (!check_name(fname, cnum)) {
 		if ((errno == ENOENT) && bad_path) {
@@ -221,7 +221,7 @@ static int call_trans2open(char *inbuf, char *outbuf, int bufsize, int cnum,
 			unix_ERR_code = ERRbadpath;
 		}
 		Files[fnum].reserved = false;
-		return (UNIXERROR(ERRDOS, ERRnoaccess));
+		return UNIXERROR(ERRDOS, ERRnoaccess);
 	}
 
 	open_file_shared(fnum, cnum, fname, open_mode, open_ofun,
@@ -233,12 +233,12 @@ static int call_trans2open(char *inbuf, char *outbuf, int bufsize, int cnum,
 			unix_ERR_code = ERRbadpath;
 		}
 		Files[fnum].reserved = false;
-		return (UNIXERROR(ERRDOS, ERRnoaccess));
+		return UNIXERROR(ERRDOS, ERRnoaccess);
 	}
 
 	if (fstat(Files[fnum].fd_ptr->fd, &sbuf) != 0) {
 		close_file(fnum, false);
-		return (ERROR(ERRDOS, ERRnoaccess));
+		return ERROR(ERRDOS, ERRnoaccess);
 	}
 
 	size = sbuf.st_size;
@@ -247,13 +247,13 @@ static int call_trans2open(char *inbuf, char *outbuf, int bufsize, int cnum,
 	inode = sbuf.st_ino;
 	if (fmode & aDIR) {
 		close_file(fnum, false);
-		return (ERROR(ERRDOS, ERRnoaccess));
+		return ERROR(ERRDOS, ERRnoaccess);
 	}
 
 	/* Realloc the size of parameters and data we will return */
 	params = *pparams = Realloc(*pparams, 28);
 	if (params == NULL)
-		return (ERROR(ERRDOS, ERRnomem));
+		return ERROR(ERRDOS, ERRnomem);
 
 	bzero(params, 28);
 	SSVAL(params, 0, fnum);
@@ -307,7 +307,7 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 	*out_of_space = false;
 
 	if (!Connections[cnum].dirptr)
-		return (false);
+		return false;
 
 	p = strrchr(path_mask, '/');
 	if (p != NULL) {
@@ -338,7 +338,7 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 		          TellDir(Connections[cnum].dirptr)));
 
 		if (!dname)
-			return (false);
+			return false;
 
 		pstrcpy(fname, dname);
 
@@ -569,7 +569,7 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 		break;
 
 	default:
-		return (false);
+		return false;
 	}
 
 	if (PTR_DIFF(p, pdata) > space_remaining) {
@@ -584,7 +584,7 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 	*last_name_off = PTR_DIFF(nameptr, base_data);
 	/* Advance the data pointer to the next slot */
 	*ppdata = p;
-	return (found);
+	return found;
 }
 
 /****************************************************************************
@@ -668,7 +668,7 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 	case SMB_FIND_FILE_BOTH_DIRECTORY_INFO:
 		break;
 	default:
-		return (ERROR(ERRDOS, ERRunknownlevel));
+		return ERROR(ERRDOS, ERRunknownlevel);
 	}
 
 	pstrcpy(directory, params + 12); /* Complete directory path with
@@ -683,7 +683,7 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 			unix_ERR_code = ERRbadpath;
 		}
 
-		return (ERROR(ERRDOS, ERRbadpath));
+		return ERROR(ERRDOS, ERRbadpath);
 	}
 
 	p = strrchr(directory, '/');
@@ -699,17 +699,17 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 
 	pdata = *ppdata = Realloc(*ppdata, max_data_bytes + 1024);
 	if (!*ppdata)
-		return (ERROR(ERRDOS, ERRnomem));
+		return ERROR(ERRDOS, ERRnomem);
 	bzero(pdata, max_data_bytes);
 
 	/* Realloc the params space */
 	params = *pparams = Realloc(*pparams, 10);
 	if (params == NULL)
-		return (ERROR(ERRDOS, ERRnomem));
+		return ERROR(ERRDOS, ERRnomem);
 
 	dptr_num = dptr_create(cnum, directory, true, SVAL(inbuf, smb_pid));
 	if (dptr_num < 0)
-		return (ERROR(ERRDOS, ERRbadfile));
+		return ERROR(ERRDOS, ERRbadfile);
 
 	/* convert the formatted masks */
 	mask_convert(mask);
@@ -719,7 +719,7 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 
 	if (!(wcard = strdup(mask))) {
 		dptr_close(dptr_num);
-		return (ERROR(ERRDOS, ERRnomem));
+		return ERROR(ERRDOS, ERRnomem);
 	}
 
 	dptr_set_wcard(dptr_num, wcard);
@@ -769,7 +769,7 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 	 */
 
 	if (numentries == 0)
-		return (ERROR(ERRDOS, ERRbadfile));
+		return ERROR(ERRDOS, ERRbadfile);
 
 	/* At this point pdata points to numentries directory entries. */
 
@@ -792,7 +792,7 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 	       timestring(), smb_fn_name(CVAL(inbuf, smb_com)), mask, directory,
 	       cnum, dirtype, numentries));
 
-	return (-1);
+	return -1;
 }
 
 /****************************************************************************
@@ -853,29 +853,29 @@ resume_key = %d resume name = %s continue=%d level = %d\n",
 	case SMB_FIND_FILE_BOTH_DIRECTORY_INFO:
 		break;
 	default:
-		return (ERROR(ERRDOS, ERRunknownlevel));
+		return ERROR(ERRDOS, ERRunknownlevel);
 	}
 
 	pdata = *ppdata = Realloc(*ppdata, max_data_bytes + 1024);
 	if (!*ppdata)
-		return (ERROR(ERRDOS, ERRnomem));
+		return ERROR(ERRDOS, ERRnomem);
 	bzero(pdata, max_data_bytes);
 
 	/* Realloc the params space */
 	params = *pparams = Realloc(*pparams, 6 * SIZEOFWORD);
 	if (!params)
-		return (ERROR(ERRDOS, ERRnomem));
+		return ERROR(ERRDOS, ERRnomem);
 
 	/* Check that the dptr is valid */
 	if (!(Connections[cnum].dirptr = dptr_fetch_lanman2(dptr_num)))
-		return (ERROR(ERRDOS, ERRnofiles));
+		return ERROR(ERRDOS, ERRnofiles);
 
 	string_set(&Connections[cnum].dirpath, dptr_path(dptr_num));
 
 	/* Get the wildcard mask from the dptr */
 	if ((p = dptr_wcard(dptr_num)) == NULL) {
 		DEBUG(2, ("dptr_num %d has no wildcard\n", dptr_num));
-		return (ERROR(ERRDOS, ERRnofiles));
+		return ERROR(ERRDOS, ERRnofiles);
 	}
 	pstrcpy(mask, p);
 	pstrcpy(directory, Connections[cnum].dirpath);
@@ -1022,7 +1022,7 @@ resume_key = %d resume name = %s continue=%d level = %d\n",
 	       timestring(), smb_fn_name(CVAL(inbuf, smb_com)), mask, directory,
 	       cnum, dirtype, numentries));
 
-	return (-1);
+	return -1;
 }
 
 /****************************************************************************
@@ -1046,7 +1046,7 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
 	if (stat(".", &st) != 0) {
 		DEBUG(2, ("call_trans2qfsinfo: stat of . failed (%s)\n",
 		          strerror(errno)));
-		return (ERROR(ERRSRV, ERRinvdevice));
+		return ERROR(ERRSRV, ERRinvdevice);
 	}
 
 	pdata = *ppdata = Realloc(*ppdata, 1024);
@@ -1129,7 +1129,7 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
 		SIVAL(pdata, 4, 0); /* characteristics */
 		break;
 	default:
-		return (ERROR(ERRDOS, ERRunknownlevel));
+		return ERROR(ERRDOS, ERRunknownlevel);
 	}
 
 	send_trans2_replies(outbuf, bufsize, params, 0, pdata, data_len);
@@ -1153,7 +1153,7 @@ static int call_trans2setfsinfo(char *inbuf, char *outbuf, int length,
 	DEBUG(3, ("call_trans2setfsinfo\n"));
 
 	if (!CAN_WRITE(cnum))
-		return (ERROR(ERRSRV, ERRaccess));
+		return ERROR(ERRSRV, ERRaccess);
 
 	outsize = set_message(outbuf, 10, 0, true);
 
@@ -1192,7 +1192,7 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
 		if (fstat(Files[fnum].fd_ptr->fd, &sbuf) != 0) {
 			DEBUG(3, ("fstat of fnum %d failed (%s)\n", fnum,
 			          strerror(errno)));
-			return (UNIXERROR(ERRDOS, ERRbadfid));
+			return UNIXERROR(ERRDOS, ERRbadfid);
 		}
 		pos = lseek(Files[fnum].fd_ptr->fd, 0, SEEK_CUR);
 	} else {
@@ -1208,7 +1208,7 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
 				unix_ERR_class = ERRDOS;
 				unix_ERR_code = ERRbadpath;
 			}
-			return (UNIXERROR(ERRDOS, ERRbadpath));
+			return UNIXERROR(ERRDOS, ERRbadpath);
 		}
 		pos = 0;
 	}
@@ -1237,7 +1237,7 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
 		/* uggh, EAs for OS2 */
 		DEBUG(4, ("Rejecting EA request with total_data=%d\n",
 		          total_data));
-		return (ERROR(ERRDOS, ERROR_EAS_NOT_SUPPORTED));
+		return ERROR(ERRDOS, ERROR_EAS_NOT_SUPPORTED);
 	}
 
 	bzero(pdata, data_size);
@@ -1272,7 +1272,7 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
 		break;
 
 	case 6:
-		return (ERROR(ERRDOS, ERRbadfunc)); /* os/2 needs this */
+		return ERROR(ERRDOS, ERRbadfunc); /* os/2 needs this */
 
 	case SMB_QUERY_FILE_BASIC_INFO:
 		data_size = 36; /* w95 returns 40 bytes not 36 - why ?. */
@@ -1376,12 +1376,12 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
 		pstrcpy(pdata + 24, fname);
 		break;
 	default:
-		return (ERROR(ERRDOS, ERRunknownlevel));
+		return ERROR(ERRDOS, ERRunknownlevel);
 	}
 
 	send_trans2_replies(outbuf, bufsize, params, 2, *ppdata, data_size);
 
-	return (-1);
+	return -1;
 }
 
 /****************************************************************************
@@ -1405,7 +1405,7 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 	bool bad_path = false;
 
 	if (!CAN_WRITE(cnum))
-		return (ERROR(ERRSRV, ERRaccess));
+		return ERROR(ERRSRV, ERRaccess);
 
 	if (tran_call == TRANSACT2_SETFILEINFO) {
 		int16_t fnum = SVALS(params, 0);
@@ -1420,7 +1420,7 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 		if (fstat(fd, &st) != 0) {
 			DEBUG(3, ("fstat of %s failed (%s)\n", fname,
 			          strerror(errno)));
-			return (ERROR(ERRDOS, ERRbadpath));
+			return ERROR(ERRDOS, ERRbadpath);
 		}
 	} else {
 		/* set path info */
@@ -1433,7 +1433,7 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 				unix_ERR_class = ERRDOS;
 				unix_ERR_code = ERRbadpath;
 			}
-			return (UNIXERROR(ERRDOS, ERRbadpath));
+			return UNIXERROR(ERRDOS, ERRbadpath);
 		}
 
 		if (stat(fname, &st) != 0) {
@@ -1443,7 +1443,7 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 				unix_ERR_class = ERRDOS;
 				unix_ERR_code = ERRbadpath;
 			}
-			return (UNIXERROR(ERRDOS, ERRbadpath));
+			return UNIXERROR(ERRDOS, ERRbadpath);
 		}
 	}
 
@@ -1455,7 +1455,7 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 	params = *pparams = Realloc(*pparams, 2);
 	SSVAL(params, 0, 0);
 	if (params == NULL)
-		return (ERROR(ERRDOS, ERRnomem));
+		return ERROR(ERRDOS, ERRnomem);
 
 	size = st.st_size;
 	tvs.modtime = st.st_mtime;
@@ -1466,7 +1466,7 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 		/* uggh, EAs for OS2 */
 		DEBUG(4, ("Rejecting EA request with total_data=%d\n",
 		          total_data));
-		return (ERROR(ERRDOS, ERROR_EAS_NOT_SUPPORTED));
+		return ERROR(ERRDOS, ERROR_EAS_NOT_SUPPORTED);
 	}
 
 	switch (info_level) {
@@ -1518,7 +1518,7 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 
 	case SMB_SET_FILE_END_OF_FILE_INFO: {
 		if (IVAL(pdata, 4) != 0) /* more than 32 bits? */
-			return (ERROR(ERRDOS, ERRunknownlevel));
+			return ERROR(ERRDOS, ERRunknownlevel);
 		size = IVAL(pdata, 0);
 		break;
 	}
@@ -1526,7 +1526,7 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 	case SMB_SET_FILE_DISPOSITION_INFO: /* not supported yet */
 	case SMB_SET_FILE_ALLOCATION_INFO:  /* not supported yet */
 	default: {
-		return (ERROR(ERRDOS, ERRunknownlevel));
+		return ERROR(ERRDOS, ERRunknownlevel);
 	}
 	}
 
@@ -1548,7 +1548,7 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 	 */
 	if (st.st_mtime != tvs.modtime || st.st_atime != tvs.actime) {
 		if (sys_utime(fname, &tvs) != 0) {
-			return (ERROR(ERRDOS, ERRnoaccess));
+			return ERROR(ERRDOS, ERRnoaccess);
 		}
 	}
 
@@ -1556,14 +1556,14 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 	if (mode != dos_mode(cnum, fname, &st) &&
 	    dos_chmod(cnum, fname, mode, NULL)) {
 		DEBUG(2, ("chmod of %s failed (%s)\n", fname, strerror(errno)));
-		return (ERROR(ERRDOS, ERRnoaccess));
+		return ERROR(ERRDOS, ERRnoaccess);
 	}
 
 	if (size != st.st_size) {
 		if (fd == -1) {
 			fd = open(fname, O_RDWR, 0);
 			if (fd == -1) {
-				return (ERROR(ERRDOS, ERRbadpath));
+				return ERROR(ERRDOS, ERRbadpath);
 			}
 			set_filelen(fd, size);
 			close(fd);
@@ -1576,7 +1576,7 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 
 	send_trans2_replies(outbuf, bufsize, params, 2, *ppdata, 0);
 
-	return (-1);
+	return -1;
 }
 
 /****************************************************************************
@@ -1591,7 +1591,7 @@ static int call_trans2mkdir(char *inbuf, char *outbuf, int length, int bufsize,
 	bool bad_path = false;
 
 	if (!CAN_WRITE(cnum))
-		return (ERROR(ERRSRV, ERRaccess));
+		return ERROR(ERRSRV, ERRaccess);
 
 	pstrcpy(directory, &params[4]);
 
@@ -1607,19 +1607,19 @@ static int call_trans2mkdir(char *inbuf, char *outbuf, int length, int bufsize,
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
-		return (UNIXERROR(ERRDOS, ERRnoaccess));
+		return UNIXERROR(ERRDOS, ERRnoaccess);
 	}
 
 	/* Realloc the parameter and data sizes */
 	params = *pparams = Realloc(*pparams, 2);
 	if (params == NULL)
-		return (ERROR(ERRDOS, ERRnomem));
+		return ERROR(ERRDOS, ERRnomem);
 
 	SSVAL(params, 0, 0);
 
 	send_trans2_replies(outbuf, bufsize, params, 2, *ppdata, 0);
 
-	return (-1);
+	return -1;
 }
 
 /****************************************************************************
@@ -1641,13 +1641,13 @@ static int call_trans2findnotifyfirst(char *inbuf, char *outbuf, int length,
 	case 2:
 		break;
 	default:
-		return (ERROR(ERRDOS, ERRunknownlevel));
+		return ERROR(ERRDOS, ERRunknownlevel);
 	}
 
 	/* Realloc the parameter and data sizes */
 	params = *pparams = Realloc(*pparams, 6);
 	if (params == NULL)
-		return (ERROR(ERRDOS, ERRnomem));
+		return ERROR(ERRDOS, ERRnomem);
 
 	SSVAL(params, 0, fnf_handle);
 	SSVAL(params, 2, 0); /* No changes */
@@ -1660,7 +1660,7 @@ static int call_trans2findnotifyfirst(char *inbuf, char *outbuf, int length,
 
 	send_trans2_replies(outbuf, bufsize, params, 6, *ppdata, 0);
 
-	return (-1);
+	return -1;
 }
 
 /****************************************************************************
@@ -1678,14 +1678,14 @@ static int call_trans2findnotifynext(char *inbuf, char *outbuf, int length,
 	/* Realloc the parameter and data sizes */
 	params = *pparams = Realloc(*pparams, 4);
 	if (params == NULL)
-		return (ERROR(ERRDOS, ERRnomem));
+		return ERROR(ERRDOS, ERRnomem);
 
 	SSVAL(params, 0, 0); /* No changes */
 	SSVAL(params, 2, 0); /* No EA errors */
 
 	send_trans2_replies(outbuf, bufsize, params, 4, *ppdata, 0);
 
-	return (-1);
+	return -1;
 }
 
 /****************************************************************************
@@ -1709,7 +1709,7 @@ int reply_findclose(char *inbuf, char *outbuf, int length, int bufsize)
 	DEBUG(3, ("%s SMBfindclose cnum=%d, dptr_num = %d\n", timestring(),
 	          cnum, dptr_num));
 
-	return (outsize);
+	return outsize;
 }
 
 /****************************************************************************
@@ -1736,7 +1736,7 @@ int reply_findnclose(char *inbuf, char *outbuf, int length, int bufsize)
 	DEBUG(3, ("%s SMB_findnclose cnum=%d, dptr_num = %d\n", timestring(),
 	          cnum, dptr_num));
 
-	return (outsize);
+	return outsize;
 }
 
 /****************************************************************************
@@ -1745,7 +1745,7 @@ int reply_findnclose(char *inbuf, char *outbuf, int length, int bufsize)
 int reply_transs2(char *inbuf, char *outbuf, int length, int bufsize)
 {
 	DEBUG(4, ("Ignoring transs2 of length %d\n", length));
-	return (-1);
+	return -1;
 }
 
 /****************************************************************************
@@ -1768,7 +1768,7 @@ int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize)
 	   is so as a sanity check */
 	if (suwcnt != 1) {
 		DEBUG(2, ("Invalid smb_sucnt in trans2 call\n"));
-		return (ERROR(ERRSRV, ERRerror));
+		return ERROR(ERRSRV, ERRerror);
 	}
 
 	/* Allocate the space for the maximum needed parameters and data */
@@ -1779,7 +1779,7 @@ int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize)
 
 	if ((total_params && !params) || (total_data && !data)) {
 		DEBUG(2, ("Out of memory in reply_trans2\n"));
-		return (ERROR(ERRDOS, ERRnomem));
+		return ERROR(ERRDOS, ERRnomem);
 	}
 
 	/* Copy the param and data bytes sent with this request into
@@ -1821,7 +1821,7 @@ int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize)
 					           : "timeout"));
 				free(params);
 				free(data);
-				return (ERROR(ERRSRV, ERRerror));
+				return ERROR(ERRSRV, ERRerror);
 			}
 
 			/* Revise total_params and total_data in case they have
@@ -1901,7 +1901,7 @@ int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize)
 		          timestring(), tran_call));
 		free(params);
 		free(data);
-		return (ERROR(ERRSRV, ERRerror));
+		return ERROR(ERRSRV, ERRerror);
 	}
 
 	/* As we do not know how many data packets will need to be

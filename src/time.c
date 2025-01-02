@@ -236,7 +236,7 @@ time_t interpret_long_date(char *p)
 	thigh = IVAL(p, 4);
 
 	if (thigh == 0)
-		return (0);
+		return 0;
 
 	d = ((double) thigh) * 4.0 * (double) (1 << 30);
 	d += (tlow & 0xFFF00000);
@@ -246,7 +246,7 @@ time_t interpret_long_date(char *p)
 	d -= TIME_FIXUP_CONSTANT;
 
 	if (!(l_time_min <= d && d <= l_time_max))
-		return (0);
+		return 0;
 
 	ret = (time_t) (d + 0.5);
 
@@ -254,7 +254,7 @@ time_t interpret_long_date(char *p)
 	ret -= serverzone;
 	ret += LocTimeDiff(ret);
 
-	return (ret);
+	return ret;
 }
 
 /****************************************************************************
@@ -294,8 +294,8 @@ check if it's a null mtime
 bool null_mtime(time_t mtime)
 {
 	if (mtime == 0 || mtime == 0xFFFFFFFF || mtime == (time_t) -1)
-		return (true);
-	return (false);
+		return true;
+	return false;
 }
 
 /*******************************************************************
@@ -307,7 +307,7 @@ static uint16_t make_dos_date1(time_t unixdate, struct tm *t)
 	ret = (((unsigned) (t->tm_mon + 1)) >> 3) | ((t->tm_year - 80) << 1);
 	ret =
 	    ((ret & 0xFF) << 8) | (t->tm_mday | (((t->tm_mon + 1) & 0x7) << 5));
-	return (ret);
+	return ret;
 }
 
 /*******************************************************************
@@ -320,7 +320,7 @@ static uint16_t make_dos_time1(time_t unixdate, struct tm *t)
 	       (((unsigned) t->tm_hour) << 3));
 	ret =
 	    ((ret & 0xFF) << 8) | ((t->tm_sec / 2) | ((t->tm_min & 0x7) << 5));
-	return (ret);
+	return ret;
 }
 
 /*******************************************************************
@@ -339,7 +339,7 @@ static uint32_t make_dos_date(time_t unixdate)
 	ret = make_dos_date1(unixdate, t);
 	ret = ((ret & 0xFFFF) << 16) | make_dos_time1(unixdate, t);
 
-	return (ret);
+	return ret;
 }
 
 /*******************************************************************
@@ -409,7 +409,7 @@ static time_t make_unix_date(void *date_ptr)
 	dos_date = IVAL(date_ptr, 0);
 
 	if (dos_date == 0)
-		return (0);
+		return 0;
 
 	interpret_dos_date(dos_date, &t.tm_year, &t.tm_mon, &t.tm_mday,
 	                   &t.tm_hour, &t.tm_min, &t.tm_sec);
@@ -418,7 +418,7 @@ static time_t make_unix_date(void *date_ptr)
 	/* mktime() also does the local to GMT time conversion for us */
 	ret = mktime(&t);
 
-	return (ret);
+	return ret;
 }
 
 /*******************************************************************
@@ -432,7 +432,7 @@ time_t make_unix_date2(void *date_ptr)
 	x2 = ((x & 0xFFFF) << 16) | ((x & 0xFFFF0000) >> 16);
 	SIVAL(&x, 0, x2);
 
-	return (make_unix_date((void *) &x));
+	return make_unix_date((void *) &x);
 }
 
 /*******************************************************************
@@ -444,7 +444,7 @@ time_t make_unix_date3(void *date_ptr)
 	time_t t = IVAL(date_ptr, 0);
 	if (!null_mtime(t))
 		t += LocTimeDiff(t);
-	return (t);
+	return t;
 }
 
 /****************************************************************************
@@ -461,7 +461,7 @@ char *timestring(void)
 		         "%ld seconds since the Epoch", (long) t);
 	else
 		strftime(TimeBuf, 100, "%Y/%m/%d %r", tm);
-	return (TimeBuf);
+	return TimeBuf;
 }
 
 /****************************************************************************

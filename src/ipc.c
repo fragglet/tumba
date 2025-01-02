@@ -75,7 +75,7 @@ static int CopyAndAdvance(char **dst, char *src, int *n)
 {
 	int l;
 	if (!src || !dst || !n || !(*dst))
-		return (0);
+		return 0;
 	strlcpy(*dst, src, *n + 1);
 	l = strlen(*dst) + 1;
 	(*dst) += l;
@@ -88,7 +88,7 @@ static int CopyAndAdvance(char **dst, char *src, int *n)
   ******************************************************************/
 static bool prefix_ok(char *str, char *prefix)
 {
-	return (strncmp(str, prefix, strlen(prefix)) == 0);
+	return strncmp(str, prefix, strlen(prefix)) == 0;
 }
 
 /****************************************************************************
@@ -225,7 +225,7 @@ static bool api_RNetServerEnum(int cnum, char *param, char *data, int mdrcnt,
 
 	DEBUG(3, ("NetServerEnum\n"));
 
-	return (true);
+	return true;
 }
 
 /****************************************************************************
@@ -390,7 +390,7 @@ static bool api_RNetShareGetInfo(int cnum, char *param, char *data, int mdrcnt,
 	SSVAL(*rparam, 2, 0); /* converter word */
 	SSVAL(*rparam, 4, *rdata_len);
 
-	return (true);
+	return true;
 }
 
 /****************************************************************************
@@ -456,7 +456,7 @@ static bool api_RNetShareEnum(int cnum, char *param, char *data, int mdrcnt,
 
 	DEBUG(3, ("RNetShareEnum gave %d entries of %d (%d %d %d %d)\n",
 	          counted, total, uLevel, buf_len, *rdata_len, mdrcnt));
-	return (true);
+	return true;
 }
 
 /****************************************************************************
@@ -554,7 +554,7 @@ static bool api_RNetServerGetInfo(int cnum, char *param, char *data, int mdrcnt,
 	SSVAL(*rparam, 2, 0); /* converter word */
 	SSVAL(*rparam, 4, *rdata_len);
 
-	return (true);
+	return true;
 }
 
 /****************************************************************************
@@ -578,7 +578,7 @@ static bool api_NetWkstaGetInfo(int cnum, char *param, char *data, int mdrcnt,
 	/* check it's a supported varient */
 	if (!(level == 10 && strcsequal(str1, "WrLh") &&
 	      strcsequal(str2, "zzzBBzz")))
-		return (false);
+		return false;
 
 	*rdata_len = mdrcnt + 1024;
 	*rdata = REALLOC(*rdata, *rdata_len);
@@ -624,7 +624,7 @@ static bool api_NetWkstaGetInfo(int cnum, char *param, char *data, int mdrcnt,
 
 	SSVAL(*rparam, 4, *rdata_len);
 
-	return (true);
+	return true;
 }
 
 /****************************************************************************
@@ -643,7 +643,7 @@ static bool api_TooSmall(int cnum, char *param, char *data, int mdrcnt,
 
 	DEBUG(3, ("Supplied buffer too small in API command\n"));
 
-	return (true);
+	return true;
 }
 
 /****************************************************************************
@@ -663,7 +663,7 @@ static bool api_Unsupported(int cnum, char *param, char *data, int mdrcnt,
 
 	DEBUG(3, ("Unsupported API command\n"));
 
-	return (true);
+	return true;
 }
 
 struct {
@@ -730,7 +730,7 @@ static int api_reply(int cnum, char *outbuf, char *data, char *params,
 	free(rdata);
 	free(rparam);
 
-	return (-1);
+	return -1;
 }
 
 /****************************************************************************
@@ -831,7 +831,7 @@ int reply_trans(char *inbuf, char *outbuf, int size, int bufsize)
 			free(params);
 			free(data);
 			free(setup);
-			return (ERROR(ERRSRV, ERRerror));
+			return ERROR(ERRSRV, ERRerror);
 		}
 
 		show_msg(inbuf);
@@ -881,10 +881,10 @@ int reply_trans(char *inbuf, char *outbuf, int size, int bufsize)
 		close_cnum(cnum);
 
 	if (one_way)
-		return (-1);
+		return -1;
 
 	if (outsize == 0)
-		return (ERROR(ERRSRV, ERRnosupport));
+		return ERROR(ERRSRV, ERRnosupport);
 
-	return (outsize);
+	return outsize;
 }

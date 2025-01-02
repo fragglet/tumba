@@ -118,9 +118,9 @@ static void *dptr_get(int key, uint32_t lastused)
 			if ((dp->ptr = OpenDir(dp->cnum, dp->path)))
 				dptrs_open++;
 		}
-		return (dp->ptr);
+		return dp->ptr;
 	}
-	return (NULL);
+	return NULL;
 }
 
 /****************************************************************************
@@ -129,8 +129,8 @@ get the dir path for a dir index
 char *dptr_path(int key)
 {
 	if (dirptrs[key].valid)
-		return (dirptrs[key].path);
-	return (NULL);
+		return dirptrs[key].path;
+	return NULL;
 }
 
 /****************************************************************************
@@ -139,8 +139,8 @@ get the dir wcard for a dir index (lanman2 specific)
 char *dptr_wcard(int key)
 {
 	if (dirptrs[key].valid)
-		return (dirptrs[key].wcard);
-	return (NULL);
+		return dirptrs[key].wcard;
+	return NULL;
 }
 
 /****************************************************************************
@@ -175,8 +175,8 @@ get the dir attrib for a dir index (lanman2 specific)
 uint16_t dptr_attr(int key)
 {
 	if (dirptrs[key].valid)
-		return (dirptrs[key].attr);
-	return (0);
+		return dirptrs[key].attr;
+	return 0;
 }
 
 /****************************************************************************
@@ -253,7 +253,7 @@ static bool start_dir(int cnum, char *directory)
 	DEBUG(5, ("start_dir cnum=%d dir=%s\n", cnum, directory));
 
 	if (!check_name(directory, cnum))
-		return (false);
+		return false;
 
 	if (!*directory)
 		directory = ".";
@@ -262,10 +262,10 @@ static bool start_dir(int cnum, char *directory)
 	if (Connections[cnum].dirptr) {
 		dptrs_open++;
 		string_set(&Connections[cnum].dirpath, directory);
-		return (true);
+		return true;
 	}
 
-	return (false);
+	return false;
 }
 
 /****************************************************************************
@@ -278,7 +278,7 @@ int dptr_create(int cnum, char *path, bool expect_close, int pid)
 	int oldi;
 
 	if (!start_dir(cnum, path))
-		return (-2); /* Code to say use a unix error return code. */
+		return -2; /* Code to say use a unix error return code. */
 
 	if (dptrs_open >= MAXDIR)
 		dptr_idleoldest();
@@ -316,7 +316,7 @@ int dptr_create(int cnum, char *path, bool expect_close, int pid)
 
 	if (i == -1) {
 		DEBUG(0, ("Error - all dirptrs in use??\n"));
-		return (-1);
+		return -1;
 	}
 
 	if (dirptrs[i].valid)
@@ -336,7 +336,7 @@ int dptr_create(int cnum, char *path, bool expect_close, int pid)
 	DEBUG(3, ("creating new dirptr %d for path %s, expect_close = %d\n", i,
 	          path, expect_close));
 
-	return (i);
+	return i;
 }
 
 #define DPTR_MASK ((uint32_t) (((uint32_t) 1) << 31))
@@ -351,13 +351,13 @@ bool dptr_fill(char *buf1, unsigned int key)
 	uint32_t offset;
 	if (!p) {
 		DEBUG(1, ("filling null dirptr %d\n", key));
-		return (false);
+		return false;
 	}
 	offset = TellDir(p);
 	DEBUG(6, ("fill on key %d dirptr 0x%x now at %d\n", key, p, offset));
 	buf[0] = key;
 	SIVAL(buf, 1, offset | DPTR_MASK);
-	return (true);
+	return true;
 }
 
 /****************************************************************************
@@ -365,7 +365,7 @@ return true is the offset is at zero
 ****************************************************************************/
 bool dptr_zero(char *buf)
 {
-	return ((IVAL(buf, 1) & ~DPTR_MASK) == 0);
+	return (IVAL(buf, 1) & ~DPTR_MASK) == 0;
 }
 
 /****************************************************************************
@@ -378,14 +378,14 @@ void *dptr_fetch(char *buf, int *num)
 	uint32_t offset;
 	if (!p) {
 		DEBUG(3, ("fetched null dirptr %d\n", key));
-		return (NULL);
+		return NULL;
 	}
 	*num = key;
 	offset = IVAL(buf, 1) & ~DPTR_MASK;
 	SeekDir(p, offset);
 	DEBUG(3, ("fetching dirptr %d for path %s at offset %d\n", key,
 	          dptr_path(key), offset));
-	return (p);
+	return p;
 }
 
 /****************************************************************************
@@ -397,11 +397,11 @@ void *dptr_fetch_lanman2(int dptr_num)
 
 	if (!p) {
 		DEBUG(3, ("fetched null dirptr %d\n", dptr_num));
-		return (NULL);
+		return NULL;
 	}
 	DEBUG(3, ("fetching dirptr %d for path %s\n", dptr_num,
 	          dptr_path(dptr_num)));
-	return (p);
+	return p;
 }
 
 /****************************************************************************
@@ -440,7 +440,7 @@ bool get_dir_entry(int cnum, char *mask, int dirtype, char *fname, int *size,
 	     '/');
 
 	if (!Connections[cnum].dirptr)
-		return (false);
+		return false;
 
 	while (!found) {
 		dname = ReadDirName(Connections[cnum].dirptr);
@@ -450,7 +450,7 @@ bool get_dir_entry(int cnum, char *mask, int dirtype, char *fname, int *size,
 		          TellDir(Connections[cnum].dirptr)));
 
 		if (dname == NULL)
-			return (false);
+			return false;
 
 		pstrcpy(filename, dname);
 
@@ -496,7 +496,7 @@ bool get_dir_entry(int cnum, char *mask, int dirtype, char *fname, int *size,
 		found = true;
 	}
 
-	return (found);
+	return found;
 }
 
 typedef struct {
@@ -518,11 +518,11 @@ void *OpenDir(int cnum, char *name)
 	int used = 0;
 
 	if (!p)
-		return (NULL);
+		return NULL;
 	dirp = (Dir *) malloc(sizeof(Dir));
 	if (!dirp) {
 		closedir(p);
-		return (NULL);
+		return NULL;
 	}
 	dirp->pos = dirp->numentries = dirp->mallocsize = 0;
 	dirp->data = dirp->current = NULL;
@@ -548,7 +548,7 @@ void *OpenDir(int cnum, char *name)
 	}
 
 	closedir(p);
-	return ((void *) dirp);
+	return (void *) dirp;
 }
 
 /*******************************************************************
@@ -572,13 +572,13 @@ char *ReadDirName(void *p)
 	Dir *dirp = (Dir *) p;
 
 	if (!dirp || !dirp->current || dirp->pos >= dirp->numentries)
-		return (NULL);
+		return NULL;
 
 	ret = dirp->current;
 	dirp->current = skip_string(dirp->current, 1);
 	dirp->pos++;
 
-	return (ret);
+	return ret;
 }
 
 /*******************************************************************
@@ -589,7 +589,7 @@ bool SeekDir(void *p, int pos)
 	Dir *dirp = (Dir *) p;
 
 	if (!dirp)
-		return (false);
+		return false;
 
 	if (pos < dirp->pos) {
 		dirp->current = dirp->data;
@@ -599,7 +599,7 @@ bool SeekDir(void *p, int pos)
 	while (dirp->pos < pos && ReadDirName(p))
 		;
 
-	return (dirp->pos == pos);
+	return dirp->pos == pos;
 }
 
 /*******************************************************************
@@ -610,9 +610,9 @@ int TellDir(void *p)
 	Dir *dirp = (Dir *) p;
 
 	if (!dirp)
-		return (-1);
+		return -1;
 
-	return (dirp->pos);
+	return dirp->pos;
 }
 
 /* -------------------------------------------------------------------------- **
@@ -690,11 +690,11 @@ char *DirCacheCheck(char *path, char *name, int snum)
 		    0 == strcmp(path, entry->path)) {
 			DEBUG(4, ("Got dir cache hit on %s %s -> %s\n", path,
 			          name, entry->dname));
-			return (entry->dname);
+			return entry->dname;
 		}
 	}
 
-	return (NULL);
+	return NULL;
 } /* DirCacheCheck */
 
 /* ------------------------------------------------------------------------ **

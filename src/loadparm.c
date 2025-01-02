@@ -267,7 +267,7 @@ static int add_a_service(service *pservice, char *name)
 	if (name) {
 		i = getservicebyname(name);
 		if (i >= 0)
-			return (i);
+			return i;
 	}
 
 	/* find an invalid one */
@@ -284,7 +284,7 @@ static int add_a_service(service *pservice, char *name)
 			    (service *) malloc(sizeof(service));
 
 		if (!ServicePtrs || !pSERVICE(iNumServices))
-			return (-1);
+			return -1;
 
 		iNumServices++;
 	} else
@@ -297,7 +297,7 @@ static int add_a_service(service *pservice, char *name)
 	if (name)
 		string_set(&iSERVICE(i).szService, name);
 
-	return (i);
+	return i;
 }
 
 /***************************************************************************
@@ -309,7 +309,7 @@ static bool lp_add_ipc(void)
 	int i = add_a_service(&sDefault, "IPC$");
 
 	if (i < 0)
-		return (false);
+		return false;
 
 	slprintf(comment, sizeof(comment), "IPC Service (%s)",
 	         lp_serverstring());
@@ -319,7 +319,7 @@ static bool lp_add_ipc(void)
 
 	DEBUG(3, ("adding IPC service\n"));
 
-	return (true);
+	return true;
 }
 
 /***************************************************************************
@@ -330,11 +330,11 @@ static int strwicmp(char *psz1, char *psz2)
 	/* if BOTH strings are NULL, return TRUE, if ONE is NULL return */
 	/* appropriate value. */
 	if (psz1 == psz2)
-		return (0);
+		return 0;
 	else if (psz1 == NULL)
-		return (-1);
+		return -1;
 	else if (psz2 == NULL)
-		return (1);
+		return 1;
 
 	/* sync the strings on first non-whitespace */
 	while (1) {
@@ -348,7 +348,7 @@ static int strwicmp(char *psz1, char *psz2)
 		psz1++;
 		psz2++;
 	}
-	return (*psz1 - *psz2);
+	return *psz1 - *psz2;
 }
 
 /***************************************************************************
@@ -360,14 +360,14 @@ static int map_parameter(char *pszParmName)
 	int iIndex;
 
 	if (*pszParmName == '-')
-		return (-1);
+		return -1;
 
 	for (iIndex = 0; parm_table[iIndex].label; iIndex++)
 		if (strwicmp(parm_table[iIndex].label, pszParmName) == 0)
-			return (iIndex);
+			return iIndex;
 
 	DEBUG(0, ("Unknown parameter encountered: \"%s\"\n", pszParmName));
-	return (-1);
+	return -1;
 }
 
 /***************************************************************************
@@ -394,7 +394,7 @@ static bool set_boolean(bool *pb, char *pszParmValue)
 		       pszParmValue));
 		bRetval = false;
 	}
-	return (bRetval);
+	return bRetval;
 }
 
 /***************************************************************************
@@ -410,7 +410,7 @@ static int getservicebyname(char *pszServiceName)
 			break;
 		}
 
-	return (iService);
+	return iService;
 }
 
 /***************************************************************************
@@ -480,7 +480,7 @@ static bool service_ok(int iService)
 		string_set(&iSERVICE(iService).szPath, tmpdir());
 	}
 
-	return (bRetval);
+	return bRetval;
 }
 
 /***************************************************************************
@@ -497,7 +497,7 @@ static bool lp_do_parameter(int snum, char *pszParmName, char *pszParmValue)
 
 	if (parmnum < 0) {
 		DEBUG(0, ("Ignoring unknown parameter \"%s\"\n", pszParmName));
-		return (true);
+		return true;
 	}
 
 	def_ptr = parm_table[parmnum].ptr;
@@ -507,7 +507,7 @@ static bool lp_do_parameter(int snum, char *pszParmName, char *pszParmValue)
 	/* if it is a special case then go ahead */
 	if (parm_table[parmnum].special) {
 		parm_table[parmnum].special(pszParmValue, parm_ptr);
-		return (true);
+		return true;
 	}
 
 	/* now switch on the type of variable it is */
@@ -563,7 +563,7 @@ static bool lp_do_parameter(int snum, char *pszParmName, char *pszParmValue)
 		break;
 	}
 
-	return (true);
+	return true;
 }
 
 /***************************************************************************
@@ -603,13 +603,12 @@ static bool do_section(char *pszSectionName)
 		if ((iServiceIndex = add_a_service(&sDefault, pszSectionName)) <
 		    0) {
 			DEBUG(0, ("Failed to add a new service\n"));
-			return (false);
+			return false;
 		}
 	}
 
-	return (bRetval);
+	return bRetval;
 }
-
 
 /***************************************************************************
 Return TRUE if the passed service number is within range.
@@ -624,7 +623,7 @@ have we loaded a services file yet?
 ***************************************************************************/
 bool lp_loaded(void)
 {
-	return (bLoaded);
+	return bLoaded;
 }
 
 /***************************************************************************
@@ -656,7 +655,7 @@ bool lp_load(char *pszFname)
 
 	bLoaded = true;
 
-	return (bRetval);
+	return bRetval;
 }
 
 /***************************************************************************
@@ -664,7 +663,7 @@ return the max number of services
 ***************************************************************************/
 int lp_numservices(void)
 {
-	return (iNumServices);
+	return iNumServices;
 }
 
 /***************************************************************************
@@ -686,5 +685,5 @@ int lp_servicenumber(char *pszServiceName)
 		DEBUG(7,
 		      ("lp_servicenumber: couldn't find %s\n", pszServiceName));
 
-	return (iService);
+	return iService;
 }

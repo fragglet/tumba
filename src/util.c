@@ -188,7 +188,7 @@ int Debug1(char *format_str, ...)
 		vfprintf(dbf, format_str, ap);
 		va_end(ap);
 		errno = old_errno;
-		return (0);
+		return 0;
 	}
 
 	if (!dbf) {
@@ -202,7 +202,7 @@ int Debug1(char *format_str, ...)
 			setbuf(dbf, NULL);
 		} else {
 			errno = old_errno;
-			return (0);
+			return 0;
 		}
 	}
 
@@ -247,7 +247,7 @@ int Debug1(char *format_str, ...)
 
 	errno = old_errno;
 
-	return (0);
+	return 0;
 }
 
 /****************************************************************************
@@ -270,7 +270,7 @@ bool is_a_socket(int fd)
 {
 	int v;
 	socklen_t l = sizeof(int);
-	return (getsockopt(fd, SOL_SOCKET, SO_TYPE, &v, &l) == 0);
+	return getsockopt(fd, SOL_SOCKET, SO_TYPE, &v, &l) == 0;
 }
 
 /****************************************************************************
@@ -314,12 +314,12 @@ static int name_interpret(char *in, char *out)
 	*out = 0;
 
 	if (len > 30 || len < 1)
-		return (0);
+		return 0;
 
 	while (len--) {
 		if (in[0] < 'A' || in[0] > 'P' || in[1] < 'A' || in[1] > 'P') {
 			*out = 0;
-			return (0);
+			return 0;
 		}
 		*out = ((in[0] - 'A') << 4) + (in[1] - 'A');
 		in += 2;
@@ -339,7 +339,7 @@ static int name_interpret(char *in, char *out)
 		in += len;
 	}
 #endif
-	return (ret);
+	return ret;
 }
 
 /*******************************************************************
@@ -352,9 +352,9 @@ bool file_exist(char *fname, struct stat *sbuf)
 		sbuf = &st;
 
 	if (stat(fname, sbuf) != 0)
-		return (false);
+		return false;
 
-	return (S_ISREG(sbuf->st_mode));
+	return S_ISREG(sbuf->st_mode);
 }
 
 /*******************************************************************
@@ -369,7 +369,7 @@ bool directory_exist(char *dname, struct stat *st)
 		st = &st2;
 
 	if (stat(dname, st) != 0)
-		return (false);
+		return false;
 
 	ret = S_ISDIR(st->st_mode);
 	if (!ret)
@@ -385,7 +385,7 @@ uint32_t file_size(char *file_name)
 	struct stat buf;
 	buf.st_size = 0;
 	stat(file_name, &buf);
-	return (buf.st_size);
+	return buf.st_size;
 }
 
 void init_dos_char_table(void)
@@ -422,9 +422,9 @@ int isdoschar(int c)
 bool strequal(char *s1, char *s2)
 {
 	if (s1 == s2)
-		return (true);
+		return true;
 	if (!s1 || !s2)
-		return (false);
+		return false;
 
 	return strcasecmp(s1, s2) == 0;
 }
@@ -435,11 +435,11 @@ bool strequal(char *s1, char *s2)
 bool strcsequal(char *s1, char *s2)
 {
 	if (s1 == s2)
-		return (true);
+		return true;
 	if (!s1 || !s2)
-		return (false);
+		return false;
 
-	return (strcmp(s1, s2) == 0);
+	return strcmp(s1, s2) == 0;
 }
 
 /*******************************************************************
@@ -483,9 +483,9 @@ check if a string is in "normal" case
 bool strisnormal(char *s)
 {
 	if (case_default == CASE_UPPER)
-		return (!strhaslower(s));
+		return !strhaslower(s);
 
-	return (!strhasupper(s));
+	return !strhasupper(s);
 }
 
 /****************************************************************************
@@ -606,8 +606,7 @@ void show_msg(char *buf)
 ********************************************************************/
 int smb_len(char *buf)
 {
-	return (PVAL(buf, 3) | (PVAL(buf, 2) << 8) |
-	        ((PVAL(buf, 1) & 1) << 16));
+	return PVAL(buf, 3) | (PVAL(buf, 2) << 8) | ((PVAL(buf, 1) & 1) << 16);
 }
 
 /*******************************************************************
@@ -644,7 +643,7 @@ int set_message(char *buf, int num_words, int num_bytes, bool zero)
 	CVAL(buf, smb_wct) = num_words;
 	SSVAL(buf, smb_vwv + num_words * SIZEOFWORD, num_bytes);
 	smb_setlen(buf, smb_size + num_words * 2 + num_bytes - 4);
-	return (smb_size + num_words * 2 + num_bytes);
+	return smb_size + num_words * 2 + num_bytes;
 }
 
 /*******************************************************************
@@ -652,7 +651,7 @@ return the number of smb words
 ********************************************************************/
 static int smb_numwords(char *buf)
 {
-	return (CVAL(buf, smb_wct));
+	return CVAL(buf, smb_wct);
 }
 
 /*******************************************************************
@@ -660,7 +659,7 @@ return the size of the smb_buf region of a message
 ********************************************************************/
 int smb_buflen(char *buf)
 {
-	return (SVAL(buf, smb_vwv0 + smb_numwords(buf) * 2));
+	return SVAL(buf, smb_vwv0 + smb_numwords(buf) * 2);
 }
 
 /*******************************************************************
@@ -668,7 +667,7 @@ int smb_buflen(char *buf)
 ********************************************************************/
 static int smb_buf_ofs(char *buf)
 {
-	return (smb_size + CVAL(buf, smb_wct) * 2);
+	return smb_size + CVAL(buf, smb_wct) * 2;
 }
 
 /*******************************************************************
@@ -676,7 +675,7 @@ static int smb_buf_ofs(char *buf)
 ********************************************************************/
 char *smb_buf(char *buf)
 {
-	return (buf + smb_buf_ofs(buf));
+	return buf + smb_buf_ofs(buf);
 }
 
 /*******************************************************************
@@ -684,7 +683,7 @@ return the SMB offset into an SMB buffer
 ********************************************************************/
 int smb_offset(char *p, char *buf)
 {
-	return (PTR_DIFF(p, buf + 4) + chain_size);
+	return PTR_DIFF(p, buf + 4) + chain_size;
 }
 
 /*******************************************************************
@@ -694,7 +693,7 @@ char *skip_string(char *buf, int n)
 {
 	while (n--)
 		buf += strlen(buf) + 1;
-	return (buf);
+	return buf;
 }
 
 /*******************************************************************
@@ -718,7 +717,7 @@ bool trim_string(char *s, char *front, char *back)
 		ret = true;
 		s[strlen(s) - strlen(back)] = 0;
 	}
-	return (ret);
+	return ret;
 }
 
 /*******************************************************************
@@ -763,10 +762,10 @@ bool strhasupper(char *s)
 {
 	while (*s) {
 		if (isupper(*s))
-			return (true);
+			return true;
 		s++;
 	}
-	return (false);
+	return false;
 }
 
 /****************************************************************************
@@ -776,10 +775,10 @@ static bool strhaslower(char *s)
 {
 	while (*s) {
 		if (islower(*s))
-			return (true);
+			return true;
 		s++;
 	}
-	return (false);
+	return false;
 }
 
 /****************************************************************************
@@ -794,7 +793,7 @@ static int count_chars(char *s, char c)
 			count++;
 		s++;
 	}
-	return (count);
+	return count;
 }
 
 /****************************************************************************
@@ -874,7 +873,7 @@ static int write_socket(int fd, char *buf, int len)
 		          "ERRNO = %s\n",
 		          len, fd, strerror(errno)));
 
-	return (ret);
+	return ret;
 }
 
 /****************************************************************************
@@ -882,7 +881,8 @@ read data from a device with a timout in msec.
 mincount = if timeout, minimum to read before returning
 maxcount = number to be read.
 ****************************************************************************/
-static int read_with_timeout(int fd, char *buf, int mincnt, int maxcnt, long time_out)
+static int read_with_timeout(int fd, char *buf, int mincnt, int maxcnt,
+                             long time_out)
 {
 	fd_set fds;
 	int selrtn;
@@ -892,7 +892,7 @@ static int read_with_timeout(int fd, char *buf, int mincnt, int maxcnt, long tim
 
 	/* just checking .... */
 	if (maxcnt <= 0)
-		return (0);
+		return 0;
 
 	smb_read_error = 0;
 
@@ -914,7 +914,7 @@ static int read_with_timeout(int fd, char *buf, int mincnt, int maxcnt, long tim
 			}
 			nread += readret;
 		}
-		return (nread);
+		return nread;
 	}
 
 	/* Most difficult - timeout read */
@@ -963,7 +963,7 @@ static int read_with_timeout(int fd, char *buf, int mincnt, int maxcnt, long tim
 	}
 
 	/* Return the number we got */
-	return (nread);
+	return nread;
 }
 
 /****************************************************************************
@@ -1085,10 +1085,10 @@ int transfer_file(int infd, int outfd, int n, char *header, int headlen,
 				              NULL, 0, 0);
 		}
 		if (ret <= 0 || ret2 != ret)
-			return (total);
+			return total;
 		n -= ret;
 	}
-	return (total);
+	return total;
 }
 
 /****************************************************************************
@@ -1109,7 +1109,7 @@ int read_smb_length_return_keepalive(int fd, char *inbuf, int timeout)
 			ok = (read_data(fd, inbuf, 4) == 4);
 
 		if (!ok)
-			return (-1);
+			return -1;
 
 		len = smb_len(inbuf);
 		msg_type = CVAL(inbuf, 0);
@@ -1120,7 +1120,7 @@ int read_smb_length_return_keepalive(int fd, char *inbuf, int timeout)
 
 	DEBUG(10, ("got smb length of %d\n", len));
 
-	return (len);
+	return len;
 }
 
 /****************************************************************************
@@ -1186,9 +1186,9 @@ static char *name_ptr(char *buf, int ofs)
 		l = RSVAL(p, 0);
 		DEBUG(5,
 		      ("name ptr to pos %d from %d is %s\n", l, ofs, buf + l));
-		return (buf + l);
+		return buf + l;
 	} else
-		return (buf + ofs);
+		return buf + ofs;
 }
 
 /****************************************************************************
@@ -1200,8 +1200,8 @@ int name_extract(char *buf, int ofs, char *name)
 	int d = PTR_DIFF(p, buf + ofs);
 	pstrcpy(name, "");
 	if (d < -50 || d > 50)
-		return (0);
-	return (name_interpret(p, name));
+		return 0;
+	return name_interpret(p, name);
 }
 
 /****************************************************************************
@@ -1213,14 +1213,14 @@ int name_len(char *s)
 
 	/* If the two high bits of the byte are set, return 2. */
 	if (0xC0 == (*(unsigned char *) s & 0xC0))
-		return (2);
+		return 2;
 
 	/* Add up the length bytes. */
 	for (len = 1; (*s); s += (*s) + 1) {
 		len += *s + 1;
 	}
 
-	return (len);
+	return len;
 } /* name_len */
 
 /****************************************************************************
@@ -1260,7 +1260,7 @@ bool send_one_packet(char *buf, int len, struct in_addr ip, int port, int type)
 		          inet_ntoa(ip), port, strerror(errno)));
 
 	close(out_fd);
-	return (ret);
+	return ret;
 }
 
 /* this is used to prevent lots of mallocs of size 1 */
@@ -1292,7 +1292,7 @@ bool string_init(char **dest, char *src)
 
 		pstrcpy(*dest, src);
 	}
-	return (true);
+	return true;
 }
 
 /****************************************************************************
@@ -1316,7 +1316,7 @@ bool string_set(char **dest, char *src)
 {
 	string_free(dest);
 
-	return (string_init(dest, src));
+	return string_init(dest, src);
 }
 
 /****************************************************************************
@@ -1335,14 +1335,14 @@ bool string_sub(char *s, char *pattern, char *insert)
 	int ls, lp, li;
 
 	if (!insert || !pattern || !s)
-		return (false);
+		return false;
 
 	ls = strlen(s);
 	lp = strlen(pattern);
 	li = strlen(insert);
 
 	if (!*pattern)
-		return (false);
+		return false;
 
 	while (lp <= ls && (p = strstr(s, pattern))) {
 		ret = true;
@@ -1351,7 +1351,7 @@ bool string_sub(char *s, char *pattern, char *insert)
 		s = p + li;
 		ls = strlen(s);
 	}
-	return (ret);
+	return ret;
 }
 
 /*********************************************************
@@ -1420,13 +1420,13 @@ static bool do_match(char *str, char *regexp, int case_sig)
 		return true;
 
 	if (!*p && str[0] == '.' && str[1] == 0) {
-		return (true);
+		return true;
 	}
 
 	if (!*str && *p == '?') {
 		while (*p == '?')
 			p++;
-		return (!*p);
+		return !*p;
 	}
 
 	if (!*str && (*p == '*' && p[1] == '\0')) {
@@ -1460,7 +1460,7 @@ bool mask_match(char *str, char *regexp, int case_sig, bool trans2)
 	string_sub(t_pattern, "**", "*");
 
 	if (strequal(t_pattern, "*"))
-		return (true);
+		return true;
 
 	DEBUG(8, ("mask_match str=<%s> regexp=<%s>, case_sig = %d\n",
 	          t_filename, t_pattern, case_sig));
@@ -1581,7 +1581,7 @@ bool mask_match(char *str, char *regexp, int case_sig, bool trans2)
 					 * there is no DOT */
 					*eext = 0;
 					if (strequal(ebase, "*"))
-						return (true);
+						return true;
 				}
 			} else {
 				/*
@@ -1752,7 +1752,7 @@ void *Realloc(void *p, int size)
 		     size));
 	}
 
-	return (ret);
+	return ret;
 }
 
 /****************************************************************************
@@ -1789,7 +1789,7 @@ bool get_myname(char *my_name, struct in_addr *ip)
 	if (ip)
 		*ip = *((struct in_addr *) hp->h_addr);
 
-	return (true);
+	return true;
 }
 
 /****************************************************************************
@@ -1849,11 +1849,11 @@ int open_socket_in(int type, int port, int dlevel, uint32_t socket_addr)
 				port = 7999;
 
 			if (port >= 1000 && port < 9000)
-				return (open_socket_in(type, port + 1, dlevel,
-				                       socket_addr));
+				return open_socket_in(type, port + 1, dlevel,
+				                      socket_addr);
 		}
 
-		return (-1);
+		return -1;
 	}
 	DEBUG(3, ("bind succeeded on port %d\n", port));
 
@@ -1871,9 +1871,9 @@ uint32_t interpret_addr(char *str)
 	bool pure_address = true;
 
 	if (strcmp(str, "0.0.0.0") == 0)
-		return (0);
+		return 0;
 	if (strcmp(str, "255.255.255.255") == 0)
-		return (0xFFFFFFFF);
+		return 0xFFFFFFFF;
 
 	for (i = 0; pure_address && str[i]; i++)
 		if (!(isdigit(str[i]) || str[i] == '.'))
@@ -1900,9 +1900,9 @@ uint32_t interpret_addr(char *str)
 	}
 
 	if (res == (uint32_t) -1)
-		return (0);
+		return 0;
 
-	return (res);
+	return res;
 }
 
 /*******************************************************************
@@ -1913,7 +1913,7 @@ struct in_addr *interpret_addr2(char *str)
 	static struct in_addr ret;
 	uint32_t a = interpret_addr(str);
 	ret.s_addr = a;
-	return (&ret);
+	return &ret;
 }
 
 static bool global_client_name_done = false;
@@ -1967,7 +1967,7 @@ int PutUniCode(char *dst, char *src)
 	}
 	dst[ret++] = 0;
 	dst[ret++] = 0;
-	return (ret);
+	return ret;
 }
 
 /*******************************************************************
@@ -2001,11 +2001,11 @@ char *readdirname(void *p)
 	char *dname;
 
 	if (!p)
-		return (NULL);
+		return NULL;
 
 	ptr = (struct dirent *) readdir(p);
 	if (!ptr)
-		return (NULL);
+		return NULL;
 
 	dname = ptr->d_name;
 
@@ -2064,11 +2064,11 @@ bool fcntl_lock(int fd, int op, uint32_t offset, uint32_t count, int type)
 		    (lock.l_pid != 0) && (lock.l_pid != getpid())) {
 			DEBUG(3,
 			      ("fd %d is locked by pid %d\n", fd, lock.l_pid));
-			return (true);
+			return true;
 		}
 
 		/* it must be not locked or locked by me */
-		return (false);
+		return false;
 	}
 
 	/* a lock set or unset */
@@ -2080,16 +2080,16 @@ bool fcntl_lock(int fd, int op, uint32_t offset, uint32_t count, int type)
 		/* perhaps it doesn't support this sort of locking?? */
 		if (errno == EINVAL) {
 			DEBUG(3, ("locking not supported? returning true\n"));
-			return (true);
+			return true;
 		}
 
-		return (false);
+		return false;
 	}
 
 	/* everything went OK */
 	DEBUG(8, ("Lock call successful\n"));
 
-	return (true);
+	return true;
 }
 
 /*******************************************************************
