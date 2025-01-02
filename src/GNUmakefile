@@ -28,6 +28,8 @@ OBJECTS = \
 	reply.o              \
 	server.o             \
 	slprintf.o           \
+	strlcat.o            \
+	strlcpy.o            \
 	system.o             \
 	time.o               \
 	trans2.o             \
