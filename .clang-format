@@ -10,3 +10,4 @@ BinPackParameters: true
 AlignOperands: AlignAfterOperator
 AllowShortFunctionsOnASingleLine: None
 AllowShortEnumsOnASingleLine: false
+RemoveParentheses: ReturnStatement
