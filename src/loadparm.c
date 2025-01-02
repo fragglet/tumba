@@ -91,10 +91,6 @@ typedef struct {
 	char *szService;
 	char *szPath;
 	char *comment;
-	int iCreate_mask;
-	int iCreate_force_mode;
-	int iDir_mask;
-	int iDir_force_mode;
 	bool bCaseSensitive;
 	bool bShortCasePreserve;
 	char dummy[3]; /* for alignment */
@@ -106,10 +102,6 @@ static service sDefault = {
     "",         /* szService */
     "",         /* szPath */
     "",         /* comment */
-    0744,       /* iCreate_mask */
-    0000,       /* iCreate_force_mode */
-    0755,       /* iDir_mask */
-    0000,       /* iDir_force_mode */
     false,      /* case sensitive */
     false,      /* short case preserve */
     ""          /* dummy */
