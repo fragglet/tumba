@@ -120,7 +120,7 @@ static int TimeZoneFaster(time_t t)
 
 	/* Tunis has a 8 day DST region, we need to be careful ... */
 #define MAX_DST_WIDTH (365 * 24 * 60 * 60)
-#define MAX_DST_SKIP (7 * 24 * 60 * 60)
+#define MAX_DST_SKIP  (7 * 24 * 60 * 60)
 
 	for (i = 0; i < table_size; i++)
 		if (t >= dst_table[i].start && t <= dst_table[i].end)

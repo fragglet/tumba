@@ -23,7 +23,7 @@
    MAX_CONNECTIONS services, but any number of machines may connect at
    one time. */
 #define MAX_CONNECTIONS 127
-#define MAX_OPEN_FILES 100
+#define MAX_OPEN_FILES  100
 
 /* the max number of connections that the smbstatus program will show */
 #define MAXSTATUS 1000
@@ -76,16 +76,16 @@
 
 /* the following control timings of various actions. Don't change
    them unless you know what you are doing. These are all in seconds */
-#define DEFAULT_SMBD_TIMEOUT (60 * 60 * 24 * 7)
-#define SMBD_RELOAD_CHECK (60)
-#define IDLE_CLOSED_TIMEOUT (60)
-#define DPTR_IDLE_TIMEOUT (120)
-#define SMBD_SELECT_LOOP (10)
-#define NMBD_SELECT_LOOP (10)
-#define BROWSE_INTERVAL (60)
+#define DEFAULT_SMBD_TIMEOUT  (60 * 60 * 24 * 7)
+#define SMBD_RELOAD_CHECK     (60)
+#define IDLE_CLOSED_TIMEOUT   (60)
+#define DPTR_IDLE_TIMEOUT     (120)
+#define SMBD_SELECT_LOOP      (10)
+#define NMBD_SELECT_LOOP      (10)
+#define BROWSE_INTERVAL       (60)
 #define REGISTRATION_INTERVAL (10 * 60)
-#define NMBD_INETD_TIMEOUT (120)
-#define NMBD_MAX_TTL (24 * 60 * 60)
+#define NMBD_INETD_TIMEOUT    (120)
+#define NMBD_MAX_TTL          (24 * 60 * 60)
 
 /* the following are in milliseconds */
 #define LOCK_RETRY_TIMEOUT (100)
@@ -107,7 +107,7 @@
 #define ENABLE_FIFO 1
 
 /* how long to wait for a socket connect to happen */
-#define LONG_CONNECT_TIMEOUT 30
+#define LONG_CONNECT_TIMEOUT  30
 #define SHORT_CONNECT_TIMEOUT 5
 
 /* the directory to sit in when idle */

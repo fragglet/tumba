@@ -41,25 +41,25 @@ extern connection_struct Connections[];
 extern fstring local_machine;
 extern fstring myworkgroup;
 
-#define NERR_Success 0
-#define NERR_badpass 86
+#define NERR_Success      0
+#define NERR_badpass      86
 #define NERR_notsupported 50
 
-#define NERR_BASE (2100)
-#define NERR_BufTooSmall (NERR_BASE + 23)
-#define NERR_JobNotFound (NERR_BASE + 51)
-#define NERR_DestNotFound (NERR_BASE + 52)
+#define NERR_BASE           (2100)
+#define NERR_BufTooSmall    (NERR_BASE + 23)
+#define NERR_JobNotFound    (NERR_BASE + 51)
+#define NERR_DestNotFound   (NERR_BASE + 52)
 #define ERROR_INVALID_LEVEL 124
-#define ERROR_MORE_DATA 234
+#define ERROR_MORE_DATA     234
 
-#define ACCESS_READ 0x01
-#define ACCESS_WRITE 0x02
+#define ACCESS_READ   0x01
+#define ACCESS_WRITE  0x02
 #define ACCESS_CREATE 0x04
 
-#define SHPWLEN 8 /* share password length */
-#define NNLEN 12  /* 8.3 net name length */
-#define SNLEN 15  /* service name length */
-#define QNLEN 12  /* queue name maximum length */
+#define SHPWLEN 8  /* share password length */
+#define NNLEN   12 /* 8.3 net name length */
+#define SNLEN   15 /* service name length */
+#define QNLEN   12 /* queue name maximum length */
 
 extern int Client;
 extern int smb_read_error;

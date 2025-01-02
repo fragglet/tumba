@@ -22,10 +22,10 @@
 #include "includes.h"
 #include "trans2.h"
 
-#define RUN_AS_USER "nobody"
+#define RUN_AS_USER    "nobody"
 #define DOSATTRIB_NAME "user.DOSATTRIB"
 
-#define MAX_MUX 50
+#define MAX_MUX            50
 #define MANGLED_STACK_SIZE 200
 
 pstring servicesf = CONFIGFILE;
@@ -99,10 +99,10 @@ static int find_free_connection(int hash);
 
 /* for readability... */
 #define IS_DOS_READONLY(test_mode) (((test_mode) & aRONLY) != 0)
-#define IS_DOS_DIR(test_mode) (((test_mode) & aDIR) != 0)
-#define IS_DOS_ARCHIVE(test_mode) (((test_mode) & aARCH) != 0)
-#define IS_DOS_SYSTEM(test_mode) (((test_mode) & aSYSTEM) != 0)
-#define IS_DOS_HIDDEN(test_mode) (((test_mode) & aHIDDEN) != 0)
+#define IS_DOS_DIR(test_mode)      (((test_mode) & aDIR) != 0)
+#define IS_DOS_ARCHIVE(test_mode)  (((test_mode) & aARCH) != 0)
+#define IS_DOS_SYSTEM(test_mode)   (((test_mode) & aSYSTEM) != 0)
+#define IS_DOS_HIDDEN(test_mode)   (((test_mode) & aHIDDEN) != 0)
 
 /****************************************************************************
   when exiting, take the whole family
@@ -2231,9 +2231,9 @@ protocol [LANMAN2.1]
   *  tim@fsg.com 09/29/95
   */
 
-#define ARCH_WFWG 0x3 /* This is a fudge because WfWg is like Win95 */
+#define ARCH_WFWG  0x3 /* This is a fudge because WfWg is like Win95 */
 #define ARCH_WIN95 0x2
-#define ARCH_OS2 0xC /* Again OS/2 is like NT */
+#define ARCH_OS2   0xC /* Again OS/2 is like NT */
 #define ARCH_WINNT 0x8
 #define ARCH_SAMBA 0x10
 
@@ -2426,9 +2426,9 @@ Note that I don't set NEED_WRITE on some write operations because they
 are used by some brain-dead clients when printing, and I don't want to
 force write permissions on print services.
 */
-#define NEED_WRITE (1 << 1)
-#define TIME_INIT (1 << 2)
-#define CAN_IPC (1 << 3)
+#define NEED_WRITE      (1 << 1)
+#define TIME_INIT       (1 << 2)
+#define CAN_IPC         (1 << 3)
 #define QUEUE_IN_OPLOCK (1 << 6)
 
 /*

@@ -141,8 +141,8 @@ it also defines lots of intermediate macros, just ignore those :-)
 #define CAREFUL_ALIGNMENT 1
 #endif
 
-#define CVAL(buf, pos) (((unsigned char *) (buf))[pos])
-#define PVAL(buf, pos) ((unsigned) CVAL(buf, pos))
+#define CVAL(buf, pos)       (((unsigned char *) (buf))[pos])
+#define PVAL(buf, pos)       ((unsigned) CVAL(buf, pos))
 #define SCVAL(buf, pos, val) (CVAL(buf, pos) = (val))
 
 #if CAREFUL_ALIGNMENT
@@ -153,10 +153,10 @@ it also defines lots of intermediate macros, just ignore those :-)
 	(CVAL(buf, pos) = (val) & 0xFF, CVAL(buf, pos + 1) = (val) >> 8)
 #define SIVALX(buf, pos, val)                                                  \
 	(SSVALX(buf, pos, val & 0xFFFF), SSVALX(buf, pos + 2, val >> 16))
-#define SVALS(buf, pos) ((int16_t) SVAL(buf, pos))
-#define IVALS(buf, pos) ((int32_t) IVAL(buf, pos))
-#define SSVAL(buf, pos, val) SSVALX((buf), (pos), ((uint16_t) (val)))
-#define SIVAL(buf, pos, val) SIVALX((buf), (pos), ((uint32_t) (val)))
+#define SVALS(buf, pos)       ((int16_t) SVAL(buf, pos))
+#define IVALS(buf, pos)       ((int32_t) IVAL(buf, pos))
+#define SSVAL(buf, pos, val)  SSVALX((buf), (pos), ((uint16_t) (val)))
+#define SIVAL(buf, pos, val)  SIVALX((buf), (pos), ((uint32_t) (val)))
 #define SSVALS(buf, pos, val) SSVALX((buf), (pos), ((int16_t) (val)))
 #define SIVALS(buf, pos, val) SIVALX((buf), (pos), ((int32_t) (val)))
 
@@ -170,14 +170,14 @@ it also defines lots of intermediate macros, just ignore those :-)
 */
 
 /* get single value from an SMB buffer */
-#define SVAL(buf, pos) (*(uint16_t *) ((char *) (buf) + (pos)))
-#define IVAL(buf, pos) (*(uint32_t *) ((char *) (buf) + (pos)))
-#define SVALS(buf, pos) (*(int16_t *) ((char *) (buf) + (pos)))
-#define IVALS(buf, pos) (*(int32_t *) ((char *) (buf) + (pos)))
+#define SVAL(buf, pos)        (*(uint16_t *) ((char *) (buf) + (pos)))
+#define IVAL(buf, pos)        (*(uint32_t *) ((char *) (buf) + (pos)))
+#define SVALS(buf, pos)       (*(int16_t *) ((char *) (buf) + (pos)))
+#define IVALS(buf, pos)       (*(int32_t *) ((char *) (buf) + (pos)))
 
 /* store single value in an SMB buffer */
-#define SSVAL(buf, pos, val) SVAL(buf, pos) = ((uint16_t) (val))
-#define SIVAL(buf, pos, val) IVAL(buf, pos) = ((uint32_t) (val))
+#define SSVAL(buf, pos, val)  SVAL(buf, pos) = ((uint16_t) (val))
+#define SIVAL(buf, pos, val)  IVAL(buf, pos) = ((uint32_t) (val))
 #define SSVALS(buf, pos, val) SVALS(buf, pos) = ((int16_t) (val))
 #define SIVALS(buf, pos, val) IVALS(buf, pos) = ((int32_t) (val))
 
@@ -200,17 +200,17 @@ it also defines lots of intermediate macros, just ignore those :-)
 	}
 
 /* reads multiple data from an SMB buffer */
-#define PCVAL(buf, pos, val, len) SMBMACRO(CVAL, buf, pos, val, len, 1)
-#define PSVAL(buf, pos, val, len) SMBMACRO(SVAL, buf, pos, val, len, 2)
-#define PIVAL(buf, pos, val, len) SMBMACRO(IVAL, buf, pos, val, len, 4)
+#define PCVAL(buf, pos, val, len)  SMBMACRO(CVAL, buf, pos, val, len, 1)
+#define PSVAL(buf, pos, val, len)  SMBMACRO(SVAL, buf, pos, val, len, 2)
+#define PIVAL(buf, pos, val, len)  SMBMACRO(IVAL, buf, pos, val, len, 4)
 #define PCVALS(buf, pos, val, len) SMBMACRO(CVALS, buf, pos, val, len, 1)
 #define PSVALS(buf, pos, val, len) SMBMACRO(SVALS, buf, pos, val, len, 2)
 #define PIVALS(buf, pos, val, len) SMBMACRO(IVALS, buf, pos, val, len, 4)
 
 /* stores multiple data in an SMB buffer */
-#define PSCVAL(buf, pos, val, len) SSMBMACRO(SCVAL, buf, pos, val, len, 1)
-#define PSSVAL(buf, pos, val, len) SSMBMACRO(SSVAL, buf, pos, val, len, 2)
-#define PSIVAL(buf, pos, val, len) SSMBMACRO(SIVAL, buf, pos, val, len, 4)
+#define PSCVAL(buf, pos, val, len)  SSMBMACRO(SCVAL, buf, pos, val, len, 1)
+#define PSSVAL(buf, pos, val, len)  SSMBMACRO(SSVAL, buf, pos, val, len, 2)
+#define PSIVAL(buf, pos, val, len)  SSMBMACRO(SIVAL, buf, pos, val, len, 4)
 #define PSCVALS(buf, pos, val, len) SSMBMACRO(SCVALS, buf, pos, val, len, 1)
 #define PSSVALS(buf, pos, val, len) SSMBMACRO(SSVALS, buf, pos, val, len, 2)
 #define PSIVALS(buf, pos, val, len) SSMBMACRO(SIVALS, buf, pos, val, len, 4)
@@ -219,8 +219,8 @@ it also defines lots of intermediate macros, just ignore those :-)
 #define SREV(x) ((((x) & 0xFF) << 8) | (((x) >> 8) & 0xFF))
 #define IREV(x) ((SREV(x) << 16) | (SREV((x) >> 16)))
 
-#define RSVAL(buf, pos) SREV(SVAL(buf, pos))
-#define RIVAL(buf, pos) IREV(IVAL(buf, pos))
+#define RSVAL(buf, pos)       SREV(SVAL(buf, pos))
+#define RIVAL(buf, pos)       IREV(IVAL(buf, pos))
 #define RSSVAL(buf, pos, val) SSVAL(buf, pos, SREV(val))
 #define RSIVAL(buf, pos, val) SIVAL(buf, pos, IREV(val))
 
