@@ -1595,125 +1595,106 @@ static void drop_privileges(void)
 /****************************************************************************
   open the socket communication
 ****************************************************************************/
-static bool open_sockets(bool is_daemon, int port)
+static bool open_sockets(int port)
 {
 	extern int Client;
+	int server_socket;
 
-	if (is_daemon) {
-		int server_socket;
-
-		/* Stop zombies */
+	/* Stop zombies */
 #ifdef SIGCLD_IGNORE
-		signal(SIGCLD, SIG_IGN);
+	signal(SIGCLD, SIG_IGN);
 #else
-		signal(SIGCLD, SIGNAL_CAST sig_cld);
+	signal(SIGCLD, SIGNAL_CAST sig_cld);
 #endif
 
-		if (atexit_set == 0)
-			atexit(killkids);
+	if (atexit_set == 0)
+		atexit(killkids);
 
-		/* open an incoming socket */
-		server_socket = open_socket_in(
-		    SOCK_STREAM, port, 0, interpret_addr(lp_socket_address()));
-		if (server_socket == -1)
-			return false;
+	/* open an incoming socket */
+	server_socket = open_socket_in(
+	    SOCK_STREAM, port, 0, interpret_addr(lp_socket_address()));
+	if (server_socket == -1)
+		return false;
 
-		drop_privileges();
+	drop_privileges();
 
-		/* ready to listen */
-		if (listen(server_socket, 5) == -1) {
-			DEBUG(0,
-			      ("open_sockets: listen: %s\n", strerror(errno)));
-			close(server_socket);
-			return false;
+	/* ready to listen */
+	if (listen(server_socket, 5) == -1) {
+		DEBUG(0,
+		      ("open_sockets: listen: %s\n", strerror(errno)));
+		close(server_socket);
+		return false;
+	}
+
+	/* now accept incoming connections - forking a new process
+	   for each incoming connection */
+	DEBUG(2, ("waiting for a connection\n"));
+	while (1) {
+		fd_set listen_set;
+		int num;
+		struct sockaddr addr;
+		socklen_t in_addrlen = sizeof(addr);
+
+		FD_ZERO(&listen_set);
+		FD_SET(server_socket, &listen_set);
+
+		num = sys_select(&listen_set, NULL);
+
+		if (num == -1 && errno == EINTR)
+			continue;
+
+		if (!FD_ISSET(server_socket, &listen_set)) {
+			continue;
 		}
 
-		/* now accept incoming connections - forking a new process
-		   for each incoming connection */
-		DEBUG(2, ("waiting for a connection\n"));
-		while (1) {
-			fd_set listen_set;
-			int num;
-			struct sockaddr addr;
-			socklen_t in_addrlen = sizeof(addr);
+		Client = accept(server_socket, &addr, &in_addrlen);
 
-			FD_ZERO(&listen_set);
-			FD_SET(server_socket, &listen_set);
+		if (Client == -1 && errno == EINTR)
+			continue;
 
-			num = sys_select(&listen_set, NULL);
+		if (Client == -1) {
+			DEBUG(0, ("open_sockets: accept: %s\n", strerror(errno)));
+			continue;
+		}
 
-			if (num == -1 && errno == EINTR)
-				continue;
-
-			if (!FD_ISSET(server_socket, &listen_set)) {
-				continue;
-			}
-
-			Client = accept(server_socket, &addr, &in_addrlen);
-
-			if (Client == -1 && errno == EINTR)
-				continue;
-
-			if (Client == -1) {
-				DEBUG(0, ("open_sockets: accept: %s\n",
-				          strerror(errno)));
-				continue;
-			}
+		signal(SIGPIPE, SIGNAL_CAST sig_pipe);
+		signal(SIGCLD, SIGNAL_CAST SIG_DFL);
+		if (Client != -1 && fork() == 0) {
+			/* Child code ... */
 
 			signal(SIGPIPE, SIGNAL_CAST sig_pipe);
 			signal(SIGCLD, SIGNAL_CAST SIG_DFL);
-			if (Client != -1 && fork() == 0) {
-				/* Child code ... */
 
-				signal(SIGPIPE, SIGNAL_CAST sig_pipe);
-				signal(SIGCLD, SIGNAL_CAST SIG_DFL);
+			/* close the listening socket */
+			close(server_socket);
 
-				/* close the listening socket */
-				close(server_socket);
+			/* close our standard file descriptors */
+			close_low_fds();
+			am_parent = 0;
 
-				/* close our standard file descriptors */
-				close_low_fds();
-				am_parent = 0;
+			set_keepalive_option(Client);
 
-				set_keepalive_option(Client);
-
-				/* Reset global variables in util.c so
-				   that client substitutions will be done
-				   correctly in the process. */
-				reset_globals_after_fork();
-				return true;
-			}
-			close(Client); /* The parent doesn't need this socket */
-
-			/*
-			 * Force parent to check log size after spawning child.
-			 * Fix from klausr@ITAP.Physik.Uni-Stuttgart.De. The
-			 * parent smbd will log to logserver.smb. It writes
-			 * only two messages for each child started/finished.
-			 * But each child writes, say, 50 messages also in
-			 * logserver.smb, begining with the debug_count of the
-			 * parent, before the child opens its own log file
-			 * logserver.client. In a worst case scenario the size
-			 * of logserver.smb would be checked after about
-			 * 50*50=2500 messages (ca. 100kb).
-			 */
-			force_check_log_size();
+			/* Reset global variables in util.c so
+			   that client substitutions will be done
+			   correctly in the process. */
+			reset_globals_after_fork();
+			return true;
 		}
-	} /* end if is_daemon */
-	else {
-		/* Started from inetd. fd 0 is the socket. */
-		drop_privileges();
-		/* We will abort gracefully when the client or remote system
-		   goes away */
-#ifndef NO_SIGNAL_TEST
-		signal(SIGPIPE, SIGNAL_CAST sig_pipe);
-#endif
-		Client = dup(0);
+		close(Client); /* The parent doesn't need this socket */
 
-		/* close our standard file descriptors */
-		close_low_fds();
-
-		set_keepalive_option(Client);
+		/*
+		 * Force parent to check log size after spawning child.
+		 * Fix from klausr@ITAP.Physik.Uni-Stuttgart.De. The
+		 * parent smbd will log to logserver.smb. It writes
+		 * only two messages for each child started/finished.
+		 * But each child writes, say, 50 messages also in
+		 * logserver.smb, begining with the debug_count of the
+		 * parent, before the child opens its own log file
+		 * logserver.client. In a worst case scenario the size
+		 * of logserver.smb would be checked after about
+		 * 50*50=2500 messages (ca. 100kb).
+		 */
+		force_check_log_size();
 	}
 
 	return true;
@@ -3114,7 +3095,7 @@ int main(int argc, char *argv[])
 		become_daemon();
 	}
 
-	if (!open_sockets(is_daemon, port))
+	if (!open_sockets(port))
 		exit(1);
 
 	drop_privileges();
