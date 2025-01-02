@@ -1,0 +1,6 @@
+[submodule "samba"]
+	path = torture/samba
+	url = https://github.com/samba-team/samba
+	update = merge
+	branch = v4-8-stable
+	shallow = true
