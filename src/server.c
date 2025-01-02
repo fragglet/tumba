@@ -3084,12 +3084,6 @@ int main(int argc, char *argv[])
 
 	DEBUG(3, ("%s loaded services\n", timestring()));
 
-	if (!is_daemon && !is_a_socket(0)) {
-		DEBUG(0,
-		      ("standard input is not a socket, assuming -D option\n"));
-		is_daemon = true;
-	}
-
 	if (is_daemon) {
 		DEBUG(3, ("%s becoming a daemon\n", timestring()));
 		become_daemon();
