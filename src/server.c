@@ -466,7 +466,6 @@ bool unix_convert(char *name, int cnum, pstring saved_last_component,
 	struct stat st;
 	char *start, *end;
 	pstring dirpath;
-	int saved_errno;
 
 	*dirpath = 0;
 	*bad_path = false;
@@ -499,8 +498,6 @@ bool unix_convert(char *name, int cnum, pstring saved_last_component,
 	/* stat the name - if it exists then we are all done! */
 	if (stat(name, &st) == 0)
 		return true;
-
-	saved_errno = errno;
 
 	DEBUG(5, ("unix_convert(%s,%d)\n", name, cnum));
 
@@ -1337,7 +1334,6 @@ load parameters specific to a connection/service
 static bool become_service(int cnum)
 {
 	static int last_cnum = -1;
-	int snum;
 
 	if (!OPEN_CNUM(cnum)) {
 		last_cnum = -1;
@@ -1345,8 +1341,6 @@ static bool become_service(int cnum)
 	}
 
 	Connections[cnum].lastused = smb_last_time;
-
-	snum = SNUM(cnum);
 
 	if (chdir(Connections[cnum].connectpath) != 0) {
 		DEBUG(0, ("%s chdir (%s) failed cnum=%d\n", timestring(),

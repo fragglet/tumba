@@ -252,16 +252,6 @@ char *tmpdir(void)
 }
 
 /****************************************************************************
-determine if a file descriptor is in fact a socket
-****************************************************************************/
-bool is_a_socket(int fd)
-{
-	int v;
-	socklen_t l = sizeof(int);
-	return getsockopt(fd, SOL_SOCKET, SO_TYPE, &v, &l) == 0;
-}
-
-/****************************************************************************
 prompte a dptr (to make it recently used)
 ****************************************************************************/
 void array_promote(char *array, int elsize, int element)
