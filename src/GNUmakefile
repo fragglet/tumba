@@ -37,6 +37,8 @@ OBJECTS = \
 
 DEPS = $(patsubst %.o,%.d,$(OBJECTS))
 
+all: rumba_smbd
+
 rumba_smbd: $(OBJECTS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJECTS) -o $@
 
@@ -49,6 +51,6 @@ clean:
 format:
 	clang-format -i *.[ch]
 
-.PHONY: clean format
+.PHONY: clean format all
 
 -include $(DEPS)
