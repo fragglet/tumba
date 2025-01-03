@@ -16,6 +16,12 @@ DEFINES = -DWORKGROUP=\"$(WORKGROUP)\" \
           -DSMBLOGFILE=\"$(SMBLOGFILE)\"
 
 CFLAGS = -MMD -Wall $(DEFINES)
+LDFLAGS =
+
+ifdef FIND_UNUSED_CODE
+CFLAGS += -ffunction-sections -fdata-sections
+LDFLAGS += -Wl,--gc-sections -Wl,--print-gc-sections
+endif
 
 OBJECTS = \
 	dir.o                \
