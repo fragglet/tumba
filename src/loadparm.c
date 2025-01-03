@@ -91,20 +91,18 @@ typedef struct {
 	char *szService;
 	char *szPath;
 	char *comment;
-	bool bCaseSensitive;
 	bool bShortCasePreserve;
 	char dummy[3]; /* for alignment */
 } service;
 
 /* This is a default service used to prime a services structure */
 static service sDefault = {
-    true,       /* valid */
-    "",         /* szService */
-    "",         /* szPath */
-    "",         /* comment */
-    false,      /* case sensitive */
-    false,      /* short case preserve */
-    ""          /* dummy */
+    true,  /* valid */
+    "",    /* szService */
+    "",    /* szPath */
+    "",    /* comment */
+    false, /* short case preserve */
+    ""     /* dummy */
 };
 
 /* local variables */
@@ -129,8 +127,6 @@ static struct parm_struct {
 } parm_table[] = {
     {"-valid", P_BOOL, P_LOCAL, &sDefault.valid, NULL, NULL},
     {"comment", P_STRING, P_LOCAL, &sDefault.comment, NULL, NULL},
-    {"case sensitive", P_BOOL, P_LOCAL, &sDefault.bCaseSensitive, NULL, NULL},
-    {"casesignames", P_BOOL, P_LOCAL, &sDefault.bCaseSensitive, NULL, NULL},
     {"short preserve case", P_BOOL, P_LOCAL, &sDefault.bShortCasePreserve, NULL,
      NULL},
     {"path", P_STRING, P_LOCAL, &sDefault.szPath, NULL, NULL},
@@ -189,7 +185,6 @@ FN_LOCAL_STRING(lp_servicename, szService)
 FN_LOCAL_STRING(lp_pathname, szPath)
 FN_LOCAL_STRING(lp_comment, comment)
 
-FN_LOCAL_BOOL(lp_casesensitive, bCaseSensitive)
 FN_LOCAL_BOOL(lp_shortpreservecase, bShortCasePreserve)
 
 /* local prototypes */

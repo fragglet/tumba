@@ -46,7 +46,6 @@ int last_message = -1;
 #define LAST_MESSAGE() smb_fn_name(last_message)
 
 extern int DEBUGLEVEL;
-extern bool case_sensitive;
 extern bool short_case_preserve;
 time_t smb_last_time = (time_t) 0;
 
@@ -359,10 +358,6 @@ static bool fname_equal(char *name1, char *name2)
 		return ret;
 	}
 
-	/* now normal filename handling */
-	if (case_sensitive)
-		return strcmp(name1, name2) == 0;
-
 	return strequal(name1, name2);
 }
 
@@ -499,7 +494,7 @@ bool unix_convert(char *name, int cnum, pstring saved_last_component,
 			pstrcpy(saved_last_component, name);
 	}
 
-	if (!case_sensitive && is_8_3(name, false) && !short_case_preserve)
+	if (is_8_3(name, false) && !short_case_preserve)
 		strnorm(name);
 
 	/* stat the name - if it exists then we are all done! */
@@ -509,12 +504,6 @@ bool unix_convert(char *name, int cnum, pstring saved_last_component,
 	saved_errno = errno;
 
 	DEBUG(5, ("unix_convert(%s,%d)\n", name, cnum));
-
-	/* a special case - if we don't have any mangling chars and are case
-	   sensitive then searching won't help */
-	if (case_sensitive && !is_mangled(name) && !lp_strip_dot() &&
-	    saved_errno != ENOENT)
-		return false;
 
 	/* now we need to recursively match the name against the real
 	   directory structure */
@@ -1372,7 +1361,6 @@ static bool become_service(int cnum)
 	last_cnum = cnum;
 
 	short_case_preserve = lp_shortpreservecase(snum);
-	case_sensitive = lp_casesensitive(snum);
 	return true;
 }
 

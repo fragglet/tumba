@@ -40,7 +40,6 @@ pstring debugf = "";
 
 /* the following control case operations - they are put here so the
    client can link easily */
-bool case_sensitive;
 bool short_case_preserve;
 
 fstring remote_machine = "";
@@ -799,8 +798,7 @@ void make_dir_struct(char *buf, char *mask, char *fname, unsigned int size,
 	SSVAL(buf, 26, size & 0xFFFF);
 	SSVAL(buf, 28, size >> 16);
 	strlcpy(buf + 30, fname, 13);
-	if (!case_sensitive)
-		strupper(buf + 30);
+	strupper(buf + 30);
 	DEBUG(8, ("put name [%s] into dir struct\n", buf + 30));
 }
 
@@ -1334,7 +1332,7 @@ bool string_sub(char *s, char *pattern, char *insert)
  * false if failed.
  *********************************************************/
 
-static bool do_match(char *str, char *regexp, int case_sig)
+static bool do_match(char *str, char *regexp)
 {
 	char *p;
 
@@ -1352,19 +1350,17 @@ static bool do_match(char *str, char *regexp, int case_sig)
 			if (!*p)
 				return true; /* Automatic match */
 			while (*str) {
-				while (*str && (case_sig ? (*p != *str)
-				                         : (toupper(*p) !=
-				                            toupper(*str))))
+				while (*str && toupper(*p) != toupper(*str)) {
 					str++;
+				}
 				/* Now eat all characters that match, as
 				   we want the *last* character to match. */
-				while (*str && (case_sig ? (*p == *str)
-				                         : (toupper(*p) ==
-				                            toupper(*str))))
+				while (*str && toupper(*p) == toupper(*str)) {
 					str++;
+				}
 				str--; /* We've eaten the match char after the
 				          '*' */
-				if (do_match(str, p, case_sig)) {
+				if (do_match(str, p)) {
 					return true;
 				}
 				if (!*str) {
@@ -1376,14 +1372,8 @@ static bool do_match(char *str, char *regexp, int case_sig)
 			return false;
 
 		default:
-			if (case_sig) {
-				if (*str != *p) {
-					return false;
-				}
-			} else {
-				if (toupper(*str) != toupper(*p)) {
-					return false;
-				}
+			if (toupper(*str) != toupper(*p)) {
+				return false;
 			}
 			str++, p++;
 			break;
@@ -1417,7 +1407,7 @@ static bool do_match(char *str, char *regexp, int case_sig)
  * The 8.3 handling was rewritten by Ums Harald <Harald.Ums@pro-sieben.de>
  *********************************************************/
 
-bool mask_match(char *str, char *regexp, int case_sig, bool trans2)
+bool mask_match(char *str, char *regexp, bool trans2)
 {
 	char *p;
 	pstring t_pattern, t_filename, te_pattern, te_filename;
@@ -1436,8 +1426,7 @@ bool mask_match(char *str, char *regexp, int case_sig, bool trans2)
 	if (strequal(t_pattern, "*"))
 		return true;
 
-	DEBUG(8, ("mask_match str=<%s> regexp=<%s>, case_sig = %d\n",
-	          t_filename, t_pattern, case_sig));
+	DEBUG(8, ("mask_match str=<%s> regexp=<%s>\n", t_filename, t_pattern));
 
 	if (trans2) {
 		/*
@@ -1462,7 +1451,7 @@ bool mask_match(char *str, char *regexp, int case_sig, bool trans2)
 		 * a.b.c...z
 		 */
 		if (num_regexp_components == 0)
-			matched = do_match(te_filename, te_pattern, case_sig);
+			matched = do_match(te_filename, te_pattern);
 		else {
 			for (cp1 = te_pattern, cp2 = te_filename; cp1;) {
 				fp = strchr(cp2, '.');
@@ -1477,8 +1466,9 @@ bool mask_match(char *str, char *regexp, int case_sig, bool trans2)
 				else
 					last_wcard_was_star = false;
 
-				if (!do_match(cp2, cp1, case_sig))
+				if (!do_match(cp2, cp1)) {
 					break;
+				}
 
 				cp1 = rp ? rp + 1 : NULL;
 				cp2 = fp ? fp + 1 : "";
@@ -1497,8 +1487,7 @@ bool mask_match(char *str, char *regexp, int case_sig, bool trans2)
 							*fp = '\0';
 
 						if ((cp1 != NULL) &&
-						    do_match(cp2, cp1,
-						             case_sig)) {
+						    do_match(cp2, cp1)) {
 							cp2 = fp ? fp + 1 : "";
 							break;
 						}
@@ -1583,15 +1572,13 @@ bool mask_match(char *str, char *regexp, int case_sig, bool trans2)
 				fstrcpy(sbase, t_filename);
 				fstrcpy(sext, p + 1);
 				if (*eext) {
-					matched =
-					    do_match(sbase, ebase, case_sig) &&
-					    do_match(sext, eext, case_sig);
+					matched = do_match(sbase, ebase) &&
+					          do_match(sext, eext);
 				} else {
 					/* pattern has no extension */
 					/* Really: match complete filename with
 					 * pattern ??? means exactly 3 chars */
-					matched =
-					    do_match(str, ebase, case_sig);
+					matched = do_match(str, ebase);
 				}
 			} else {
 				/*
@@ -1601,12 +1588,10 @@ bool mask_match(char *str, char *regexp, int case_sig, bool trans2)
 				fstrcpy(sext, "");
 				if (*eext) {
 					/* pattern has extension */
-					matched =
-					    do_match(sbase, ebase, case_sig) &&
-					    do_match(sext, eext, case_sig);
+					matched = do_match(sbase, ebase) &&
+					          do_match(sext, eext);
 				} else {
-					matched =
-					    do_match(sbase, ebase, case_sig);
+					matched = do_match(sbase, ebase);
 #ifdef EMULATE_WEIRD_W95_MATCHING
 					/*
 					 * Even Microsoft has some problems
@@ -1618,8 +1603,8 @@ bool mask_match(char *str, char *regexp, int case_sig, bool trans2)
 					if (!matched) {
 						/* a? matches aa and a in w95 */
 						fstrcat(sbase, ".");
-						matched = do_match(sbase, ebase,
-						                   case_sig);
+						matched =
+						    do_match(sbase, ebase);
 					}
 #endif
 				}

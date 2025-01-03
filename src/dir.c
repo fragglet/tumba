@@ -456,7 +456,7 @@ bool get_dir_entry(int cnum, char *mask, int dirtype, char *fname, int *size,
 
 		if (strcmp(filename, mask) != 0) {
 			name_map_mangle(filename, true, SNUM(cnum));
-			if (!mask_match(filename, mask, false, false)) {
+			if (!mask_match(filename, mask, false)) {
 				continue;
 			}
 		}

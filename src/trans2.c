@@ -28,7 +28,6 @@ extern int DEBUGLEVEL;
 extern int Protocol;
 extern connection_struct Connections[];
 extern files_struct Files[];
-extern bool case_sensitive;
 extern int Client;
 extern int smb_read_error;
 extern fstring local_machine;
@@ -342,7 +341,7 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 
 		pstrcpy(fname, dname);
 
-		if (mask_match(fname, mask, case_sensitive, true)) {
+		if (mask_match(fname, mask, true)) {
 			bool isdots =
 			    (strequal(fname, "..") || strequal(fname, "."));
 

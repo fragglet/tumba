@@ -34,7 +34,6 @@ extern int max_recv;
 extern int chain_fnum;
 extern connection_struct Connections[];
 extern files_struct Files[];
-extern bool case_sensitive;
 extern bool short_case_preserve;
 extern fstring myworkgroup;
 extern int Client;
@@ -629,8 +628,7 @@ int reply_search(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		if (!Connections[cnum].dirptr)
 			goto SearchEmpty;
 		string_set(&Connections[cnum].dirpath, dptr_path(dptr_num));
-		if (!case_sensitive)
-			strnorm(mask);
+		strnorm(mask);
 	}
 
 	/* turn strings of spaces into a . */
@@ -1229,9 +1227,9 @@ int reply_unlink(char *inbuf, char *outbuf, int dum_size, int dum_bufsize)
 				pstring fname;
 				pstrcpy(fname, dname);
 
-				if (!mask_match(fname, mask, case_sensitive,
-				                false))
+				if (!mask_match(fname, mask, false)) {
 					continue;
+				}
 
 				error = ERRnoaccess;
 				slprintf(fname, sizeof(fname) - 1, "%s/%s",
@@ -2279,11 +2277,11 @@ int reply_mv(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 			pstrcpy(newname, tmpstr);
 		}
 
-		DEBUG(3, ("reply_mv : case_sensitive = %d, "
+		DEBUG(3, ("reply_mv : "
 		          "short case preserve = %d, directory = %s, newname = "
 		          "%s, newname_last_component = %s, is_8_3 = %d\n",
-		          case_sensitive, short_case_preserve, directory,
-		          newname, newname_last_component, is_short_name));
+		          short_case_preserve, directory, newname,
+		          newname_last_component, is_short_name));
 
 		/*
 		 * Check for special case with case preserving and not
@@ -2293,8 +2291,7 @@ int reply_mv(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		 * the rename (user is trying to change the case of the
 		 * filename).
 		 */
-		if (!case_sensitive &&
-		    (!is_short_name || short_case_preserve) &&
+		if ((!is_short_name || short_case_preserve) &&
 		    strcsequal(directory, newname)) {
 			pstring newname_modified_last_component;
 
@@ -2350,9 +2347,9 @@ int reply_mv(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 				pstring fname;
 				pstrcpy(fname, dname);
 
-				if (!mask_match(fname, mask, case_sensitive,
-				                false))
+				if (!mask_match(fname, mask, false)) {
 					continue;
+				}
 
 				error = ERRnoaccess;
 				slprintf(fname, sizeof(fname) - 1, "%s/%s",
@@ -2572,9 +2569,9 @@ int reply_copy(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 				pstring fname;
 				pstrcpy(fname, dname);
 
-				if (!mask_match(fname, mask, case_sensitive,
-				                false))
+				if (!mask_match(fname, mask, false)) {
 					continue;
+				}
 
 				error = ERRnoaccess;
 				slprintf(fname, sizeof(fname) - 1, "%s/%s",
