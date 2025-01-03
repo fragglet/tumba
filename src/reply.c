@@ -34,7 +34,6 @@ extern int max_recv;
 extern int chain_fnum;
 extern connection_struct Connections[];
 extern files_struct Files[];
-extern bool short_case_preserve;
 extern fstring myworkgroup;
 extern int Client;
 
@@ -2278,9 +2277,9 @@ int reply_mv(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		}
 
 		DEBUG(3, ("reply_mv : "
-		          "short case preserve = %d, directory = %s, newname = "
+		          "directory = %s, newname = "
 		          "%s, newname_last_component = %s, is_8_3 = %d\n",
-		          short_case_preserve, directory, newname,
+		          directory, newname,
 		          newname_last_component, is_short_name));
 
 		/*
@@ -2291,8 +2290,7 @@ int reply_mv(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		 * the rename (user is trying to change the case of the
 		 * filename).
 		 */
-		if ((!is_short_name || short_case_preserve) &&
-		    strcsequal(directory, newname)) {
+		if (!is_short_name && strcsequal(directory, newname)) {
 			pstring newname_modified_last_component;
 
 			/*

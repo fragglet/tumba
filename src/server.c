@@ -46,7 +46,6 @@ int last_message = -1;
 #define LAST_MESSAGE() smb_fn_name(last_message)
 
 extern int DEBUGLEVEL;
-extern bool short_case_preserve;
 time_t smb_last_time = (time_t) 0;
 
 extern int smb_read_error;
@@ -494,7 +493,7 @@ bool unix_convert(char *name, int cnum, pstring saved_last_component,
 			pstrcpy(saved_last_component, name);
 	}
 
-	if (is_8_3(name, false) && !short_case_preserve)
+	if (is_8_3(name, false))
 		strnorm(name);
 
 	/* stat the name - if it exists then we are all done! */
@@ -1360,7 +1359,6 @@ static bool become_service(int cnum)
 
 	last_cnum = cnum;
 
-	short_case_preserve = lp_shortpreservecase(snum);
 	return true;
 }
 

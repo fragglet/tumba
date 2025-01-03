@@ -38,10 +38,6 @@ int chain_size = 0;
 
 pstring debugf = "";
 
-/* the following control case operations - they are put here so the
-   client can link easily */
-bool short_case_preserve;
-
 fstring remote_machine = "";
 fstring local_machine = "";
 fstring remote_proto = "UNKNOWN";

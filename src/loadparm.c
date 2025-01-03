@@ -91,7 +91,6 @@ typedef struct {
 	char *szService;
 	char *szPath;
 	char *comment;
-	bool bShortCasePreserve;
 	char dummy[3]; /* for alignment */
 } service;
 
@@ -101,7 +100,6 @@ static service sDefault = {
     "",    /* szService */
     "",    /* szPath */
     "",    /* comment */
-    false, /* short case preserve */
     ""     /* dummy */
 };
 
@@ -127,8 +125,6 @@ static struct parm_struct {
 } parm_table[] = {
     {"-valid", P_BOOL, P_LOCAL, &sDefault.valid, NULL, NULL},
     {"comment", P_STRING, P_LOCAL, &sDefault.comment, NULL, NULL},
-    {"short preserve case", P_BOOL, P_LOCAL, &sDefault.bShortCasePreserve, NULL,
-     NULL},
     {"path", P_STRING, P_LOCAL, &sDefault.szPath, NULL, NULL},
     {"directory", P_STRING, P_LOCAL, &sDefault.szPath, NULL, NULL},
 
@@ -184,8 +180,6 @@ static void init_globals(void)
 FN_LOCAL_STRING(lp_servicename, szService)
 FN_LOCAL_STRING(lp_pathname, szPath)
 FN_LOCAL_STRING(lp_comment, comment)
-
-FN_LOCAL_BOOL(lp_shortpreservecase, bShortCasePreserve)
 
 /* local prototypes */
 static int strwicmp(char *psz1, char *psz2);
