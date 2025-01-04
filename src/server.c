@@ -653,6 +653,10 @@ bool check_name(char *name, int cnum)
 	char old_wd[PATH_MAX];
 	bool success = false;
 
+	if (CONN_SHARE(cnum) == ipc_service) {
+		return true;
+	}
+
 	/* A weird corner case that is probably a bad idea, but ... */
 	if (!strcmp(top, "/")) {
 		return true;
@@ -1341,7 +1345,8 @@ static bool become_service(int cnum)
 
 	Connections[cnum].lastused = smb_last_time;
 
-	if (chdir(Connections[cnum].connectpath) != 0) {
+	if (CONN_SHARE(cnum) != ipc_service
+	 && chdir(Connections[cnum].connectpath) != 0) {
 		DEBUG(0, ("%s chdir (%s) failed cnum=%d\n", timestring(),
 		          Connections[cnum].connectpath, cnum));
 		return false;
@@ -1829,7 +1834,7 @@ int make_connection(char *service, char *dev)
 	}
 
 	/* you can only connect to the IPC$ service as an ipc device */
-	if (strequal(service, "IPC$")) {
+	if (share == ipc_service) {
 		pstrcpy(dev, "IPC");
 	} else if (*dev == '?' || !*dev) {
 		pstrcpy(dev, "A:");
@@ -1851,16 +1856,17 @@ int make_connection(char *service, char *dev)
 	pcon = &Connections[cnum];
 	bzero((char *) pcon, sizeof(*pcon));
 
-	pcon->read_only = !dir_world_writeable(share->path);
+	pcon->read_only = share == ipc_service || !dir_world_writeable(share->path);
 	pcon->ipc = strncmp(dev, "IPC", 3) == 0;
 	pcon->num_files_open = 0;
 	pcon->lastused = time(NULL);
 	pcon->share = share;
 	pcon->used = true;
 	pcon->dirptr = NULL;
+	pcon->connectpath = NULL;
 	string_set(&pcon->dirpath, "");
 
-	{
+	if (share != ipc_service) {
 		char *canon_path;
 		pstring s;
 		pstrcpy(s, share->path);
@@ -1880,7 +1886,7 @@ int make_connection(char *service, char *dev)
 
 	pcon->open = true;
 
-	if (chdir(pcon->connectpath) != 0) {
+	if (share != ipc_service && chdir(pcon->connectpath) != 0) {
 		DEBUG(0, ("Can't change directory to %s (%s)\n",
 		          pcon->connectpath, strerror(errno)));
 		pcon->open = false;
