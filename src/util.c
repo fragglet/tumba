@@ -38,7 +38,6 @@ int chain_size = 0;
 
 pstring debugf = "";
 
-fstring remote_machine = "";
 fstring local_machine = "";
 fstring remote_proto = "UNKNOWN";
 pstring myhostname = "";

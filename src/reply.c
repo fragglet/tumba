@@ -50,7 +50,6 @@ int reply_special(char *inbuf, char *outbuf)
 	int msg_type = CVAL(inbuf, 0);
 	int msg_flags = CVAL(inbuf, 1);
 	pstring name1, name2;
-	extern fstring remote_machine;
 	extern fstring local_machine;
 	int len;
 	char name_type = 0;
@@ -72,11 +71,6 @@ int reply_special(char *inbuf, char *outbuf)
 		name_extract(inbuf, 4 + name_len(inbuf + 4), name2);
 		DEBUG(2,
 		      ("netbios connect: name1=%s name2=%s\n", name1, name2));
-
-		fstrcpy(remote_machine, name2);
-		remote_machine[15] = 0;
-		trim_string(remote_machine, " ", " ");
-		strlower(remote_machine);
 
 		fstrcpy(local_machine, name1);
 		len = strlen(local_machine);

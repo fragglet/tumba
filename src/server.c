@@ -82,8 +82,6 @@ int chain_fnum = -1;
 /* number of open connections */
 static int num_connections_open = 0;
 
-extern fstring remote_machine;
-
 /* these can be set by some functions to override the error codes */
 int unix_ERR_class = SMB_SUCCESS;
 int unix_ERR_code = 0;
@@ -1849,8 +1847,8 @@ int make_connection(char *service, char *dev)
 			return -3;
 		}
 
-		DEBUG(0, ("%s %s (%s) couldn't find service %s\n", timestring(),
-		          remote_machine, client_addr(), service));
+		DEBUG(0, ("%s (%s) couldn't find service %s\n", timestring(),
+		          client_addr(), service));
 		return -2;
 	}
 	if (!lp_snum_ok(snum)) {
@@ -1919,8 +1917,8 @@ int make_connection(char *service, char *dev)
 	num_connections_open++;
 
 	{
-		DEBUG(1, ("%s %s (%s) connect to service %s (pid %d)\n",
-		          timestring(), remote_machine, client_addr(),
+		DEBUG(1, ("%s (%s) connect to service %s (pid %d)\n",
+		          timestring(), client_addr(),
 		          lp_servicename(SNUM(cnum)), (int) getpid()));
 	}
 
@@ -2293,8 +2291,8 @@ void close_cnum(int cnum)
 		return;
 	}
 
-	DEBUG(1, ("%s %s (%s) closed connection to service %s\n", timestring(),
-	          remote_machine, client_addr(), lp_servicename(SNUM(cnum))));
+	DEBUG(1, ("%s (%s) closed connection to service %s\n", timestring(),
+	          client_addr(), lp_servicename(SNUM(cnum))));
 
 	close_open_files(cnum);
 	dptr_closecnum(cnum);
@@ -2969,8 +2967,6 @@ int main(int argc, char *argv[])
 	TimeInit();
 
 	pstrcpy(debugf, SMBLOGFILE);
-
-	pstrcpy(remote_machine, "smb");
 
 	setup_logging(argv[0], false);
 
