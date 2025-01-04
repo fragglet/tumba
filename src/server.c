@@ -2933,8 +2933,8 @@ static void usage(char *pname)
 	DEBUG(0, ("Incorrect program usage - are you sure the command line is "
 	          "correct?\n"));
 
-	printf("Usage: %s [-D] [-p port] [-d debuglevel] [-l log basename] [-s "
-	       "services file]\n",
+	printf("Usage: %s [-D] [-p port] [-d debuglevel] [-l log basename] "
+	       "<path> [paths...]\n",
 	       pname);
 	printf("Version %s\n", VERSION);
 	printf("\t-D                    become a daemon\n");
@@ -2975,13 +2975,7 @@ int main(int argc, char *argv[])
 	fault_setup((void (*)(void *)) exit_server);
 	signal(SIGTERM, SIGNAL_CAST dflt_sig);
 
-	/* this is for people who can't start the program correctly */
-	while (argc > 1 && (*argv[1] != '-')) {
-		argv++;
-		argc--;
-	}
-
-	while ((opt = getopt(argc, argv, "O:i:l:s:d:Dp:hPaf:")) != EOF)
+	while ((opt = getopt(argc, argv, "O:i:l:s:d:Dp:hPaf:")) != EOF) {
 		switch (opt) {
 		case 's':
 			pstrcpy(servicesf, optarg);
@@ -3013,6 +3007,19 @@ int main(int argc, char *argv[])
 			usage(argv[0]);
 			exit(1);
 		}
+	}
+
+#if 0
+	/* User must specify at least one path to share */
+	if (optind == argc) {
+		usage(argv[0]);
+		exit(1);
+	}
+#endif
+
+	for (opt = optind; opt < argc; ++opt) {
+		add_share(argv[opt]);
+	}
 
 	reopen_logs();
 
