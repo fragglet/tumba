@@ -177,6 +177,12 @@ void exit_server(char *reason);
 char *smb_fn_name(int type);
 int chain_reply(char *inbuf, char *outbuf, int size, int bufsize);
 
+/*The following definitions come from shares.c  */
+
+const struct share *lookup_share(const char *name);
+const struct share *add_share(const char *path);
+const struct share *get_share(unsigned int idx);
+
 /*The following definitions come from  slprintf.c  */
 
 int vslprintf(char *str, int n, char *format, va_list ap);

@@ -33,6 +33,7 @@ OBJECTS = \
 	params.o             \
 	reply.o              \
 	server.o             \
+	shares.o             \
 	slprintf.o           \
 	strlcat.o            \
 	strlcpy.o            \

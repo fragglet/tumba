@@ -339,6 +339,12 @@ struct interface {
 	struct in_addr nmask;
 };
 
+struct share {
+	char *name;
+	char *path;
+	char *description;
+};
+
 /* struct returned by get_share_modes */
 typedef struct {
 	int pid;
