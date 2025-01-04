@@ -284,7 +284,7 @@ typedef struct {
 } files_struct;
 
 typedef struct {
-	int service;
+	const struct share *share;
 	void *dirptr;
 	bool open;
 	bool ipc;
@@ -413,12 +413,10 @@ struct connection_options {
 	return (CACHED_ERROR(fnum))
 
 /* translates a connection number into a service number */
-#define SNUM(cnum) (Connections[cnum].service)
+#define CONN_SHARE(cnum) (Connections[cnum].share)
 
 /* access various service details */
-#define SERVICE(snum)    (lp_servicename(snum))
 #define CAN_WRITE(cnum)  (OPEN_CNUM(cnum) && !Connections[cnum].read_only)
-#define VALID_SNUM(snum) (lp_snum_ok(snum))
 
 /* the basic packet size, assuming no words or bytes */
 #define smb_size 39

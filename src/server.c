@@ -392,7 +392,7 @@ static bool scan_directory(char *path, char *name, int cnum, bool docache)
 	if (*path == 0)
 		path = ".";
 
-	if (docache && (dname = DirCacheCheck(path, name, SNUM(cnum)))) {
+	if (docache && (dname = DirCacheCheck(path, name, CONN_SHARE(cnum)))) {
 		pstrcpy(name, dname);
 		return true;
 	}
@@ -420,13 +420,13 @@ static bool scan_directory(char *path, char *name, int cnum, bool docache)
 			continue;
 
 		pstrcpy(name2, dname);
-		name_map_mangle(name2, false, SNUM(cnum));
+		name_map_mangle(name2, false, CONN_SHARE(cnum));
 
 		if ((mangled && mangled_equal(name, name2)) ||
 		    fname_equal(name, name2)) {
 			/* we've found the file, change it's name and return */
 			if (docache)
-				DirCacheAdd(path, name, dname, SNUM(cnum));
+				DirCacheAdd(path, name, dname, CONN_SHARE(cnum));
 			pstrcpy(name, dname);
 			CloseDir(cur_dir);
 			return true;
@@ -1355,31 +1355,6 @@ static bool become_service(int cnum)
 }
 
 /****************************************************************************
-  find a service entry
-****************************************************************************/
-int find_service(char *service)
-{
-	int iService;
-
-	string_sub(service, "\\", "/");
-
-	iService = lp_servicenumber(service);
-
-	if (iService >= 0)
-		if (!VALID_SNUM(iService)) {
-			DEBUG(0,
-			      ("Invalid snum %d for %s\n", iService, service));
-			iService = -1;
-		}
-
-	if (iService < 0)
-		DEBUG(3,
-		      ("find_service() failed to find service %s\n", service));
-
-	return iService;
-}
-
-/****************************************************************************
   create an error packet from a cached error.
 ****************************************************************************/
 int cached_error_packet(char *inbuf, char *outbuf, int fnum, int line)
@@ -1833,14 +1808,14 @@ static bool dir_world_writeable(const char *path)
 ****************************************************************************/
 int make_connection(char *service, char *dev)
 {
+	const struct share *share;
 	int cnum;
-	int snum;
 	connection_struct *pcon;
 
 	strlower(service);
 
-	snum = find_service(service);
-	if (snum < 0) {
+	share = lookup_share(service);
+	if (share == NULL) {
 		if (strequal(service, "IPC$")) {
 			DEBUG(3,
 			      ("%s refusing IPC connection\n", timestring()));
@@ -1850,9 +1825,6 @@ int make_connection(char *service, char *dev)
 		DEBUG(0, ("%s (%s) couldn't find service %s\n", timestring(),
 		          client_addr(), service));
 		return -2;
-	}
-	if (!lp_snum_ok(snum)) {
-		return -4;
 	}
 
 	/* you can only connect to the IPC$ service as an ipc device */
@@ -1878,11 +1850,11 @@ int make_connection(char *service, char *dev)
 	pcon = &Connections[cnum];
 	bzero((char *) pcon, sizeof(*pcon));
 
-	pcon->read_only = !dir_world_writeable(lp_pathname(snum));
+	pcon->read_only = !dir_world_writeable(share->path);
 	pcon->ipc = strncmp(dev, "IPC", 3) == 0;
 	pcon->num_files_open = 0;
 	pcon->lastused = time(NULL);
-	pcon->service = snum;
+	pcon->share = share;
 	pcon->used = true;
 	pcon->dirptr = NULL;
 	string_set(&pcon->dirpath, "");
@@ -1890,7 +1862,7 @@ int make_connection(char *service, char *dev)
 	{
 		char *canon_path;
 		pstring s;
-		pstrcpy(s, lp_pathname(snum));
+		pstrcpy(s, share->path);
 		/* Convert path to its canonical form (no ../ or symlinks,
 		   etc.). This is important because check_name() does the same
 		   thing and expects all files to be subpaths. */
@@ -1919,7 +1891,7 @@ int make_connection(char *service, char *dev)
 	{
 		DEBUG(1, ("%s (%s) connect to service %s (pid %d)\n",
 		          timestring(), client_addr(),
-		          lp_servicename(SNUM(cnum)), (int) getpid()));
+		          CONN_SHARE(cnum)->name, (int) getpid()));
 	}
 
 	return cnum;
@@ -2284,7 +2256,7 @@ close a cnum
 ****************************************************************************/
 void close_cnum(int cnum)
 {
-	DirCacheFlush(SNUM(cnum));
+	DirCacheFlush(CONN_SHARE(cnum));
 
 	if (!OPEN_CNUM(cnum)) {
 		DEBUG(0, ("Can't close cnum %d\n", cnum));
@@ -2292,7 +2264,7 @@ void close_cnum(int cnum)
 	}
 
 	DEBUG(1, ("%s (%s) closed connection to service %s\n", timestring(),
-	          client_addr(), lp_servicename(SNUM(cnum))));
+	          client_addr(), CONN_SHARE(cnum)->name));
 
 	close_open_files(cnum);
 	dptr_closecnum(cnum);
@@ -3009,13 +2981,11 @@ int main(int argc, char *argv[])
 		}
 	}
 
-#if 0
 	/* User must specify at least one path to share */
 	if (optind == argc) {
 		usage(argv[0]);
 		exit(1);
 	}
-#endif
 
 	for (opt = optind; opt < argc; ++opt) {
 		add_share(argv[opt]);
@@ -3051,11 +3021,6 @@ int main(int argc, char *argv[])
 	          geteuid(), getegid()));
 
 	init_structs();
-
-	if (!lp_load(servicesf)) {
-		return -1;
-	}
-
 	pstrcpy(myworkgroup, lp_workgroup());
 
 #ifndef NO_SIGNAL_TEST

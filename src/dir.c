@@ -455,7 +455,7 @@ bool get_dir_entry(int cnum, char *mask, int dirtype, char *fname, int *size,
 		pstrcpy(filename, dname);
 
 		if (strcmp(filename, mask) != 0) {
-			name_map_mangle(filename, true, SNUM(cnum));
+			name_map_mangle(filename, true, CONN_SHARE(cnum));
 			if (!mask_match(filename, mask, false)) {
 				continue;
 			}
@@ -625,7 +625,7 @@ typedef struct {
 	char *path;
 	char *name;
 	char *dname;
-	int snum;
+	const struct share *share;
 } dir_cache_entry;
 
 static dir_cache_entry *dir_cache[DIRCACHESIZE];
@@ -634,7 +634,7 @@ static int dir_cache_head = 0, dir_cache_tail = 0;
 /* ------------------------------------------------------------------------ **
  * Add an entry to the directory cache.
  * ------------------------------------------------------------------------ **/
-void DirCacheAdd(char *path, char *name, char *dname, int snum)
+void DirCacheAdd(char *path, char *name, char *dname, const struct share *share)
 {
 	int pathlen, namelen, new_head;
 	dir_cache_entry *entry;
@@ -655,7 +655,7 @@ void DirCacheAdd(char *path, char *name, char *dname, int snum)
 	entry->path = pstrcpy((char *) &entry[1], path);
 	entry->name = pstrcpy(&(entry->path[pathlen]), name);
 	entry->dname = pstrcpy(&(entry->name[namelen]), dname);
-	entry->snum = snum;
+	entry->share = share;
 
 	/* Add the new entry to the cache. Free up an entry if needed. */
 	new_head = (dir_cache_head + 1) % DIRCACHESIZE;
@@ -678,7 +678,7 @@ void DirCacheAdd(char *path, char *name, char *dname, int snum)
  *          the small size of the cache.
  * ------------------------------------------------------------------------ **
  */
-char *DirCacheCheck(char *path, char *name, int snum)
+char *DirCacheCheck(char *path, char *name, const struct share *share)
 {
 	dir_cache_entry *entry;
 	int idx;
@@ -686,7 +686,7 @@ char *DirCacheCheck(char *path, char *name, int snum)
 	for (idx = dir_cache_head; idx != dir_cache_tail;
 	     idx = (idx + DIRCACHESIZE - 1) % DIRCACHESIZE) {
 		entry = dir_cache[idx];
-		if (entry->snum == snum && 0 == strcmp(name, entry->name) &&
+		if (entry->share == share && 0 == strcmp(name, entry->name) &&
 		    0 == strcmp(path, entry->path)) {
 			DEBUG(4, ("Got dir cache hit on %s %s -> %s\n", path,
 			          name, entry->dname));
@@ -698,9 +698,9 @@ char *DirCacheCheck(char *path, char *name, int snum)
 } /* DirCacheCheck */
 
 /* ------------------------------------------------------------------------ **
- * Remove all cache entries which have an snum that matches the input.
+ * Remove all cache entries which have a share that matches the input.
  * ------------------------------------------------------------------------ **/
-void DirCacheFlush(int snum)
+void DirCacheFlush(const struct share *share)
 {
 	dir_cache_entry *entry;
 	int idx, new_tail = dir_cache_head;
@@ -710,7 +710,7 @@ void DirCacheFlush(int snum)
 		entry = dir_cache[idx];
 		dir_cache[idx] = NULL;
 
-		if (entry->snum == snum) {
+		if (entry->share == share) {
 			free(entry);
 		} else {
 			dir_cache[new_tail] = entry;

@@ -381,7 +381,7 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 		}
 	}
 
-	name_map_mangle(fname, false, SNUM(cnum));
+	name_map_mangle(fname, false, CONN_SHARE(cnum));
 
 	p = pdata;
 	nameptr = p;
@@ -486,7 +486,7 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 		p += 4;
 		if (!was_8_3) {
 			pstrcpy(p + 2, fname);
-			name_map_mangle(p + 2, true, SNUM(cnum));
+			name_map_mangle(p + 2, true, CONN_SHARE(cnum));
 		} else
 			*(p + 2) = 0;
 		strupper(p + 2);
@@ -928,7 +928,7 @@ resume_key = %d resume name = %s continue=%d level = %d\n",
 			 */
 
 			if (dname != NULL)
-				name_map_mangle(dname, false, SNUM(cnum));
+				name_map_mangle(dname, false, CONN_SHARE(cnum));
 
 			if (dname && strcsequal(resume_name, dname)) {
 				SeekDir(dirptr, current_pos + 1);
@@ -960,7 +960,7 @@ resume_key = %d resume name = %s continue=%d level = %d\n",
 
 				if (dname != NULL)
 					name_map_mangle(dname, false,
-					                SNUM(cnum));
+					                CONN_SHARE(cnum));
 
 				if (dname && strcsequal(resume_name, dname)) {
 					SeekDir(dirptr, current_pos + 1);
@@ -1036,8 +1036,8 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
 	uint16_t info_level = SVAL(params, 0);
 	int data_len;
 	struct stat st;
-	char *vname = lp_servicename(SNUM(cnum));
-	int snum = SNUM(cnum);
+	const struct share *share = CONN_SHARE(cnum);
+	char *vname = share->name;
 
 	DEBUG(3, ("call_trans2qfsinfo: cnum = %d, level = %d\n", cnum,
 	          info_level));
@@ -1076,7 +1076,7 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
 		 * the called hostname and the service name.
 		 */
 		SIVAL(pdata, 0,
-		      str_checksum(lp_servicename(snum)) ^
+		      str_checksum(share->name) ^
 		          (str_checksum(local_machine) << 16));
 		SCVAL(pdata, l2_vol_cch, volname_len);
 		strlcpy(pdata + l2_vol_szVolLabel, vname, volname_len + 1);
@@ -1105,7 +1105,7 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
 		 * the called hostname and the service name.
 		 */
 		SIVAL(pdata, 8,
-		      str_checksum(lp_servicename(snum)) ^
+		      str_checksum(share->name) ^
 		          (str_checksum(local_machine) << 16));
 		SIVAL(pdata, 12, 2 * strlen(vname));
 		PutUniCode(pdata + 18, vname);
@@ -1312,7 +1312,7 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
 		pstrcpy(short_name, fname);
 		/* Mangle if not already 8.3 */
 		if (!is_8_3(short_name, true)) {
-			name_map_mangle(short_name, true, SNUM(cnum));
+			name_map_mangle(short_name, true, CONN_SHARE(cnum));
 		}
 		strncpy(pdata + 4, short_name, 12);
 		(pdata + 4)[12] = 0;

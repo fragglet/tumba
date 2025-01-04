@@ -395,7 +395,7 @@ static bool illegal_name(char *name)
 /****************************************************************************
 convert a filename to DOS format. return true if successful.
 ****************************************************************************/
-void name_map_mangle(char *OutName, bool need83, int snum)
+void name_map_mangle(char *OutName, bool need83, const struct share *share)
 {
 #ifdef MANGLE_LONG_FILENAMES
 	if (!need83 && illegal_name(OutName))

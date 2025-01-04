@@ -41,9 +41,9 @@ void CloseDir(void *p);
 char *ReadDirName(void *p);
 bool SeekDir(void *p, int pos);
 int TellDir(void *p);
-void DirCacheAdd(char *path, char *name, char *dname, int snum);
-char *DirCacheCheck(char *path, char *name, int snum);
-void DirCacheFlush(int snum);
+void DirCacheAdd(char *path, char *name, char *dname, const struct share *);
+char *DirCacheCheck(char *path, char *name, const struct share *);
+void DirCacheFlush(const struct share *);
 
 /*The following definitions come from  fault.c  */
 
@@ -86,7 +86,7 @@ void reset_mangled_stack(int size);
 bool check_mangled_stack(char *s);
 bool is_mangled(char *s);
 void mangle_name_83(char *s, int s_len);
-void name_map_mangle(char *OutName, bool need83, int snum);
+void name_map_mangle(char *OutName, bool need83, const struct share *share);
 
 /*The following definitions come from  params.c  */
 
@@ -163,7 +163,6 @@ void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
 int seek_file(int fnum, uint32_t pos);
 int read_file(int fnum, char *data, uint32_t pos, int n);
 int write_file(int fnum, char *data, int n);
-int find_service(char *service);
 int cached_error_packet(char *inbuf, char *outbuf, int fnum, int line);
 int unix_error_packet(char *inbuf, char *outbuf, int def_class,
                       uint32_t def_code, int line);

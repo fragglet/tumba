@@ -256,7 +256,7 @@ static bool check_share_info(int uLevel, char *id)
 	return true;
 }
 
-static int fill_share_info(int cnum, int snum, int uLevel, char **buf,
+static int fill_share_info(int cnum, const struct share *share, int uLevel, char **buf,
                            int *buflen, char **stringbuf, int *stringspace,
                            char *baseaddr)
 {
@@ -286,9 +286,9 @@ static int fill_share_info(int cnum, int snum, int uLevel, char **buf,
 	if (!buf) {
 		len = 0;
 		if (uLevel > 0)
-			len += strlen(lp_comment(snum)) + 1;
+			len += strlen(share->description) + 1;
 		if (uLevel > 1)
-			len += strlen(lp_pathname(snum)) + 1;
+			len += strlen(share->path) + 1;
 		if (buflen)
 			*buflen = struct_len;
 		if (stringspace)
@@ -310,17 +310,17 @@ static int fill_share_info(int cnum, int snum, int uLevel, char **buf,
 	if (!baseaddr)
 		baseaddr = p;
 
-	strlcpy(p, lp_servicename(snum), 14);
+	strlcpy(p, share->name, 14);
 
 	if (uLevel > 0) {
 		int type;
 		CVAL(p, 13) = 0;
 		type = STYPE_DISKTREE;
-		if (strequal("IPC$", lp_servicename(snum)))
+		if (strequal("IPC$", share->name))
 			type = STYPE_IPC;
 		SSVAL(p, 14, type); /* device type */
 		SIVAL(p, 16, PTR_DIFF(p2, baseaddr));
-		len += CopyAndAdvance(&p2, lp_comment(snum), &l2);
+		len += CopyAndAdvance(&p2, share->description, &l2);
 	}
 
 	if (uLevel > 1) {
@@ -330,7 +330,7 @@ static int fill_share_info(int cnum, int snum, int uLevel, char **buf,
 		SSVALS(p, 22, -1);                    /* max uses */
 		SSVAL(p, 24, 1);                      /* current uses */
 		SIVAL(p, 26, PTR_DIFF(p2, baseaddr)); /* local pathname */
-		len += CopyAndAdvance(&p2, lp_pathname(snum), &l2);
+		len += CopyAndAdvance(&p2, share->path, &l2);
 		memset(p + 30, 0,
 		       SHPWLEN + 2); /* passwd (reserved), pad field */
 	}
@@ -367,10 +367,11 @@ static bool api_RNetShareGetInfo(int cnum, char *param, char *data, int mdrcnt,
 	char *netname = skip_string(str2, 1);
 	char *p = skip_string(netname, 1);
 	int uLevel = SVAL(p, 0);
-	int snum = find_service(netname);
+	const struct share *share = lookup_share(netname);
 
-	if (snum < 0)
+	if (share == NULL) {
 		return false;
+	}
 
 	/* check it's a supported varient */
 	if (!prefix_ok(str1, "zWrLh"))
@@ -380,7 +381,7 @@ static bool api_RNetShareGetInfo(int cnum, char *param, char *data, int mdrcnt,
 
 	*rdata = REALLOC(*rdata, mdrcnt);
 	p = *rdata;
-	*rdata_len = fill_share_info(cnum, snum, uLevel, &p, &mdrcnt, 0, 0, 0);
+	*rdata_len = fill_share_info(cnum, share, uLevel, &p, &mdrcnt, 0, 0, 0);
 	if (*rdata_len < 0)
 		return false;
 
@@ -406,7 +407,6 @@ static bool api_RNetShareEnum(int cnum, char *param, char *data, int mdrcnt,
 	int uLevel = SVAL(p, 0);
 	int buf_len = SVAL(p, 2);
 	char *p2;
-	int count = lp_numservices();
 	int total = 0, counted = 0;
 	bool missed = false;
 	int i;
@@ -419,18 +419,19 @@ static bool api_RNetShareEnum(int cnum, char *param, char *data, int mdrcnt,
 		return false;
 
 	data_len = fixed_len = string_len = 0;
-	for (i = 0; i < count; i++)
-		if (lp_snum_ok(i)) {
-			total++;
-			data_len += fill_share_info(cnum, i, uLevel, 0, &f_len,
-			                            0, &s_len, 0);
-			if (data_len <= buf_len) {
-				counted++;
-				fixed_len += f_len;
-				string_len += s_len;
-			} else
-				missed = true;
+	for (i = 0; i < shares_count(); i++) {
+		const struct share *s = get_share(i);
+		total++;
+		data_len += fill_share_info(cnum, s, uLevel, 0, &f_len,
+		                            0, &s_len, 0);
+		if (data_len <= buf_len) {
+			counted++;
+			fixed_len += f_len;
+			string_len += s_len;
+		} else {
+			missed = true;
 		}
+	}
 	*rdata_len = fixed_len + string_len;
 	*rdata = REALLOC(*rdata, *rdata_len);
 	memset(*rdata, 0, *rdata_len);
@@ -439,11 +440,11 @@ static bool api_RNetShareEnum(int cnum, char *param, char *data, int mdrcnt,
 	p = *rdata;
 	f_len = fixed_len;
 	s_len = string_len;
-	for (i = 0; i < count; i++) {
-		if (lp_snum_ok(i)) {
-			if (fill_share_info(cnum, i, uLevel, &p, &f_len, &p2,
-			                    &s_len, *rdata) < 0)
-				break;
+	for (i = 0; i < shares_count(); i++) {
+		const struct share *s = get_share(i);
+		if (fill_share_info(cnum, s, uLevel, &p, &f_len, &p2,
+		                    &s_len, *rdata) < 0) {
+			break;
 		}
 	}
 
@@ -451,11 +452,11 @@ static bool api_RNetShareEnum(int cnum, char *param, char *data, int mdrcnt,
 	*rparam = REALLOC(*rparam, *rparam_len);
 	SSVAL(*rparam, 0, missed ? ERROR_MORE_DATA : NERR_Success);
 	SSVAL(*rparam, 2, 0);
-	SSVAL(*rparam, 4, counted);
+	SSVAL(*rparam, 4, shares_count());
 	SSVAL(*rparam, 6, total);
 
 	DEBUG(3, ("RNetShareEnum gave %d entries of %d (%d %d %d %d)\n",
-	          counted, total, uLevel, buf_len, *rdata_len, mdrcnt));
+	          shares_count(), total, uLevel, buf_len, *rdata_len, mdrcnt));
 	return true;
 }
 
