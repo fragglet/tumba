@@ -3021,6 +3021,8 @@ int main(int argc, char *argv[])
 		add_share(argv[opt]);
 	}
 
+	add_ipc_service();
+
 	reopen_logs();
 
 	DEBUG(2, ("%s smbd version %s started\n", timestring(), VERSION));

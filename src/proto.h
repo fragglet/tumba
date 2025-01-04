@@ -181,6 +181,7 @@ int chain_reply(char *inbuf, char *outbuf, int size, int bufsize);
 
 const struct share *lookup_share(const char *name);
 const struct share *add_share(const char *path);
+const struct share *add_ipc_service(void);
 const struct share *get_share(unsigned int idx);
 
 /*The following definitions come from  slprintf.c  */

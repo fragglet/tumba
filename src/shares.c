@@ -23,6 +23,8 @@
 #include "includes.h"
 #include "smb.h"
 
+#define IPC_NAME "IPC$"
+
 static struct share *shares;
 static int num_shares;
 
@@ -39,6 +41,18 @@ const struct share *lookup_share(const char *name)
 	return NULL;
 }
 
+static struct share *_add_share(void)
+{
+	struct share *result;
+	shares = realloc(shares, (num_shares + 1) * sizeof(*shares));
+	assert(shares != NULL);
+
+	result = &shares[num_shares];
+	++num_shares;
+
+	return result;
+}
+
 const struct share *add_share(const char *path)
 {
 	struct share *result;
@@ -46,12 +60,7 @@ const struct share *add_share(const char *path)
 
 	assert(lookup_share(name) == NULL);
 
-	shares = realloc(shares, (num_shares + 1) * sizeof(*shares));
-	assert(shares != NULL);
-
-	result = &shares[num_shares];
-	++num_shares;
-
+	result = _add_share();
 	result->name = strdup(name);
 	assert(result->name != NULL);
 	result->path = strdup(path);
@@ -60,6 +69,20 @@ const struct share *add_share(const char *path)
 	assert(result->path != NULL);
 
 	return result;
+}
+
+const struct share *add_ipc_service(void)
+{
+	struct share *ipc;
+
+	assert(lookup_share(IPC_NAME) == NULL);
+
+	ipc = _add_share();
+	ipc->name = IPC_NAME;
+	ipc->path = "/dev/nonexistent/path";
+	ipc->description = "IPC service";
+
+	return ipc;
 }
 
 const struct share *get_share(unsigned int idx)
