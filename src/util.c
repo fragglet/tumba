@@ -397,7 +397,7 @@ int isdoschar(int c)
 /*******************************************************************
   compare 2 strings
 ********************************************************************/
-bool strequal(char *s1, char *s2)
+bool strequal(const char *s1, const char *s2)
 {
 	if (s1 == s2)
 		return true;

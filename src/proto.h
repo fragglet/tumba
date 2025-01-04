@@ -227,7 +227,7 @@ bool directory_exist(char *dname, struct stat *st);
 uint32_t file_size(char *file_name);
 int isdoschar(int c);
 void init_dos_char_table(void);
-bool strequal(char *s1, char *s2);
+bool strequal(const char *s1, const char *s2);
 bool strcsequal(char *s1, char *s2);
 void strlower(char *s);
 void strupper(char *s);
