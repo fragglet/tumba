@@ -28,6 +28,11 @@
 static struct share *shares;
 static int num_shares;
 
+int shares_count(void)
+{
+	return num_shares;
+}
+
 const struct share *lookup_share(const char *name)
 {
 	int i;
