@@ -48,6 +48,7 @@ int last_message = -1;
 extern int DEBUGLEVEL;
 time_t smb_last_time = (time_t) 0;
 
+extern const struct share *ipc_service;
 extern int smb_read_error;
 
 connection_struct Connections[MAX_CONNECTIONS];

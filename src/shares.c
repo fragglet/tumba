@@ -27,6 +27,7 @@
 
 static struct share *shares;
 static int num_shares;
+const struct share *ipc_service;
 
 int shares_count(void)
 {
@@ -76,7 +77,7 @@ const struct share *add_share(const char *path)
 	return result;
 }
 
-const struct share *add_ipc_service(void)
+void add_ipc_service(void)
 {
 	struct share *ipc;
 
@@ -84,10 +85,9 @@ const struct share *add_ipc_service(void)
 
 	ipc = _add_share();
 	ipc->name = IPC_NAME;
-	ipc->path = "/dev/nonexistent/path";
 	ipc->description = "IPC service";
 
-	return ipc;
+	ipc_service = ipc;
 }
 
 const struct share *get_share(unsigned int idx)
