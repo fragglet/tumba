@@ -49,14 +49,10 @@
 #define SMB_SECONDARY_WAIT (60 * 1000)
 
 /* debugging code */
-#ifndef SYSLOG
-#define DEBUG(level, body) ((DEBUGLEVEL >= (level)) ? (Debug1 body) : 0)
-#else
 extern int syslog_level;
 
 #define DEBUG(level, body)                                                     \
 	((DEBUGLEVEL >= (level)) ? (syslog_level = (level), Debug1 body) : 0)
-#endif
 
 /* this defines the error codes that receive_smb can put in smb_read_error */
 #define READ_TIMEOUT 1

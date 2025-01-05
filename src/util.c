@@ -37,6 +37,7 @@ int Client = -1;
 int chain_size = 0;
 
 pstring debugf = "";
+int syslog_level;
 
 fstring local_machine = "";
 fstring remote_proto = "UNKNOWN";
@@ -53,18 +54,12 @@ static bool stdout_logging = false;
   ******************************************************************/
 void setup_logging(char *pname, bool interactive)
 {
-#ifdef SYSLOG
 	if (!interactive) {
 		char *p = strrchr(pname, '/');
 		if (p)
 			pname = p + 1;
-#ifdef LOG_DAEMON
 		openlog(pname, LOG_PID, SYSLOG_FACILITY);
-#else /* for old systems that have no facility codes. */
-		openlog(pname, LOG_PID);
-#endif
 	}
-#endif
 	if (interactive) {
 		stdout_logging = true;
 		dbf = stdout;
@@ -193,7 +188,6 @@ int Debug1(char *format_str, ...)
 		}
 	}
 
-#ifdef SYSLOG
 	if (syslog_level < lp_syslog()) {
 		/*
 		 * map debug levels to syslog() priorities
@@ -223,7 +217,6 @@ int Debug1(char *format_str, ...)
 		msgbuf[255] = '\0';
 		syslog(priority, "%s", msgbuf);
 	}
-#endif
 
 	va_start(ap, format_str);
 	vfprintf(dbf, format_str, ap);

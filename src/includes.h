@@ -53,11 +53,8 @@
 #include <sys/time.h>
 #include <sys/wait.h>
 #include <sys/xattr.h>
-#include <unistd.h>
-
-#ifdef SYSLOG
 #include <syslog.h>
-#endif
+#include <unistd.h>
 
 #include <arpa/inet.h>
 #include <dirent.h>
