@@ -27,7 +27,6 @@ OBJECTS = \
 	dir.o                \
 	fault.o              \
 	ipc.o                \
-	loadparm.o           \
 	locking.o            \
 	mangle.o             \
 	params.o             \

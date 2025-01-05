@@ -59,17 +59,6 @@ struct in_addr *iface_n_ip(int n);
 
 int reply_trans(char *inbuf, char *outbuf, int size, int bufsize);
 
-/*The following definitions come from  loadparm.c  */
-
-char *lp_servicename(int);
-char *lp_pathname(int);
-char *lp_comment(int);
-bool lp_snum_ok(int iService);
-bool lp_loaded(void);
-bool lp_load(char *pszFname);
-int lp_numservices(void);
-int lp_servicenumber(char *pszServiceName);
-
 /*The following definitions come from  locking.c  */
 
 bool do_lock(int fnum, int cnum, uint32_t count, uint32_t offset, int lock_type,
