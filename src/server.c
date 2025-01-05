@@ -2280,42 +2280,6 @@ void close_cnum(int cnum)
 	string_set(&Connections[cnum].connectpath, "");
 }
 
-#if DUMP_CORE
-/*******************************************************************
-prepare to dump a core file - carefully!
-********************************************************************/
-static bool dump_core(void)
-{
-	char *p;
-	pstring dname;
-	pstrcpy(dname, debugf);
-	if ((p = strrchr(dname, '/')))
-		*p = 0;
-	pstrcat(dname, "/corefiles");
-	mkdir(dname, 0700);
-	chown(dname, getuid(), getgid());
-	chmod(dname, 0700);
-	if (chdir(dname))
-		return false;
-	umask(~(0700));
-
-#ifdef RLIMIT_CORE
-	{
-		struct rlimit rlp;
-		getrlimit(RLIMIT_CORE, &rlp);
-		rlp.rlim_cur = MAX(4 * 1024 * 1024, rlp.rlim_cur);
-		setrlimit(RLIMIT_CORE, &rlp);
-		getrlimit(RLIMIT_CORE, &rlp);
-		DEBUG(3,
-		      ("Core limits now %d %d\n", rlp.rlim_cur, rlp.rlim_max));
-	}
-#endif
-
-	DEBUG(0, ("Dumping core in %s\n", dname));
-	return true;
-}
-#endif
-
 /****************************************************************************
 exit the server
 ****************************************************************************/
@@ -2341,10 +2305,6 @@ void exit_server(char *reason)
 		DEBUGLEVEL = oldlevel;
 		DEBUG(0, ("===================================================="
 		          "===========\n"));
-#if DUMP_CORE
-		if (dump_core())
-			return;
-#endif
 	}
 
 	DEBUG(3,
@@ -2953,7 +2913,6 @@ int main(int argc, char *argv[])
 
 	init_dos_char_table();
 
-	fault_setup((void (*)(void *)) exit_server);
 	signal(SIGTERM, SIGNAL_CAST dflt_sig);
 
 	while ((opt = getopt(argc, argv, "O:i:l:s:d:Dp:hPaf:")) != EOF) {

@@ -45,10 +45,6 @@ void DirCacheAdd(char *path, char *name, char *dname, const struct share *);
 char *DirCacheCheck(char *path, char *name, const struct share *);
 void DirCacheFlush(const struct share *);
 
-/*The following definitions come from  fault.c  */
-
-void fault_setup(void (*fn)(void *));
-
 /*The following definitions come from  interface.c  */
 
 void load_interfaces(void);
