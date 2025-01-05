@@ -902,7 +902,7 @@ int reply_open_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	   support this, but if we send the "invalid device" error back, it
 	   will fall back to the LANMAN approach instead. However, it does
 	   introduce a brief pause. */
-	if (IS_IPC(cnum)) {
+	if (CONN_SHARE(cnum) == ipc_service) {
 		DEBUG(1, ("Tried to open IPC %s\n", fname));
 		return ERROR(ERRSRV, ERRinvdevice);
 	}

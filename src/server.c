@@ -48,7 +48,6 @@ int last_message = -1;
 extern int DEBUGLEVEL;
 time_t smb_last_time = (time_t) 0;
 
-extern const struct share *ipc_service;
 extern int smb_read_error;
 
 connection_struct Connections[MAX_CONNECTIONS];
@@ -1857,7 +1856,6 @@ int make_connection(char *service, char *dev)
 	bzero((char *) pcon, sizeof(*pcon));
 
 	pcon->read_only = share == ipc_service || !dir_world_writeable(share->path);
-	pcon->ipc = strncmp(dev, "IPC", 3) == 0;
 	pcon->num_files_open = 0;
 	pcon->lastused = time(NULL);
 	pcon->share = share;
