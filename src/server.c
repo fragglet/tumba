@@ -2364,7 +2364,7 @@ force write permissions on print services.
 */
 #define NEED_WRITE      (1 << 1)
 #define TIME_INIT       (1 << 2)
-#define CAN_IPC         (1 << 3)
+#define ALLOWED_IN_IPC  (1 << 3)
 #define QUEUE_IN_OPLOCK (1 << 6)
 
 /*
@@ -2408,7 +2408,7 @@ struct smb_message_struct {
     {SMBunlink, "SMBunlink", reply_unlink, NEED_WRITE | QUEUE_IN_OPLOCK},
     {SMBread, "SMBread", reply_read, 0},
     {SMBwrite, "SMBwrite", reply_write, 0},
-    {SMBclose, "SMBclose", reply_close, CAN_IPC},
+    {SMBclose, "SMBclose", reply_close, ALLOWED_IN_IPC},
     {SMBmkdir, "SMBmkdir", reply_mkdir, NEED_WRITE},
     {SMBrmdir, "SMBrmdir", reply_rmdir, NEED_WRITE},
     {SMBdskattr, "SMBdskattr", reply_dskattr, 0},
@@ -2445,13 +2445,13 @@ struct smb_message_struct {
     {SMBwritec, "SMBwritec", NULL, 0},
     {SMBsetattrE, "SMBsetattrE", reply_setattrE, NEED_WRITE},
     {SMBgetattrE, "SMBgetattrE", reply_getattrE, 0},
-    {SMBtrans, "SMBtrans", reply_trans, CAN_IPC},
-    {SMBtranss, "SMBtranss", NULL, CAN_IPC},
+    {SMBtrans, "SMBtrans", reply_trans, ALLOWED_IN_IPC},
+    {SMBtranss, "SMBtranss", NULL, ALLOWED_IN_IPC},
     {SMBioctls, "SMBioctls", NULL, 0},
     {SMBcopy, "SMBcopy", reply_copy, NEED_WRITE | QUEUE_IN_OPLOCK},
     {SMBmove, "SMBmove", NULL, NEED_WRITE | QUEUE_IN_OPLOCK},
 
-    {SMBopenX, "SMBopenX", reply_open_and_X, CAN_IPC | QUEUE_IN_OPLOCK},
+    {SMBopenX, "SMBopenX", reply_open_and_X, ALLOWED_IN_IPC | QUEUE_IN_OPLOCK},
     {SMBreadX, "SMBreadX", reply_read_and_X, 0},
     {SMBwriteX, "SMBwriteX", reply_write_and_X, 0},
     {SMBlockingX, "SMBlockingX", reply_lockingX, 0},
@@ -2555,6 +2555,12 @@ static int switch_message(int type, char *inbuf, char *outbuf, int size,
 
 			/* load service specific parameters */
 			if (OPEN_CNUM(cnum) && !become_service(cnum)) {
+				return ERROR(ERRSRV, ERRaccess);
+			}
+
+			/* for the IPC service, only certain messages are allowed */
+			if (CONN_SHARE(cnum) == ipc_service
+			 && (flags & ALLOWED_IN_IPC) == 0) {
 				return ERROR(ERRSRV, ERRaccess);
 			}
 
