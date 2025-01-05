@@ -425,7 +425,8 @@ static bool scan_directory(char *path, char *name, int cnum, bool docache)
 		    fname_equal(name, name2)) {
 			/* we've found the file, change it's name and return */
 			if (docache)
-				DirCacheAdd(path, name, dname, CONN_SHARE(cnum));
+				DirCacheAdd(path, name, dname,
+				            CONN_SHARE(cnum));
 			pstrcpy(name, dname);
 			CloseDir(cur_dir);
 			return true;
@@ -1343,8 +1344,8 @@ static bool become_service(int cnum)
 
 	Connections[cnum].lastused = smb_last_time;
 
-	if (CONN_SHARE(cnum) != ipc_service
-	 && chdir(Connections[cnum].connectpath) != 0) {
+	if (CONN_SHARE(cnum) != ipc_service &&
+	    chdir(Connections[cnum].connectpath) != 0) {
 		DEBUG(0, ("%s chdir (%s) failed cnum=%d\n", timestring(),
 		          Connections[cnum].connectpath, cnum));
 		return false;
@@ -1566,8 +1567,8 @@ static bool open_sockets(int port)
 		atexit(killkids);
 
 	/* open an incoming socket */
-	server_socket = open_socket_in(
-	    SOCK_STREAM, port, 0, interpret_addr(lp_socket_address()));
+	server_socket = open_socket_in(SOCK_STREAM, port, 0,
+	                               interpret_addr(lp_socket_address()));
 	if (server_socket == -1)
 		return false;
 
@@ -1575,8 +1576,7 @@ static bool open_sockets(int port)
 
 	/* ready to listen */
 	if (listen(server_socket, 5) == -1) {
-		DEBUG(0,
-		      ("open_sockets: listen: %s\n", strerror(errno)));
+		DEBUG(0, ("open_sockets: listen: %s\n", strerror(errno)));
 		close(server_socket);
 		return false;
 	}
@@ -1608,7 +1608,8 @@ static bool open_sockets(int port)
 			continue;
 
 		if (Client == -1) {
-			DEBUG(0, ("open_sockets: accept: %s\n", strerror(errno)));
+			DEBUG(0,
+			      ("open_sockets: accept: %s\n", strerror(errno)));
 			continue;
 		}
 
@@ -1854,7 +1855,8 @@ int make_connection(char *service, char *dev)
 	pcon = &Connections[cnum];
 	bzero((char *) pcon, sizeof(*pcon));
 
-	pcon->read_only = share == ipc_service || !dir_world_writeable(share->path);
+	pcon->read_only =
+	    share == ipc_service || !dir_world_writeable(share->path);
 	pcon->num_files_open = 0;
 	pcon->lastused = time(NULL);
 	pcon->share = share;
@@ -1893,9 +1895,9 @@ int make_connection(char *service, char *dev)
 	num_connections_open++;
 
 	{
-		DEBUG(1, ("%s (%s) connect to service %s (pid %d)\n",
-		          timestring(), client_addr(),
-		          CONN_SHARE(cnum)->name, (int) getpid()));
+		DEBUG(1,
+		      ("%s (%s) connect to service %s (pid %d)\n", timestring(),
+		       client_addr(), CONN_SHARE(cnum)->name, (int) getpid()));
 	}
 
 	return cnum;
@@ -2515,9 +2517,10 @@ static int switch_message(int type, char *inbuf, char *outbuf, int size,
 				return ERROR(ERRSRV, ERRaccess);
 			}
 
-			/* for the IPC service, only certain messages are allowed */
-			if (CONN_SHARE(cnum) == ipc_service
-			 && (flags & ALLOWED_IN_IPC) == 0) {
+			/* for the IPC service, only certain messages are
+			 * allowed */
+			if (CONN_SHARE(cnum) == ipc_service &&
+			    (flags & ALLOWED_IN_IPC) == 0) {
 				return ERROR(ERRSRV, ERRaccess);
 			}
 

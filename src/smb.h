@@ -409,7 +409,7 @@ struct connection_options {
 #define CONN_SHARE(cnum) (Connections[cnum].share)
 
 /* access various service details */
-#define CAN_WRITE(cnum)  (OPEN_CNUM(cnum) && !Connections[cnum].read_only)
+#define CAN_WRITE(cnum) (OPEN_CNUM(cnum) && !Connections[cnum].read_only)
 
 /* the basic packet size, assuming no words or bytes */
 #define smb_size 39

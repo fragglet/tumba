@@ -17,7 +17,8 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* TODO: Remove this file once this function's addition to glibc is less recent */
+/* TODO: Remove this file once this function's addition to glibc is less recent
+ */
 
 #include <stdlib.h>
 #include <string.h>
@@ -27,11 +28,10 @@
  * will be copied.  Always NUL terminates (unless siz == 0).
  * Returns strlen(src); if retval >= siz, truncation occurred.
  */
-size_t
-strlcpy(dst, src, siz)
-	char *dst;
-	const char *src;
-	size_t siz;
+size_t strlcpy(dst, src, siz)
+char *dst;
+const char *src;
+size_t siz;
 {
 	char *d = dst;
 	const char *s = src;
@@ -48,10 +48,10 @@ strlcpy(dst, src, siz)
 	/* Not enough room in dst, add NUL and traverse rest of src */
 	if (n == 0) {
 		if (siz != 0)
-			*d = '\0';		/* NUL-terminate dst */
+			*d = '\0'; /* NUL-terminate dst */
 		while (*s++)
 			;
 	}
 
-	return(s - src - 1);	/* count does not include NUL */
+	return s - src - 1; /* count does not include NUL */
 }

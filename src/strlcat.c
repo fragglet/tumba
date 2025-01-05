@@ -17,7 +17,8 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* TODO: Remove this file once this function's addition to glibc is less recent */
+/* TODO: Remove this file once this function's addition to glibc is less recent
+ */
 
 #include <stdlib.h>
 #include <string.h>
@@ -29,11 +30,10 @@
  * Returns strlen(src) + MIN(siz, strlen(initial dst)).
  * If retval >= siz, truncation occurred.
  */
-size_t
-strlcat(dst, src, siz)
-	char *dst;
-	const char *src;
-	size_t siz;
+size_t strlcat(dst, src, siz)
+char *dst;
+const char *src;
+size_t siz;
 {
 	char *d = dst;
 	const char *s = src;
@@ -47,7 +47,7 @@ strlcat(dst, src, siz)
 	n = siz - dlen;
 
 	if (n == 0)
-		return(dlen + strlen(s));
+		return dlen + strlen(s);
 	while (*s != '\0') {
 		if (n != 1) {
 			*d++ = *s;
@@ -57,5 +57,5 @@ strlcat(dst, src, siz)
 	}
 	*d = '\0';
 
-	return(dlen + (s - src));	/* count does not include NUL */
+	return dlen + (s - src); /* count does not include NUL */
 }

@@ -256,9 +256,9 @@ static bool check_share_info(int uLevel, char *id)
 	return true;
 }
 
-static int fill_share_info(int cnum, const struct share *share, int uLevel, char **buf,
-                           int *buflen, char **stringbuf, int *stringspace,
-                           char *baseaddr)
+static int fill_share_info(int cnum, const struct share *share, int uLevel,
+                           char **buf, int *buflen, char **stringbuf,
+                           int *stringspace, char *baseaddr)
 {
 	int struct_len;
 	char *p;
@@ -422,8 +422,8 @@ static bool api_RNetShareEnum(int cnum, char *param, char *data, int mdrcnt,
 	for (i = 0; i < shares_count(); i++) {
 		const struct share *s = get_share(i);
 		total++;
-		data_len += fill_share_info(cnum, s, uLevel, 0, &f_len,
-		                            0, &s_len, 0);
+		data_len +=
+		    fill_share_info(cnum, s, uLevel, 0, &f_len, 0, &s_len, 0);
 		if (data_len <= buf_len) {
 			counted++;
 			fixed_len += f_len;
@@ -442,8 +442,8 @@ static bool api_RNetShareEnum(int cnum, char *param, char *data, int mdrcnt,
 	s_len = string_len;
 	for (i = 0; i < shares_count(); i++) {
 		const struct share *s = get_share(i);
-		if (fill_share_info(cnum, s, uLevel, &p, &f_len, &p2,
-		                    &s_len, *rdata) < 0) {
+		if (fill_share_info(cnum, s, uLevel, &p, &f_len, &p2, &s_len,
+		                    *rdata) < 0) {
 			break;
 		}
 	}

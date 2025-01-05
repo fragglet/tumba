@@ -16,9 +16,9 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <stdlib.h>
 #include <assert.h>
 #include <libgen.h>
+#include <stdlib.h>
 
 #include "includes.h"
 #include "smb.h"
