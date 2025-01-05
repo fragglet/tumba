@@ -1447,28 +1447,24 @@ int error_packet(char *inbuf, char *outbuf, int error_class,
 	return outsize;
 }
 
-#ifndef SIGCLD_IGNORE
 /****************************************************************************
 this prevents zombie child processes
 ****************************************************************************/
-static int sig_cld(void)
+static int sigchld_handler(void)
 {
 	static int depth = 0;
 	if (depth != 0) {
-		DEBUG(0, ("ERROR: Recursion in sig_cld? Perhaps you need "
-		          "`#define USE_WAITPID'?\n"));
+		DEBUG(0, ("ERROR: Recursion in sigchld_handler?"));
 		depth = 0;
 		return 0;
 	}
 	depth++;
 
-	BlockSignals(true, SIGCLD);
-	DEBUG(5, ("got SIGCLD\n"));
+	BlockSignals(true, SIGCHLD);
+	DEBUG(5, ("got SIGCHLD\n"));
 
-#ifdef USE_WAITPID
-	while (waitpid((pid_t) -1, (int *) NULL, WNOHANG) > 0)
-		;
-#endif
+	while (waitpid((pid_t) -1, (int *) NULL, WNOHANG) > 0) {
+	}
 
 	/* Stop zombies */
 	/* Stevens, Adv. Unix Prog. says that on system V you must call
@@ -1476,24 +1472,12 @@ static int sig_cld(void)
 	   calls the handler from within the signal-call when there is a
 	   child that has exited. This would lead to an infinite recursion
 	   if done vice versa. */
+	signal(SIGCHLD, SIGNAL_CAST sigchld_handler);
 
-#ifndef DONT_REINSTALL_SIG
-#ifdef SIGCLD_IGNORE
-	signal(SIGCLD, SIG_IGN);
-#else
-	signal(SIGCLD, SIGNAL_CAST sig_cld);
-#endif
-#endif
-
-#ifndef USE_WAITPID
-	while (wait3(WAIT3_CAST1 NULL, WNOHANG, WAIT3_CAST2 NULL) > 0)
-		;
-#endif
 	depth--;
-	BlockSignals(false, SIGCLD);
+	BlockSignals(false, SIGCHLD);
 	return 0;
 }
-#endif
 
 /****************************************************************************
   this is called when the client exits abruptly
@@ -1557,11 +1541,7 @@ static bool open_sockets(int port)
 	int server_socket;
 
 	/* Stop zombies */
-#ifdef SIGCLD_IGNORE
-	signal(SIGCLD, SIG_IGN);
-#else
-	signal(SIGCLD, SIGNAL_CAST sig_cld);
-#endif
+	signal(SIGCHLD, SIGNAL_CAST sigchld_handler);
 
 	if (atexit_set == 0)
 		atexit(killkids);
@@ -1617,7 +1597,7 @@ static bool open_sockets(int port)
 
 			/* only the parent catches SIGCHLD */
 			signal(SIGPIPE, SIGNAL_CAST sig_pipe);
-			signal(SIGCLD, SIGNAL_CAST SIG_DFL);
+			signal(SIGCHLD, SIGNAL_CAST SIG_DFL);
 
 			/* close the listening socket */
 			close(server_socket);

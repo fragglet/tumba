@@ -112,10 +112,6 @@ it works and getting lots of bug reports */
 #define FTRUNCATE_CAN_EXTEND 0
 #endif
 
-#ifndef SIGCLD
-#define SIGCLD SIGCHLD
-#endif
-
 #ifndef WAIT3_CAST2
 #define WAIT3_CAST2 (struct rusage *)
 #endif
