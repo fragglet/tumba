@@ -35,7 +35,7 @@
 
 /* what type of filesystem do we want this to show up as in a NT file
    manager window? */
-#define FSTYPE_STRING "Samba"
+#define FSTYPE_STRING "Rumba"
 
 /* do you want smbd to send a 1 byte packet to nmbd to trigger it to start
    when smbd starts? */
