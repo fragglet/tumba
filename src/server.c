@@ -1613,11 +1613,9 @@ static bool open_sockets(int port)
 			continue;
 		}
 
-		signal(SIGPIPE, SIGNAL_CAST sig_pipe);
-		signal(SIGCLD, SIGNAL_CAST SIG_DFL);
-		if (Client != -1 && fork() == 0) {
-			/* Child code ... */
+		if (fork() == 0) {
 
+			/* only the parent catches SIGCHLD */
 			signal(SIGPIPE, SIGNAL_CAST sig_pipe);
 			signal(SIGCLD, SIGNAL_CAST SIG_DFL);
 
