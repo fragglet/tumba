@@ -27,7 +27,6 @@ OBJECTS = \
 	ipc.o                \
 	locking.o            \
 	mangle.o             \
-	params.o             \
 	reply.o              \
 	server.o             \
 	shares.o             \
