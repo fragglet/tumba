@@ -77,8 +77,9 @@ void reopen_logs(void)
 
 	if (DEBUGLEVEL > 0) {
 		pstrcpy(fname, debugf);
-		if (lp_loaded() && (*lp_logfile()))
+		if (strlen(lp_logfile()) > 0) {
 			pstrcpy(fname, lp_logfile());
+		}
 
 		if (!strcsequal(fname, debugf) || !dbf ||
 		    !file_exist(debugf, NULL)) {
