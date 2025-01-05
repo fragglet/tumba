@@ -28,7 +28,6 @@
 #define MAX_MUX            50
 #define MANGLED_STACK_SIZE 200
 
-pstring servicesf = CONFIGFILE;
 extern pstring debugf;
 extern fstring myworkgroup;
 
@@ -2924,7 +2923,6 @@ static void usage(char *pname)
 	printf("\t-p port               listen on the specified port\n");
 	printf("\t-d debuglevel         set the debuglevel\n");
 	printf("\t-l log basename.      Basename for log/debug files\n");
-	printf("\t-s services file.     Filename of services file\n");
 	printf("\t-a                    overwrite log file, don't append\n");
 	printf("\n");
 }
@@ -2960,9 +2958,6 @@ int main(int argc, char *argv[])
 
 	while ((opt = getopt(argc, argv, "O:i:l:s:d:Dp:hPaf:")) != EOF) {
 		switch (opt) {
-		case 's':
-			pstrcpy(servicesf, optarg);
-			break;
 		case 'l':
 			pstrcpy(debugf, optarg);
 			break;

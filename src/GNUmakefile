@@ -8,11 +8,9 @@ LIBDIR = $(PREFIX)/lib
 # the default group you want your machine to appear in for browsing.
 WORKGROUP = WORKGROUP
 
-CONFIGFILE = /etc/rumba_smbd.conf
 SMBLOGFILE = /var/log/rumba_smbd.log
 
 DEFINES = -DWORKGROUP=\"$(WORKGROUP)\" \
-          -DCONFIGFILE=\"$(CONFIGFILE)\" \
           -DSMBLOGFILE=\"$(SMBLOGFILE)\"
 
 CFLAGS = -MMD -Wall $(DEFINES)
