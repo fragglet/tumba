@@ -1681,63 +1681,30 @@ void *Realloc(void *p, int size)
 /****************************************************************************
 open a socket of the specified type, port and address for incoming data
 ****************************************************************************/
-int open_socket_in(int type, int port, int dlevel, uint32_t socket_addr)
+int open_socket_in(int type, int port, int dlevel, in_addr_t socket_addr)
 {
-	struct hostent *hp;
 	struct sockaddr_in sock;
-	pstring host_name;
+	int one = 1;
 	int res;
 
-	/* get my host name */
-	if (gethostname(host_name, MAXHOSTNAMELEN) == -1) {
-		DEBUG(0, ("gethostname failed\n"));
-		return -1;
-	}
-
-	/* get host info */
-	if ((hp = gethostbyname(host_name)) == 0) {
-		DEBUG(0, ("gethostbyname: Unknown host. %s\n", host_name));
-		return -1;
-	}
-
-	bzero((char *) &sock, sizeof(sock));
-	memcpy((char *) &sock.sin_addr, (char *) hp->h_addr, hp->h_length);
-#if defined(__FreeBSD__) || defined(NETBSD) ||                                 \
-    defined(__OpenBSD__) /* XXX not the right ifdef */
-	sock.sin_len = sizeof(sock);
-#endif
-	sock.sin_port = htons(port);
-	sock.sin_family = hp->h_addrtype;
-	sock.sin_addr.s_addr = socket_addr;
-	res = socket(hp->h_addrtype, type, 0);
+	res = socket(AF_INET, SOCK_STREAM, 0);
 	if (res == -1) {
 		DEBUG(0, ("socket failed\n"));
 		return -1;
 	}
 
-	{
-		int one = 1;
-		setsockopt(res, SOL_SOCKET, SO_REUSEADDR, (char *) &one,
-		           sizeof(one));
-	}
+	setsockopt(res, SOL_SOCKET, SO_REUSEADDR, (char *) &one, sizeof(one));
+
+	sock.sin_family = AF_INET;
+	sock.sin_port = htons(port);
+	sock.sin_addr.s_addr = socket_addr;
 
 	/* now we've got a socket - we need to bind it */
 	if (bind(res, (struct sockaddr *) &sock, sizeof(sock)) < 0) {
-		if (port) {
-			if (port == SMB_PORT || port == NMB_PORT)
-				DEBUG(dlevel, ("bind failed on port %d "
-				               "socket_addr=%s (%s)\n",
-				               port, inet_ntoa(sock.sin_addr),
-				               strerror(errno)));
-			close(res);
-
-			if (dlevel > 0 && port < 1000)
-				port = 7999;
-
-			if (port >= 1000 && port < 9000)
-				return open_socket_in(type, port + 1, dlevel,
-				                      socket_addr);
-		}
+		DEBUG(dlevel, ("bind failed on port %d socket_addr=%s (%s)\n",
+		               port, inet_ntoa(sock.sin_addr),
+		               strerror(errno)));
+		close(res);
 
 		return -1;
 	}
