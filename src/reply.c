@@ -34,7 +34,7 @@ extern int max_recv;
 extern int chain_fnum;
 extern connection_struct Connections[];
 extern files_struct Files[];
-extern fstring myworkgroup;
+extern const char *workgroup;
 extern int Client;
 
 /* this macro should always be used to extract an fnum (smb_fid) from
@@ -330,7 +330,7 @@ int reply_sesssetup_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 		pstrcpy(p, "Rumba ");
 		pstrcat(p, VERSION);
 		p = skip_string(p, 1);
-		pstrcpy(p, myworkgroup);
+		pstrcpy(p, workgroup);
 		p = skip_string(p, 1);
 		set_message(outbuf, 3, PTR_DIFF(p, smb_buf(outbuf)), false);
 		/* perhaps grab OS version here?? */

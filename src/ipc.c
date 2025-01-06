@@ -34,7 +34,7 @@ extern files_struct Files[];
 extern connection_struct Connections[];
 
 extern fstring local_machine;
-extern fstring myworkgroup;
+extern const char *workgroup;
 
 #define NERR_Success      0
 #define NERR_notsupported 50
@@ -590,7 +590,7 @@ static bool api_NetWkstaGetInfo(int cnum, char *param, char *data, int mdrcnt,
 	p += 4;
 
 	SIVAL(p, 0, PTR_DIFF(p2, *rdata)); /* login domain */
-	pstrcpy(p2, myworkgroup);
+	pstrcpy(p2, workgroup);
 	strupper(p2);
 	p2 = skip_string(p2, 1);
 	p += 4;
@@ -600,7 +600,7 @@ static bool api_NetWkstaGetInfo(int cnum, char *param, char *data, int mdrcnt,
 	p += 2;
 
 	SIVAL(p, 0, PTR_DIFF(p2, *rdata));
-	pstrcpy(p2, myworkgroup); /* don't know.  login domain?? */
+	pstrcpy(p2, workgroup); /* don't know.  login domain?? */
 	p2 = skip_string(p2, 1);
 	p += 4;
 

@@ -5,13 +5,9 @@ PREFIX = /usr/local
 SHAREDIR = $(PREFIX)/share
 LIBDIR = $(PREFIX)/lib
 
-# the default group you want your machine to appear in for browsing.
-WORKGROUP = WORKGROUP
-
 SMBLOGFILE = /var/log/rumba_smbd.log
 
-DEFINES = -DWORKGROUP=\"$(WORKGROUP)\" \
-          -DSMBLOGFILE=\"$(SMBLOGFILE)\"
+DEFINES = -DSMBLOGFILE=\"$(SMBLOGFILE)\"
 
 CFLAGS = -MMD -Wall $(DEFINES)
 LDFLAGS =

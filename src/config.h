@@ -41,13 +41,6 @@ static inline char *lp_serverstring(void)
 	return "Rumba " VERSION;
 }
 
-// This controls what workgroup your server will appear to be in when queried
-// by clients.
-static inline char *lp_workgroup(void)
-{
-	return WORKGROUP;
-}
-
 // This option allows you to control what address Samba will listen for
 // connections on.
 static inline char *lp_socket_address(void)

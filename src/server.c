@@ -28,7 +28,6 @@
 #define MAX_MUX            50
 
 extern pstring debugf;
-extern fstring myworkgroup;
 
 static char *InBuffer = NULL;
 static char *OutBuffer = NULL;
@@ -60,6 +59,8 @@ static file_fd_struct FileFd[MAX_OPEN_FILES];
 static int max_file_fd_used = 0;
 
 extern int Protocol;
+
+const char *workgroup = "WORKGROUP";
 
 /*
  * Size of data we can send to client. Set
@@ -2101,10 +2102,10 @@ static int reply_nt1(char *outbuf)
 	/* decide where (if) to put the encryption challenge, and
 	   follow it with the OEM'd domain name
 	 */
-	data_len = crypt_len + strlen(myworkgroup) + 1;
+	data_len = crypt_len + strlen(workgroup) + 1;
 
 	set_message(outbuf, 17, data_len, true);
-	pstrcpy(smb_buf(outbuf) + crypt_len, myworkgroup);
+	pstrcpy(smb_buf(outbuf) + crypt_len, workgroup);
 
 	CVAL(outbuf, smb_vwv1) = secword;
 	SSVALS(outbuf, smb_vwv16 + 1, crypt_len);
@@ -2930,6 +2931,7 @@ static void usage(char *pname)
 	printf("\t-d debuglevel         set the debuglevel\n");
 	printf("\t-l log basename.      Basename for log/debug files\n");
 	printf("\t-a                    overwrite log file, don't append\n");
+	printf("\t-W workgroup          Override workgroup name\n");
 	printf("\n");
 }
 
@@ -2959,7 +2961,7 @@ int main(int argc, char *argv[])
 
 	signal(SIGTERM, SIGNAL_CAST dflt_sig);
 
-	while ((opt = getopt(argc, argv, "l:d:p:ha")) != EOF) {
+	while ((opt = getopt(argc, argv, "l:d:p:haW:")) != EOF) {
 		switch (opt) {
 		case 'l':
 			pstrcpy(debugf, optarg);
@@ -2980,6 +2982,9 @@ int main(int argc, char *argv[])
 		case 'h':
 			usage(argv[0]);
 			exit(0);
+			break;
+		case 'W':
+			workgroup = optarg;
 			break;
 		default:
 			usage(argv[0]);
@@ -3027,7 +3032,6 @@ int main(int argc, char *argv[])
 	          geteuid(), getegid()));
 
 	init_structs();
-	pstrcpy(myworkgroup, lp_workgroup());
 
 #ifndef NO_SIGNAL_TEST
 	signal(SIGHUP, SIGNAL_CAST sig_hup);

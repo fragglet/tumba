@@ -41,8 +41,6 @@ int syslog_level;
 
 fstring local_machine = "";
 
-fstring myworkgroup = "";
-
 int smb_read_error = 0;
 
 static bool stdout_logging = false;
