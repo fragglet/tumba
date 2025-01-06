@@ -238,7 +238,6 @@ int read_smb_length(int fd, char *inbuf, int timeout);
 bool send_smb(int fd, char *buffer);
 int name_extract(char *buf, int ofs, char *name);
 int name_len(char *s);
-bool send_one_packet(char *buf, int len, struct in_addr ip, int port, int type);
 bool string_init(char **dest, char *src);
 void string_free(char **s);
 bool string_set(char **dest, char *src);
