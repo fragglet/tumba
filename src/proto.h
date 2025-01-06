@@ -226,8 +226,6 @@ char *skip_string(char *buf, int n);
 bool trim_string(char *s, char *front, char *back);
 void unix_clean_name(char *s);
 bool strhasupper(char *s);
-void make_dir_struct(char *buf, char *mask, char *fname, unsigned int size,
-                     int mode, time_t date);
 void close_low_fds(void);
 int read_data(int fd, char *buffer, int N);
 int write_data(int fd, char *buffer, int N);

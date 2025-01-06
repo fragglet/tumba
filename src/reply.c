@@ -537,6 +537,39 @@ int reply_dskattr(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 }
 
 /****************************************************************************
+  make a dir struct
+****************************************************************************/
+static void make_dir_struct(char *buf, char *mask, char *fname,
+                            unsigned int size, int mode, time_t date)
+{
+	char *p;
+	pstring mask2;
+
+	pstrcpy(mask2, mask);
+
+	if ((mode & aDIR) != 0)
+		size = 0;
+
+	memset(buf + 1, ' ', 11);
+	if ((p = strchr(mask2, '.')) != NULL) {
+		*p = 0;
+		memcpy(buf + 1, mask2, MIN(strlen(mask2), 8));
+		memcpy(buf + 9, p + 1, MIN(strlen(p + 1), 3));
+		*p = '.';
+	} else
+		memcpy(buf + 1, mask2, MIN(strlen(mask2), 11));
+
+	bzero(buf + 21, DIR_STRUCT_SIZE - 21);
+	CVAL(buf, 21) = mode;
+	put_dos_date(buf, 22, date);
+	SSVAL(buf, 26, size & 0xFFFF);
+	SSVAL(buf, 28, size >> 16);
+	strlcpy(buf + 30, fname, 13);
+	strupper(buf + 30);
+	DEBUG(8, ("put name [%s] into dir struct\n", buf + 30));
+}
+
+/****************************************************************************
   reply to a search
   Can be called from SMBsearch, SMBffirst or SMBfunique.
 ****************************************************************************/
