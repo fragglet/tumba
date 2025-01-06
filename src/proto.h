@@ -231,8 +231,6 @@ void make_dir_struct(char *buf, char *mask, char *fname, unsigned int size,
 void close_low_fds(void);
 int read_data(int fd, char *buffer, int N);
 int write_data(int fd, char *buffer, int N);
-int transfer_file(int infd, int outfd, int n, char *header, int headlen,
-                  int align);
 int read_smb_length_return_keepalive(int fd, char *inbuf, int timeout);
 int read_smb_length(int fd, char *inbuf, int timeout);
 bool send_smb(int fd, char *buffer);
