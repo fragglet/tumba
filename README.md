@@ -18,6 +18,7 @@ Samba's features. The goal is to make something simple and easy to set up that
 hopefully requires minimal maintenance. In particular the following are not
 supported:
 
+ * SMBv2, SMBv3 or the CIFS extensions (only SMBv1 is supported)
  * Authentication/password-restricted shares (all shares are public)
  * Per-user home directory shares
  * Printer sharing
