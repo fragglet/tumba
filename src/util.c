@@ -230,19 +230,6 @@ int Debug1(char *format_str, ...)
 }
 
 /****************************************************************************
-  find a suitable temporary directory. The result should be copied immediately
-  as it may be overwritten by a subsequent call
-  ****************************************************************************/
-char *tmpdir(void)
-{
-	char *p;
-	if ((p = getenv("TMPDIR"))) {
-		return p;
-	}
-	return "/tmp";
-}
-
-/****************************************************************************
 prompte a dptr (to make it recently used)
 ****************************************************************************/
 void array_promote(char *array, int elsize, int element)
