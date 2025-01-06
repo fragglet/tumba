@@ -36,7 +36,6 @@ char *OutBuffer = NULL;
 char *last_inbuf = NULL;
 
 int am_parent = 1;
-int atexit_set = 0;
 
 /* the last message the was processed */
 int last_message = -1;
@@ -1541,8 +1540,7 @@ static bool open_sockets(int port)
 	/* Stop zombies */
 	signal(SIGCHLD, SIGNAL_CAST sigchld_handler);
 
-	if (atexit_set == 0)
-		atexit(killkids);
+	atexit(killkids);
 
 	/* open an incoming socket */
 	server_socket = open_socket_in(SOCK_STREAM, port, 0,
