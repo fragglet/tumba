@@ -826,15 +826,16 @@ static int read_with_timeout(int fd, char *buf, int mincnt, int maxcnt,
 	       system performance will suffer severely as
 	       select always return true on disk files */
 
-	/* Set initial timeout */
-	timeout.tv_sec = time_out / 1000;
-	timeout.tv_usec = 1000 * (time_out % 1000);
-
 	for (nread = 0; nread < mincnt;) {
-		FD_ZERO(&fds);
-		FD_SET(fd, &fds);
+		do {
+			FD_ZERO(&fds);
+			FD_SET(fd, &fds);
 
-		selrtn = sys_select(&fds, &timeout);
+			timeout.tv_sec = time_out / 1000;
+			timeout.tv_usec = 1000 * (time_out % 1000);
+
+			selrtn = select(fd + 1, &fds, NULL, NULL, &timeout);
+		} while (selrtn < 0 && errno == EINTR);
 
 		/* Check if error */
 		if (selrtn == -1) {

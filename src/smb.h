@@ -179,19 +179,6 @@ implemented */
 typedef char pstring[1024];
 typedef char fstring[128];
 
-typedef struct {
-	int size;
-	int mode;
-	int uid;
-	int gid;
-	/* these times are normally kept in GMT */
-	time_t mtime;
-	time_t atime;
-	time_t ctime;
-	pstring name;
-
-} file_info;
-
 /* Structure used when SMBwritebmpx is active */
 typedef struct {
 	int wr_total_written; /* So we know when to discard this */

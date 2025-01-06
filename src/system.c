@@ -39,27 +39,6 @@ extern int DEBUGLEVEL;
 */
 
 /*******************************************************************
-this replaces the normal select() system call
-return if some data has arrived on one of the file descriptors
-return -1 means error
-********************************************************************/
-int sys_select(fd_set *fds, struct timeval *tval)
-{
-	struct timeval t2;
-	int selrtn;
-
-	do {
-		if (tval)
-			memcpy((void *) &t2, (void *) tval, sizeof(t2));
-		errno = 0;
-		selrtn =
-		    select(255, fds, NULL, NULL, tval ? &t2 : NULL);
-	} while (selrtn < 0 && errno == EINTR);
-
-	return selrtn;
-}
-
-/*******************************************************************
 now for utime()
 ********************************************************************/
 int sys_utime(char *fname, struct utimbuf *times)

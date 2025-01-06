@@ -1605,10 +1605,11 @@ static bool open_sockets(int port)
 		FD_ZERO(&listen_set);
 		FD_SET(server_socket, &listen_set);
 
-		num = sys_select(&listen_set, NULL);
+		num = select(server_socket + 1, &listen_set, NULL, NULL, NULL);
 
-		if (num == -1 && errno == EINTR)
+		if (num < 0 && errno == EINTR) {
 			continue;
+		}
 
 		if (!FD_ISSET(server_socket, &listen_set)) {
 			continue;
@@ -1729,13 +1730,16 @@ static bool receive_message_or_smb(int smbfd, char *buffer, int buffer_len,
 
 	*got_smb = false;
 
-	FD_ZERO(&fds);
-	FD_SET(smbfd, &fds);
+	do {
+		FD_ZERO(&fds);
+		FD_SET(smbfd, &fds);
 
-	to.tv_sec = timeout / 1000;
-	to.tv_usec = (timeout % 1000) * 1000;
+		to.tv_sec = timeout / 1000;
+		to.tv_usec = (timeout % 1000) * 1000;
 
-	selrtn = sys_select(&fds, timeout > 0 ? &to : NULL);
+		selrtn = select(smbfd + 1, &fds, NULL, NULL,
+		                timeout > 0 ? &to : NULL);
+	} while (selrtn < 0 && errno == EINTR);
 
 	/* Check if error */
 	if (selrtn == -1) {

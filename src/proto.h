@@ -164,8 +164,6 @@ int vslprintf(char *str, int n, char *format, va_list ap);
 
 /*The following definitions come from  system.c  */
 
-int sys_select(fd_set *fds, struct timeval *tval);
-int sys_select(fd_set *fds, struct timeval *tval);
 int sys_utime(char *fname, struct utimbuf *times);
 ssize_t sys_getxattr(const char *path, const char *name, void *value,
                      size_t size);
