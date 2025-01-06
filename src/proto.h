@@ -254,7 +254,6 @@ bool mask_match(char *str, char *regexp, bool trans2);
 void become_daemon(void);
 int set_filelen(int fd, long len);
 void *Realloc(void *p, int size);
-bool get_myname(char *my_name, struct in_addr *ip);
 int open_socket_in(int type, int port, int dlevel, uint32_t socket_addr);
 uint32_t interpret_addr(char *str);
 struct in_addr *interpret_addr2(char *str);

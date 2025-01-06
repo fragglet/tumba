@@ -87,8 +87,6 @@ int unix_ERR_code = 0;
 
 extern int extra_time_offset;
 
-extern pstring myhostname;
-
 static int find_free_connection(int hash);
 
 /* for readability... */
@@ -2818,7 +2816,6 @@ static void process(void)
 static void init_structs(void)
 {
 	int i;
-	get_myname(myhostname, NULL);
 
 	for (i = 0; i < MAX_CONNECTIONS; i++) {
 		Connections[i].open = false;

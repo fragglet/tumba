@@ -41,7 +41,6 @@ int syslog_level;
 
 fstring local_machine = "";
 fstring remote_proto = "UNKNOWN";
-pstring myhostname = "";
 
 fstring myworkgroup = "";
 
@@ -1691,43 +1690,6 @@ void *Realloc(void *p, int size)
 	}
 
 	return ret;
-}
-
-/****************************************************************************
-get my own name and IP
-****************************************************************************/
-bool get_myname(char *my_name, struct in_addr *ip)
-{
-	struct hostent *hp;
-	pstring hostname;
-
-	*hostname = 0;
-
-	/* get my host name */
-	if (gethostname(hostname, MAXHOSTNAMELEN) == -1) {
-		DEBUG(0, ("gethostname failed\n"));
-		return false;
-	}
-
-	/* get host info */
-	if ((hp = gethostbyname(hostname)) == 0) {
-		DEBUG(0, ("gethostbyname: Unknown host %s.\n", hostname));
-		return false;
-	}
-
-	if (my_name) {
-		/* split off any parts after an initial . */
-		char *p = strchr(hostname, '.');
-		if (p)
-			*p = 0;
-
-		fstrcpy(my_name, hostname);
-	}
-
-	if (ip)
-		*ip = *((struct in_addr *) hp->h_addr);
-
-	return true;
 }
 
 /****************************************************************************
