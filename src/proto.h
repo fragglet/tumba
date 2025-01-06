@@ -61,8 +61,6 @@ bool locking_end(void);
 
 int str_checksum(char *s);
 bool is_8_3(char *fname, bool check_case);
-void reset_mangled_stack(int size);
-bool check_mangled_stack(char *s);
 bool is_mangled(char *s);
 void mangle_name_83(char *s, int s_len);
 void name_map_mangle(char *OutName, bool need83, const struct share *share);

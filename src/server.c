@@ -398,8 +398,6 @@ static bool scan_directory(char *path, char *name, int cnum, bool docache)
 	 * call. We need to mangle both names or neither.
 	 * (JRA).
 	 */
-	if (mangled)
-		mangled = !check_mangled_stack(name);
 
 	/* open the directory */
 	if (!(cur_dir = OpenDir(cnum, path))) {
@@ -559,11 +557,6 @@ bool unix_convert(char *name, int cnum, pstring saved_last_component,
 
 				/* just the last part of the name doesn't exist
 				 */
-
-				/* check on the mangled stack to see if we can
-				   recover the base of the filename */
-				if (is_mangled(start))
-					check_mangled_stack(start);
 
 				DEBUG(5, ("New file %s\n", start));
 				return true;

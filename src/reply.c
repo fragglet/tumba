@@ -1219,9 +1219,6 @@ int reply_unlink(char *inbuf, char *outbuf, int dum_size, int dum_bufsize)
 		pstrcpy(mask, p + 1);
 	}
 
-	if (is_mangled(mask))
-		check_mangled_stack(mask);
-
 	has_wild = strchr(mask, '*') || strchr(mask, '?');
 
 	if (!has_wild) {
@@ -2362,9 +2359,6 @@ int reply_mv(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		*p = '/'; /* Replace needed for exceptional test below. */
 	}
 
-	if (is_mangled(mask))
-		check_mangled_stack(mask);
-
 	has_wild = strchr(mask, '*') || strchr(mask, '?');
 
 	if (!has_wild) {
@@ -2641,9 +2635,6 @@ int reply_copy(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		pstrcpy(directory, name);
 		pstrcpy(mask, p + 1);
 	}
-
-	if (is_mangled(mask))
-		check_mangled_stack(mask);
 
 	has_wild = strchr(mask, '*') || strchr(mask, '?');
 
