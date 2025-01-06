@@ -28,7 +28,7 @@ extern connection_struct Connections[];
    This module implements directory related functions for Samba.
 */
 
-uint32_t dircounter = 0;
+static uint32_t dircounter = 0;
 
 #define NUMDIRPTRS 256
 

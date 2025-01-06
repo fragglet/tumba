@@ -31,20 +31,20 @@
 extern pstring debugf;
 extern fstring myworkgroup;
 
-char *InBuffer = NULL;
-char *OutBuffer = NULL;
-char *last_inbuf = NULL;
+static char *InBuffer = NULL;
+static char *OutBuffer = NULL;
+static char *last_inbuf = NULL;
 
-int am_parent = 1;
+static int am_parent = 1;
 
 /* the last message the was processed */
-int last_message = -1;
+static int last_message = -1;
 
 /* a useful macro to debug the last message processed */
 #define LAST_MESSAGE() smb_fn_name(last_message)
 
 extern int DEBUGLEVEL;
-time_t smb_last_time = (time_t) 0;
+static time_t smb_last_time = (time_t) 0;
 
 extern int smb_read_error;
 
@@ -57,8 +57,8 @@ files_struct Files[MAX_OPEN_FILES];
  * <https://www.samba.org/samba/news/articles/low_point/tale_two_stds_os2.html>
  * TODO: The 2024 POSIX spec now includes OFD locks, so this can be replaced
  */
-file_fd_struct FileFd[MAX_OPEN_FILES];
-int max_file_fd_used = 0;
+static file_fd_struct FileFd[MAX_OPEN_FILES];
+static int max_file_fd_used = 0;
 
 extern int Protocol;
 

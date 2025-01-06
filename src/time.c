@@ -26,7 +26,7 @@
   in May 1996
   */
 
-int serverzone = 0;
+static int serverzone = 0;
 
 extern int DEBUGLEVEL;
 
