@@ -28,11 +28,6 @@
 
 #include "includes.h"
 
-#ifdef CHECK_TYPES
-#undef CHECK_TYPES
-#endif
-#define CHECK_TYPES 0
-
 extern int DEBUGLEVEL;
 extern int max_send;
 extern files_struct Files[];
@@ -42,14 +37,10 @@ extern fstring local_machine;
 extern fstring myworkgroup;
 
 #define NERR_Success      0
-#define NERR_badpass      86
 #define NERR_notsupported 50
 
 #define NERR_BASE           (2100)
 #define NERR_BufTooSmall    (NERR_BASE + 23)
-#define NERR_JobNotFound    (NERR_BASE + 51)
-#define NERR_DestNotFound   (NERR_BASE + 52)
-#define ERROR_INVALID_LEVEL 124
 #define ERROR_MORE_DATA     234
 
 #define ACCESS_READ   0x01
@@ -57,9 +48,6 @@ extern fstring myworkgroup;
 #define ACCESS_CREATE 0x04
 
 #define SHPWLEN 8  /* share password length */
-#define NNLEN   12 /* 8.3 net name length */
-#define SNLEN   15 /* service name length */
-#define QNLEN   12 /* queue name maximum length */
 
 extern int Client;
 extern int smb_read_error;

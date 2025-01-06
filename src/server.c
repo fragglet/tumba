@@ -26,7 +26,6 @@
 #define DOSATTRIB_NAME "user.DOSATTRIB"
 
 #define MAX_MUX            50
-#define MANGLED_STACK_SIZE 200
 
 extern pstring debugf;
 extern fstring myworkgroup;
