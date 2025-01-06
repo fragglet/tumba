@@ -45,12 +45,6 @@ void DirCacheAdd(char *path, char *name, char *dname, const struct share *);
 char *DirCacheCheck(char *path, char *name, const struct share *);
 void DirCacheFlush(const struct share *);
 
-/*The following definitions come from  interface.c  */
-
-void load_interfaces(void);
-int iface_count(void);
-struct in_addr *iface_n_ip(int n);
-
 /*The following definitions come from  ipc.c  */
 
 int reply_trans(char *inbuf, char *outbuf, int size, int bufsize);
