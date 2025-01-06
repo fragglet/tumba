@@ -27,7 +27,6 @@
   */
 
 int serverzone = 0;
-int extra_time_offset = 0;
 
 extern int DEBUGLEVEL;
 
@@ -185,7 +184,7 @@ static int TimeZoneFaster(time_t t)
   **************************************************************************/
 int TimeDiff(time_t t)
 {
-	return TimeZoneFaster(t) + 60 * extra_time_offset;
+	return TimeZoneFaster(t);
 }
 
 /****************************************************************************
@@ -197,12 +196,12 @@ int TimeDiff(time_t t)
   +**************************************************************************/
 static int LocTimeDiff(time_t lte)
 {
-	time_t lt = lte - 60 * extra_time_offset;
+	time_t lt = lte;
 	int d = TimeZoneFaster(lt);
 	time_t t = lt + d;
 
 	/* if overflow occurred, ignore all the adjustments so far */
-	if (((lte < lt) ^ (extra_time_offset < 0)) | ((t < lt) ^ (d < 0)))
+	if ((lte < lt) | ((t < lt) ^ (d < 0)))
 		t = lte;
 
 	/* now t should be close enough to the true UTC to yield the right

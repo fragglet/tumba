@@ -84,8 +84,6 @@ static int num_connections_open = 0;
 int unix_ERR_class = SMB_SUCCESS;
 int unix_ERR_code = 0;
 
-extern int extra_time_offset;
-
 static int find_free_connection(int hash);
 
 /* for readability... */
