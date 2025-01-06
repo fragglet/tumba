@@ -2896,7 +2896,7 @@ int main(int argc, char *argv[])
 
 	signal(SIGTERM, SIGNAL_CAST dflt_sig);
 
-	while ((opt = getopt(argc, argv, "O:i:l:s:d:Dp:hPaf:")) != EOF) {
+	while ((opt = getopt(argc, argv, "l:d:Dp:ha")) != EOF) {
 		switch (opt) {
 		case 'l':
 			pstrcpy(debugf, optarg);
