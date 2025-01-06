@@ -2202,8 +2202,6 @@ static int reply_negprot(char *inbuf, char *outbuf, int size, int bufsize)
 
 	SSVAL(outbuf, smb_vwv0, choice);
 	if (choice != -1) {
-		extern fstring remote_proto;
-		fstrcpy(remote_proto, supported_protocols[protocol].short_name);
 		outsize = supported_protocols[protocol].proto_reply_fn(outbuf);
 		DEBUG(3, ("Selected protocol %s\n",
 		          supported_protocols[protocol].proto_name));

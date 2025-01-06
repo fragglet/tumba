@@ -40,7 +40,6 @@ pstring debugf = "";
 int syslog_level;
 
 fstring local_machine = "";
-fstring remote_proto = "UNKNOWN";
 
 fstring myworkgroup = "";
 
