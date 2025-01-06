@@ -26,10 +26,6 @@
    filename listings? */
 #define MANGLE_LONG_FILENAMES
 
-/* define this if you want to stop spoofing with .. and soft links
-   NOTE: This also slows down the server considerably */
-#define REDUCE_PATHS
-
 /* the size of the directory cache */
 #define DIRCACHESIZE 20
 
@@ -49,10 +45,6 @@
 #define IDLE_CLOSED_TIMEOUT   (60)
 #define DPTR_IDLE_TIMEOUT     (120)
 #define SMBD_SELECT_LOOP      (10)
-#define REGISTRATION_INTERVAL (10 * 60)
-
-/* the following are in milliseconds */
-#define LOCK_RETRY_TIMEOUT (100)
 
 #define SMB_ALIGNMENT 1
 
