@@ -157,6 +157,27 @@ bool is_8_3(char *fname, bool check_case)
 	return true;
 }
 
+/****************************************************************************
+prompte a dptr (to make it recently used)
+****************************************************************************/
+static void array_promote(char *array, int elsize, int element)
+{
+	char *p;
+	if (element == 0)
+		return;
+
+	p = (char *) malloc(elsize);
+
+	if (!p) {
+		DEBUG(5, ("Ahh! Can't malloc\n"));
+		return;
+	}
+	memcpy(p, array + element * elsize, elsize);
+	memmove(array + elsize, array, elsize * element);
+	memcpy(array, p, elsize);
+	free(p);
+}
+
 /* -------------------------------------------------------------------------- **
  * This section creates and maintains a stack of name mangling results.
  * The original comments read: "keep a stack of name mangling results - just

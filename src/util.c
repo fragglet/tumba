@@ -228,27 +228,6 @@ int Debug1(char *format_str, ...)
 }
 
 /****************************************************************************
-prompte a dptr (to make it recently used)
-****************************************************************************/
-void array_promote(char *array, int elsize, int element)
-{
-	char *p;
-	if (element == 0)
-		return;
-
-	p = (char *) malloc(elsize);
-
-	if (!p) {
-		DEBUG(5, ("Ahh! Can't malloc\n"));
-		return;
-	}
-	memcpy(p, array + element * elsize, elsize);
-	memmove(array + elsize, array, elsize * element);
-	memcpy(array, p, elsize);
-	free(p);
-}
-
-/****************************************************************************
   close the socket communication
 ****************************************************************************/
 void close_sockets(void)

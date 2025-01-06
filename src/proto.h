@@ -198,7 +198,6 @@ int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize);
 void setup_logging(char *pname, bool interactive);
 void reopen_logs(void);
 void force_check_log_size(void);
-void array_promote(char *array, int elsize, int element);
 void close_sockets(void);
 bool file_exist(char *fname, struct stat *sbuf);
 bool directory_exist(char *dname, struct stat *st);
