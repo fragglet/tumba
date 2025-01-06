@@ -1610,50 +1610,6 @@ void become_daemon(void)
 }
 
 /****************************************************************************
-set the length of a file from a filedescriptor.
-Returns 0 on success, -1 on failure.
-****************************************************************************/
-int set_filelen(int fd, long len)
-{
-	/* According to W. R. Stevens advanced UNIX prog. Pure 4.3 BSD cannot
-	   extend a file with ftruncate. Provide alternate implementation
-	   for this */
-
-#if FTRUNCATE_CAN_EXTEND
-	return ftruncate(fd, len);
-#else
-	struct stat st;
-	char c = 0;
-	long currpos = lseek(fd, 0L, SEEK_CUR);
-
-	if (currpos < 0)
-		return -1;
-	/* Do an fstat to see if the file is longer than
-	   the requested size (call ftruncate),
-	   or shorter, in which case seek to len - 1 and write 1
-	   byte of zero */
-	if (fstat(fd, &st) < 0)
-		return -1;
-
-	if (S_ISFIFO(st.st_mode))
-		return 0;
-
-	if (st.st_size == len)
-		return 0;
-	if (st.st_size > len)
-		return ftruncate(fd, len);
-
-	if (lseek(fd, len - 1, SEEK_SET) != len - 1)
-		return -1;
-	if (write(fd, &c, 1) != 1)
-		return -1;
-	/* Seek to where we were */
-	lseek(fd, currpos, SEEK_SET);
-	return 0;
-#endif
-}
-
-/****************************************************************************
 expand a pointer to be a particular size
 ****************************************************************************/
 void *Realloc(void *p, int size)

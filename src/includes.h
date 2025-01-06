@@ -106,12 +106,6 @@
 #define SOL_TCP 6
 #endif
 
-/* default to using ftruncate workaround as this is safer than assuming
-it works and getting lots of bug reports */
-#ifndef FTRUNCATE_CAN_EXTEND
-#define FTRUNCATE_CAN_EXTEND 0
-#endif
-
 #ifndef WAIT3_CAST2
 #define WAIT3_CAST2 (struct rusage *)
 #endif

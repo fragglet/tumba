@@ -1564,10 +1564,14 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 			if (fd == -1) {
 				return ERROR(ERRDOS, ERRbadpath);
 			}
-			set_filelen(fd, size);
+			if (ftruncate(fd, size) != 0) {
+				/* TODO: Better choice of error? */
+				return ERROR(ERRDOS, ERRnoaccess);
+			}
 			close(fd);
-		} else {
-			set_filelen(fd, size);
+		} else if (ftruncate(fd, size) != 0) {
+			/* TODO: Better choice of error? */
+			return ERROR(ERRDOS, ERRnoaccess);
 		}
 	}
 

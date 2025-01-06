@@ -1648,10 +1648,11 @@ int reply_write(char *inbuf, char *outbuf, int dum1, int dum2)
 	/* X/Open SMB protocol says that if smb_vwv1 is
 	   zero then the file size should be extended or
 	   truncated to the size given in smb_vwv[2-3] */
-	if (numtowrite == 0)
-		nwritten = set_filelen(Files[fnum].fd_ptr->fd, startpos);
-	else
+	if (numtowrite != 0) {
 		nwritten = write_file(fnum, data, numtowrite);
+	} else {
+		nwritten = ftruncate(Files[fnum].fd_ptr->fd, startpos);
+	}
 
 	if (((nwritten == 0) && (numtowrite != 0)) || (nwritten < 0))
 		return UNIXERROR(ERRDOS, ERRnoaccess);
