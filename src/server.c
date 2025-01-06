@@ -1531,6 +1531,7 @@ static void drop_privileges(void)
 ****************************************************************************/
 static bool open_sockets(int port)
 {
+	in_addr_t bind_addr;
 	extern int Client;
 	int server_socket;
 
@@ -1540,8 +1541,14 @@ static bool open_sockets(int port)
 	atexit(killkids);
 
 	/* open an incoming socket */
-	server_socket = open_socket_in(SOCK_STREAM, port, 0,
-	                               interpret_addr(lp_socket_address()));
+	bind_addr = inet_addr(lp_socket_address());
+	if (bind_addr == INADDR_NONE) {
+		DEBUG(0, ("open_sockets: invalid bind adress %s\n",
+		          lp_socket_address()));
+		return false;
+	}
+
+	server_socket = open_socket_in(SOCK_STREAM, port, 0, bind_addr);
 	if (server_socket == -1)
 		return false;
 
@@ -2723,11 +2730,7 @@ static void process(void)
 #if PRIME_NMBD
 	DEBUG(3, ("priming nmbd\n"));
 	{
-		struct in_addr ip;
-		ip = *interpret_addr2("localhost");
-		if (ip.s_addr == 0) {
-			ip = *interpret_addr2("127.0.0.1");
-		}
+		struct in_addr ip = {htonl(INADDR_LOOPBACK)};
 		*OutBuffer = 0;
 		send_one_packet(OutBuffer, 1, ip, NMB_PORT, SOCK_DGRAM);
 	}

@@ -1746,62 +1746,6 @@ int open_socket_in(int type, int port, int dlevel, uint32_t socket_addr)
 	return res;
 }
 
-/****************************************************************************
-interpret an internet address or name into an IP address in 4 byte form
-****************************************************************************/
-uint32_t interpret_addr(char *str)
-{
-	struct hostent *hp;
-	uint32_t res;
-	int i;
-	bool pure_address = true;
-
-	if (strcmp(str, "0.0.0.0") == 0)
-		return 0;
-	if (strcmp(str, "255.255.255.255") == 0)
-		return 0xFFFFFFFF;
-
-	for (i = 0; pure_address && str[i]; i++)
-		if (!(isdigit(str[i]) || str[i] == '.'))
-			pure_address = false;
-
-	/* if it's in the form of an IP address then get the lib to interpret it
-	 */
-	if (pure_address) {
-		res = inet_addr(str);
-	} else {
-		/* otherwise assume it's a network name of some sort and use
-		   gethostbyname */
-		if ((hp = gethostbyname(str)) == 0) {
-			DEBUG(3, ("gethostbyname: Unknown host. %s\n", str));
-			return 0;
-		}
-		if (hp->h_addr == NULL) {
-			DEBUG(3, ("gethostbyname: host address is invalid for "
-			          "host %s.\n",
-			          str));
-			return 0;
-		}
-		res = ((struct in_addr *) hp->h_addr)->s_addr;
-	}
-
-	if (res == (uint32_t) -1)
-		return 0;
-
-	return res;
-}
-
-/*******************************************************************
-  a convenient addition to interpret_addr()
-  ******************************************************************/
-struct in_addr *interpret_addr2(char *str)
-{
-	static struct in_addr ret;
-	uint32_t a = interpret_addr(str);
-	ret.s_addr = a;
-	return &ret;
-}
-
 static bool global_client_name_done = false;
 static bool global_client_addr_done = false;
 
