@@ -1477,7 +1477,7 @@ const char *client_addr(void)
 /*******************************************************************
 write a string in unicoode format
 ********************************************************************/
-int PutUniCode(char *dst, char *src)
+int PutUnicode(char *dst, char *src)
 {
 	int ret = 0;
 	while (*src) {

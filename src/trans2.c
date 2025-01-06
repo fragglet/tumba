@@ -1091,7 +1091,7 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
 		      0x4006); /* FS ATTRIBUTES == long filenames supported? */
 		SIVAL(pdata, 4, 128); /* Max filename component length */
 		SIVAL(pdata, 8, 2 * strlen(FSTYPE_STRING));
-		PutUniCode(pdata + 12, FSTYPE_STRING);
+		PutUnicode(pdata + 12, FSTYPE_STRING);
 		break;
 	case SMB_QUERY_FS_LABEL_INFO:
 		data_len = 4 + strlen(vname);
@@ -1108,7 +1108,7 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
 		      str_checksum(share->name) ^
 		          (str_checksum(local_machine) << 16));
 		SIVAL(pdata, 12, 2 * strlen(vname));
-		PutUniCode(pdata + 18, vname);
+		PutUnicode(pdata + 18, vname);
 		DEBUG(5, ("call_trans2qfsinfo : SMB_QUERY_FS_VOLUME_INFO "
 		          "namelen = %d, vol = %s\n",
 		          strlen(vname), vname));

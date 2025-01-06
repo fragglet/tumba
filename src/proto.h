@@ -241,7 +241,7 @@ bool string_sub(char *s, char *pattern, char *insert);
 bool mask_match(char *str, char *regexp, bool trans2);
 void *Realloc(void *p, int size);
 const char *client_addr(void);
-int PutUniCode(char *dst, char *src);
+int PutUnicode(char *dst, char *src);
 char *gidtoname(int gid);
 void BlockSignals(bool block, int signum);
 void ajt_panic(void);
