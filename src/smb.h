@@ -492,10 +492,6 @@ int slprintf(char *str, int n, char *format, ...);
 #define SIGNAL_CAST
 #endif
 
-#ifndef SELECT_CAST
-#define SELECT_CAST
-#endif
-
 /* these are used in NetServerEnum to choose what to receive */
 #define SV_TYPE_WORKSTATION       0x00000001
 #define SV_TYPE_SERVER            0x00000002
