@@ -1172,7 +1172,7 @@ int name_len(char *s)
 	}
 
 	return len;
-} /* name_len */
+}
 
 /****************************************************************************
 send a single packet to a port on another machine

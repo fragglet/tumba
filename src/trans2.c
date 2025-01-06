@@ -969,9 +969,9 @@ resume_key = %d resume name = %s continue=%d level = %d\n",
 					          current_pos + 1));
 					break;
 				}
-			} /* end for */
-		} /* end if current_pos */
-	} /* end if requires_resume_key && !continue_bit */
+			}
+		}
+	}
 
 	for (i = 0; (i < (int) maxentries) && !finished && !out_of_space; i++) {
 		/* this is a heuristic to avoid seeking the dirptr except when

@@ -44,7 +44,7 @@ int str_checksum(char *s)
 		i++;
 	}
 	return res;
-} /* str_checksum */
+}
 
 /****************************************************************************
 return true if a name is a special msdos reserved name
@@ -76,7 +76,7 @@ static bool is_reserved_msdos(char *fname)
 		return true;
 
 	return false;
-} /* is_reserved_msdos */
+}
 
 /****************************************************************************
 return true if a name is in 8.3 dos format
@@ -155,7 +155,7 @@ bool is_8_3(char *fname, bool check_case)
 
 	/* must be in 8.3 format */
 	return true;
-} /* is_8_3 */
+}
 
 /* -------------------------------------------------------------------------- **
  * This section creates and maintains a stack of name mangling results.
@@ -208,7 +208,7 @@ static void push_mangled_name(char *s)
 	if (p && (!strhasupper(p + 1)) && (strlen(p + 1) < (size_t) 4))
 		*p = 0;
 
-} /* push_mangled_name */
+}
 
 /****************************************************************************
  * check for a name on the mangled name stack CRH
@@ -261,7 +261,7 @@ bool check_mangled_stack(char *s)
 	}
 
 	return false;
-} /* check_mangled_stack */
+}
 
 /* End of the mangled stack section.
  * -------------------------------------------------------------------------- **
@@ -287,7 +287,7 @@ bool is_mangled(char *s)
 
 	/* it could be */
 	return true;
-} /* is_mangled */
+}
 
 /****************************************************************************
 return a base 36 character. v must be from 0 to 35.
@@ -296,7 +296,7 @@ static char base36(unsigned int v)
 {
 	static char basechars[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 	return basechars[v % 36];
-} /* base36 */
+}
 
 /****************************************************************************
 do the actual mangling to 8.3 format
@@ -362,7 +362,7 @@ void mangle_name_83(char *s, int s_len)
 	}
 	DEBUG(5, ("%s\n", s));
 
-} /* mangle_name_83 */
+}
 
 /*******************************************************************
   work out if a name is illegal, even for long names
@@ -390,7 +390,7 @@ static bool illegal_name(char *name)
 	}
 
 	return false;
-} /* illegal_name */
+}
 
 /****************************************************************************
 convert a filename to DOS format. return true if successful.

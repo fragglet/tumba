@@ -666,7 +666,7 @@ void DirCacheAdd(char *path, char *name, char *dname, const struct share *share)
 	dir_cache[new_head] = entry;
 	dir_cache_head = new_head;
 	DEBUG(4, ("Added dir cache entry %s %s -> %s\n", path, name, dname));
-} /* DirCacheAdd */
+}
 
 /* ------------------------------------------------------------------------ **
  * Search for an entry to the directory cache.
@@ -695,7 +695,7 @@ char *DirCacheCheck(char *path, char *name, const struct share *share)
 	}
 
 	return NULL;
-} /* DirCacheCheck */
+}
 
 /* ------------------------------------------------------------------------ **
  * Remove all cache entries which have a share that matches the input.
