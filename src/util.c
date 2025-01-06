@@ -1582,34 +1582,6 @@ bool mask_match(char *str, char *regexp, bool trans2)
 }
 
 /****************************************************************************
-become a daemon, discarding the controlling terminal
-****************************************************************************/
-void become_daemon(void)
-{
-#ifndef NO_FORK_DEBUG
-	if (fork())
-		exit(0);
-
-	/* detach from the terminal */
-#ifdef USE_SETSID
-	setsid();
-#else /* USE_SETSID */
-#ifdef TIOCNOTTY
-	{
-		int i = open("/dev/tty", O_RDWR);
-		if (i >= 0) {
-			ioctl(i, (int) TIOCNOTTY, (char *) 0);
-			close(i);
-		}
-	}
-#endif /* TIOCNOTTY */
-#endif /* USE_SETSID */
-	/* Close fd's 0,1,2. Needed if started by rsh */
-	close_low_fds();
-#endif /* NO_FORK_DEBUG */
-}
-
-/****************************************************************************
 expand a pointer to be a particular size
 ****************************************************************************/
 void *Realloc(void *p, int size)

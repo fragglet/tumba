@@ -2881,7 +2881,6 @@ static void usage(char *pname)
 	       "<path> [paths...]\n",
 	       pname);
 	printf("Version %s\n", VERSION);
-	printf("\t-D                    become a daemon\n");
 	printf("\t-p port               listen on the specified port\n");
 	printf("\t-d debuglevel         set the debuglevel\n");
 	printf("\t-l log basename.      Basename for log/debug files\n");
@@ -2895,8 +2894,6 @@ static void usage(char *pname)
 int main(int argc, char *argv[])
 {
 	extern bool append_log;
-	/* shall I run as a daemon */
-	bool is_daemon = false;
 	int port = SMB_PORT;
 	int opt;
 	extern char *optarg;
@@ -2917,7 +2914,7 @@ int main(int argc, char *argv[])
 
 	signal(SIGTERM, SIGNAL_CAST dflt_sig);
 
-	while ((opt = getopt(argc, argv, "l:d:Dp:ha")) != EOF) {
+	while ((opt = getopt(argc, argv, "l:d:p:ha")) != EOF) {
 		switch (opt) {
 		case 'l':
 			pstrcpy(debugf, optarg);
@@ -2926,9 +2923,6 @@ int main(int argc, char *argv[])
 			extern bool append_log;
 			append_log = !append_log;
 		} break;
-		case 'D':
-			is_daemon = true;
-			break;
 		case 'd':
 			if (*optarg == 'A')
 				DEBUGLEVEL = 10000;
@@ -2998,11 +2992,6 @@ int main(int argc, char *argv[])
 	   to by dynamically changed. */
 
 	DEBUG(3, ("%s loaded services\n", timestring()));
-
-	if (is_daemon) {
-		DEBUG(3, ("%s becoming a daemon\n", timestring()));
-		become_daemon();
-	}
 
 	if (!open_sockets(port))
 		exit(1);

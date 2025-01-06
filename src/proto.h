@@ -244,7 +244,6 @@ void string_free(char **s);
 bool string_set(char **dest, char *src);
 bool string_sub(char *s, char *pattern, char *insert);
 bool mask_match(char *str, char *regexp, bool trans2);
-void become_daemon(void);
 void *Realloc(void *p, int size);
 const char *client_addr(void);
 int PutUniCode(char *dst, char *src);
