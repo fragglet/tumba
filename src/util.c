@@ -1515,7 +1515,7 @@ void BlockSignals(bool block, int signum)
 safe string copy into a known length string
 dest_size is the size of the destination buffer
 ********************************************************************/
-char *safe_strcpy(char *dest, char *src, int dest_size)
+char *safe_strcpy(char *dest, const char *src, int dest_size)
 {
 	size_t len;
 
@@ -1538,7 +1538,7 @@ char *safe_strcpy(char *dest, char *src, int dest_size)
 safe string cat into a string
 dest_size is the size of the destination buffer
 ********************************************************************/
-char *safe_strcat(char *dest, char *src, int dest_size)
+char *safe_strcat(char *dest, const char *src, int dest_size)
 {
 	size_t len;
 

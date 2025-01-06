@@ -243,6 +243,6 @@ int PutUnicode(char *dst, char *src);
 char *gidtoname(int gid);
 void BlockSignals(bool block, int signum);
 void ajt_panic(void);
-char *safe_strcpy(char *dest, char *src, int dest_size);
-char *safe_strcat(char *dest, char *src, int dest_size);
+char *safe_strcpy(char *dest, const char *src, int dest_size);
+char *safe_strcat(char *dest, const char *src, int dest_size);
 char *tab_depth(int depth);
