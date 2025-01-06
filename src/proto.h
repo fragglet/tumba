@@ -247,7 +247,6 @@ bool mask_match(char *str, char *regexp, bool trans2);
 void become_daemon(void);
 int set_filelen(int fd, long len);
 void *Realloc(void *p, int size);
-int open_socket_in(int type, int port, int dlevel, in_addr_t socket_addr);
 const char *client_addr(void);
 int PutUniCode(char *dst, char *src);
 char *gidtoname(int gid);

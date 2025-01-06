@@ -1678,40 +1678,6 @@ void *Realloc(void *p, int size)
 	return ret;
 }
 
-/****************************************************************************
-open a socket of the specified type, port and address for incoming data
-****************************************************************************/
-int open_socket_in(int type, int port, int dlevel, in_addr_t socket_addr)
-{
-	struct sockaddr_in sock;
-	int one = 1;
-	int res;
-
-	res = socket(AF_INET, SOCK_STREAM, 0);
-	if (res == -1) {
-		DEBUG(0, ("socket failed\n"));
-		return -1;
-	}
-
-	setsockopt(res, SOL_SOCKET, SO_REUSEADDR, (char *) &one, sizeof(one));
-
-	sock.sin_family = AF_INET;
-	sock.sin_port = htons(port);
-	sock.sin_addr.s_addr = socket_addr;
-
-	/* now we've got a socket - we need to bind it */
-	if (bind(res, (struct sockaddr *) &sock, sizeof(sock)) < 0) {
-		DEBUG(dlevel, ("bind failed on port %d socket_addr=%s (%s)\n",
-		               port, inet_ntoa(sock.sin_addr),
-		               strerror(errno)));
-		close(res);
-
-		return -1;
-	}
-	DEBUG(3, ("bind succeeded on port %d\n", port));
-
-	return res;
-}
 /*******************************************************************
  return the IP addr of the client as a string
  ******************************************************************/
