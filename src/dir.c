@@ -513,22 +513,23 @@ open a directory
 void *OpenDir(int cnum, char *name)
 {
 	Dir *dirp;
-	char *n;
-	void *p = opendir(name);
+	struct dirent *de;
+	DIR *d = opendir(name);
 	int used = 0;
 
-	if (!p)
+	if (d == NULL) {
 		return NULL;
+	}
 	dirp = (Dir *) malloc(sizeof(Dir));
 	if (!dirp) {
-		closedir(p);
+		closedir(d);
 		return NULL;
 	}
 	dirp->pos = dirp->numentries = dirp->mallocsize = 0;
 	dirp->data = dirp->current = NULL;
 
-	while ((n = readdirname(p))) {
-		int l = strlen(n) + 1;
+	while ((de = readdir(d)) != NULL) {
+		int l = strlen(de->d_name) + 1;
 
 		if (used + l > dirp->mallocsize) {
 			int s = MAX(used + l, used + 2000);
@@ -542,12 +543,12 @@ void *OpenDir(int cnum, char *name)
 			dirp->mallocsize = s;
 			dirp->current = dirp->data;
 		}
-		pstrcpy(dirp->data + used, n);
+		pstrcpy(dirp->data + used, de->d_name);
 		used += l;
 		dirp->numentries++;
 	}
 
-	closedir(p);
+	closedir(d);
 	return (void *) dirp;
 }
 

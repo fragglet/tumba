@@ -1511,29 +1511,6 @@ void BlockSignals(bool block, int signum)
 }
 
 /*******************************************************************
-a readdir wrapper which just returns the file name
-also return the inode number if requested
-********************************************************************/
-char *readdirname(void *p)
-{
-	static pstring buf;
-	struct dirent *ptr;
-	char *dname;
-
-	if (!p)
-		return NULL;
-
-	ptr = (struct dirent *) readdir(p);
-	if (!ptr)
-		return NULL;
-
-	dname = ptr->d_name;
-
-	pstrcpy(buf, dname);
-	return buf;
-}
-
-/*******************************************************************
 safe string copy into a known length string
 dest_size is the size of the destination buffer
 ********************************************************************/
