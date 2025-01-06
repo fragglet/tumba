@@ -1745,43 +1745,24 @@ int open_socket_in(int type, int port, int dlevel, uint32_t socket_addr)
 
 	return res;
 }
-
-static bool global_client_name_done = false;
-static bool global_client_addr_done = false;
-
-void reset_globals_after_fork(void)
-{
-	global_client_name_done = false;
-	global_client_addr_done = false;
-}
-
 /*******************************************************************
  return the IP addr of the client as a string
  ******************************************************************/
-char *client_addr(void)
+const char *client_addr(void)
 {
 	struct sockaddr_in sockin;
-	static fstring addr_buf;
 	socklen_t length = sizeof(sockin);
 
-	if (global_client_addr_done)
-		return addr_buf;
-
-	fstrcpy(addr_buf, "0.0.0.0");
-
 	if (Client == -1) {
-		return addr_buf;
+		return "(no client)";
 	}
 
 	if (getpeername(Client, (struct sockaddr *) &sockin, &length) < 0) {
 		DEBUG(0, ("getpeername failed\n"));
-		return addr_buf;
+		return "(error getting peer address)";
 	}
 
-	fstrcpy(addr_buf, (char *) inet_ntoa(sockin.sin_addr));
-
-	global_client_addr_done = true;
-	return addr_buf;
+	return inet_ntoa(sockin.sin_addr);
 }
 
 /*******************************************************************

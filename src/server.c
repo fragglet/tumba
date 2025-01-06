@@ -1608,10 +1608,6 @@ static bool open_sockets(int port)
 
 			set_keepalive_option(Client);
 
-			/* Reset global variables in util.c so
-			   that client substitutions will be done
-			   correctly in the process. */
-			reset_globals_after_fork();
 			return true;
 		}
 		close(Client); /* The parent doesn't need this socket */
