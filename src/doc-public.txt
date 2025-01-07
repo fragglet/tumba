@@ -1,0 +1,8 @@
+This directory is a publicly-accessible read/write share. Be aware that
+anything put into this directory can be read, written or deleted by
+other clients on the network.
+
+The share is made read/write by the write permissions on the directory.
+The following command will convert it to a readonly share:
+
+  chmod o-w /var/rumba/public

@@ -1,9 +1,7 @@
 
 DESTDIR =
 PREFIX = /usr/local
-
-SHAREDIR = $(PREFIX)/share
-LIBDIR = $(PREFIX)/lib
+DATADIR = /var/rumba
 
 SMBLOGFILE = /var/log/rumba_smbd.log
 
@@ -54,6 +52,10 @@ install:
 	install -m 755 rumba_smbd $(DESTDIR)$(PREFIX)/bin/rumba_smbd
 	mkdir -p $(DESTDIR)$(PREFIX)/lib/systemd/system
 	install -m 644 rumba_smbd.service $(DESTDIR)$(PREFIX)/lib/systemd/system/rumba_smbd.service
+	mkdir -m 777 -p $(DESTDIR)$(DATADIR)/public
+	install -m 666 doc-public.txt $(DESTDIR)$(DATADIR)/public/README.txt
+	mkdir -m 755 -p $(DESTDIR)$(DATADIR)/readonly
+	install -m 644 doc-readonly.txt $(DESTDIR)$(DATADIR)/readonly/README.txt
 
 .PHONY: clean format all install
 

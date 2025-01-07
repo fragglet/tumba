@@ -4,7 +4,7 @@ Description=Rumba SMB server
 
 [Service]
 User=nobody
-ExecStart=rumba_smbd
+ExecStart=sh -c "exec rumba_smbd /var/rumba/*"
 Restart=on-failure
 PrivateTmp=true
 SocketBindAllow=ipv4:tcp:139
