@@ -219,7 +219,7 @@ int dos_mode(int cnum, char *path, struct stat *sbuf)
 	if (CAN_WRITE(cnum)) {
 		if ((sbuf->st_mode & S_IWOTH) == 0 &&
 		    ((sbuf->st_mode & S_IWUSR) == 0 ||
-		     geteuid() == sbuf->st_uid)) {
+		     geteuid() != sbuf->st_uid)) {
 			result |= aRONLY;
 		}
 	} else if ((sbuf->st_mode & S_IWUSR) == 0) {
