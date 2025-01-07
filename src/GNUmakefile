@@ -1,5 +1,5 @@
 
-# The base directory for all samba files
+DESTDIR =
 PREFIX = /usr/local
 
 SHAREDIR = $(PREFIX)/share
@@ -49,6 +49,12 @@ clean:
 format:
 	clang-format -i *.[ch]
 
-.PHONY: clean format all
+install:
+	mkdir -p $(DESTDIR)$(PREFIX)/bin
+	install -m 755 rumba_smbd $(DESTDIR)$(PREFIX)/bin/rumba_smbd
+	mkdir -p $(DESTDIR)$(PREFIX)/lib/systemd/system
+	install -m 644 rumba_smbd.service $(DESTDIR)$(PREFIX)/lib/systemd/system/rumba_smbd.service
+
+.PHONY: clean format all install
 
 -include $(DEPS)
