@@ -91,9 +91,9 @@ static void send_trans_reply(char *outbuf, char *data, char *param,
 	int align;
 
 	this_lparam =
-	    MIN(lparam, max_send - (500 + lsetup * SIZEOFWORD)); /* hack */
+	    MIN(lparam, max_send - (500 + lsetup * sizeof(uint16_t))); /* hack */
 	this_ldata =
-	    MIN(ldata, max_send - (500 + lsetup * SIZEOFWORD + this_lparam));
+	    MIN(ldata, max_send - (500 + lsetup * sizeof(uint16_t) + this_lparam));
 
 #ifdef CONFUSE_NETMONITOR_MSRPC_DECODING
 	/* if you don't want Net Monitor to decode your packets, do this!!! */
@@ -120,7 +120,7 @@ static void send_trans_reply(char *outbuf, char *data, char *param,
 	SSVAL(outbuf, smb_vwv8, 0);
 	SSVAL(outbuf, smb_vwv9, lsetup);
 	for (i = 0; i < lsetup; i++)
-		SSVAL(outbuf, smb_vwv10 + i * SIZEOFWORD, setup[i]);
+		SSVAL(outbuf, smb_vwv10 + i * sizeof(uint16_t), setup[i]);
 
 	show_msg(outbuf);
 	send_smb(Client, outbuf);
@@ -788,7 +788,7 @@ int reply_trans(char *inbuf, char *outbuf, int size, int bufsize)
 		int i;
 		setup = (uint16_t *) malloc(suwcnt * sizeof(setup[0]));
 		for (i = 0; i < suwcnt; i++)
-			setup[i] = SVAL(inbuf, smb_vwv14 + i * SIZEOFWORD);
+			setup[i] = SVAL(inbuf, smb_vwv14 + i * sizeof(uint16_t));
 	}
 
 	if (pscnt < tpscnt || dscnt < tdscnt) {

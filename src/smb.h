@@ -39,8 +39,6 @@
 /* limiting size of ipc replies */
 #define REALLOC(ptr, size) Realloc(ptr, MAX((size), 4 * 1024))
 
-#define SIZEOFWORD 2
-
 /* how long to wait for secondary SMB packets (milli-seconds) */
 #define SMB_SECONDARY_WAIT (60 * 1000)
 

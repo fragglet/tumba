@@ -861,7 +861,7 @@ resume_key = %d resume name = %s continue=%d level = %d\n",
 	bzero(pdata, max_data_bytes);
 
 	/* Realloc the params space */
-	params = *pparams = Realloc(*pparams, 6 * SIZEOFWORD);
+	params = *pparams = Realloc(*pparams, 6 * sizeof(uint16_t));
 	if (!params)
 		return ERROR(ERRDOS, ERRnomem);
 
