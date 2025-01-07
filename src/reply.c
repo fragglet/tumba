@@ -2414,7 +2414,7 @@ int reply_mv(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 		if (resolve_wildcards(directory, newname) &&
 		    can_rename(directory, cnum) && !file_exist(newname, NULL) &&
-		    rename(directory, newname) != 0) {
+		    rename(directory, newname) == 0) {
 			count++;
 		}
 
@@ -2473,7 +2473,7 @@ int reply_mv(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 					error = 183;
 					continue;
 				}
-				if (rename(fname, destname) != 0) {
+				if (rename(fname, destname) == 0) {
 					count++;
 				}
 				DEBUG(3,
