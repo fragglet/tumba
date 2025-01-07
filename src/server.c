@@ -25,7 +25,7 @@
 #define RUN_AS_USER    "nobody"
 #define DOSATTRIB_NAME "user.DOSATTRIB"
 
-#define MAX_MUX            50
+#define MAX_MUX 50
 
 extern pstring debugf;
 extern bool append_log;

@@ -251,7 +251,6 @@ void mangle_name_83(char *s, int s_len)
 		fstrcat(s, extension);
 	}
 	DEBUG(5, ("%s\n", s));
-
 }
 
 /*******************************************************************

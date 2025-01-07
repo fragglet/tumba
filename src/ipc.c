@@ -39,15 +39,15 @@ extern const char *workgroup;
 #define NERR_Success      0
 #define NERR_notsupported 50
 
-#define NERR_BASE           (2100)
-#define NERR_BufTooSmall    (NERR_BASE + 23)
-#define ERROR_MORE_DATA     234
+#define NERR_BASE        (2100)
+#define NERR_BufTooSmall (NERR_BASE + 23)
+#define ERROR_MORE_DATA  234
 
 #define ACCESS_READ   0x01
 #define ACCESS_WRITE  0x02
 #define ACCESS_CREATE 0x04
 
-#define SHPWLEN 8  /* share password length */
+#define SHPWLEN 8 /* share password length */
 
 extern int Client;
 extern int smb_read_error;
@@ -90,10 +90,10 @@ static void send_trans_reply(char *outbuf, char *data, char *param,
 	int tot_data = 0, tot_param = 0;
 	int align;
 
-	this_lparam =
-	    MIN(lparam, max_send - (500 + lsetup * sizeof(uint16_t))); /* hack */
-	this_ldata =
-	    MIN(ldata, max_send - (500 + lsetup * sizeof(uint16_t) + this_lparam));
+	this_lparam = MIN(
+	    lparam, max_send - (500 + lsetup * sizeof(uint16_t))); /* hack */
+	this_ldata = MIN(
+	    ldata, max_send - (500 + lsetup * sizeof(uint16_t) + this_lparam));
 
 #ifdef CONFUSE_NETMONITOR_MSRPC_DECODING
 	/* if you don't want Net Monitor to decode your packets, do this!!! */
@@ -788,7 +788,8 @@ int reply_trans(char *inbuf, char *outbuf, int size, int bufsize)
 		int i;
 		setup = (uint16_t *) malloc(suwcnt * sizeof(setup[0]));
 		for (i = 0; i < suwcnt; i++)
-			setup[i] = SVAL(inbuf, smb_vwv14 + i * sizeof(uint16_t));
+			setup[i] =
+			    SVAL(inbuf, smb_vwv14 + i * sizeof(uint16_t));
 	}
 
 	if (pscnt < tpscnt || dscnt < tdscnt) {
