@@ -4,6 +4,9 @@ Description=Rumba SMB server
 
 [Service]
 User=nobody
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=full
 ExecStart=sh -c "exec rumba_smbd /var/rumba/*"
 Restart=on-failure
 PrivateTmp=true
