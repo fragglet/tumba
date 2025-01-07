@@ -28,4 +28,4 @@ sed -i "s/HAVE_BSD_MD5_H/disabled_BSD_MD5_H/" lib/crypto/md5.h
             --without-gpgme \
             --without-syslog \
             --without-ldap
-make smbtorture3
+make "${@:-smbtorture3}"
