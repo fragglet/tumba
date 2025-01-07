@@ -28,6 +28,7 @@
 #define MAX_MUX            50
 
 extern pstring debugf;
+extern bool append_log;
 
 static char *InBuffer = NULL;
 static char *OutBuffer = NULL;
@@ -2959,10 +2960,9 @@ int main(int argc, char *argv[])
 		case 'l':
 			pstrcpy(debugf, optarg);
 			break;
-		case 'a': {
-			extern bool append_log;
+		case 'a':
 			append_log = !append_log;
-		} break;
+			break;
 		case 'd':
 			if (*optarg == 'A')
 				DEBUGLEVEL = 10000;

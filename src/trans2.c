@@ -1037,6 +1037,7 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
 	int data_len;
 	struct stat st;
 	const struct share *share = CONN_SHARE(cnum);
+	int dfree, dsize, bsize, volname_len;
 	char *vname = share->name;
 
 	DEBUG(3, ("call_trans2qfsinfo: cnum = %d, level = %d\n", cnum,
@@ -1052,8 +1053,7 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
 	bzero(pdata, 1024);
 
 	switch (info_level) {
-	case 1: {
-		int dfree, dsize, bsize;
+	case 1:
 		data_len = 18;
 		sys_disk_free(".", &bsize, &dfree, &dsize);
 		SIVAL(pdata, l1_idFileSystem, st.st_dev);
@@ -1066,10 +1066,9 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
 		       "cUnit=%d, cUnitAvail=%d, cbSector=%d\n",
 		       bsize, st.st_dev, bsize / 512, dsize, dfree, 512));
 		break;
-	}
-	case 2: {
+	case 2:
 		/* Return volume name */
-		int volname_len = MIN(strlen(vname), 11);
+		volname_len = MIN(strlen(vname), 11);
 		data_len = l2_vol_szVolLabel + volname_len + 1;
 		/*
 		 * Add volume serial number - hash of a combination of
@@ -1084,7 +1083,6 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
 		          "= %s\n",
 		          st.st_ctime, volname_len, pdata + l2_vol_szVolLabel));
 		break;
-	}
 	case SMB_QUERY_FS_ATTRIBUTE_INFO:
 		data_len = 12 + 2 * strlen(FSTYPE_STRING);
 		SIVAL(pdata, 0,
@@ -1113,15 +1111,14 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
 		          "namelen = %d, vol = %s\n",
 		          strlen(vname), vname));
 		break;
-	case SMB_QUERY_FS_SIZE_INFO: {
-		int dfree, dsize, bsize;
+	case SMB_QUERY_FS_SIZE_INFO:
 		data_len = 24;
 		sys_disk_free(".", &bsize, &dfree, &dsize);
 		SIVAL(pdata, 0, dsize);
 		SIVAL(pdata, 8, dfree);
 		SIVAL(pdata, 16, bsize / 512);
 		SIVAL(pdata, 20, 512);
-	} break;
+		break;
 	case SMB_QUERY_FS_DEVICE_INFO:
 		data_len = 8;
 		SIVAL(pdata, 0, 0); /* dev type */
@@ -1307,7 +1304,7 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
 		break;
 
 	/* Get the 8.3 name - used if NT SMB was negotiated. */
-	case SMB_QUERY_FILE_ALT_NAME_INFO: {
+	case SMB_QUERY_FILE_ALT_NAME_INFO:
 		pstring short_name;
 		pstrcpy(short_name, fname);
 		/* Mangle if not already 8.3 */
@@ -1320,7 +1317,7 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
 		l = strlen(pdata + 4);
 		data_size = 4 + l;
 		SIVAL(pdata, 0, l);
-	} break;
+		break;
 
 	case SMB_QUERY_FILE_NAME_INFO:
 		data_size = 4 + l;
@@ -1470,7 +1467,7 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 
 	switch (info_level) {
 	case SMB_INFO_STANDARD:
-	case SMB_INFO_QUERY_EA_SIZE: {
+	case SMB_INFO_QUERY_EA_SIZE:
 		/* access time */
 		tvs.actime = make_unix_date2(pdata + l1_fdateLastAccess);
 
@@ -1480,7 +1477,6 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 		mode = SVAL(pdata, l1_attrFile);
 		size = IVAL(pdata, l1_cbFile);
 		break;
-	}
 
 	/* XXXX um, i don't think this is right.
 	   it's also not in the cifs6.txt spec.
@@ -1500,7 +1496,7 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 		mode = IVAL(pdata, 24);
 		break;
 
-	case SMB_SET_FILE_BASIC_INFO: {
+	case SMB_SET_FILE_BASIC_INFO:
 		/* Ignore create time at offset pdata. */
 
 		/* access time */
@@ -1513,14 +1509,12 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 		/* attributes */
 		mode = IVAL(pdata, 32);
 		break;
-	}
 
-	case SMB_SET_FILE_END_OF_FILE_INFO: {
+	case SMB_SET_FILE_END_OF_FILE_INFO:
 		if (IVAL(pdata, 4) != 0) /* more than 32 bits? */
 			return ERROR(ERRDOS, ERRunknownlevel);
 		size = IVAL(pdata, 0);
 		break;
-	}
 
 	case SMB_SET_FILE_DISPOSITION_INFO: /* not supported yet */
 	case SMB_SET_FILE_ALLOCATION_INFO:  /* not supported yet */
