@@ -41,13 +41,6 @@ static inline char *lp_serverstring(void)
 	return "Rumba " VERSION;
 }
 
-// This option allows you to control what address Samba will listen for
-// connections on.
-static inline char *lp_socket_address(void)
-{
-	return "0.0.0.0";
-}
-
 // This parameter controls whether or not the server will support raw reads
 // when transferring data to clients.
 static inline bool lp_readraw(void)

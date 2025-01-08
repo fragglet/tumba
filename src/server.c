@@ -64,6 +64,7 @@ static int max_file_fd_used = 0;
 extern int Protocol;
 
 const char *workgroup = "WORKGROUP";
+static const char *bind_addr = "0.0.0.0";
 
 /*
  * Size of data we can send to client. Set
@@ -1595,7 +1596,7 @@ static bool is_private_peer(void)
 ****************************************************************************/
 static bool open_sockets(int port)
 {
-	in_addr_t bind_addr;
+	struct in_addr addr;
 	int server_socket;
 
 	/* Stop zombies */
@@ -1604,16 +1605,15 @@ static bool open_sockets(int port)
 	atexit(killkids);
 
 	/* open an incoming socket */
-	bind_addr = inet_addr(lp_socket_address());
-	if (bind_addr == INADDR_NONE) {
-		DEBUG(0, ("open_sockets: invalid bind adress %s\n",
-		          lp_socket_address()));
+	if (inet_aton(bind_addr, &addr) == 0) {
+		DEBUG(0, ("open_sockets: failed to parse bind address %s\n",
+		bind_addr));
 		return false;
 	}
-
-	server_socket = open_server_socket(SOCK_STREAM, port, 0, bind_addr);
-	if (server_socket == -1)
+	server_socket = open_server_socket(SOCK_STREAM, port, 0, addr.s_addr);
+	if (server_socket == -1) {
 		return false;
+	}
 
 	drop_privileges();
 
@@ -2972,6 +2972,7 @@ static void usage(void)
 	       "[-d debuglevel] [-l log basename]\n"
 	       "                  <path> [paths...]\n\n"
 	       "   -a                allow connections from all addresses\n"
+	       "   -b addr           bind to given address\n"
 	       "   -p port           listen on the specified port\n"
 	       "   -d debuglevel     set the debuglevel\n"
 	       "   -l log basename.  basename for log/debug files\n"
@@ -3002,10 +3003,13 @@ int main(int argc, char *argv[])
 
 	signal(SIGTERM, SIGNAL_CAST dflt_sig);
 
-	while ((opt = getopt(argc, argv, "l:d:p:haW:")) != EOF) {
+	while ((opt = getopt(argc, argv, "b:l:d:p:haW:")) != EOF) {
 		switch (opt) {
 		case 'a':
 			allow_public_connections = true;
+			break;
+		case 'b':
+			bind_addr = optarg;
 			break;
 		case 'l':
 			pstrcpy(debugf, optarg);
