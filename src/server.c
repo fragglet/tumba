@@ -28,7 +28,6 @@
 #define MAX_MUX 50
 
 extern pstring debugf;
-extern bool append_log;
 
 static bool allow_public_connections = false;
 
@@ -2969,7 +2968,6 @@ static void usage(char *pname)
 	printf("\t-p port               listen on the specified port\n");
 	printf("\t-d debuglevel         set the debuglevel\n");
 	printf("\t-l log basename.      Basename for log/debug files\n");
-	printf("\t-a                    overwrite log file, don't append\n");
 	printf("\t-W workgroup          Override workgroup name\n");
 	printf("\n");
 }
@@ -2979,7 +2977,6 @@ static void usage(char *pname)
 ****************************************************************************/
 int main(int argc, char *argv[])
 {
-	extern bool append_log;
 	int port = SMB_PORT;
 	int opt;
 	extern char *optarg;
@@ -2987,8 +2984,6 @@ int main(int argc, char *argv[])
 #ifdef NEED_AUTH_PARAMETERS
 	set_auth_parameters(argc, argv);
 #endif
-
-	append_log = true;
 
 	time_init();
 
@@ -3004,9 +2999,6 @@ int main(int argc, char *argv[])
 		switch (opt) {
 		case 'l':
 			pstrcpy(debugf, optarg);
-			break;
-		case 'a':
-			append_log = !append_log;
 			break;
 		case 'd':
 			if (*optarg == 'A')

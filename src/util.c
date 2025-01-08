@@ -62,8 +62,6 @@ void setup_logging(char *pname, bool interactive)
 	}
 }
 
-bool append_log = false;
-
 /****************************************************************************
 reopen the log files
 ****************************************************************************/
@@ -83,10 +81,7 @@ void reopen_logs(void)
 			pstrcpy(debugf, fname);
 			if (dbf)
 				fclose(dbf);
-			if (append_log)
-				dbf = fopen(debugf, "a");
-			else
-				dbf = fopen(debugf, "w");
+			dbf = fopen(debugf, "a");
 			/*
 			 * Fix from klausr@ITAP.Physik.Uni-Stuttgart.De
 			 * to fix problem where smbd's that generate less
@@ -172,10 +167,7 @@ int Debug1(char *format_str, ...)
 
 	if (!dbf) {
 		int oldumask = umask(022);
-		if (append_log)
-			dbf = fopen(debugf, "a");
-		else
-			dbf = fopen(debugf, "w");
+		dbf = fopen(debugf, "a");
 		umask(oldumask);
 		if (dbf) {
 			setbuf(dbf, NULL);
