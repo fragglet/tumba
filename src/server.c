@@ -2965,6 +2965,7 @@ static void usage(char *pname)
 	       "<path> [paths...]\n",
 	       pname);
 	printf("Version %s\n", VERSION);
+	printf("\t-a                    allow connections from all addresses\n");
 	printf("\t-p port               listen on the specified port\n");
 	printf("\t-d debuglevel         set the debuglevel\n");
 	printf("\t-l log basename.      Basename for log/debug files\n");
@@ -2997,6 +2998,9 @@ int main(int argc, char *argv[])
 
 	while ((opt = getopt(argc, argv, "l:d:p:haW:")) != EOF) {
 		switch (opt) {
+		case 'a':
+			allow_public_connections = true;
+			break;
 		case 'l':
 			pstrcpy(debugf, optarg);
 			break;
