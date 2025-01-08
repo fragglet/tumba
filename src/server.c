@@ -30,6 +30,8 @@
 extern pstring debugf;
 extern bool append_log;
 
+static bool allow_public_connections = false;
+
 static char *InBuffer = NULL;
 static char *OutBuffer = NULL;
 static char *last_inbuf = NULL;
@@ -46,6 +48,7 @@ extern int DEBUGLEVEL;
 static time_t smb_last_time = (time_t) 0;
 
 extern int smb_read_error;
+extern int Client;
 
 connection_struct Connections[MAX_CONNECTIONS];
 files_struct Files[MAX_OPEN_FILES];
@@ -1554,13 +1557,46 @@ static int open_server_socket(int type, int port, int dlevel,
 
 	return res;
 }
+
+/* is_private_peer checks if the connecting client comes either from a
+ * localhost address or from one of the RFC 1918 private ranges. */
+static bool is_private_peer(void)
+{
+	struct sockaddr_in sockin;
+	socklen_t length = sizeof(sockin);
+	int i;
+	const struct {
+		in_addr_t addr;
+		int bits;
+	} ranges[] = {
+	    {inet_addr("10.0.0.0"), 8},
+	    {inet_addr("192.168.0.0"), 16},
+	    {inet_addr("172.16.0.0"), 20},
+	    {inet_addr("127.0.0.1"), 8},
+	};
+
+	if (getpeername(Client, (struct sockaddr *) &sockin, &length) < 0) {
+		DEBUG(0, ("is_private_peer: getpeername failed\n"));
+		return false;
+	}
+
+	for (i = 0; i < sizeof(ranges) / sizeof(*ranges); i++) {
+		in_addr_t mask = ~((1 << (32 - ranges[i].bits)) - 1);
+		if ((ntohl(sockin.sin_addr.s_addr) & mask) ==
+		    (ntohl(ranges[i].addr) & mask)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 /****************************************************************************
   open the socket communication
 ****************************************************************************/
 static bool open_sockets(int port)
 {
 	in_addr_t bind_addr;
-	extern int Client;
 	int server_socket;
 
 	/* Stop zombies */
@@ -1619,6 +1655,19 @@ static bool open_sockets(int port)
 		if (Client == -1) {
 			DEBUG(0,
 			      ("open_sockets: accept: %s\n", strerror(errno)));
+			continue;
+		}
+
+		/* The BSD sockets API does not provide any way to reject TCP
+		   connections, the best we can do is to accept the connection
+		   and then immediately close it. By default we only allow
+		   connections from local peers on the same private IP range. */
+		if (!allow_public_connections && !is_private_peer()) {
+			DEBUG(0, ("open_sockets: rejecting connection from "
+			          "public IP address %s\n",
+			          client_addr()));
+			close(Client);
+			Client = -1;
 			continue;
 		}
 
