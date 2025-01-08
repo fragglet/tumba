@@ -58,6 +58,19 @@ purely for fun and personal use by hobbyists and retro enthusiasts. You should
   fork of Samba and its many, many features. This aims to do one thing and do
   it well, which is to share files with old machines.
 
+* **How do I configure this? Is there an equivalent to `smb.conf`?** Since
+  there are very few configuration options, there is no configuration file.
+  Instead, it is configured like a traditional Unix daemon, with command line
+  arguments.
+
+* **Okay, how do I create a share?** A list of directories to share is given on
+  the command line. The included systemd service file automatically shares all
+  directories found in `/var/rumba`, so you just need to create a subdirectory
+  there and restart the server.
+
+* **My share is read-only, how do I make it read/write?** You can do this using
+  the `chmod` command, eg. `chmod o+w /var/samba/myshare`
+
 * **Why can't I connect from a public IP address?** Since there is no support
   for password authentication, all shares are publicly accessible. By default,
   Rumba only allows connections either from localhost (127.0.0.1) or from IPs
