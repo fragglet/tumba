@@ -216,6 +216,7 @@ int reply_tcon_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	pstring devicename;
 	int connection_num;
 	int passlen = SVAL(inbuf, smb_vwv3);
+	char *path, *p;
 
 	*service = *user = *password = *devicename = 0;
 
@@ -223,24 +224,21 @@ int reply_tcon_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	if ((SVAL(inbuf, smb_vwv2) & 0x1) != 0)
 		close_cnum(SVAL(inbuf, smb_tid));
 
-	{
-		char *path = smb_buf(inbuf) + passlen;
-		char *p;
+	path = smb_buf(inbuf) + passlen;
 
-		fstrcpy(service, path + 2);
-		p = strchr(service, '\\');
-		if (!p)
-			return ERROR(ERRSRV, ERRinvnetname);
-		*p = 0;
-		fstrcpy(service, p + 1);
-		p = strchr(service, '%');
-		if (p) {
-			*p++ = 0;
-			fstrcpy(user, p);
-		}
-		strlcpy(devicename, path + strlen(path) + 1, 7);
-		DEBUG(4, ("Got device type %s\n", devicename));
+	fstrcpy(service, path + 2);
+	p = strchr(service, '\\');
+	if (!p)
+		return ERROR(ERRSRV, ERRinvnetname);
+	*p = 0;
+	fstrcpy(service, p + 1);
+	p = strchr(service, '%');
+	if (p) {
+		*p++ = 0;
+		fstrcpy(user, p);
 	}
+	strlcpy(devicename, path + strlen(path) + 1, 7);
+	DEBUG(4, ("Got device type %s\n", devicename));
 
 	connection_num = make_connection(service, devicename);
 
@@ -658,31 +656,23 @@ int reply_search(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	}
 
 	/* turn strings of spaces into a . */
-	{
+	trim_string(mask, NULL, " ");
+	if ((p = strrchr(mask, ' '))) {
+		fstring ext;
+		fstrcpy(ext, p + 1);
+		*p = 0;
 		trim_string(mask, NULL, " ");
-		if ((p = strrchr(mask, ' '))) {
-			fstring ext;
-			fstrcpy(ext, p + 1);
-			*p = 0;
-			trim_string(mask, NULL, " ");
-			pstrcat(mask, ".");
-			pstrcat(mask, ext);
-		}
+		pstrcat(mask, ".");
+		pstrcat(mask, ext);
 	}
 
 	/* Convert the formatted mask. (This code lives in trans2.c) */
 	mask_convert(mask);
 
-	{
-		p = mask;
-		while (*p) {
-			if (*p != '?' && *p != '*' && !isdoschar(*p)) {
-				DEBUG(5, ("Invalid char [%c] in search "
-				          "mask?\n",
-				          *p));
-				*p = '?';
-			}
-			p++;
+	for (p = mask; *p != '\0'; ++p) {
+		if (*p != '?' && *p != '*' && !isdoschar(*p)) {
+			DEBUG(5, ("Invalid char [%c] in search mask?\n", *p));
+			*p = '?';
 		}
 	}
 

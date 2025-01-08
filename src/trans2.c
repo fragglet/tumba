@@ -1172,6 +1172,7 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
 	unsigned int data_size;
 	struct stat sbuf;
 	pstring fname1;
+	time_t create_time;
 	char *fname;
 	char *p;
 	int l, pos;
@@ -1279,10 +1280,8 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
 		SIVAL(pdata, 32, mode);
 
 		DEBUG(5, ("SMB_QFBI - "));
-		{
-			time_t create_time = get_create_time(&sbuf);
-			DEBUG(5, ("create: %s ", ctime(&create_time)));
-		}
+		create_time = get_create_time(&sbuf);
+		DEBUG(5, ("create: %s ", ctime(&create_time)));
 		DEBUG(5, ("access: %s ", ctime(&sbuf.st_atime)));
 		DEBUG(5, ("write: %s ", ctime(&sbuf.st_mtime)));
 		DEBUG(5, ("change: %s ", ctime(&sbuf.st_mtime)));

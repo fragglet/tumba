@@ -84,7 +84,7 @@ return true if a name is in 8.3 dos format
 bool is_8_3(char *fname, bool check_case)
 {
 	int len;
-	char *dot_pos;
+	char *dot_pos, *p;
 	char *slash_pos = strrchr(fname, '/');
 	int l;
 
@@ -113,17 +113,12 @@ bool is_8_3(char *fname, bool check_case)
 
 	dot_pos = strchr(fname, '.');
 
-	{
-		char *p = fname;
-
-		dot_pos = 0;
-		while (*p) {
-			if (*p == '.' && !dot_pos)
-				dot_pos = (char *) p;
-			if (!isdoschar(*p))
-				return false;
-			p++;
-		}
+	dot_pos = 0;
+	for (p = fname; *p != '\0'; ++p) {
+		if (*p == '.' && !dot_pos)
+			dot_pos = (char *) p;
+		if (!isdoschar(*p))
+			return false;
 	}
 
 	/* no dot and less than 9 means OK */

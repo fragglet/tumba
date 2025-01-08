@@ -1899,11 +1899,8 @@ int make_connection(char *service, char *dev)
 
 	num_connections_open++;
 
-	{
-		DEBUG(1,
-		      ("%s (%s) connect to service %s (pid %d)\n", timestring(),
-		       client_addr(), CONN_SHARE(cnum)->name, (int) getpid()));
-	}
+	DEBUG(1, ("%s (%s) connect to service %s (pid %d)\n", timestring(),
+	          client_addr(), CONN_SHARE(cnum)->name, (int) getpid()));
 
 	return cnum;
 }
@@ -2567,7 +2564,7 @@ int chain_reply(char *inbuf, char *outbuf, int size, int bufsize)
 	int smb_com1, smb_com2 = CVAL(inbuf, smb_vwv0);
 	unsigned smb_off2 = SVAL(inbuf, smb_vwv1);
 	char *inbuf2, *outbuf2;
-	int outsize2;
+	int outsize2, ofs;
 	char inbuf_saved[smb_wct];
 	char outbuf_saved[smb_wct];
 	extern int chain_size;
@@ -2646,12 +2643,10 @@ int chain_reply(char *inbuf, char *outbuf, int size, int bufsize)
 	/* restore the saved data, being careful not to overwrite any
 	 data from the reply header */
 	memcpy(inbuf2, inbuf_saved, smb_wct);
-	{
-		int ofs = smb_wct - PTR_DIFF(outbuf2, orig_outbuf);
-		if (ofs < 0)
-			ofs = 0;
-		memmove(outbuf2 + ofs, outbuf_saved + ofs, smb_wct - ofs);
-	}
+	ofs = smb_wct - PTR_DIFF(outbuf2, orig_outbuf);
+	if (ofs < 0)
+		ofs = 0;
+	memmove(outbuf2 + ofs, outbuf_saved + ofs, smb_wct - ofs);
 
 	return outsize2;
 }
