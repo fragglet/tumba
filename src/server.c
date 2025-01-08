@@ -2962,21 +2962,21 @@ static void init_structs(void)
 /****************************************************************************
 usage on the program
 ****************************************************************************/
-static void usage(char *pname)
+static void usage(void)
 {
 	DEBUG(0, ("Incorrect program usage - are you sure the command line is "
 	          "correct?\n"));
 
-	printf("Usage: %s [-D] [-p port] [-d debuglevel] [-l log basename] "
-	       "<path> [paths...]\n",
-	       pname);
-	printf("Version %s\n", VERSION);
-	printf("\t-a                allow connections from all addresses\n");
-	printf("\t-p port           listen on the specified port\n");
-	printf("\t-d debuglevel     set the debuglevel\n");
-	printf("\t-l log basename.  basename for log/debug files\n");
-	printf("\t-W workgroup      override workgroup name\n");
-	printf("\n");
+	printf("Rumba version " VERSION "\n"
+	       "Usage: rumba_smbd [-a] [-W workgroup] [-p port] "
+	       "[-d debuglevel] [-l log basename]\n"
+	       "                  <path> [paths...]\n\n"
+	       "   -a                allow connections from all addresses\n"
+	       "   -p port           listen on the specified port\n"
+	       "   -d debuglevel     set the debuglevel\n"
+	       "   -l log basename.  basename for log/debug files\n"
+	       "   -W workgroup      override workgroup name\n"
+	       "\n");
 }
 
 /****************************************************************************
@@ -3020,21 +3020,21 @@ int main(int argc, char *argv[])
 			port = atoi(optarg);
 			break;
 		case 'h':
-			usage(argv[0]);
+			usage();
 			exit(0);
 			break;
 		case 'W':
 			workgroup = optarg;
 			break;
 		default:
-			usage(argv[0]);
+			usage();
 			exit(1);
 		}
 	}
 
 	/* User must specify at least one path to share */
 	if (optind == argc) {
-		usage(argv[0]);
+		usage();
 		exit(1);
 	}
 
