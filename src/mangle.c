@@ -103,16 +103,6 @@ bool is_8_3(char *fname, bool check_case)
 		return false;
 
 	/* can't contain invalid dos chars */
-	/* Windows use the ANSI charset.
-	   But filenames are translated in the PC charset.
-	   This Translation may be more or less relaxed depending
-	   the Windows application. */
-
-	/* %%% A nice improvment to name mangling would be to translate
-	   filename to ANSI charset on the smb server host */
-
-	dot_pos = strchr(fname, '.');
-
 	dot_pos = 0;
 	for (p = fname; *p != '\0'; ++p) {
 		if (*p == '.' && !dot_pos)
@@ -122,7 +112,7 @@ bool is_8_3(char *fname, bool check_case)
 	}
 
 	/* no dot and less than 9 means OK */
-	if (!dot_pos)
+	if (dot_pos == NULL)
 		return len <= 8;
 
 	l = PTR_DIFF(dot_pos, fname);
