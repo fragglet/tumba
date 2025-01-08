@@ -27,13 +27,6 @@ static inline char *lp_logfile(void)
 	return "";
 }
 
-// This allows you to override the config file to use, instead of the default
-// (usually smb.conf).
-static inline char *lp_configfile(void)
-{
-	return "";
-}
-
 // This controls what string will show up in the printer comment box in print
 // manager and next to the IPC connection in "net view".
 static inline char *lp_serverstring(void)
