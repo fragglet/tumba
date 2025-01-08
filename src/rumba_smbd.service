@@ -9,7 +9,6 @@ ProtectHome=yes
 ProtectSystem=full
 ExecStart=sh -c "exec rumba_smbd /var/rumba/*"
 Restart=on-failure
-PrivateTmp=true
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 SocketBindAllow=ipv4:tcp:139
 
