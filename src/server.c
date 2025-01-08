@@ -2971,11 +2971,11 @@ static void usage(char *pname)
 	       "<path> [paths...]\n",
 	       pname);
 	printf("Version %s\n", VERSION);
-	printf("\t-a                    allow connections from all addresses\n");
-	printf("\t-p port               listen on the specified port\n");
-	printf("\t-d debuglevel         set the debuglevel\n");
-	printf("\t-l log basename.      Basename for log/debug files\n");
-	printf("\t-W workgroup          Override workgroup name\n");
+	printf("\t-a                allow connections from all addresses\n");
+	printf("\t-p port           listen on the specified port\n");
+	printf("\t-d debuglevel     set the debuglevel\n");
+	printf("\t-l log basename.  basename for log/debug files\n");
+	printf("\t-W workgroup      override workgroup name\n");
 	printf("\n");
 }
 
