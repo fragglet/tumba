@@ -43,16 +43,17 @@ purely for fun and personal use by hobbyists and retro enthusiasts. You should
 
 ## FAQ
 
-* **Why is there no support for password protected shares?** The old SMBv1 protocol
-  is very insecure, especially earlier versions. I made a deliberate decision not to
-  give the illusion of security that passwords would imply. Other methods such
-  as firewalls can be used to restrict access to shares if desired, though if
-  something is being shared that's important enough to *need* password protection,
-  you should be using a different protocol.
+* **Why is there no support for password protected shares?** The old SMBv1
+  protocol is very insecure, especially earlier versions. The cryptography is
+  essentially obsolete. I made a deliberate decision not to give the illusion
+  of security that passwords would imply. Other methods such as firewalls can
+  be used to restrict access to shares if desired, though if something is being
+  shared that's important enough to *need* password protection, you should be
+  using a different protocol.
 
-* **Why remove all the features of Samba?** Partly to make it a smaller and simpler
-  codebase, partly to intentionally deter any use of the project for serious use cases.
-  There are probably people out there still needing to use SMBv1 for various reasons
-  and I do **not** want to end up supporting a full fork of Samba and its many, many
-  features. This aims to do one thing and do it well, which is to share files with old
-  machines.
+* **Why remove all the features of Samba?** Partly to make it a smaller and
+  simpler codebase, partly to intentionally deter any use of the project for
+  serious use cases.  There are probably people out there still needing to use
+  SMBv1 for various reasons and I do **not** want to end up supporting a full
+  fork of Samba and its many, many features. This aims to do one thing and do
+  it well, which is to share files with old machines.
