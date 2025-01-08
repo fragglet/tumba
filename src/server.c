@@ -3002,25 +3002,6 @@ int main(int argc, char *argv[])
 	DEBUG(2, ("%s smbd version %s started\n", timestring(), VERSION));
 	DEBUG(2, ("Copyright Andrew Tridgell 1992-1997\n"));
 
-#ifdef RLIMIT_NOFILE
-	{
-		struct rlimit rlp;
-		getrlimit(RLIMIT_NOFILE, &rlp);
-		/*
-		 * Set the fd limit to be MAX_OPEN_FILES + 10 to account for the
-		 * extra fd we need to read directories, as well as the log
-		 * files and standard handles etc.
-		 */
-		rlp.rlim_cur = (MAX_OPEN_FILES + 10 > rlp.rlim_max)
-		                 ? rlp.rlim_max
-		                 : MAX_OPEN_FILES + 10;
-		setrlimit(RLIMIT_NOFILE, &rlp);
-		getrlimit(RLIMIT_NOFILE, &rlp);
-		DEBUG(3, ("Maximum number of open files per session is %d\n",
-		          rlp.rlim_cur));
-	}
-#endif
-
 	DEBUG(2, ("uid=%d gid=%d euid=%d egid=%d\n", getuid(), getgid(),
 	          geteuid(), getegid()));
 
