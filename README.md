@@ -40,7 +40,7 @@ purely for fun and personal use by hobbyists and retro enthusiasts. You should
 * Windows 2000, XP
 * OS/2 Warp 4.52
 * Workgroup Add-on For DOS / MS Client 3.0
-* Samba (smbclient; recent versions of Samba still support connecting to old shares)
+* Samba (smbclient still works as of Samba v4.21)
 
 ## FAQ
 
