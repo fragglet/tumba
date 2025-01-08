@@ -76,7 +76,7 @@ static void dptr_idle(int key)
 	if (dirptrs[key].valid && dirptrs[key].ptr) {
 		DEBUG(4, ("Idling dptr key %d\n", key));
 		dptrs_open--;
-		CloseDir(dirptrs[key].ptr);
+		close_dir(dirptrs[key].ptr);
 		dirptrs[key].ptr = NULL;
 	}
 }
@@ -115,7 +115,7 @@ static void *dptr_get(int key, uint32_t lastused)
 			if (dptrs_open >= MAXDIR)
 				dptr_idleoldest();
 			DEBUG(4, ("Reopening dptr key %d\n", key));
-			if ((dp->ptr = OpenDir(dp->cnum, dp->path)))
+			if ((dp->ptr = open_dir(dp->cnum, dp->path)))
 				dptrs_open++;
 		}
 		return dp->ptr;
@@ -200,7 +200,7 @@ void dptr_close(int key)
 	if (dirptrs[key].valid) {
 		DEBUG(4, ("closing dptr key %d\n", key));
 		if (dirptrs[key].ptr) {
-			CloseDir(dirptrs[key].ptr);
+			close_dir(dirptrs[key].ptr);
 			dptrs_open--;
 		}
 		/* Lanman 2 specific code */
@@ -258,7 +258,7 @@ static bool start_dir(int cnum, char *directory)
 	if (!*directory)
 		directory = ".";
 
-	Connections[cnum].dirptr = OpenDir(cnum, directory);
+	Connections[cnum].dirptr = open_dir(cnum, directory);
 	if (Connections[cnum].dirptr) {
 		dptrs_open++;
 		string_set(&Connections[cnum].dirpath, directory);
@@ -353,7 +353,7 @@ bool dptr_fill(char *buf1, unsigned int key)
 		DEBUG(1, ("filling null dirptr %d\n", key));
 		return false;
 	}
-	offset = TellDir(p);
+	offset = tell_dir(p);
 	DEBUG(6, ("fill on key %d dirptr 0x%x now at %d\n", key, p, offset));
 	buf[0] = key;
 	SIVAL(buf, 1, offset | DPTR_MASK);
@@ -382,7 +382,7 @@ void *dptr_fetch(char *buf, int *num)
 	}
 	*num = key;
 	offset = IVAL(buf, 1) & ~DPTR_MASK;
-	SeekDir(p, offset);
+	seek_dir(p, offset);
 	DEBUG(3, ("fetching dirptr %d for path %s at offset %d\n", key,
 	          dptr_path(key), offset));
 	return p;
@@ -443,11 +443,11 @@ bool get_dir_entry(int cnum, char *mask, int dirtype, char *fname, int *size,
 		return false;
 
 	while (!found) {
-		dname = ReadDirName(Connections[cnum].dirptr);
+		dname = read_dir_name(Connections[cnum].dirptr);
 
 		DEBUG(6, ("readdir on dirptr 0x%x now at offset %d\n",
 		          Connections[cnum].dirptr,
-		          TellDir(Connections[cnum].dirptr)));
+		          tell_dir(Connections[cnum].dirptr)));
 
 		if (dname == NULL)
 			return false;
@@ -510,7 +510,7 @@ typedef struct {
 /*******************************************************************
 open a directory
 ********************************************************************/
-void *OpenDir(int cnum, char *name)
+void *open_dir(int cnum, char *name)
 {
 	Dir *dirp;
 	struct dirent *de;
@@ -536,7 +536,7 @@ void *OpenDir(int cnum, char *name)
 			char *r;
 			r = (char *) Realloc(dirp->data, s);
 			if (!r) {
-				DEBUG(0, ("Out of memory in OpenDir\n"));
+				DEBUG(0, ("Out of memory in open_dir\n"));
 				break;
 			}
 			dirp->data = r;
@@ -555,7 +555,7 @@ void *OpenDir(int cnum, char *name)
 /*******************************************************************
 close a directory
 ********************************************************************/
-void CloseDir(void *p)
+void close_dir(void *p)
 {
 	Dir *dirp = (Dir *) p;
 	if (!dirp)
@@ -567,7 +567,7 @@ void CloseDir(void *p)
 /*******************************************************************
 read from a directory
 ********************************************************************/
-char *ReadDirName(void *p)
+char *read_dir_name(void *p)
 {
 	char *ret;
 	Dir *dirp = (Dir *) p;
@@ -585,7 +585,7 @@ char *ReadDirName(void *p)
 /*******************************************************************
 seek a dir
 ********************************************************************/
-bool SeekDir(void *p, int pos)
+bool seek_dir(void *p, int pos)
 {
 	Dir *dirp = (Dir *) p;
 
@@ -597,7 +597,7 @@ bool SeekDir(void *p, int pos)
 		dirp->pos = 0;
 	}
 
-	while (dirp->pos < pos && ReadDirName(p))
+	while (dirp->pos < pos && read_dir_name(p))
 		;
 
 	return dirp->pos == pos;
@@ -606,7 +606,7 @@ bool SeekDir(void *p, int pos)
 /*******************************************************************
 tell a dir position
 ********************************************************************/
-int TellDir(void *p)
+int tell_dir(void *p)
 {
 	Dir *dirp = (Dir *) p;
 
@@ -635,7 +635,8 @@ static int dir_cache_head = 0, dir_cache_tail = 0;
 /* ------------------------------------------------------------------------ **
  * Add an entry to the directory cache.
  * ------------------------------------------------------------------------ **/
-void DirCacheAdd(char *path, char *name, char *dname, const struct share *share)
+void dir_cache_add(char *path, char *name, char *dname,
+                   const struct share *share)
 {
 	int pathlen, namelen, new_head;
 	dir_cache_entry *entry;
@@ -679,7 +680,7 @@ void DirCacheAdd(char *path, char *name, char *dname, const struct share *share)
  *          the small size of the cache.
  * ------------------------------------------------------------------------ **
  */
-char *DirCacheCheck(char *path, char *name, const struct share *share)
+char *dir_cache_check(char *path, char *name, const struct share *share)
 {
 	dir_cache_entry *entry;
 	int idx;
@@ -701,7 +702,7 @@ char *DirCacheCheck(char *path, char *name, const struct share *share)
 /* ------------------------------------------------------------------------ **
  * Remove all cache entries which have a share that matches the input.
  * ------------------------------------------------------------------------ **/
-void DirCacheFlush(const struct share *share)
+void dir_cache_flush(const struct share *share)
 {
 	dir_cache_entry *entry;
 	int idx, new_tail = dir_cache_head;

@@ -36,14 +36,14 @@ void *dptr_fetch_lanman2(int dptr_num);
 bool dir_check_ftype(int cnum, int mode, struct stat *st, int dirtype);
 bool get_dir_entry(int cnum, char *mask, int dirtype, char *fname, int *size,
                    int *mode, time_t *date);
-void *OpenDir(int cnum, char *name);
-void CloseDir(void *p);
-char *ReadDirName(void *p);
-bool SeekDir(void *p, int pos);
-int TellDir(void *p);
-void DirCacheAdd(char *path, char *name, char *dname, const struct share *);
-char *DirCacheCheck(char *path, char *name, const struct share *);
-void DirCacheFlush(const struct share *);
+void *open_dir(int cnum, char *name);
+void close_dir(void *p);
+char *read_dir_name(void *p);
+bool seek_dir(void *p, int pos);
+int tell_dir(void *p);
+void dir_cache_add(char *path, char *name, char *dname, const struct share *);
+char *dir_cache_check(char *path, char *name, const struct share *);
+void dir_cache_flush(const struct share *);
 
 /*The following definitions come from  ipc.c  */
 

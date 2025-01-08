@@ -1223,7 +1223,7 @@ int reply_unlink(char *inbuf, char *outbuf, int dum_size, int dum_bufsize)
 		char *dname;
 
 		if (check_name(directory, cnum))
-			dirptr = OpenDir(cnum, directory);
+			dirptr = open_dir(cnum, directory);
 
 		/* XXXX the CIFS spec says that if bit0 of the flags2 field is
 		   set then the pattern matches against the long name, otherwise
@@ -1236,7 +1236,7 @@ int reply_unlink(char *inbuf, char *outbuf, int dum_size, int dum_bufsize)
 			if (strequal(mask, "????????.???"))
 				pstrcpy(mask, "*");
 
-			while ((dname = ReadDirName(dirptr))) {
+			while ((dname = read_dir_name(dirptr))) {
 				pstring fname;
 				pstrcpy(fname, dname);
 
@@ -1254,7 +1254,7 @@ int reply_unlink(char *inbuf, char *outbuf, int dum_size, int dum_bufsize)
 				DEBUG(3, ("reply_unlink : doing unlink on %s\n",
 				          fname));
 			}
-			CloseDir(dirptr);
+			close_dir(dirptr);
 		}
 	}
 
@@ -2424,7 +2424,7 @@ int reply_mv(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		pstring destname;
 
 		if (check_name(directory, cnum))
-			dirptr = OpenDir(cnum, directory);
+			dirptr = open_dir(cnum, directory);
 
 		if (dirptr) {
 			error = ERRbadfile;
@@ -2432,7 +2432,7 @@ int reply_mv(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 			if (strequal(mask, "????????.???"))
 				pstrcpy(mask, "*");
 
-			while ((dname = ReadDirName(dirptr))) {
+			while ((dname = read_dir_name(dirptr))) {
 				pstring fname;
 				pstrcpy(fname, dname);
 
@@ -2470,7 +2470,7 @@ int reply_mv(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 				      ("reply_mv : doing rename on %s -> %s\n",
 				       fname, destname));
 			}
-			CloseDir(dirptr);
+			close_dir(dirptr);
 		}
 	}
 
@@ -2643,7 +2643,7 @@ int reply_copy(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		pstring destname;
 
 		if (check_name(directory, cnum))
-			dirptr = OpenDir(cnum, directory);
+			dirptr = open_dir(cnum, directory);
 
 		if (dirptr) {
 			error = ERRbadfile;
@@ -2651,7 +2651,7 @@ int reply_copy(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 			if (strequal(mask, "????????.???"))
 				pstrcpy(mask, "*");
 
-			while ((dname = ReadDirName(dirptr))) {
+			while ((dname = read_dir_name(dirptr))) {
 				pstring fname;
 				pstrcpy(fname, dname);
 
@@ -2671,7 +2671,7 @@ int reply_copy(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 				      ("reply_copy : doing copy on %s -> %s\n",
 				       fname, destname));
 			}
-			CloseDir(dirptr);
+			close_dir(dirptr);
 		}
 	}
 

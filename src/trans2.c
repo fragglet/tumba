@@ -319,8 +319,8 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 
 	while (!found) {
 		/* Needed if we run out of space */
-		prev_dirpos = TellDir(Connections[cnum].dirptr);
-		dname = ReadDirName(Connections[cnum].dirptr);
+		prev_dirpos = tell_dir(Connections[cnum].dirptr);
+		dname = read_dir_name(Connections[cnum].dirptr);
 
 		/*
 		 * Due to bugs in NT client redirectors we are not using
@@ -334,7 +334,7 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 		DEBUG(8, ("get_lanman2_dir_entry:readdir on dirptr 0x%x now at "
 		          "offset %d\n",
 		          (unsigned int) Connections[cnum].dirptr,
-		          TellDir(Connections[cnum].dirptr)));
+		          tell_dir(Connections[cnum].dirptr)));
 
 		if (!dname)
 			return false;
@@ -573,7 +573,7 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 
 	if (PTR_DIFF(p, pdata) > space_remaining) {
 		/* Move the dirptr back to prev_dirpos */
-		SeekDir(Connections[cnum].dirptr, prev_dirpos);
+		seek_dir(Connections[cnum].dirptr, prev_dirpos);
 		*out_of_space = true;
 		DEBUG(9, ("get_lanman2_dir_entry: out of space\n"));
 		return false; /* Not finished - just out of space */
@@ -885,7 +885,7 @@ resume_key = %d resume name = %s continue=%d level = %d\n",
 	DEBUG(3,
 	      ("dptr_num is %d, mask = %s, attr = %x, dirptr=(0x%X,%d)\n",
 	       dptr_num, mask, dirtype, (unsigned int) Connections[cnum].dirptr,
-	       TellDir(Connections[cnum].dirptr)));
+	       tell_dir(Connections[cnum].dirptr)));
 
 	p = pdata;
 	space_remaining = max_data_bytes;
@@ -912,13 +912,13 @@ resume_key = %d resume name = %s continue=%d level = %d\n",
 		int current_pos, start_pos;
 		char *dname = NULL;
 		void *dirptr = Connections[cnum].dirptr;
-		start_pos = TellDir(dirptr);
+		start_pos = tell_dir(dirptr);
 		for (current_pos = start_pos; current_pos >= 0; current_pos--) {
 			DEBUG(7, ("call_trans2findnext: seeking to pos %d\n",
 			          current_pos));
 
-			SeekDir(dirptr, current_pos);
-			dname = ReadDirName(dirptr);
+			seek_dir(dirptr, current_pos);
+			dname = read_dir_name(dirptr);
 
 			/*
 			 * Remember, name_map_mangle is called by
@@ -931,7 +931,7 @@ resume_key = %d resume name = %s continue=%d level = %d\n",
 				name_map_mangle(dname, false, CONN_SHARE(cnum));
 
 			if (dname && strcsequal(resume_name, dname)) {
-				SeekDir(dirptr, current_pos + 1);
+				seek_dir(dirptr, current_pos + 1);
 				DEBUG(7, ("call_trans2findnext: got match at "
 				          "pos %d\n",
 				          current_pos + 1));
@@ -947,10 +947,10 @@ resume_key = %d resume name = %s continue=%d level = %d\n",
 			DEBUG(7, ("call_trans2findnext: notfound: seeking to "
 			          "pos %d\n",
 			          start_pos));
-			SeekDir(dirptr, start_pos);
+			seek_dir(dirptr, start_pos);
 			for (current_pos = start_pos;
-			     (dname = ReadDirName(dirptr)) != NULL;
-			     SeekDir(dirptr, ++current_pos)) {
+			     (dname = read_dir_name(dirptr)) != NULL;
+			     seek_dir(dirptr, ++current_pos)) {
 				/*
 				 * Remember, name_map_mangle is called by
 				 * get_lanman2_dir_entry(), so the resume name
@@ -963,7 +963,7 @@ resume_key = %d resume name = %s continue=%d level = %d\n",
 					                CONN_SHARE(cnum));
 
 				if (dname && strcsequal(resume_name, dname)) {
-					SeekDir(dirptr, current_pos + 1);
+					seek_dir(dirptr, current_pos + 1);
 					DEBUG(7, ("call_trans2findnext: got "
 					          "match at pos %d\n",
 					          current_pos + 1));

@@ -387,7 +387,8 @@ static bool scan_directory(char *path, char *name, int cnum, bool docache)
 	if (*path == 0)
 		path = ".";
 
-	if (docache && (dname = DirCacheCheck(path, name, CONN_SHARE(cnum)))) {
+	if (docache &&
+	    (dname = dir_cache_check(path, name, CONN_SHARE(cnum)))) {
 		pstrcpy(name, dname);
 		return true;
 	}
@@ -401,13 +402,13 @@ static bool scan_directory(char *path, char *name, int cnum, bool docache)
 	 */
 
 	/* open the directory */
-	if (!(cur_dir = OpenDir(cnum, path))) {
+	if (!(cur_dir = open_dir(cnum, path))) {
 		DEBUG(3, ("scan dir didn't open dir [%s]\n", path));
 		return false;
 	}
 
 	/* now scan for matching names */
-	while ((dname = ReadDirName(cur_dir))) {
+	while ((dname = read_dir_name(cur_dir))) {
 		if (*dname == '.' &&
 		    (strequal(dname, ".") || strequal(dname, "..")))
 			continue;
@@ -419,15 +420,15 @@ static bool scan_directory(char *path, char *name, int cnum, bool docache)
 		    fname_equal(name, name2)) {
 			/* we've found the file, change it's name and return */
 			if (docache)
-				DirCacheAdd(path, name, dname,
-				            CONN_SHARE(cnum));
+				dir_cache_add(path, name, dname,
+				              CONN_SHARE(cnum));
 			pstrcpy(name, dname);
-			CloseDir(cur_dir);
+			close_dir(cur_dir);
 			return true;
 		}
 	}
 
-	CloseDir(cur_dir);
+	close_dir(cur_dir);
 	return false;
 }
 
@@ -2262,7 +2263,7 @@ close a cnum
 ****************************************************************************/
 void close_cnum(int cnum)
 {
-	DirCacheFlush(CONN_SHARE(cnum));
+	dir_cache_flush(CONN_SHARE(cnum));
 
 	if (!OPEN_CNUM(cnum)) {
 		DEBUG(0, ("Can't close cnum %d\n", cnum));
