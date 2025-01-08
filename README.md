@@ -72,9 +72,9 @@ purely for fun and personal use by hobbyists and retro enthusiasts. You should
   the `chmod` command, eg. `chmod o+w /var/samba/myshare`
 
 * **Why can't I connect from a public IP address?** Since there is no support
-  for password authentication, all shares are publicly accessible. By default,
-  Rumba only allows connections either from localhost (127.0.0.1) or from IPs
-  in [RFC 1918](https://datatracker.ietf.org/doc/html/rfc1918) private ranges.
+  for password authentication, Rumba by default only allows connections either
+  from localhost (127.0.0.1) or from IPs in
+  [RFC 1918](https://datatracker.ietf.org/doc/html/rfc1918) private ranges.
   You can specify the `-a` command line argument to open connections from all
   public IP addresses, but you should understand the implications of doing this
   and consider if it is really what you want.
