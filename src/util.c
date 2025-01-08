@@ -1455,7 +1455,7 @@ const char *client_addr(void)
 /*******************************************************************
 write a string in unicoode format
 ********************************************************************/
-int PutUnicode(char *dst, char *src)
+int put_unicode(char *dst, char *src)
 {
 	int ret = 0;
 	while (*src) {
@@ -1471,7 +1471,7 @@ int PutUnicode(char *dst, char *src)
 /*******************************************************************
 block sigs
 ********************************************************************/
-void BlockSignals(bool block, int signum)
+void block_signals(bool block, int signum)
 {
 #ifdef USE_SIGBLOCK
 	int block_mask = sigmask(signum);

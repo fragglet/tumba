@@ -59,7 +59,7 @@ static bool api_TooSmall(int cnum, char *param, char *data, int mdrcnt,
                          int mprcnt, char **rdata, char **rparam,
                          int *rdata_len, int *rparam_len);
 
-static int CopyAndAdvance(char **dst, char *src, int *n)
+static int copy_and_advance(char **dst, char *src, int *n)
 {
 	int l;
 	if (!src || !dst || !n || !(*dst))
@@ -308,7 +308,7 @@ static int fill_share_info(int cnum, const struct share *share, int uLevel,
 			type = STYPE_IPC;
 		SSVAL(p, 14, type); /* device type */
 		SIVAL(p, 16, PTR_DIFF(p2, baseaddr));
-		len += CopyAndAdvance(&p2, share->description, &l2);
+		len += copy_and_advance(&p2, share->description, &l2);
 	}
 
 	if (uLevel > 1) {
@@ -318,7 +318,7 @@ static int fill_share_info(int cnum, const struct share *share, int uLevel,
 		SSVALS(p, 22, -1);                    /* max uses */
 		SSVAL(p, 24, 1);                      /* current uses */
 		SIVAL(p, 26, PTR_DIFF(p2, baseaddr)); /* local pathname */
-		len += CopyAndAdvance(&p2, share->path, &l2);
+		len += copy_and_advance(&p2, share->path, &l2);
 		memset(p + 30, 0,
 		       SHPWLEN + 2); /* passwd (reserved), pad field */
 	}

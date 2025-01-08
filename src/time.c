@@ -68,7 +68,7 @@ static int tm_diff(struct tm *a, struct tm *b)
 /*******************************************************************
   return the UTC offset in seconds west of UTC, or 0 if it cannot be determined
   ******************************************************************/
-static int TimeZone(time_t t)
+static int time_zone(time_t t)
 {
 	struct tm *tm = gmtime(&t);
 	struct tm tm_utc;
@@ -84,9 +84,9 @@ static int TimeZone(time_t t)
 /*******************************************************************
 init the time differences
 ********************************************************************/
-void TimeInit(void)
+void time_init(void)
 {
-	serverzone = TimeZone(time(NULL));
+	serverzone = time_zone(time(NULL));
 
 	if ((serverzone % 60) != 0) {
 		DEBUG(1, ("WARNING: Your timezone is not a multiple of 1 "
@@ -97,14 +97,14 @@ void TimeInit(void)
 }
 
 /*******************************************************************
-return the same value as TimeZone, but it should be more efficient.
+return the same value as time_zone, but it should be more efficient.
 
 We keep a table of DST offsets to prevent calling localtime() on each
 call of this function. This saves a LOT of time on many unixes.
 
 Updated by Paul Eggert <eggert@twinsun.com>
 ********************************************************************/
-static int TimeZoneFaster(time_t t)
+static int time_zone_faster(time_t t)
 {
 	static struct dst_table {
 		time_t start, end;
@@ -130,7 +130,7 @@ static int TimeZoneFaster(time_t t)
 	} else {
 		time_t low, high;
 
-		zone = TimeZone(t);
+		zone = time_zone(t);
 		dst_table = (struct dst_table *) Realloc(
 		    dst_table, sizeof(dst_table[0]) * (i + 1));
 		if (!dst_table) {
@@ -157,7 +157,7 @@ static int TimeZoneFaster(time_t t)
 				else
 					t = low +
 					    (dst_table[i].start - low) / 2;
-				if (TimeZone(t) == zone)
+				if (time_zone(t) == zone)
 					dst_table[i].start = t;
 				else
 					low = t;
@@ -169,7 +169,7 @@ static int TimeZoneFaster(time_t t)
 				else
 					t = high -
 					    (high - dst_table[i].end) / 2;
-				if (TimeZone(t) == zone)
+				if (time_zone(t) == zone)
 					dst_table[i].end = t;
 				else
 					high = t;
@@ -182,22 +182,22 @@ static int TimeZoneFaster(time_t t)
 /****************************************************************************
   return the UTC offset in seconds west of UTC, adjusted for extra time offset
   **************************************************************************/
-int TimeDiff(time_t t)
+int time_diff(time_t t)
 {
-	return TimeZoneFaster(t);
+	return time_zone_faster(t);
 }
 
 /****************************************************************************
   return the UTC offset in seconds west of UTC, adjusted for extra time
-  offset, for a local time value.  If ut = lt + LocTimeDiff(lt), then
-  lt = ut - TimeDiff(ut), but the converse does not necessarily hold near
+  offset, for a local time value.  If ut = lt + loc_time_diff(lt), then
+  lt = ut - time_diff(ut), but the converse does not necessarily hold near
   daylight savings transitions because some local times are ambiguous.
-  LocTimeDiff(t) equals TimeDiff(t) except near daylight savings transitions.
+  loc_time_diff(t) equals time_diff(t) except near daylight savings transitions.
   +**************************************************************************/
-static int LocTimeDiff(time_t lte)
+static int loc_time_diff(time_t lte)
 {
 	time_t lt = lte;
-	int d = TimeZoneFaster(lt);
+	int d = time_zone_faster(lt);
 	time_t t = lt + d;
 
 	/* if overflow occurred, ignore all the adjustments so far */
@@ -206,7 +206,7 @@ static int LocTimeDiff(time_t lte)
 
 	/* now t should be close enough to the true UTC to yield the right
 	 * answer */
-	return TimeDiff(t);
+	return time_diff(t);
 }
 
 #define TIME_FIXUP_CONSTANT                                                    \
@@ -251,7 +251,7 @@ time_t interpret_long_date(char *p)
 
 	/* this takes us from kludge-GMT to real GMT */
 	ret -= serverzone;
-	ret += LocTimeDiff(ret);
+	ret += loc_time_diff(ret);
 
 	return ret;
 }
@@ -272,7 +272,7 @@ void put_long_date(char *p, time_t t)
 	}
 
 	/* this converts GMT to kludge-GMT */
-	t -= LocTimeDiff(t) - serverzone;
+	t -= loc_time_diff(t) - serverzone;
 
 	d = (double) (t);
 
@@ -370,7 +370,7 @@ localtime for this sort of date)
 void put_dos_date3(char *buf, int offset, time_t unixdate)
 {
 	if (!null_mtime(unixdate))
-		unixdate -= TimeDiff(unixdate);
+		unixdate -= time_diff(unixdate);
 	SIVAL(buf, offset, unixdate);
 }
 
@@ -442,7 +442,7 @@ time_t make_unix_date3(void *date_ptr)
 {
 	time_t t = IVAL(date_ptr, 0);
 	if (!null_mtime(t))
-		t += LocTimeDiff(t);
+		t += loc_time_diff(t);
 	return t;
 }
 
@@ -451,16 +451,16 @@ time_t make_unix_date3(void *date_ptr)
 ****************************************************************************/
 char *timestring(void)
 {
-	static fstring TimeBuf;
+	static fstring time_buf;
 	time_t t = time(NULL);
 	struct tm *tm = localtime(&t);
 
 	if (!tm)
-		slprintf(TimeBuf, sizeof(TimeBuf) - 1,
+		slprintf(time_buf, sizeof(time_buf) - 1,
 		         "%ld seconds since the Epoch", (long) t);
 	else
-		strftime(TimeBuf, 100, "%Y/%m/%d %r", tm);
-	return TimeBuf;
+		strftime(time_buf, 100, "%Y/%m/%d %r", tm);
+	return time_buf;
 }
 
 /****************************************************************************

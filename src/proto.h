@@ -170,8 +170,8 @@ ssize_t sys_setxattr(const char *path, const char *name, void *value,
 
 /*The following definitions come from  time.c  */
 
-void TimeInit(void);
-int TimeDiff(time_t t);
+void time_init(void);
+int time_diff(time_t t);
 time_t interpret_long_date(char *p);
 void put_long_date(char *p, time_t t);
 bool null_mtime(time_t mtime);
@@ -236,9 +236,9 @@ bool string_sub(char *s, char *pattern, char *insert);
 bool mask_match(char *str, char *regexp, bool trans2);
 void *Realloc(void *p, int size);
 const char *client_addr(void);
-int PutUnicode(char *dst, char *src);
+int put_unicode(char *dst, char *src);
 char *gidtoname(int gid);
-void BlockSignals(bool block, int signum);
+void block_signals(bool block, int signum);
 void ajt_panic(void);
 char *safe_strcpy(char *dest, const char *src, int dest_size);
 char *safe_strcat(char *dest, const char *src, int dest_size);

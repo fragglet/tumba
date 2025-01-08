@@ -650,7 +650,7 @@ int reply_search(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		dirtype = CVAL(status, 0) & 0x1F;
 		Connections[cnum].dirptr = dptr_fetch(status + 12, &dptr_num);
 		if (!Connections[cnum].dirptr)
-			goto SearchEmpty;
+			goto search_empty;
 		string_set(&Connections[cnum].dirpath, dptr_path(dptr_num));
 		strnorm(mask);
 	}
@@ -740,7 +740,7 @@ int reply_search(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		}
 	}
 
-SearchEmpty:
+search_empty:
 
 	if (numentries == 0 || !ok) {
 		CVAL(outbuf, smb_rcls) = ERRDOS;

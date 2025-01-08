@@ -1450,7 +1450,7 @@ static int sigchld_handler(void)
 	}
 	depth++;
 
-	BlockSignals(true, SIGCHLD);
+	block_signals(true, SIGCHLD);
 	DEBUG(5, ("got SIGCHLD\n"));
 
 	while (waitpid((pid_t) -1, (int *) NULL, WNOHANG) > 0) {
@@ -1465,7 +1465,7 @@ static int sigchld_handler(void)
 	signal(SIGCHLD, SIGNAL_CAST sigchld_handler);
 
 	depth--;
-	BlockSignals(false, SIGCHLD);
+	block_signals(false, SIGCHLD);
 	return 0;
 }
 
@@ -1474,7 +1474,7 @@ static int sigchld_handler(void)
   **************************************************************************/
 static int sig_pipe(void)
 {
-	BlockSignals(true, SIGPIPE);
+	block_signals(true, SIGPIPE);
 
 	exit_server("Got sigpipe\n");
 	return 0;
@@ -1787,13 +1787,13 @@ this prevents zombie child processes
 
 static int sig_hup(void)
 {
-	BlockSignals(true, SIGHUP);
+	block_signals(true, SIGHUP);
 	DEBUG(0, ("Got SIGHUP\n"));
 
 #ifndef DONT_REINSTALL_SIG
 	signal(SIGHUP, SIGNAL_CAST sig_hup);
 #endif
-	BlockSignals(false, SIGHUP);
+	block_signals(false, SIGHUP);
 	return 0;
 }
 
@@ -2034,7 +2034,7 @@ static int reply_lanman1(char *outbuf)
 	SSVAL(outbuf, smb_vwv5, raw); /* tell redirector we support
 	                                 readbraw writebraw (possibly) */
 	SIVAL(outbuf, smb_vwv6, getpid());
-	SSVAL(outbuf, smb_vwv10, TimeDiff(t) / 60);
+	SSVAL(outbuf, smb_vwv10, time_diff(t) / 60);
 
 	put_dos_date(outbuf, smb_vwv8, t);
 
@@ -2063,7 +2063,7 @@ static int reply_lanman2(char *outbuf)
 	SSVAL(outbuf, smb_vwv3, MAX_MUX);
 	SSVAL(outbuf, smb_vwv4, 1);
 	SSVAL(outbuf, smb_vwv5, raw); /* readbraw and/or writebraw */
-	SSVAL(outbuf, smb_vwv10, TimeDiff(t) / 60);
+	SSVAL(outbuf, smb_vwv10, time_diff(t) / 60);
 	put_dos_date(outbuf, smb_vwv8, t);
 
 	return smb_len(outbuf) + 4;
@@ -2111,7 +2111,7 @@ static int reply_nt1(char *outbuf)
 	SIVAL(outbuf, smb_vwv7 + 1, getpid());     /* session key */
 	SIVAL(outbuf, smb_vwv9 + 1, capabilities); /* capabilities */
 	put_long_date(outbuf + smb_vwv11 + 1, t);
-	SSVALS(outbuf, smb_vwv15 + 1, TimeDiff(t) / 60);
+	SSVALS(outbuf, smb_vwv15 + 1, time_diff(t) / 60);
 	SSVAL(outbuf, smb_vwv17,
 	      data_len); /* length of challenge+domain strings */
 
@@ -2801,7 +2801,7 @@ static void process(void)
 #endif
 
 	/* re-initialise the timezone */
-	TimeInit();
+	time_init();
 
 	while (true) {
 		int counter;
@@ -2941,7 +2941,7 @@ int main(int argc, char *argv[])
 
 	append_log = true;
 
-	TimeInit();
+	time_init();
 
 	pstrcpy(debugf, SMBLOGFILE);
 
