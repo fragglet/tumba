@@ -1661,13 +1661,19 @@ static bool open_sockets(int port)
 		   connections, the best we can do is to accept the connection
 		   and then immediately close it. By default we only allow
 		   connections from local peers on the same private IP range. */
-		if (!allow_public_connections && !is_private_peer()) {
-			DEBUG(0, ("open_sockets: rejecting connection from "
+		if (!is_private_peer()) {
+			if (!allow_public_connections) {
+				DEBUG(0, ("open_sockets: rejecting connection from "
+				          "public IP address %s\n",
+				          client_addr()));
+				close(Client);
+				Client = -1;
+				continue;
+			}
+			/* even if allowed, log a warning */
+			DEBUG(0, ("open_sockets: warning: connection from "
 			          "public IP address %s\n",
 			          client_addr()));
-			close(Client);
-			Client = -1;
-			continue;
 		}
 
 		if (fork() == 0) {
