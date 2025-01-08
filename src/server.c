@@ -2574,7 +2574,7 @@ static int switch_message(int type, char *inbuf, char *outbuf, int size,
 
 			/* for the IPC service, only certain messages are
 			 * allowed */
-			if (CONN_SHARE(cnum) == ipc_service &&
+			if (OPEN_CNUM(cnum) && CONN_SHARE(cnum) == ipc_service &&
 			    (flags & ALLOWED_IN_IPC) == 0) {
 				return ERROR(ERRSRV, ERRaccess);
 			}
