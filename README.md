@@ -42,6 +42,8 @@ purely for fun and personal use by hobbyists and retro enthusiasts. You should
 * Workgroup Add-on For DOS / MS Client 3.0
 * Samba (smbclient still works as of Samba v4.21)
 
+Check out some [screenshots](sshot/).
+
 ## FAQ
 
 * **Why is there no support for password protected shares?** The old SMBv1
