@@ -72,7 +72,7 @@ Check out some [screenshots](sshot/README.md).
   there and restart the server.
 
 * **My share is read-only, how do I make it read/write?** You can do this using
-  the `chmod` command, eg. `chmod o+w /var/samba/myshare`
+  the `chmod` command, eg. `chmod o+w /var/rumba/myshare`
 
 * **Why can't I connect from a public IP address?** Since there is no support
   for password authentication, Rumba by default only allows connections either
