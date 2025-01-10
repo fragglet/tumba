@@ -24,6 +24,8 @@
 #include "trans2.h"
 #include "includes.h"
 
+#define DIR_ENTRY_SAFETY_MARGIN 4096
+
 extern int DEBUGLEVEL;
 extern int Protocol;
 extern connection_struct Connections[];
@@ -201,7 +203,7 @@ static int call_trans2open(char *inbuf, char *outbuf, int bufsize, int cnum,
 	int smb_action = 0;
 	bool bad_path = false;
 
-	strlcpy(fname, pname, sizeof(fname));
+	pstrcpy(fname, pname);
 
 	DEBUG(3, ("trans2open %s cnum=%d mode=%d attr=%d ofun=%d size=%d\n",
 	          fname, cnum, open_mode, open_attr, open_ofun, open_size));
@@ -696,10 +698,11 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 
 	DEBUG(5, ("dir=%s, mask = %s\n", directory, mask));
 
-	pdata = *ppdata = Realloc(*ppdata, max_data_bytes + 1024);
+	pdata = *ppdata =
+	    Realloc(*ppdata, max_data_bytes + DIR_ENTRY_SAFETY_MARGIN);
 	if (!*ppdata)
 		return ERROR(ERRDOS, ERRnomem);
-	bzero(pdata, max_data_bytes);
+	bzero(pdata, max_data_bytes + DIR_ENTRY_SAFETY_MARGIN);
 
 	/* Realloc the params space */
 	params = *pparams = Realloc(*pparams, 10);
@@ -855,7 +858,8 @@ resume_key = %d resume name = %s continue=%d level = %d\n",
 		return ERROR(ERRDOS, ERRunknownlevel);
 	}
 
-	pdata = *ppdata = Realloc(*ppdata, max_data_bytes + 1024);
+	pdata = *ppdata =
+	    Realloc(*ppdata, max_data_bytes + DIR_ENTRY_SAFETY_MARGIN);
 	if (!*ppdata)
 		return ERROR(ERRDOS, ERRnomem);
 	bzero(pdata, max_data_bytes);
@@ -1031,6 +1035,7 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
                               int bufsize, int cnum, char **pparams,
                               char **ppdata)
 {
+	int max_data_bytes = SVAL(inbuf, smb_mdrcnt);
 	char *pdata = *ppdata;
 	char *params = *pparams;
 	uint16_t info_level = SVAL(params, 0);
@@ -1049,8 +1054,9 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
 		return ERROR(ERRSRV, ERRinvdevice);
 	}
 
-	pdata = *ppdata = Realloc(*ppdata, 1024);
-	bzero(pdata, 1024);
+	pdata = *ppdata =
+	    Realloc(*ppdata, max_data_bytes + DIR_ENTRY_SAFETY_MARGIN);
+	bzero(pdata, max_data_bytes + DIR_ENTRY_SAFETY_MARGIN);
 
 	switch (info_level) {
 	case 1:
@@ -1163,6 +1169,7 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
                                     int bufsize, int cnum, char **pparams,
                                     char **ppdata, int total_data)
 {
+	int max_data_bytes = SVAL(inbuf, smb_mdrcnt);
 	char *params = *pparams;
 	char *pdata = *ppdata;
 	uint16_t tran_call = SVAL(inbuf, smb_setup0);
@@ -1227,7 +1234,7 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
 
 	params = *pparams = Realloc(*pparams, 2);
 	bzero(params, 2);
-	data_size = 1024;
+	data_size = max_data_bytes + DIR_ENTRY_SAFETY_MARGIN;
 	pdata = *ppdata = Realloc(*ppdata, data_size);
 
 	if (total_data > 0 && IVAL(pdata, 0) == total_data) {
