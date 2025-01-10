@@ -2,6 +2,8 @@
 
 <img src="wfw311.png" width="640">
 
+(Server description is because the Samba nmbd server is being used) 
+
 ## Windows 95
 
 <img src="win95.png" width="800">
