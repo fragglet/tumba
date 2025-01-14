@@ -251,10 +251,7 @@ static int call_trans2open(char *inbuf, char *outbuf, int bufsize, int cnum,
 		return ERROR(ERRDOS, ERRnoaccess);
 	}
 
-	/* checked_realloc the size of parameters and data we will return */
 	params = *pparams = checked_realloc(*pparams, 28);
-	if (params == NULL)
-		return ERROR(ERRDOS, ERRnomem);
 
 	bzero(params, 28);
 	SSVAL(params, 0, fnum);
@@ -700,14 +697,9 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 
 	pdata = *ppdata =
 	    checked_realloc(*ppdata, max_data_bytes + DIR_ENTRY_SAFETY_MARGIN);
-	if (!*ppdata)
-		return ERROR(ERRDOS, ERRnomem);
 	bzero(pdata, max_data_bytes + DIR_ENTRY_SAFETY_MARGIN);
 
-	/* checked_realloc the params space */
 	params = *pparams = checked_realloc(*pparams, 10);
-	if (params == NULL)
-		return ERROR(ERRDOS, ERRnomem);
 
 	dptr_num = dptr_create(cnum, directory, true, SVAL(inbuf, smb_pid));
 	if (dptr_num < 0)
@@ -860,14 +852,10 @@ resume_key = %d resume name = %s continue=%d level = %d\n",
 
 	pdata = *ppdata =
 	    checked_realloc(*ppdata, max_data_bytes + DIR_ENTRY_SAFETY_MARGIN);
-	if (!*ppdata)
-		return ERROR(ERRDOS, ERRnomem);
 	bzero(pdata, max_data_bytes);
 
 	/* checked_realloc the params space */
 	params = *pparams = checked_realloc(*pparams, 6 * sizeof(uint16_t));
-	if (!params)
-		return ERROR(ERRDOS, ERRnomem);
 
 	/* Check that the dptr is valid */
 	if (!(Connections[cnum].dirptr = dptr_fetch_lanman2(dptr_num)))
@@ -1456,8 +1444,6 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 	/* checked_realloc the parameter and data sizes */
 	params = *pparams = checked_realloc(*pparams, 2);
 	SSVAL(params, 0, 0);
-	if (params == NULL)
-		return ERROR(ERRDOS, ERRnomem);
 
 	size = st.st_size;
 	tvs.modtime = st.st_mtime;
@@ -1613,10 +1599,7 @@ static int call_trans2mkdir(char *inbuf, char *outbuf, int length, int bufsize,
 		return UNIXERROR(ERRDOS, ERRnoaccess);
 	}
 
-	/* checked_realloc the parameter and data sizes */
 	params = *pparams = checked_realloc(*pparams, 2);
-	if (params == NULL)
-		return ERROR(ERRDOS, ERRnomem);
 
 	SSVAL(params, 0, 0);
 
@@ -1647,10 +1630,7 @@ static int call_trans2findnotifyfirst(char *inbuf, char *outbuf, int length,
 		return ERROR(ERRDOS, ERRunknownlevel);
 	}
 
-	/* checked_realloc the parameter and data sizes */
 	params = *pparams = checked_realloc(*pparams, 6);
-	if (params == NULL)
-		return ERROR(ERRDOS, ERRnomem);
 
 	SSVAL(params, 0, fnf_handle);
 	SSVAL(params, 2, 0); /* No changes */
@@ -1678,10 +1658,7 @@ static int call_trans2findnotifynext(char *inbuf, char *outbuf, int length,
 
 	DEBUG(3, ("call_trans2findnotifynext\n"));
 
-	/* checked_realloc the parameter and data sizes */
 	params = *pparams = checked_realloc(*pparams, 4);
-	if (params == NULL)
-		return ERROR(ERRDOS, ERRnomem);
 
 	SSVAL(params, 0, 0); /* No changes */
 	SSVAL(params, 2, 0); /* No EA errors */

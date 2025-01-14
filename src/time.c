@@ -111,6 +111,7 @@ static int time_zone_faster(time_t t)
 		int zone;
 	} *dst_table = NULL;
 	static int table_size = 0;
+	time_t low, high;
 	int i;
 	int zone = 0;
 
@@ -126,56 +127,51 @@ static int time_zone_faster(time_t t)
 			break;
 
 	if (i < table_size) {
-		zone = dst_table[i].zone;
-	} else {
-		time_t low, high;
-
-		zone = time_zone(t);
-		dst_table = (struct dst_table *) checked_realloc(
-		    dst_table, sizeof(dst_table[0]) * (i + 1));
-		if (!dst_table) {
-			table_size = 0;
-		} else {
-			table_size++;
-
-			dst_table[i].zone = zone;
-			dst_table[i].start = dst_table[i].end = t;
-
-			/* no entry will cover more than 6 months */
-			low = t - MAX_DST_WIDTH / 2;
-			if (t < low)
-				low = TIME_T_MIN;
-
-			high = t + MAX_DST_WIDTH / 2;
-			if (high < t)
-				high = TIME_T_MAX;
-
-			/* widen the new entry using two bisection searches */
-			while (low + 60 * 60 < dst_table[i].start) {
-				if (dst_table[i].start - low > MAX_DST_SKIP * 2)
-					t = dst_table[i].start - MAX_DST_SKIP;
-				else
-					t = low +
-					    (dst_table[i].start - low) / 2;
-				if (time_zone(t) == zone)
-					dst_table[i].start = t;
-				else
-					low = t;
-			}
-
-			while (high - 60 * 60 > dst_table[i].end) {
-				if (high - dst_table[i].end > MAX_DST_SKIP * 2)
-					t = dst_table[i].end + MAX_DST_SKIP;
-				else
-					t = high -
-					    (high - dst_table[i].end) / 2;
-				if (time_zone(t) == zone)
-					dst_table[i].end = t;
-				else
-					high = t;
-			}
-		}
+		return dst_table[i].zone;
 	}
+
+	zone = time_zone(t);
+	dst_table = (struct dst_table *) checked_realloc(
+	    dst_table, sizeof(dst_table[0]) * (i + 1));
+	table_size++;
+
+	dst_table[i].zone = zone;
+	dst_table[i].start = dst_table[i].end = t;
+
+	/* no entry will cover more than 6 months */
+	low = t - MAX_DST_WIDTH / 2;
+	if (t < low)
+		low = TIME_T_MIN;
+
+	high = t + MAX_DST_WIDTH / 2;
+	if (high < t)
+		high = TIME_T_MAX;
+
+	/* widen the new entry using two bisection searches */
+	while (low + 60 * 60 < dst_table[i].start) {
+		if (dst_table[i].start - low > MAX_DST_SKIP * 2)
+			t = dst_table[i].start - MAX_DST_SKIP;
+		else
+			t = low +
+			    (dst_table[i].start - low) / 2;
+		if (time_zone(t) == zone)
+			dst_table[i].start = t;
+		else
+			low = t;
+	}
+
+	while (high - 60 * 60 > dst_table[i].end) {
+		if (high - dst_table[i].end > MAX_DST_SKIP * 2)
+			t = dst_table[i].end + MAX_DST_SKIP;
+		else
+			t = high -
+			    (high - dst_table[i].end) / 2;
+		if (time_zone(t) == zone)
+			dst_table[i].end = t;
+		else
+			high = t;
+	}
+
 	return zone;
 }
 
