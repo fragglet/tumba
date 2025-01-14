@@ -50,8 +50,7 @@ const struct share *lookup_share(const char *name)
 static struct share *_add_share(void)
 {
 	struct share *result;
-	shares = realloc(shares, (num_shares + 1) * sizeof(*shares));
-	assert(shares != NULL);
+	shares = checked_realloc(shares, (num_shares + 1) * sizeof(*shares));
 
 	result = &shares[num_shares];
 	++num_shares;
