@@ -1721,7 +1721,7 @@ static bool open_sockets(int port)
   This function will return on a
   receipt of a session keepalive packet.
 ****************************************************************************/
-static bool receive_smb(int fd, char *buffer, int timeout)
+static bool receive_smb(int fd, char *buffer, size_t buflen, int timeout)
 {
 	int len, ret;
 
@@ -1733,10 +1733,9 @@ static bool receive_smb(int fd, char *buffer, int timeout)
 	if (len < 0)
 		return false;
 
-	if (len > BUFFER_SIZE) {
+	if (len > buflen) {
 		DEBUG(0, ("Invalid packet length! (%d bytes).\n", len));
-		if (len > BUFFER_SIZE + (SAFETY_MARGIN / 2))
-			exit(1);
+		exit(1);
 	}
 
 	if (len > 0) {
@@ -1806,7 +1805,7 @@ static bool receive_message_or_smb(int smbfd, char *buffer, int buffer_len,
 
 	if (FD_ISSET(smbfd, &fds)) {
 		*got_smb = true;
-		return receive_smb(smbfd, buffer, 0);
+		return receive_smb(smbfd, buffer, buffer_len, 0);
 	} else {
 		return false;
 	}
