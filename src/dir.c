@@ -520,11 +520,7 @@ void *open_dir(int cnum, char *name)
 	if (d == NULL) {
 		return NULL;
 	}
-	dirp = (Dir *) malloc(sizeof(Dir));
-	if (!dirp) {
-		closedir(d);
-		return NULL;
-	}
+	dirp = checked_malloc(sizeof(Dir));
 	dirp->pos = dirp->numentries = dirp->mallocsize = 0;
 	dirp->data = dirp->current = NULL;
 
@@ -642,10 +638,8 @@ void dir_cache_add(char *path, char *name, char *dname,
 	    strlen(path) + 1; /* Bytes required to store path (with nul). */
 	namelen =
 	    strlen(name) + 1; /* Bytes required to store name (with nul). */
-	entry = (dir_cache_entry *) malloc(sizeof(dir_cache_entry) + pathlen +
-	                                   namelen + strlen(dname) + 1);
-	if (NULL == entry) /* Not adding to the cache is not fatal,  */
-		return;    /* so just return as if nothing happened. */
+	entry = checked_malloc(sizeof(dir_cache_entry) + pathlen +
+	                       namelen + strlen(dname) + 1);
 
 	/* Set pointers correctly and load values. */
 	entry->path = pstrcpy((char *) &entry[1], path);

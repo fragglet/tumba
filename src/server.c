@@ -2837,10 +2837,8 @@ static void process(void)
 {
 	extern int Client;
 
-	InBuffer = (char *) malloc(BUFFER_SIZE + SAFETY_MARGIN);
-	OutBuffer = (char *) malloc(BUFFER_SIZE + SAFETY_MARGIN);
-	if ((InBuffer == NULL) || (OutBuffer == NULL))
-		return;
+	InBuffer = checked_malloc(BUFFER_SIZE + SAFETY_MARGIN);
+	OutBuffer = checked_malloc(BUFFER_SIZE + SAFETY_MARGIN);
 
 	InBuffer += SMB_ALIGNMENT;
 	OutBuffer += SMB_ALIGNMENT;

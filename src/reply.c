@@ -2846,12 +2846,7 @@ int reply_writebmpx(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 			wbms =
 			    Files[fnum].wbmpx_ptr; /* Use an existing struct */
 		else
-			wbms = (write_bmpx_struct *) malloc(
-			    sizeof(write_bmpx_struct));
-		if (!wbms) {
-			DEBUG(0, ("Out of memory in reply_readmpx\n"));
-			return ERROR(ERRSRV, ERRnoresource);
-		}
+			wbms = checked_malloc(sizeof(write_bmpx_struct));
 		wbms->wr_mode = write_through;
 		wbms->wr_discard = false; /* No errors yet */
 		wbms->wr_total_written = nwritten;

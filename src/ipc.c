@@ -693,12 +693,10 @@ static int api_reply(int cnum, char *outbuf, char *data, char *params,
 			break;
 		}
 
-	rdata = (char *) malloc(1024);
-	if (rdata)
-		bzero(rdata, 1024);
-	rparam = (char *) malloc(1024);
-	if (rparam)
-		bzero(rparam, 1024);
+	rdata = checked_malloc(1024);
+	bzero(rdata, 1024);
+	rparam = checked_malloc(1024);
+	bzero(rparam, 1024);
 
 	reply = api_commands[i].fn(cnum, params, data, mdrcnt, mprcnt, &rdata,
 	                           &rparam, &rdata_len, &rparam_len);
@@ -776,11 +774,11 @@ int reply_trans(char *inbuf, char *outbuf, int size, int bufsize)
 	}
 
 	if (tdscnt) {
-		data = (char *) malloc(tdscnt);
+		data = checked_malloc(tdscnt);
 		memcpy(data, smb_base(inbuf) + dsoff, dscnt);
 	}
 	if (tpscnt) {
-		params = (char *) malloc(tpscnt);
+		params = checked_malloc(tpscnt);
 		memcpy(params, smb_base(inbuf) + psoff, pscnt);
 	}
 

@@ -1035,16 +1035,12 @@ bool string_init(char **dest, char *src)
 
 	if (l == 0) {
 		if (!null_string)
-			null_string = (char *) malloc(1);
+			null_string = checked_malloc(1);
 
 		*null_string = 0;
 		*dest = null_string;
 	} else {
-		(*dest) = (char *) malloc(l + 1);
-		if ((*dest) == NULL) {
-			DEBUG(0, ("Out of memory in string_init\n"));
-			return false;
-		}
+		*dest = checked_malloc(l + 1);
 
 		pstrcpy(*dest, src);
 	}

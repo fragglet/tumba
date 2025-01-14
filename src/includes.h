@@ -138,6 +138,8 @@
 #define fstrcpy(d, s) safe_strcpy((d), (s), sizeof(fstring))
 #define fstrcat(d, s) safe_strcat((d), (s), sizeof(fstring))
 
+#define checked_malloc(bytes)  checked_realloc(NULL, bytes)
+
 /* TODO: Remove these once their addition to glibc is less recent */
 size_t strlcat(char *, const char *, size_t);
 size_t strlcpy(char *, const char *, size_t);

@@ -1739,7 +1739,7 @@ int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize)
 	unsigned int total_data = SVAL(inbuf, smb_tdscnt);
 	unsigned int suwcnt = SVAL(inbuf, smb_suwcnt);
 	unsigned int tran_call = SVAL(inbuf, smb_setup0);
-	char *params = NULL, *data = NULL;
+	char *params, *data;
 	int num_params, num_params_sofar, num_data, num_data_sofar;
 
 	outsize = set_message(outbuf, 0, 0, true);
@@ -1752,15 +1752,8 @@ int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize)
 	}
 
 	/* Allocate the space for the maximum needed parameters and data */
-	if (total_params > 0)
-		params = (char *) malloc(total_params);
-	if (total_data > 0)
-		data = (char *) malloc(total_data);
-
-	if ((total_params && !params) || (total_data && !data)) {
-		DEBUG(2, ("Out of memory in reply_trans2\n"));
-		return ERROR(ERRDOS, ERRnomem);
-	}
+	params = checked_malloc(total_params);
+	data = checked_malloc(total_data);
 
 	/* Copy the param and data bytes sent with this request into
 	   the params buffer */
