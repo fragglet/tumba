@@ -1300,7 +1300,7 @@ static int transfer_file(int infd, int outfd, int n, char *header, int headlen,
 	}
 
 	while (!buf && size > 0) {
-		buf = (char *) Realloc(buf, size + 8);
+		buf = (char *) checked_realloc(buf, size + 8);
 		if (!buf)
 			size /= 2;
 	}

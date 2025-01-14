@@ -534,7 +534,7 @@ void *open_dir(int cnum, char *name)
 		if (used + l > dirp->mallocsize) {
 			int s = MAX(used + l, used + 2000);
 			char *r;
-			r = (char *) Realloc(dirp->data, s);
+			r = (char *) checked_realloc(dirp->data, s);
 			if (!r) {
 				DEBUG(0, ("Out of memory in open_dir\n"));
 				break;

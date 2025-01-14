@@ -19,6 +19,8 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <assert.h>
+
 #include "includes.h"
 
 static uint8_t valid_dos_chars[32];
@@ -1400,28 +1402,15 @@ bool mask_match(char *str, char *regexp, bool trans2)
 }
 
 /****************************************************************************
-expand a pointer to be a particular size
+checked result memory functions
 ****************************************************************************/
-void *Realloc(void *p, int size)
+void *checked_realloc(void *p, size_t bytes)
 {
-	void *ret = NULL;
+	void *result = realloc(p, bytes);
 
-	if (size == 0) {
-		free(p);
-		DEBUG(5, ("Realloc asked for 0 bytes\n"));
-		return NULL;
-	}
+	assert(result != NULL || bytes == 0);
 
-	ret = realloc(p, size);
-
-	if (ret == NULL) {
-		DEBUG(
-		    0,
-		    ("Memory allocation error: failed to expand to %d bytes\n",
-		     size));
-	}
-
-	return ret;
+	return result;
 }
 
 /*******************************************************************

@@ -131,7 +131,7 @@ static int time_zone_faster(time_t t)
 		time_t low, high;
 
 		zone = time_zone(t);
-		dst_table = (struct dst_table *) Realloc(
+		dst_table = (struct dst_table *) checked_realloc(
 		    dst_table, sizeof(dst_table[0]) * (i + 1));
 		if (!dst_table) {
 			table_size = 0;

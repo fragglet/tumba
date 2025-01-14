@@ -251,8 +251,8 @@ static int call_trans2open(char *inbuf, char *outbuf, int bufsize, int cnum,
 		return ERROR(ERRDOS, ERRnoaccess);
 	}
 
-	/* Realloc the size of parameters and data we will return */
-	params = *pparams = Realloc(*pparams, 28);
+	/* checked_realloc the size of parameters and data we will return */
+	params = *pparams = checked_realloc(*pparams, 28);
 	if (params == NULL)
 		return ERROR(ERRDOS, ERRnomem);
 
@@ -699,13 +699,13 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 	DEBUG(5, ("dir=%s, mask = %s\n", directory, mask));
 
 	pdata = *ppdata =
-	    Realloc(*ppdata, max_data_bytes + DIR_ENTRY_SAFETY_MARGIN);
+	    checked_realloc(*ppdata, max_data_bytes + DIR_ENTRY_SAFETY_MARGIN);
 	if (!*ppdata)
 		return ERROR(ERRDOS, ERRnomem);
 	bzero(pdata, max_data_bytes + DIR_ENTRY_SAFETY_MARGIN);
 
-	/* Realloc the params space */
-	params = *pparams = Realloc(*pparams, 10);
+	/* checked_realloc the params space */
+	params = *pparams = checked_realloc(*pparams, 10);
 	if (params == NULL)
 		return ERROR(ERRDOS, ERRnomem);
 
@@ -859,13 +859,13 @@ resume_key = %d resume name = %s continue=%d level = %d\n",
 	}
 
 	pdata = *ppdata =
-	    Realloc(*ppdata, max_data_bytes + DIR_ENTRY_SAFETY_MARGIN);
+	    checked_realloc(*ppdata, max_data_bytes + DIR_ENTRY_SAFETY_MARGIN);
 	if (!*ppdata)
 		return ERROR(ERRDOS, ERRnomem);
 	bzero(pdata, max_data_bytes);
 
-	/* Realloc the params space */
-	params = *pparams = Realloc(*pparams, 6 * sizeof(uint16_t));
+	/* checked_realloc the params space */
+	params = *pparams = checked_realloc(*pparams, 6 * sizeof(uint16_t));
 	if (!params)
 		return ERROR(ERRDOS, ERRnomem);
 
@@ -1055,7 +1055,7 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
 	}
 
 	pdata = *ppdata =
-	    Realloc(*ppdata, max_data_bytes + DIR_ENTRY_SAFETY_MARGIN);
+	    checked_realloc(*ppdata, max_data_bytes + DIR_ENTRY_SAFETY_MARGIN);
 	bzero(pdata, max_data_bytes + DIR_ENTRY_SAFETY_MARGIN);
 
 	switch (info_level) {
@@ -1232,10 +1232,10 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
 	if (mode & aDIR)
 		size = 0;
 
-	params = *pparams = Realloc(*pparams, 2);
+	params = *pparams = checked_realloc(*pparams, 2);
 	bzero(params, 2);
 	data_size = max_data_bytes + DIR_ENTRY_SAFETY_MARGIN;
-	pdata = *ppdata = Realloc(*ppdata, data_size);
+	pdata = *ppdata = checked_realloc(*ppdata, data_size);
 
 	if (total_data > 0 && IVAL(pdata, 0) == total_data) {
 		/* uggh, EAs for OS2 */
@@ -1453,8 +1453,8 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 	      ("call_trans2setfilepathinfo(%d) %s info_level=%d totdata=%d\n",
 	       tran_call, fname, info_level, total_data));
 
-	/* Realloc the parameter and data sizes */
-	params = *pparams = Realloc(*pparams, 2);
+	/* checked_realloc the parameter and data sizes */
+	params = *pparams = checked_realloc(*pparams, 2);
 	SSVAL(params, 0, 0);
 	if (params == NULL)
 		return ERROR(ERRDOS, ERRnomem);
@@ -1613,8 +1613,8 @@ static int call_trans2mkdir(char *inbuf, char *outbuf, int length, int bufsize,
 		return UNIXERROR(ERRDOS, ERRnoaccess);
 	}
 
-	/* Realloc the parameter and data sizes */
-	params = *pparams = Realloc(*pparams, 2);
+	/* checked_realloc the parameter and data sizes */
+	params = *pparams = checked_realloc(*pparams, 2);
 	if (params == NULL)
 		return ERROR(ERRDOS, ERRnomem);
 
@@ -1647,8 +1647,8 @@ static int call_trans2findnotifyfirst(char *inbuf, char *outbuf, int length,
 		return ERROR(ERRDOS, ERRunknownlevel);
 	}
 
-	/* Realloc the parameter and data sizes */
-	params = *pparams = Realloc(*pparams, 6);
+	/* checked_realloc the parameter and data sizes */
+	params = *pparams = checked_realloc(*pparams, 6);
 	if (params == NULL)
 		return ERROR(ERRDOS, ERRnomem);
 
@@ -1678,8 +1678,8 @@ static int call_trans2findnotifynext(char *inbuf, char *outbuf, int length,
 
 	DEBUG(3, ("call_trans2findnotifynext\n"));
 
-	/* Realloc the parameter and data sizes */
-	params = *pparams = Realloc(*pparams, 4);
+	/* checked_realloc the parameter and data sizes */
+	params = *pparams = checked_realloc(*pparams, 4);
 	if (params == NULL)
 		return ERROR(ERRDOS, ERRnomem);
 
