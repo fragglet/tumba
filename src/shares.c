@@ -66,11 +66,11 @@ const struct share *add_share(const char *path)
 	assert(lookup_share(name) == NULL);
 
 	result = _add_share();
-	result->name = strdup(name);
+	result->name = checked_strdup(name);
 	assert(result->name != NULL);
-	result->path = strdup(path);
+	result->path = checked_strdup(path);
 	assert(result->path != NULL);
-	result->description = strdup(path);
+	result->description = checked_strdup(path);
 	assert(result->path != NULL);
 
 	return result;

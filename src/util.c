@@ -1418,6 +1418,15 @@ void *checked_calloc(size_t nmemb, size_t size)
 	return result;
 }
 
+char *checked_strdup(const char *s)
+{
+	char *result = (strdup)(s);
+
+	assert(result != NULL);
+
+	return result;
+}
+
 /*******************************************************************
  return the IP addr of the client as a string
  ******************************************************************/

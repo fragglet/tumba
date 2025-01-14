@@ -710,11 +710,7 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 
 	/* Save the wildcard match and attribs we are using on this directory -
 	   needed as lanman2 assumes these are being saved between calls */
-
-	if (!(wcard = strdup(mask))) {
-		dptr_close(dptr_num);
-		return ERROR(ERRDOS, ERRnomem);
-	}
+	wcard = checked_strdup(mask);
 
 	dptr_set_wcard(dptr_num, wcard);
 	dptr_set_attr(dptr_num, dirtype);
