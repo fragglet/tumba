@@ -5,9 +5,10 @@ DATADIR = /var/rumba
 
 SMBLOGFILE = /var/log/rumba_smbd.log
 
-DEFINES = -DSMBLOGFILE=\"$(SMBLOGFILE)\"
+DEFINES = -DSMBLOGFILE=\"$(SMBLOGFILE)\" \
+          -D_FORTIFY_SOURCE=1
 
-CFLAGS = -MMD -Wall $(DEFINES)
+CFLAGS = -O2 -MMD -Wall $(DEFINES)
 LDFLAGS =
 
 ifdef FIND_UNUSED_CODE
