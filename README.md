@@ -81,3 +81,16 @@ Check out some [screenshots](sshot/README.md).
   You can specify the `-a` command line argument to open connections from all
   public IP addresses, but you should understand the implications of doing this
   and consider if it is really what you want.
+
+* **What about security vulnerabilities?** This is a very valid concern; Rumba
+  is based on a very old (and immature) version of the Samba codebase. I've
+  gone through historical security reports from the era and patched any
+  vulnerabilities that were later discovered. The fact that most superfluous
+  features have been removed helps a *lot* to reduce the attack surface; many
+  of the historical vulnerabilities do not apply simply because the vulnerable
+  code was deleted. I've taken multiple additional steps to mitigate any
+  undiscovered vulnerabilities: the server always runs as an unprivileged
+  user; it is compiled with
+  [fortification](https://www.redhat.com/en/blog/enhance-application-security-fortifysource)
+  enabled; the included systemd configuration file applies heavy sandboxing;
+  and by default all connections from public IP addresses are blocked.
