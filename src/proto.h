@@ -235,6 +235,7 @@ bool string_set(char **dest, char *src);
 bool string_sub(char *s, char *pattern, char *insert);
 bool mask_match(char *str, char *regexp, bool trans2);
 void *checked_realloc(void *p, size_t bytes);
+void *checked_calloc(size_t nmemb, size_t size);
 const char *client_addr(void);
 int put_unicode(char *dst, char *src);
 char *gidtoname(int gid);

@@ -1409,6 +1409,15 @@ void *checked_realloc(void *p, size_t bytes)
 	return result;
 }
 
+void *checked_calloc(size_t nmemb, size_t size)
+{
+	void *result = calloc(nmemb, size);
+
+	assert(result != NULL || nmemb == 0 || size == 0);
+
+	return result;
+}
+
 /*******************************************************************
  return the IP addr of the client as a string
  ******************************************************************/

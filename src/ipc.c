@@ -784,7 +784,7 @@ int reply_trans(char *inbuf, char *outbuf, int size, int bufsize)
 
 	if (suwcnt) {
 		int i;
-		setup = (uint16_t *) malloc(suwcnt * sizeof(setup[0]));
+		setup = checked_calloc(suwcnt, sizeof(*setup));
 		for (i = 0; i < suwcnt; i++)
 			setup[i] =
 			    SVAL(inbuf, smb_vwv14 + i * sizeof(uint16_t));
