@@ -133,6 +133,11 @@
 #endif /* sprintf */
 #define sprintf __ERROR__XX__NEVER_USE_SPRINTF__;
 
+#define malloc(x) __ERROR__XX_NEVER_USE_MALLOC__;
+#define realloc(x, y) __ERROR__XX_NEVER_USE_REALLOC__;
+#define calloc(x, y) __ERROR__XX_NEVER_USE_CALLOC__;
+#define strdup(x) __ERROR__XX_NEVER_USE_STRDUP__;
+
 #define pstrcpy(d, s) safe_strcpy((d), (s), sizeof(pstring))
 #define pstrcat(d, s) safe_strcat((d), (s), sizeof(pstring))
 #define fstrcpy(d, s) safe_strcpy((d), (s), sizeof(fstring))
