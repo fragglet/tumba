@@ -91,7 +91,9 @@ implemented */
 #define ERRnofids               4  /* Too many open files */
 #define ERRnoaccess             5  /* Access denied */
 #define ERRbadfid               6  /* Invalid fid */
-#define ERRnomem                8  /* Out of memory */
+/* We should never return this error. We handle memory allocation failures as
+   a fatal error, in which case the program aborts. */
+/*#define ERRnomem                8*/  /* Out of memory */
 #define ERRbadmem               9  /* Invalid memory block address */
 #define ERRbadenv               10 /* Invalid environment */
 #define ERRbadaccess            12 /* Invalid open mode */
