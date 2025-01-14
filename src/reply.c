@@ -723,6 +723,12 @@ int reply_search(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 			} else {
 				for (i = numentries;
 				     (i < maxentries) && !finished; i++) {
+					/* check to make sure we have room in
+					 * the buffer */
+					if ((PTR_DIFF(p, outbuf) +
+					     DIR_STRUCT_SIZE) > BUFFER_SIZE) {
+						break;
+					}
 					finished = !get_dir_entry(
 					    cnum, mask, dirtype, fname, &size,
 					    &mode, &date);
