@@ -1430,7 +1430,8 @@ const char *client_addr(void)
 	}
 
 	if (getpeername(Client, (struct sockaddr *) &sockin, &length) < 0) {
-		DEBUG(0, ("getpeername failed\n"));
+		DEBUG(0, ("getpeername failed for fd=%d, error=%s\n", Client,
+		          strerror(errno)));
 		return "(error getting peer address)";
 	}
 
