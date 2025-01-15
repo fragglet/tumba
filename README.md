@@ -56,10 +56,11 @@ Check out some [screenshots](sshot/README.md).
 
 * **Why remove all the features of Samba?** Partly to make it a smaller and
   simpler codebase, partly to intentionally deter any use of the project for
-  serious use cases.  There are probably people out there still needing to use
-  SMBv1 for various reasons and I do **not** want to end up supporting a full
-  fork of Samba and its many, many features. This aims to do one thing and do
-  it well, which is to share files with old machines.
+  serious use. There are undoubtedly people out there who want to continue
+  using SMBv1 for Serious and Important Purposes and I do **not** want to
+  either encourage this or support a full fork of Samba and its many, many
+  features. Rumba aims to do one thing and do it well, which is to allow
+  hobbyists to share files with vintage machines.
 
 * **What about security vulnerabilities?** This is a very valid concern; Rumba
   is based on a very old (and immature) version of the Samba codebase. I've
