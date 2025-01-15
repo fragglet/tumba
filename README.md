@@ -25,9 +25,6 @@ supported:
  * NIS, automount, and any of Samba's more obscure bells and whistles you may
    have used in the past.
 
-There is also (currently) no implementation of nmbd here, which you will need
-to get a working setup. You can just use the normal Samba version of nmbd.
-
 **This is based on a very old version of Samba, and there may be bugs or security
 issues hiding in here that have since been fixed in mainline Samba. This is
 purely for fun and personal use by hobbyists and retro enthusiasts. You should
@@ -86,6 +83,12 @@ Check out some [screenshots](sshot/README.md).
   the command line. The included systemd service file automatically shares all
   directories found in `/var/rumba`, so you just need to create a subdirectory
   there and restart the server.
+
+* **I can't find the server, what's wrong?** You also need to run a NetBIOS
+  name server (`nmbd`). Rumba doesn't have one of its own yet, but you can use
+  the Samba one. Install the Samba suite and then disable its SMB server, eg.
+  `sudo systemctl disable --now smbd` and the server should appear (it will be
+  mistakenly labeled as a Samba server in the server description).
 
 * **My share is read-only, how do I make it read/write?** You can do this using
   the `chmod` command, eg. `chmod o+w /var/rumba/myshare`
