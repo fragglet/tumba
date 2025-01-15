@@ -222,15 +222,6 @@ int Debug1(char *format_str, ...)
 }
 
 /****************************************************************************
-  close the socket communication
-****************************************************************************/
-void close_sockets(void)
-{
-	close(Client);
-	Client = 0;
-}
-
-/****************************************************************************
 interpret the weird netbios "name". Return the name type
 ****************************************************************************/
 static int name_interpret(char *in, char *out)
@@ -958,7 +949,6 @@ bool send_smb(int fd, char *buffer)
 			    0,
 			    ("Error writing %d bytes to client. %d. Exiting\n",
 			     len, ret));
-			close_sockets();
 			exit(1);
 		}
 		nwritten += ret;

@@ -2352,6 +2352,10 @@ void exit_server(char *reason)
 	for (i = 0; i < MAX_CONNECTIONS; i++)
 		if (Connections[i].open)
 			close_cnum(i);
+	if (Client != -1) {
+		close(Client);
+		Client = -1;
+	}
 	if (!reason) {
 		int oldlevel = DEBUGLEVEL;
 		DEBUGLEVEL = 10;
@@ -3072,7 +3076,6 @@ int main(int argc, char *argv[])
 	max_recv = MIN(lp_maxxmit(), BUFFER_SIZE);
 
 	process();
-	close_sockets();
 
 	exit_server("normal exit");
 	return 0;
