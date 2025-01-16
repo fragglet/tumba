@@ -1416,7 +1416,7 @@ int unix_error_packet(char *inbuf, char *outbuf, int def_class,
 }
 
 /****************************************************************************
-  create an error packet. Normally called using the ERROR() macro
+  create an error packet. Normally called using the ERROR_CODE() macro
 ****************************************************************************/
 int error_packet(char *inbuf, char *outbuf, int error_class,
                  uint32_t error_code, int line)
@@ -1945,8 +1945,8 @@ int make_connection(char *service, char *dev)
 
 	num_connections_open++;
 
-	LOG(1, ("connect to service %s (pid %d)\n",
-	        CONN_SHARE(cnum)->name, (int) getpid()));
+	LOG(1, ("connect to service %s (pid %d)\n", CONN_SHARE(cnum)->name,
+	        (int) getpid()));
 
 	return cnum;
 }
@@ -2315,8 +2315,7 @@ void close_cnum(int cnum)
 		return;
 	}
 
-	LOG(1, ("closed connection to service %s\n",
-	        CONN_SHARE(cnum)->name));
+	LOG(1, ("closed connection to service %s\n", CONN_SHARE(cnum)->name));
 
 	close_open_files(cnum);
 	dptr_closecnum(cnum);
@@ -2559,11 +2558,11 @@ static int switch_message(int type, char *inbuf, char *outbuf, int size,
 
 			/* does it need write permission? */
 			if ((flags & NEED_WRITE) && !CAN_WRITE(cnum))
-				return ERROR(ERRSRV, ERRaccess);
+				return ERROR_CODE(ERRSRV, ERRaccess);
 
 			/* load service specific parameters */
 			if (OPEN_CNUM(cnum) && !become_service(cnum)) {
-				return ERROR(ERRSRV, ERRaccess);
+				return ERROR_CODE(ERRSRV, ERRaccess);
 			}
 
 			/* for the IPC service, only certain messages are
@@ -2571,7 +2570,7 @@ static int switch_message(int type, char *inbuf, char *outbuf, int size,
 			if (OPEN_CNUM(cnum) &&
 			    CONN_SHARE(cnum) == ipc_service &&
 			    (flags & ALLOWED_IN_IPC) == 0) {
-				return ERROR(ERRSRV, ERRaccess);
+				return ERROR_CODE(ERRSRV, ERRaccess);
 			}
 
 			last_inbuf = inbuf;

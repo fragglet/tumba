@@ -818,7 +818,7 @@ int reply_trans(char *inbuf, char *outbuf, int size, int bufsize)
 			free(params);
 			free(data);
 			free(setup);
-			return ERROR(ERRSRV, ERRerror);
+			return ERROR_CODE(ERRSRV, ERRerror);
 		}
 
 		show_msg(inbuf);
@@ -871,7 +871,7 @@ int reply_trans(char *inbuf, char *outbuf, int size, int bufsize)
 		return -1;
 
 	if (outsize == 0)
-		return ERROR(ERRSRV, ERRnosupport);
+		return ERROR_CODE(ERRSRV, ERRnosupport);
 
 	return outsize;
 }

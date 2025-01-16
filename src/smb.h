@@ -258,16 +258,16 @@ struct share {
 
 #define CHECK_FNUM(fnum, c)                                                    \
 	if (!FNUM_OK(fnum, c))                                                 \
-	return (ERROR(ERRDOS, ERRbadfid))
+	return (ERROR_CODE(ERRDOS, ERRbadfid))
 #define CHECK_READ(fnum)                                                       \
 	if (!Files[fnum].can_read)                                             \
-	return (ERROR(ERRDOS, ERRbadaccess))
+	return (ERROR_CODE(ERRDOS, ERRbadaccess))
 #define CHECK_WRITE(fnum)                                                      \
 	if (!Files[fnum].can_write)                                            \
-	return (ERROR(ERRDOS, ERRbadaccess))
+	return (ERROR_CODE(ERRDOS, ERRbadaccess))
 #define CHECK_ERROR(fnum)                                                      \
-	if (HAS_CACHED_ERROR(fnum))                                            \
-	return (CACHED_ERROR(fnum))
+	if (HAS_CACHED_ERROR_CODE(fnum))                                       \
+	return (CACHED_ERROR_CODE(fnum))
 
 /* translates a connection number into a service number */
 #define CONN_SHARE(cnum) (Connections[cnum].share)
@@ -554,19 +554,20 @@ enum protocol_types {
 #define SMB_LKLEN_OFFSET(indx) (6 + (10 * (indx)))
 
 /* Macro to cache an error in a write_bmpx_struct */
-#define CACHE_ERROR(w, c, e)                                                   \
+#define CACHE_ERROR_CODE(w, c, e)                                              \
 	((w)->wr_errclass = (c), (w)->wr_error = (e), w->wr_discard = true, -1)
 /* Macro to test if an error has been cached for this fnum */
-#define HAS_CACHED_ERROR(fnum)                                                 \
+#define HAS_CACHED_ERROR_CODE(fnum)                                            \
 	(Files[(fnum)].open && Files[(fnum)].wbmpx_ptr &&                      \
 	 Files[(fnum)].wbmpx_ptr->wr_discard)
 /* Macro to turn the cached error into an error packet */
-#define CACHED_ERROR(fnum) cached_error_packet(inbuf, outbuf, fnum, __LINE__)
+#define CACHED_ERROR_CODE(fnum)                                                \
+	cached_error_packet(inbuf, outbuf, fnum, __LINE__)
 
-#define ERROR(class, x) error_packet(inbuf, outbuf, class, x, __LINE__)
+#define ERROR_CODE(class, x) error_packet(inbuf, outbuf, class, x, __LINE__)
 
 /* this is how errors are generated */
-#define UNIXERROR(defclass, deferror)                                          \
+#define UNIX_ERROR_CODE(defclass, deferror)                                    \
 	unix_error_packet(inbuf, outbuf, defclass, deferror, __LINE__)
 
 #define ROUNDUP(x, g) (((x) + ((g) - 1)) & ~((g) - 1))

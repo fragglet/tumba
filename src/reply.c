@@ -120,21 +120,21 @@ static int connection_error(char *inbuf, char *outbuf, int connection_num)
 {
 	switch (connection_num) {
 	case -8:
-		return ERROR(ERRSRV, ERRnoresource);
+		return ERROR_CODE(ERRSRV, ERRnoresource);
 	case -7:
-		return ERROR(ERRSRV, ERRbaduid);
+		return ERROR_CODE(ERRSRV, ERRbaduid);
 	case -6:
-		return ERROR(ERRSRV, ERRinvdevice);
+		return ERROR_CODE(ERRSRV, ERRinvdevice);
 	case -5:
-		return ERROR(ERRSRV, ERRinvnetname);
+		return ERROR_CODE(ERRSRV, ERRinvnetname);
 	case -4:
-		return ERROR(ERRSRV, ERRaccess);
+		return ERROR_CODE(ERRSRV, ERRaccess);
 	case -3:
-		return ERROR(ERRDOS, ERRnoipc);
+		return ERROR_CODE(ERRDOS, ERRnoipc);
 	case -2:
-		return ERROR(ERRSRV, ERRinvnetname);
+		return ERROR_CODE(ERRSRV, ERRinvnetname);
 	}
-	return ERROR(ERRSRV, ERRbadpw);
+	return ERROR_CODE(ERRSRV, ERRbadpw);
 }
 
 /****************************************************************************
@@ -227,7 +227,7 @@ int reply_tcon_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	fstrcpy(service, path + 2);
 	p = strchr(service, '\\');
 	if (!p)
-		return ERROR(ERRSRV, ERRinvnetname);
+		return ERROR_CODE(ERRSRV, ERRinvnetname);
 	*p = 0;
 	fstrcpy(service, p + 1);
 	p = strchr(service, '%');
@@ -286,7 +286,7 @@ int reply_unknown(char *inbuf, char *outbuf)
 	LOG(0, ("unknown command type (%s): cnum=%d type=%d (0x%X)\n",
 	        smb_fn_name(type), cnum, type, type));
 
-	return ERROR(ERRSRV, ERRunknownsmb);
+	return ERROR_CODE(ERRSRV, ERRunknownsmb);
 }
 
 /****************************************************************************
@@ -295,7 +295,7 @@ int reply_unknown(char *inbuf, char *outbuf)
 int reply_ioctl(char *inbuf, char *outbuf, int size, int bufsize)
 {
 	LOG(3, ("ignoring ioctl\n"));
-	return ERROR(ERRSRV, ERRnosupport);
+	return ERROR_CODE(ERRSRV, ERRnosupport);
 }
 
 /****************************************************************************
@@ -380,7 +380,7 @@ int reply_chkpth(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 			unix_ERR_code = ERRbadpath;
 		}
 
-		return UNIXERROR(ERRDOS, ERRbadpath);
+		return UNIX_ERROR_CODE(ERRDOS, ERRbadpath);
 	}
 
 	outsize = set_message(outbuf, 0, 0, true);
@@ -438,7 +438,7 @@ int reply_getatr(char *inbuf, char *outbuf, int in_size, int buffsize)
 			unix_ERR_code = ERRbadpath;
 		}
 
-		return UNIXERROR(ERRDOS, ERRbadfile);
+		return UNIX_ERROR_CODE(ERRDOS, ERRbadfile);
 	}
 
 	outsize = set_message(outbuf, 10, 0, true);
@@ -495,7 +495,7 @@ int reply_setatr(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 			unix_ERR_code = ERRbadpath;
 		}
 
-		return UNIXERROR(ERRDOS, ERRnoaccess);
+		return UNIX_ERROR_CODE(ERRDOS, ERRnoaccess);
 	}
 
 	outsize = set_message(outbuf, 0, 0, true);
@@ -696,9 +696,10 @@ int reply_search(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 						unix_ERR_class = ERRDOS;
 						unix_ERR_code = ERRbadpath;
 					}
-					return UNIXERROR(ERRDOS, ERRnofids);
+					return UNIX_ERROR_CODE(ERRDOS,
+					                       ERRnofids);
 				}
-				return ERROR(ERRDOS, ERRnofids);
+				return ERROR_CODE(ERRDOS, ERRnofids);
 			}
 		}
 
@@ -808,7 +809,7 @@ int reply_fclose(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	status_len = SVAL(smb_buf(inbuf), 3 + strlen(path));
 
 	if (status_len == 0)
-		return ERROR(ERRSRV, ERRsrverror);
+		return ERROR_CODE(ERRSRV, ERRsrverror);
 
 	memcpy(status, smb_buf(inbuf) + 1 + strlen(path) + 4, 21);
 
@@ -851,7 +852,7 @@ int reply_open(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	fnum = find_free_file();
 	if (fnum < 0)
-		return ERROR(ERRSRV, ERRnofids);
+		return ERROR_CODE(ERRSRV, ERRnofids);
 
 	if (!check_name(fname, cnum)) {
 		if ((errno == ENOENT) && bad_path) {
@@ -859,7 +860,7 @@ int reply_open(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 			unix_ERR_code = ERRbadpath;
 		}
 		Files[fnum].reserved = false;
-		return UNIXERROR(ERRDOS, ERRnoaccess);
+		return UNIX_ERROR_CODE(ERRDOS, ERRnoaccess);
 	}
 
 	open_file_shared(fnum, cnum, fname, share_mode, 3, aARCH, &rmode, NULL);
@@ -872,12 +873,12 @@ int reply_open(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 			unix_ERR_code = ERRbadpath;
 		}
 		Files[fnum].reserved = false;
-		return UNIXERROR(ERRDOS, ERRnoaccess);
+		return UNIX_ERROR_CODE(ERRDOS, ERRnoaccess);
 	}
 
 	if (fstat(fsp->fd_ptr->fd, &sbuf) != 0) {
 		close_file(fnum, false);
-		return ERROR(ERRDOS, ERRnoaccess);
+		return ERROR_CODE(ERRDOS, ERRnoaccess);
 	}
 
 	size = sbuf.st_size;
@@ -887,7 +888,7 @@ int reply_open(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	if (fmode & aDIR) {
 		LOG(3, ("attempt to open a directory %s\n", fname));
 		close_file(fnum, false);
-		return ERROR(ERRDOS, ERRnoaccess);
+		return ERROR_CODE(ERRDOS, ERRnoaccess);
 	}
 
 	outsize = set_message(outbuf, 7, 0, true);
@@ -929,12 +930,12 @@ int reply_open_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	   introduce a brief pause. */
 	if (CONN_SHARE(cnum) == ipc_service) {
 		LOG(1, ("Tried to open IPC %s\n", fname));
-		return ERROR(ERRSRV, ERRinvdevice);
+		return ERROR_CODE(ERRSRV, ERRinvdevice);
 	}
 
 	fnum = find_free_file();
 	if (fnum < 0)
-		return ERROR(ERRSRV, ERRnofids);
+		return ERROR_CODE(ERRSRV, ERRnofids);
 
 	if (!check_name(fname, cnum)) {
 		if ((errno == ENOENT) && bad_path) {
@@ -942,7 +943,7 @@ int reply_open_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 			unix_ERR_code = ERRbadpath;
 		}
 		Files[fnum].reserved = false;
-		return UNIXERROR(ERRDOS, ERRnoaccess);
+		return UNIX_ERROR_CODE(ERRDOS, ERRnoaccess);
 	}
 
 	open_file_shared(fnum, cnum, fname, smb_mode, smb_ofun,
@@ -956,12 +957,12 @@ int reply_open_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 			unix_ERR_code = ERRbadpath;
 		}
 		Files[fnum].reserved = false;
-		return UNIXERROR(ERRDOS, ERRnoaccess);
+		return UNIX_ERROR_CODE(ERRDOS, ERRnoaccess);
 	}
 
 	if (fstat(fsp->fd_ptr->fd, &sbuf) != 0) {
 		close_file(fnum, false);
-		return ERROR(ERRDOS, ERRnoaccess);
+		return ERROR_CODE(ERRDOS, ERRnoaccess);
 	}
 
 	size = sbuf.st_size;
@@ -969,7 +970,7 @@ int reply_open_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	mtime = sbuf.st_mtime;
 	if (fmode & aDIR) {
 		close_file(fnum, false);
-		return ERROR(ERRDOS, ERRnoaccess);
+		return ERROR_CODE(ERRDOS, ERRnoaccess);
 	}
 
 	/* The Samba version of this function had code to handle oplock
@@ -1040,7 +1041,7 @@ int reply_mknew(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	fnum = find_free_file();
 	if (fnum < 0)
-		return ERROR(ERRSRV, ERRnofids);
+		return ERROR_CODE(ERRSRV, ERRnofids);
 
 	if (!check_name(fname, cnum)) {
 		if ((errno == ENOENT) && bad_path) {
@@ -1048,7 +1049,7 @@ int reply_mknew(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 			unix_ERR_code = ERRbadpath;
 		}
 		Files[fnum].reserved = false;
-		return UNIXERROR(ERRDOS, ERRnoaccess);
+		return UNIX_ERROR_CODE(ERRDOS, ERRnoaccess);
 	}
 
 	if (com == SMBmknew) {
@@ -1072,7 +1073,7 @@ int reply_mknew(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 			unix_ERR_code = ERRbadpath;
 		}
 		Files[fnum].reserved = false;
-		return UNIXERROR(ERRDOS, ERRnoaccess);
+		return UNIX_ERROR_CODE(ERRDOS, ERRnoaccess);
 	}
 
 	outsize = set_message(outbuf, 1, 0, true);
@@ -1108,7 +1109,7 @@ int reply_ctemp(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	fnum = find_free_file();
 	if (fnum < 0)
-		return ERROR(ERRSRV, ERRnofids);
+		return ERROR_CODE(ERRSRV, ERRnofids);
 
 	if (!check_name(fname, cnum)) {
 		if ((errno == ENOENT) && bad_path) {
@@ -1116,7 +1117,7 @@ int reply_ctemp(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 			unix_ERR_code = ERRbadpath;
 		}
 		Files[fnum].reserved = false;
-		return UNIXERROR(ERRDOS, ERRnoaccess);
+		return UNIX_ERROR_CODE(ERRDOS, ERRnoaccess);
 	}
 
 	pstrcpy(fname2, (char *) mktemp(fname));
@@ -1134,7 +1135,7 @@ int reply_ctemp(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 			unix_ERR_code = ERRbadpath;
 		}
 		Files[fnum].reserved = false;
-		return UNIXERROR(ERRDOS, ERRnoaccess);
+		return UNIX_ERROR_CODE(ERRDOS, ERRnoaccess);
 	}
 
 	outsize = set_message(outbuf, 1, 2 + strlen(fname2), true);
@@ -1262,13 +1263,13 @@ int reply_unlink(char *inbuf, char *outbuf, int dum_size, int dum_bufsize)
 
 	if (count == 0) {
 		if (exists)
-			return ERROR(ERRDOS, error);
+			return ERROR_CODE(ERRDOS, error);
 		else {
 			if ((errno == ENOENT) && bad_path) {
 				unix_ERR_class = ERRDOS;
 				unix_ERR_code = ERRbadpath;
 			}
-			return UNIXERROR(ERRDOS, error);
+			return UNIX_ERROR_CODE(ERRDOS, error);
 		}
 	}
 
@@ -1462,12 +1463,12 @@ int reply_lockread(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	data = smb_buf(outbuf) + 3;
 
 	if (!do_lock(fnum, cnum, numtoread, startpos, F_RDLCK, &eclass, &ecode))
-		return ERROR(eclass, ecode);
+		return ERROR_CODE(eclass, ecode);
 
 	nread = read_file(fnum, data, startpos, numtoread);
 
 	if (nread < 0)
-		return UNIXERROR(ERRDOS, ERRnoaccess);
+		return UNIX_ERROR_CODE(ERRDOS, ERRnoaccess);
 
 	outsize += nread;
 	SSVAL(outbuf, smb_vwv0, nread);
@@ -1509,7 +1510,7 @@ int reply_read(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		nread = read_file(fnum, data, startpos, numtoread);
 
 	if (nread < 0)
-		return UNIXERROR(ERRDOS, ERRnoaccess);
+		return UNIX_ERROR_CODE(ERRDOS, ERRnoaccess);
 
 	outsize += nread;
 	SSVAL(outbuf, smb_vwv0, nread);
@@ -1548,7 +1549,7 @@ int reply_read_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	nread = read_file(fnum, data, smb_offs, smb_maxcnt);
 
 	if (nread < 0)
-		return UNIXERROR(ERRDOS, ERRnoaccess);
+		return UNIX_ERROR_CODE(ERRDOS, ERRnoaccess);
 
 	SSVAL(outbuf, smb_vwv5, nread);
 	SSVAL(outbuf, smb_vwv6, smb_offset(data, outbuf));
@@ -1612,7 +1613,7 @@ int reply_writebraw(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	        fnum, cnum, startpos, numtowrite, nwritten, write_through));
 
 	if (nwritten < numtowrite)
-		return UNIXERROR(ERRHRD, ERRdiskfull);
+		return UNIX_ERROR_CODE(ERRHRD, ERRdiskfull);
 
 	total_written = nwritten;
 
@@ -1698,10 +1699,10 @@ int reply_writeunlock(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		nwritten = write_file(fnum, data, numtowrite);
 
 	if (((nwritten == 0) && (numtowrite != 0)) || (nwritten < 0))
-		return UNIXERROR(ERRDOS, ERRnoaccess);
+		return UNIX_ERROR_CODE(ERRDOS, ERRnoaccess);
 
 	if (!do_unlock(fnum, cnum, numtowrite, startpos, &eclass, &ecode))
-		return ERROR(eclass, ecode);
+		return ERROR_CODE(eclass, ecode);
 
 	outsize = set_message(outbuf, 1, 0, true);
 
@@ -1749,7 +1750,7 @@ int reply_write(char *inbuf, char *outbuf, int dum1, int dum2)
 	}
 
 	if (((nwritten == 0) && (numtowrite != 0)) || (nwritten < 0))
-		return UNIXERROR(ERRDOS, ERRnoaccess);
+		return UNIX_ERROR_CODE(ERRDOS, ERRnoaccess);
 
 	outsize = set_message(outbuf, 1, 0, true);
 
@@ -1799,7 +1800,7 @@ int reply_write_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 		nwritten = write_file(fnum, data, smb_dsize);
 
 	if (((nwritten == 0) && (smb_dsize != 0)) || (nwritten < 0))
-		return UNIXERROR(ERRDOS, ERRnoaccess);
+		return UNIX_ERROR_CODE(ERRDOS, ERRnoaccess);
 
 	set_message(outbuf, 6, 0, true);
 
@@ -1914,7 +1915,7 @@ int reply_close(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	CHECK_FNUM(fnum, cnum);
 
-	if (HAS_CACHED_ERROR(fnum)) {
+	if (HAS_CACHED_ERROR_CODE(fnum)) {
 		eclass = Files[fnum].wbmpx_ptr->wr_errclass;
 		err = Files[fnum].wbmpx_ptr->wr_error;
 	}
@@ -1932,7 +1933,7 @@ int reply_close(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	/* We have a cached error */
 	if (eclass || err)
-		return ERROR(eclass, err);
+		return ERROR_CODE(eclass, err);
 
 	return outsize;
 }
@@ -1974,7 +1975,7 @@ int reply_writeclose(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	close_file(fnum, true);
 
 	if (nwritten <= 0)
-		return UNIXERROR(ERRDOS, ERRnoaccess);
+		return UNIX_ERROR_CODE(ERRDOS, ERRnoaccess);
 
 	outsize = set_message(outbuf, 1, 0, true);
 
@@ -2006,7 +2007,7 @@ int reply_lock(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	        Files[fnum].fd_ptr->fd, fnum, cnum, offset, count));
 
 	if (!do_lock(fnum, cnum, count, offset, F_WRLCK, &eclass, &ecode))
-		return ERROR(eclass, ecode);
+		return ERROR_CODE(eclass, ecode);
 
 	return outsize;
 }
@@ -2032,7 +2033,7 @@ int reply_unlock(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	offset = IVAL(inbuf, smb_vwv3);
 
 	if (!do_unlock(fnum, cnum, count, offset, &eclass, &ecode))
-		return ERROR(eclass, ecode);
+		return ERROR_CODE(eclass, ecode);
 
 	LOG(3, ("unlock fd=%d fnum=%d cnum=%d ofs=%d cnt=%d\n",
 	        Files[fnum].fd_ptr->fd, fnum, cnum, offset, count));
@@ -2052,7 +2053,7 @@ int reply_tdis(char *inbuf, char *outbuf, int size, int bufsize)
 
 	if (!OPEN_CNUM(cnum)) {
 		LOG(4, ("Invalid cnum in tdis (%d)\n", cnum));
-		return ERROR(ERRSRV, ERRinvnid);
+		return ERROR_CODE(ERRSRV, ERRinvnid);
 	}
 
 	Connections[cnum].used = false;
@@ -2108,7 +2109,7 @@ int reply_echo(char *inbuf, char *outbuf, int size, int bufsize)
 ****************************************************************************/
 int reply_printopen(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 {
-	return ERROR(ERRDOS, ERRnoaccess);
+	return ERROR_CODE(ERRDOS, ERRnoaccess);
 }
 
 /****************************************************************************
@@ -2116,7 +2117,7 @@ int reply_printopen(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 ****************************************************************************/
 int reply_printclose(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 {
-	return ERROR(ERRDOS, ERRnoaccess);
+	return ERROR_CODE(ERRDOS, ERRnoaccess);
 }
 
 /****************************************************************************
@@ -2124,7 +2125,7 @@ int reply_printclose(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 ****************************************************************************/
 int reply_printqueue(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 {
-	return ERROR(ERRDOS, ERRnoaccess);
+	return ERROR_CODE(ERRDOS, ERRnoaccess);
 }
 
 /****************************************************************************
@@ -2132,7 +2133,7 @@ int reply_printqueue(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 ****************************************************************************/
 int reply_printwrite(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 {
-	return ERROR(ERRDOS, ERRnoaccess);
+	return ERROR_CODE(ERRDOS, ERRnoaccess);
 }
 
 /****************************************************************************
@@ -2157,7 +2158,7 @@ int reply_mkdir(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
-		return UNIXERROR(ERRDOS, ERRnoaccess);
+		return UNIX_ERROR_CODE(ERRDOS, ERRnoaccess);
 	}
 
 	outsize = set_message(outbuf, 0, 0, true);
@@ -2196,7 +2197,7 @@ int reply_rmdir(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
-		return UNIXERROR(ERRDOS, ERRbadpath);
+		return UNIX_ERROR_CODE(ERRDOS, ERRbadpath);
 	}
 
 	outsize = set_message(outbuf, 0, 0, true);
@@ -2464,13 +2465,13 @@ int reply_mv(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	if (count == 0) {
 		if (exists)
-			return ERROR(ERRDOS, error);
+			return ERROR_CODE(ERRDOS, error);
 		else {
 			if ((errno == ENOENT) && (bad_path1 || bad_path2)) {
 				unix_ERR_class = ERRDOS;
 				unix_ERR_code = ERRbadpath;
 			}
-			return UNIXERROR(ERRDOS, error);
+			return UNIX_ERROR_CODE(ERRDOS, error);
 		}
 	}
 
@@ -2582,7 +2583,7 @@ int reply_copy(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	if (tid2 != cnum) {
 		/* can't currently handle inter share copies XXXX */
 		LOG(3, ("Rejecting inter-share copy\n"));
-		return ERROR(ERRSRV, ERRinvdevice);
+		return ERROR_CODE(ERRSRV, ERRinvdevice);
 	}
 
 	unix_convert(name, cnum, 0, &bad_path1);
@@ -2591,17 +2592,17 @@ int reply_copy(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	target_is_directory = directory_exist(newname, NULL);
 
 	if ((flags & 1) && target_is_directory) {
-		return ERROR(ERRDOS, ERRbadfile);
+		return ERROR_CODE(ERRDOS, ERRbadfile);
 	}
 
 	if ((flags & 2) && !target_is_directory) {
-		return ERROR(ERRDOS, ERRbadpath);
+		return ERROR_CODE(ERRDOS, ERRbadpath);
 	}
 
 	if ((flags & (1 << 5)) && directory_exist(name, NULL)) {
 		/* wants a tree copy! XXXX */
 		LOG(3, ("Rejecting tree copy\n"));
-		return ERROR(ERRSRV, ERRerror);
+		return ERROR_CODE(ERRSRV, ERRerror);
 	}
 
 	p = strrchr(name, '/');
@@ -2664,13 +2665,13 @@ int reply_copy(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	if (count == 0) {
 		if (exists)
-			return ERROR(ERRDOS, error);
+			return ERROR_CODE(ERRDOS, error);
 		else {
 			if ((errno == ENOENT) && (bad_path1 || bad_path2)) {
 				unix_ERR_class = ERRDOS;
 				unix_ERR_code = ERRbadpath;
 			}
-			return UNIXERROR(ERRDOS, error);
+			return UNIX_ERROR_CODE(ERRDOS, error);
 		}
 	}
 
@@ -2689,7 +2690,7 @@ int reply_setdir(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	LOG(3, ("setdir not supported cnum=%d\n", cnum));
 
-	return ERROR(ERRDOS, ERRnoaccess);
+	return ERROR_CODE(ERRDOS, ERRnoaccess);
 }
 
 /****************************************************************************
@@ -2723,7 +2724,7 @@ int reply_lockingX(char *inbuf, char *outbuf, int length, int bufsize)
 		LOG(5, ("reply_lockingX: oplock break reply from client for "
 		        "fnum = %d. no oplock granted as not supported.\n",
 		        fnum));
-		return ERROR(ERRDOS, ERRlock);
+		return ERROR_CODE(ERRDOS, ERRlock);
 	}
 
 	/* Data now points at the beginning of the list
@@ -2732,7 +2733,7 @@ int reply_lockingX(char *inbuf, char *outbuf, int length, int bufsize)
 		count = IVAL(data, SMB_LKLEN_OFFSET(i));
 		offset = IVAL(data, SMB_LKOFF_OFFSET(i));
 		if (!do_unlock(fnum, cnum, count, offset, &eclass, &ecode))
-			return ERROR(eclass, ecode);
+			return ERROR_CODE(eclass, ecode);
 	}
 
 	/* Now do any requested locks */
@@ -2756,7 +2757,7 @@ int reply_lockingX(char *inbuf, char *outbuf, int length, int bufsize)
 			offset = IVAL(data, SMB_LKOFF_OFFSET(i));
 			do_unlock(fnum, cnum, count, offset, &dummy1, &dummy2);
 		}
-		return ERROR(eclass, ecode);
+		return ERROR_CODE(eclass, ecode);
 	}
 
 	set_message(outbuf, 2, 0, true);
@@ -2774,7 +2775,7 @@ int reply_lockingX(char *inbuf, char *outbuf, int length, int bufsize)
 ****************************************************************************/
 int reply_readbmpx(char *inbuf, char *outbuf, int length, int bufsize)
 {
-	return ERROR(ERRSRV, ERRuseSTD);
+	return ERROR_CODE(ERRSRV, ERRuseSTD);
 }
 
 /****************************************************************************
@@ -2812,7 +2813,7 @@ int reply_writebmpx(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	nwritten = write_file(fnum, data, numtowrite);
 
 	if (nwritten < numtowrite)
-		return UNIXERROR(ERRHRD, ERRdiskfull);
+		return UNIX_ERROR_CODE(ERRHRD, ERRdiskfull);
 
 	/* If the maximum to be written to this file
 	   is greater than what we just wrote then set
@@ -2910,9 +2911,9 @@ int reply_writebs(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 			 * struct */
 			free(wbms);
 			Files[fnum].wbmpx_ptr = NULL;
-			return ERROR(ERRHRD, ERRdiskfull);
+			return ERROR_CODE(ERRHRD, ERRdiskfull);
 		}
-		return CACHE_ERROR(wbms, ERRHRD, ERRdiskfull);
+		return CACHE_ERROR_CODE(wbms, ERRHRD, ERRdiskfull);
 	}
 
 	/* Increment the total written, if this matches tcount
@@ -2977,7 +2978,7 @@ not setting timestamps of 0\n",
 
 	/* Set the date on this file */
 	if (sys_utime(Files[fnum].name, &unix_times) != 0)
-		return ERROR(ERRDOS, ERRnoaccess);
+		return ERROR_CODE(ERRDOS, ERRnoaccess);
 
 	LOG(3, ("reply_setattrE fnum=%d cnum=%d actime=%d modtime=%d\n", fnum,
 	        cnum, unix_times.actime, unix_times.modtime));
@@ -3005,7 +3006,7 @@ int reply_getattrE(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	/* Do an fstat on this file */
 	if (fstat(Files[fnum].fd_ptr->fd, &sbuf))
-		return UNIXERROR(ERRDOS, ERRnoaccess);
+		return UNIX_ERROR_CODE(ERRDOS, ERRnoaccess);
 
 	mode = dos_mode(cnum, Files[fnum].name, &sbuf);
 
