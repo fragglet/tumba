@@ -75,10 +75,12 @@ static void syslog_output(int level, char *format_str, va_list ap)
 	buf = msgbuf;
 	buf_len = sizeof(msgbuf);
 
-	slprintf(buf, buf_len - 1, "[%s] ", client_addr());
-	n = strlen(buf);
-	buf += n;
-	buf_len -= n;
+	if (Client != -1) {
+		slprintf(buf, buf_len - 1, "[%s] ", client_addr());
+		n = strlen(buf);
+		buf += n;
+		buf_len -= n;
+	}
 
 	vslprintf(buf, buf_len - 1, format_str, ap);
 
