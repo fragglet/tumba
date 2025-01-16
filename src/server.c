@@ -1538,8 +1538,8 @@ static int open_server_socket(int type, int port, int dlevel,
 
 	/* now we've got a socket - we need to bind it */
 	if (bind(res, (struct sockaddr *) &sock, sizeof(sock)) < 0) {
-		LOG(dlevel, ("bind failed on port %d socket_addr=%s (%s)\n",
-		             port, inet_ntoa(sock.sin_addr), strerror(errno)));
+		LOG(dlevel, "bind failed on port %d socket_addr=%s (%s)\n",
+		    port, inet_ntoa(sock.sin_addr), strerror(errno));
 		close(res);
 
 		return -1;

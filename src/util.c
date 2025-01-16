@@ -39,7 +39,6 @@ int Client = -1;
 int chain_size = 0;
 
 pstring debugf = "";
-int syslog_level;
 
 fstring local_machine = "";
 
@@ -155,7 +154,7 @@ static void check_log_size(void)
 write an debug message on the debugfile. This is called by the LOG
 macro
 ********************************************************************/
-int log_output(char *format_str, ...)
+int log_output(int level, char *format_str, ...)
 {
 	va_list ap;
 	int old_errno = errno;
@@ -181,7 +180,7 @@ int log_output(char *format_str, ...)
 		}
 	}
 
-	if (syslog_level < lp_syslog()) {
+	if (level < lp_syslog()) {
 		/*
 		 * map debug levels to syslog() priorities
 		 * note that not all ERROR( ...) calls are
@@ -198,12 +197,11 @@ int log_output(char *format_str, ...)
 		char *buf;
 		size_t buf_len;
 
-		if (syslog_level >=
-		        sizeof(priority_map) / sizeof(priority_map[0]) ||
-		    syslog_level < 0)
+		if (level >= sizeof(priority_map) / sizeof(priority_map[0]) ||
+		    level < 0)
 			priority = LOG_DEBUG;
 		else
-			priority = priority_map[syslog_level];
+			priority = priority_map[level];
 
 		buf = msgbuf;
 		buf_len = sizeof(msgbuf);
@@ -458,7 +456,7 @@ static void print_asc(int level, unsigned char *buf, int len)
 {
 	int i;
 	for (i = 0; i < len; i++)
-		LOG(level, ("%c", isprint(buf[i]) ? buf[i] : '.'));
+		LOG(level, "%c", isprint(buf[i]) ? buf[i] : '.');
 }
 
 static void dump_data(int level, char *buf1, int len)
@@ -468,38 +466,38 @@ static void dump_data(int level, char *buf1, int len)
 	if (len <= 0)
 		return;
 
-	LOG(level, ("[%03X] ", i));
+	LOG(level, "[%03X] ", i);
 	for (i = 0; i < len;) {
-		LOG(level, ("%02X ", (int) buf[i]));
+		LOG(level, "%02X ", (int) buf[i]);
 		i++;
 		if (i % 8 == 0)
-			LOG(level, (" "));
+			LOG(level, " ");
 		if (i % 16 == 0) {
 			print_asc(level, &buf[i - 16], 8);
-			LOG(level, (" "));
+			LOG(level, " ");
 			print_asc(level, &buf[i - 8], 8);
-			LOG(level, ("\n"));
+			LOG(level, "\n");
 			if (i < len)
-				LOG(level, ("[%03X] ", i));
+				LOG(level, "[%03X] ", i);
 		}
 	}
 	if (i % 16) {
 		int n;
 
 		n = 16 - (i % 16);
-		LOG(level, (" "));
+		LOG(level, " ");
 		if (n > 8)
-			LOG(level, (" "));
+			LOG(level, " ");
 		while (n--)
-			LOG(level, ("   "));
+			LOG(level, "   ");
 
 		n = MIN(8, i % 16);
 		print_asc(level, &buf[i - (i % 16)], n);
-		LOG(level, (" "));
+		LOG(level, " ");
 		n = (i % 16) - n;
 		if (n > 0)
 			print_asc(level, &buf[i - n], n);
-		LOG(level, ("\n"));
+		LOG(level, "\n");
 	}
 }
 

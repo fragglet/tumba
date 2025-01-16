@@ -42,17 +42,19 @@
 /* how long to wait for secondary SMB packets (milli-seconds) */
 #define SMB_SECONDARY_WAIT (60 * 1000)
 
-/* debugging code */
-extern int syslog_level;
+/* logging interface */
+#define LOG(level, ...)                                                        \
+	do {                                                                   \
+		if (LOGLEVEL >= (level)) {                                     \
+			log_output(level, __VA_ARGS__);                        \
+		}                                                              \
+	} while (0)
 
-#define LOG(level, body)                                                       \
-	((LOGLEVEL >= (level)) ? (syslog_level = (level), log_output body) : 0)
-
-#define ERROR(...)   LOG(0, (__VA_ARGS__))
-#define WARNING(...) LOG(1, (__VA_ARGS__))
-#define NOTICE(...)  LOG(2, (__VA_ARGS__))
-#define INFO(...)    LOG(3, (__VA_ARGS__))
-#define DEBUG(...)   LOG(4, (__VA_ARGS__))
+#define ERROR(...)   LOG(0, __VA_ARGS__)
+#define WARNING(...) LOG(1, __VA_ARGS__)
+#define NOTICE(...)  LOG(2, __VA_ARGS__)
+#define INFO(...)    LOG(3, __VA_ARGS__)
+#define DEBUG(...)   LOG(4, __VA_ARGS__)
 
 /* this defines the error codes that receive_smb can put in smb_read_error */
 #define READ_TIMEOUT 1
@@ -471,7 +473,7 @@ struct share {
 #define ERRHRD 0x03 /* Error is an hardware error. */
 #define ERRCMD 0xFF /* Command was not in the "SMB" format. */
 
-int log_output(char *, ...);
+int log_output(int level, char *, ...);
 int slprintf(char *str, int n, char *format, ...);
 
 #ifndef MIN
