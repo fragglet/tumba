@@ -3016,10 +3016,7 @@ int main(int argc, char *argv[])
 			pstrcpy(debugf, optarg);
 			break;
 		case 'd':
-			if (*optarg == 'A')
-				DEBUGLEVEL = 10000;
-			else
-				DEBUGLEVEL = atoi(optarg);
+			DEBUGLEVEL = atoi(optarg);
 			break;
 		case 'p':
 			port = atoi(optarg);
