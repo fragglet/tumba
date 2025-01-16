@@ -330,9 +330,9 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 
 		reskey = 0;
 
-		DEBUG(8, ("get_lanman2_dir_entry:readdir on dirptr 0x%x now at "
+		DEBUG(8, ("get_lanman2_dir_entry:readdir on dirptr %p now at "
 		          "offset %d\n",
-		          (unsigned int) Connections[cnum].dirptr,
+		          Connections[cnum].dirptr,
 		          tell_dir(Connections[cnum].dirptr)));
 
 		if (!dname)
@@ -871,8 +871,8 @@ resume_key = %d resume name = %s continue=%d level = %d\n",
 	dirtype = dptr_attr(dptr_num);
 
 	DEBUG(3,
-	      ("dptr_num is %d, mask = %s, attr = %x, dirptr=(0x%X,%d)\n",
-	       dptr_num, mask, dirtype, (unsigned int) Connections[cnum].dirptr,
+	      ("dptr_num is %d, mask = %s, attr = %x, dirptr=%p,%d)\n",
+	       dptr_num, mask, dirtype, Connections[cnum].dirptr,
 	       tell_dir(Connections[cnum].dirptr)));
 
 	p = pdata;
