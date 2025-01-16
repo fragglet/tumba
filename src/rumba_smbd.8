@@ -1,0 +1,155 @@
+.TH rumba_smbd 8
+.SH NAME
+rumba_smbd \- SMBv1 file server
+.SH SYNOPSIS
+.B rumba_smbd
+.RB [options]
+.I path [path...]
+.SH DESCRIPTION
+.PP
+.B Rumba
+(rumba_smbd) is a file server that implements version 1 of the Server Message
+Block (SMB) protocol, the native file sharing protocol used by the Microsoft
+Windows operating systems. Version 1 in particular is the version of the
+protocol that was used in the 1990s and used by the Windows 9x series.
+.PP
+.SH COMMAND SYNTAX
+The server must be supplied the path(s) to one or more directories to share to
+network users. The base directory name (ala \fBbasename\fR(3)) is used as the
+share name. For example, if \fB/var/rumba/pineapples\fR is given, network users
+will be able to access it via the share named \fBPINEAPPLES\fR.
+.PP
+All shares are public and there is no option for password-protected shares. If
+the \fBo+w\fR permission is set on the directory, it will be a read/write
+share; otherwise, it will be read-only.
+.PP
+.SH OPTIONS
+The following command line options are understood:
+.TP
+\fB-a\fR
+Allow connections from all (public) IP addresses. By default the server
+immediately closes any incoming connections not from localhost (127.0.0.1) or
+RFC 1918 private ranges (192.168.0.0/16; 10.0.0.0/8; 172.16.0.0/20). Since
+\fBRumba\fR does not support any password protection for shares, you should
+make sure you are very certain that you understand the implications of this
+argument before using it.
+.TP
+\fB-b addr\fR
+Bind to given IP address. By default the server binds to \fB0.0.0.0\fR,
+allowing incoming connections from any network interface, but this argument can
+be used to bind only to a specific interface.
+.TP
+\fB-p port\fR
+Listen on the given TCP port. By default, \fBRumba\fR listens on port 139, the
+NetBIOS session service port.
+.TP
+\fB-d level\fR
+Change the debug level. By default messages with debug levels up to 1 are
+logged, this argument allows more verbose logging.
+.TP
+\fB-l logfile\fR
+Specify path to a log file to write debug messages.
+.TP
+\fB-W workgroup\fR
+Specify the workgroup to which this server belongs. By default this is
+\fBWORKGROUP\fR, the default used in Windows.
+.PP
+.SH EXAMPLES
+Here are some examples for how to invoke the program:
+.TP
+rumba_smbd -W scooby /var/rumba/*
+Export all subdirectories of \fB/var/rumba\fR as shares. The server appears
+under a workgroup named \fBSCOOBY\fR.
+.TP
+rumba_smbd -b 127.0.0.1 -p 9999 /tmp/myshare
+Listen only on the localhost interface, on the nonstandard TCP port 9999.
+.TP
+rumba_smbd -d 10 -l /tmp/rumba.log /tmp/debugshare
+Run the server with verbose logging, writing to the file \fB/tmp/rumba.log\fR.
+.SH LIMITATIONS
+\fBRumba\fR is an intentionally minimalist implementation of the SMB protocol,
+and does not implement many of the features of the SMBv1 protocol. The
+following is a nonexhaustive list:
+.IP \(bu
+\fBPassword protected shares\fR. All shares are world-readable and there is no
+way to use the password protection functionality of the protocol. This is a
+deliberate design decision to avoid giving the false sense of security that
+passwords would imply; the cryptography used in the protocol is long obsolete
+and untrustworthy. If the contents of the directories you are sharing are
+sensitive enough to need password protection, you should find other ways to
+protect them. One example might be to use a VPN; another option you should
+consider is to use a different protocol.
+.IP \(bu
+\fBPer-user home directory shares\fR. This is a feature found in \fBsmbd\fR(1)
+that allows users to access their Unix home directories. \fBRumba\fR only ever
+shares a static list of directories.
+.IP \(bu
+\fBPrinter sharing\fR. The project only aims to be a file server.
+.IP \(bu
+\fBUnicode / code page support\fR. While 7-bit ASCII characters are treated in a
+case-insensitive fashion, no attempt is made to interpret higher range
+characters. So for example, while \fBcliche.txt\fR and \fBCLICHE.TXT\fR will
+both be interpreted as references to the same file, \fBcliché.txt\fR and
+\fBCLICHÉ.TXT\fR will not.
+.SH DOS ATTRIBUTES
+The DOS read-only attribute is mapped to the Unix write attribute; network
+users will see the +R attribute set if (1) the file is not world writable
+(o-w); and (2) the file is owned by a different user to the one that the server
+is running as, or the file is not owner-writable (u-w).
+.PP
+The other DOS file attributes (archive; system; hidden) are preserved through
+the use of filesystem extended attributes (xattrs). The same
+\fBuser.DOSATTRIB\fR attribute is used that is also supported by Samba,
+although only the original version is understood. Some other free software
+projects such as \fBdosemu2\fR and \fBdosbox-staging\fR also support the same
+attribute.
+.SH BUG REPORTS
+Bugs can be reported to the GitHub issue tracker:
+.UR https://github.com/fragglet/rumba
+https://github.com/fragglet/rumba
+.UE
+.SH SEE ALSO
+\fBsamba\fR(7),
+\fBsmbd\fR(8),
+\fBnmbd\fR(8),
+\fBsmbclient\fR(1)
+.SH HISTORY
+The SMB protocol was created in the 1980s at IBM, but popularized by Microsoft
+through its LAN Manager and Windows products. Specifically, its \fIWindows for
+Workgroups\fR (1992) product integrated networking support into Windows with
+SMB as its native file sharing protocol. Initially operating on top of NetBIOS
+frames (NBF) and Novell's IPX protocols, the introduction of NetBIOS over
+TCP/IP (NBT; RFCs 1001/1002) brought SMB to the IP world.
+.PP
+Around 1991-1992, Andrew Tridgell released the first versions of \fISamba\fR,
+a free software implementation of SMB for Unix systems. The project has
+continued to evolve and develop in the decades since then, keeping pace with
+the protocol itself which has continued to evolve. Nowadays, most users use
+version 2 of the SMB protocol.
+.PP
+At the time of writing in 2025, the SMBv1 protocol is now considered obsolete,
+and Samba along with other vendors including Microsoft and Apple have either
+dropped or are in the process of dropping support for it entirely. In late
+2024, Simon Howard created \fIRumba\fR as a fork of Samba v1.9.18p10
+(originally released 2007). The original code was pared down to the basics
+with most of Samba's more elaborate features deleted, the result being a
+much smaller codebase with less than 14,000 lines of code.
+.SH AUTHOR
+Rumba originated as a fork of Samba by Andrew Tridgell. It is developed and
+maintained by
+.MT fraggle@gmail.com
+Simon Howard
+.ME .
+.SH COPYRIGHT
+Copyright (C) Andrew Tridgell 1992-1998
+.br
+Copyright (C) Simon Howard 2024-2025
+
+This program is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation; either version 2 of the License, or (at your option) any later
+version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.  See the GNU General Public License for more details.

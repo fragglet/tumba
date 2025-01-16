@@ -1,6 +1,7 @@
 
 DESTDIR =
 PREFIX = /usr/local
+MANPATH = $(PREFIX)/share/man
 DATADIR = /var/rumba
 
 SMBLOGFILE = /var/log/rumba_smbd.log
@@ -57,6 +58,8 @@ install:
 	install -m 666 doc-public.txt $(DESTDIR)$(DATADIR)/public/README.txt
 	mkdir -m 755 -p $(DESTDIR)$(DATADIR)/readonly
 	install -m 644 doc-readonly.txt $(DESTDIR)$(DATADIR)/readonly/README.txt
+	mkdir -m 755 -p $(DESTDIR)$(MANPATH)/man8
+	install rumba_smbd.8 $(DESTDIR)$(MANPATH)/man8/rumba_smbd.8
 
 .PHONY: clean format all install
 
