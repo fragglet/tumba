@@ -44,12 +44,29 @@ int sys_utime(char *fname, struct utimbuf *times)
 ssize_t sys_getxattr(const char *path, const char *name, void *value,
                      size_t size)
 {
+#ifdef XATTR_API_LINUX
 	return getxattr(path, name, value, size);
+#elif defined(XATTR_API_BSD)
+	/* TODO: Skip past the "user." prefix since namespace is specified
+	   differently with the BSD API? */
+	return extattr_get_file(path, EXTATTR_NAMESPACE_USER, name, value, size);
+#else
+	errno = ENOSYS;
+	return -1;
+#endif
 }
 
 /* Different OSes have different versions of setxattr */
 ssize_t sys_setxattr(const char *path, const char *name, void *value,
                      size_t size)
 {
+#ifdef XATTR_API_LINUX
 	return setxattr(path, name, value, size, 0);
+#elif defined(XATTR_API_BSD)
+	return extattr_set_file(path, EXTATTR_NAMESPACE_USER, name, value,
+	                        size);
+#else
+	errno = ENOSYS;
+	return -1;
+#endif
 }

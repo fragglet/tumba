@@ -52,7 +52,6 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/wait.h>
-#include <sys/xattr.h>
 #include <syslog.h>
 #include <unistd.h>
 
@@ -71,6 +70,23 @@
 
 #ifndef FD_SETSIZE
 #define FD_SETSIZE 255
+#endif
+
+/* xattrs are system-specific: */
+#ifdef linux
+
+#include <sys/xattr.h>
+#define XATTR_API_LINUX
+
+#elif defined(__FreeBSD__)
+
+#include <sys/extattr.h>
+#define XATTR_API_BSD
+
+#else
+
+#define XATTR_API_NONE
+
 #endif
 
 /* some unixes have ENOTTY instead of TIOCNOTTY */
