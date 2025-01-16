@@ -24,6 +24,7 @@
 #include "includes.h"
 
 static uint8_t valid_dos_chars[32];
+char client_addr[32] = "";
 
 int LOGLEVEL = 1;
 
@@ -75,8 +76,8 @@ static void syslog_output(int level, char *format_str, va_list ap)
 	buf = msgbuf;
 	buf_len = sizeof(msgbuf);
 
-	if (Client != -1) {
-		slprintf(buf, buf_len - 1, "[%s] ", client_addr());
+	if (client_addr[0] != '\0') {
+		slprintf(buf, buf_len - 1, "[%s] ", client_addr);
 		n = strlen(buf);
 		buf += n;
 		buf_len -= n;
@@ -121,8 +122,8 @@ int log_output(int level, char *format_str, ...)
 		log_start_of_line = false;
 		fprintf(dbf, "%s ", timestring());
 
-		if (Client != -1) {
-			fprintf(dbf, "[%s] ", client_addr());
+		if (client_addr[0] != '\0') {
+			fprintf(dbf, "[%s] ", client_addr);
 		}
 	}
 
@@ -1333,19 +1334,15 @@ char *checked_strdup(const char *s)
 }
 
 /*******************************************************************
- return the IP addr of the client as a string
+ return the IP addr of the remote host connected to a socket
  ******************************************************************/
-const char *client_addr(void)
+const char *get_peer_addr(int fd)
 {
 	struct sockaddr_in sockin;
 	socklen_t length = sizeof(sockin);
 
-	if (Client == -1) {
-		return "(no client)";
-	}
-
-	if (getpeername(Client, (struct sockaddr *) &sockin, &length) < 0) {
-		ERROR("getpeername failed for fd=%d, error=%s\n", Client,
+	if (getpeername(fd, (struct sockaddr *) &sockin, &length) < 0) {
+		ERROR("getpeername failed for fd=%d, error=%s\n", fd,
 		      strerror(errno));
 		return "(error getting peer address)";
 	}

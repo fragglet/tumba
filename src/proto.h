@@ -235,7 +235,7 @@ bool mask_match(char *str, char *regexp, bool trans2);
 void *checked_realloc(void *p, size_t bytes);
 void *checked_calloc(size_t nmemb, size_t size);
 char *checked_strdup(const char *s);
-const char *client_addr(void);
+const char *get_peer_addr(int fd);
 int put_unicode(char *dst, char *src);
 char *gidtoname(int gid);
 void block_signals(bool block, int signum);

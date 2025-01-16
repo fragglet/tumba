@@ -610,5 +610,7 @@ extern int unix_ERR_code;
 
 extern const struct share *ipc_service;
 
+extern char client_addr[32];
+
 #endif /* _SMB_H */
 /* _SMB_H */

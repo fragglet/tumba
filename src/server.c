@@ -1618,6 +1618,7 @@ static bool open_sockets(int port)
 	   for each incoming connection */
 	DEBUG("waiting for a connection\n");
 	while (1) {
+		const char *peer_addr;
 		fd_set listen_set;
 		int num;
 		struct sockaddr addr;
@@ -1646,6 +1647,8 @@ static bool open_sockets(int port)
 			continue;
 		}
 
+		peer_addr = get_peer_addr(Client);
+
 		/* The BSD sockets API does not provide any way to reject TCP
 		   connections, the best we can do is to accept the connection
 		   and then immediately close it. By default we only allow
@@ -1654,7 +1657,7 @@ static bool open_sockets(int port)
 			if (!allow_public_connections) {
 				ERROR("open_sockets: rejecting connection from "
 				      "public IP address %s\n",
-				      client_addr());
+				      peer_addr);
 				close(Client);
 				Client = -1;
 				continue;
@@ -1662,10 +1665,13 @@ static bool open_sockets(int port)
 			/* even if allowed, log a warning */
 			ERROR("open_sockets: warning: connection from "
 			      "public IP address %s\n",
-			      client_addr());
+			      peer_addr);
 		}
 
 		if (fork() == 0) {
+			/* save a copy of the client's address to include log
+			 * messages */
+			strlcpy(client_addr, peer_addr, sizeof(client_addr));
 
 			/* only the parent catches SIGCHLD */
 			signal(SIGPIPE, SIGNAL_CAST sig_pipe);
