@@ -78,7 +78,7 @@
 #include <sys/xattr.h>
 #define XATTR_API_LINUX
 
-#elif defined(__FreeBSD__)
+#elif defined(__FreeBSD__) || defined(__NetBSD__)
 
 #include <sys/extattr.h>
 #define XATTR_API_BSD
