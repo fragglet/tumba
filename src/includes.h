@@ -60,7 +60,6 @@
 #include <dirent.h>
 #include <netinet/in.h>
 #include <string.h>
-#include <sys/vfs.h>
 #ifndef QSORT_CAST
 #define QSORT_CAST (int (*)(const void *, const void *))
 #endif /* QSORT_CAST */
