@@ -48,6 +48,8 @@ extern int syslog_level;
 #define LOG(level, body)                                                       \
 	((LOGLEVEL >= (level)) ? (syslog_level = (level), log_output body) : 0)
 
+#define ERROR(...) LOG(0, (__VA_ARGS__))
+
 /* this defines the error codes that receive_smb can put in smb_read_error */
 #define READ_TIMEOUT 1
 #define READ_EOF     2

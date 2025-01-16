@@ -1335,8 +1335,8 @@ static bool become_service(int cnum)
 
 	if (CONN_SHARE(cnum) != ipc_service &&
 	    chdir(Connections[cnum].connectpath) != 0) {
-		LOG(0, ("chdir (%s) failed cnum=%d\n",
-		        Connections[cnum].connectpath, cnum));
+		ERROR("chdir (%s) failed cnum=%d\n",
+		      Connections[cnum].connectpath, cnum);
 		return false;
 	}
 
@@ -1443,7 +1443,7 @@ static int sigchld_handler(void)
 {
 	static int depth = 0;
 	if (depth != 0) {
-		LOG(0, ("ERROR: Recursion in sigchld_handler?"));
+		ERROR("ERROR: Recursion in sigchld_handler?");
 		depth = 0;
 		return 0;
 	}
@@ -1486,7 +1486,7 @@ static void set_keepalive_option(int fd)
 	    setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &enabled, sizeof(int));
 
 	if (ret != 0) {
-		LOG(0, ("Failed to set keepalive option"));
+		ERROR("Failed to set keepalive option");
 	}
 }
 
@@ -1506,17 +1506,17 @@ static void drop_privileges(void)
 	pw = getpwnam(RUN_AS_USER);
 	if (pw == NULL) {
 		/* TODO: Should there be an option to override? */
-		LOG(0, ("Failed to look up user %s, cowardly refusing "
-		        "to run as root.\n",
-		        RUN_AS_USER));
+		ERROR("Failed to look up user %s, cowardly refusing "
+		      "to run as root.\n",
+		      RUN_AS_USER);
 		exit(1);
 	}
 
-	LOG(0, ("Dropping privileges, running as user %s (uid=%d)\n",
-	        RUN_AS_USER, pw->pw_uid));
+	ERROR("Dropping privileges, running as user %s (uid=%d)\n", RUN_AS_USER,
+	      pw->pw_uid);
 	if (setgid(pw->pw_gid) != 0 || setegid(pw->pw_gid) != 0 ||
 	    setuid(pw->pw_uid) != 0 || seteuid(pw->pw_uid) != 0) {
-		LOG(0, ("Failed to drop privileges: %s\n", strerror(errno)));
+		ERROR("Failed to drop privileges: %s\n", strerror(errno));
 		exit(1);
 	}
 }
@@ -1530,7 +1530,7 @@ static int open_server_socket(int type, int port, int dlevel,
 
 	res = socket(AF_INET, SOCK_STREAM, 0);
 	if (res == -1) {
-		LOG(0, ("socket failed\n"));
+		ERROR("socket failed\n");
 		return -1;
 	}
 
@@ -1571,7 +1571,7 @@ static bool is_private_peer(void)
 	};
 
 	if (getpeername(Client, (struct sockaddr *) &sockin, &length) < 0) {
-		LOG(0, ("is_private_peer: getpeername failed\n"));
+		ERROR("is_private_peer: getpeername failed\n");
 		return false;
 	}
 
@@ -1601,8 +1601,8 @@ static bool open_sockets(int port)
 
 	/* open an incoming socket */
 	if (inet_aton(bind_addr, &addr) == 0) {
-		LOG(0, ("open_sockets: failed to parse bind address %s\n",
-		        bind_addr));
+		ERROR("open_sockets: failed to parse bind address %s\n",
+		      bind_addr);
 		return false;
 	}
 	server_socket = open_server_socket(SOCK_STREAM, port, 0, addr.s_addr);
@@ -1614,7 +1614,7 @@ static bool open_sockets(int port)
 
 	/* ready to listen */
 	if (listen(server_socket, 5) == -1) {
-		LOG(0, ("open_sockets: listen: %s\n", strerror(errno)));
+		ERROR("open_sockets: listen: %s\n", strerror(errno));
 		close(server_socket);
 		return false;
 	}
@@ -1647,7 +1647,7 @@ static bool open_sockets(int port)
 			continue;
 
 		if (Client == -1) {
-			LOG(0, ("open_sockets: accept: %s\n", strerror(errno)));
+			ERROR("open_sockets: accept: %s\n", strerror(errno));
 			continue;
 		}
 
@@ -1657,18 +1657,17 @@ static bool open_sockets(int port)
 		   connections from local peers on the same private IP range. */
 		if (!is_private_peer()) {
 			if (!allow_public_connections) {
-				LOG(0,
-				    ("open_sockets: rejecting connection from "
-				     "public IP address %s\n",
-				     client_addr()));
+				ERROR("open_sockets: rejecting connection from "
+				      "public IP address %s\n",
+				      client_addr());
 				close(Client);
 				Client = -1;
 				continue;
 			}
 			/* even if allowed, log a warning */
-			LOG(0, ("open_sockets: warning: connection from "
-			        "public IP address %s\n",
-			        client_addr()));
+			ERROR("open_sockets: warning: connection from "
+			      "public IP address %s\n",
+			      client_addr());
 		}
 
 		if (fork() == 0) {
@@ -1729,7 +1728,7 @@ static bool receive_smb(int fd, char *buffer, size_t buflen, int timeout)
 		return false;
 
 	if (len > buflen) {
-		LOG(0, ("Invalid packet length! (%d bytes).\n", len));
+		ERROR("Invalid packet length! (%d bytes).\n", len);
 		exit(1);
 	}
 
@@ -1836,7 +1835,7 @@ this prevents zombie child processes
 static int sig_hup(void)
 {
 	block_signals(true, SIGHUP);
-	LOG(0, ("Got SIGHUP\n"));
+	ERROR("Got SIGHUP\n");
 
 #ifndef DONT_REINSTALL_SIG
 	signal(SIGHUP, SIGNAL_CAST sig_hup);
@@ -1879,7 +1878,7 @@ int make_connection(char *service, char *dev)
 			return -3;
 		}
 
-		LOG(0, ("couldn't find service %s\n", service));
+		ERROR("couldn't find service %s\n", service);
 		return -2;
 	}
 
@@ -1899,7 +1898,7 @@ int make_connection(char *service, char *dev)
 
 	cnum = find_free_connection(str_checksum(service));
 	if (cnum < 0) {
-		LOG(0, ("couldn't find free connection\n"));
+		ERROR("couldn't find free connection\n");
 		return -1;
 	}
 
@@ -1937,8 +1936,8 @@ int make_connection(char *service, char *dev)
 	pcon->open = true;
 
 	if (share != ipc_service && chdir(pcon->connectpath) != 0) {
-		LOG(0, ("Can't change directory to %s (%s)\n",
-		        pcon->connectpath, strerror(errno)));
+		ERROR("Can't change directory to %s (%s)\n", pcon->connectpath,
+		      strerror(errno));
 		pcon->open = false;
 		return -5;
 	}
@@ -2282,7 +2281,7 @@ static int reply_negprot(char *inbuf, char *outbuf, int size, int bufsize)
 		LOG(3, ("Selected protocol %s\n",
 		        supported_protocols[protocol].proto_name));
 	} else {
-		LOG(0, ("No protocol supported !\n"));
+		ERROR("No protocol supported !\n");
 	}
 	SSVAL(outbuf, smb_vwv0, choice);
 
@@ -2311,7 +2310,7 @@ void close_cnum(int cnum)
 	dir_cache_flush(CONN_SHARE(cnum));
 
 	if (!OPEN_CNUM(cnum)) {
-		LOG(0, ("Can't close cnum %d\n", cnum));
+		ERROR("Can't close cnum %d\n", cnum);
 		return;
 	}
 
@@ -2350,12 +2349,12 @@ void exit_server(char *reason)
 	if (!reason) {
 		int oldlevel = LOGLEVEL;
 		LOGLEVEL = 10;
-		LOG(0, ("Last message was %s\n", smb_fn_name(last_message)));
+		ERROR("Last message was %s\n", smb_fn_name(last_message));
 		if (last_inbuf)
 			show_msg(last_inbuf);
 		LOGLEVEL = oldlevel;
-		LOG(0, ("===================================================="
-		        "===========\n"));
+		ERROR("===================================================="
+		      "===========\n");
 	}
 
 	LOG(3, ("Server exit  (%s)\n", reason ? reason : ""));
@@ -2543,7 +2542,7 @@ static int switch_message(int type, char *inbuf, char *outbuf, int size,
 			break;
 
 	if (match == num_smb_messages) {
-		LOG(0, ("Unknown message type %d!\n", type));
+		ERROR("Unknown message type %d!\n", type);
 		outsize = reply_unknown(inbuf, outbuf);
 	} else {
 		LOG(3, ("switch message %s (pid %d)\n",
@@ -2773,8 +2772,8 @@ static void process_smb(char *inbuf, char *outbuf)
 			show_msg(outbuf);
 
 		if (nread != smb_len(outbuf) + 4) {
-			LOG(0, ("ERROR: Invalid message response size! %d %d\n",
-			        nread, smb_len(outbuf)));
+			ERROR("ERROR: Invalid message response size! %d %d\n",
+			      nread, smb_len(outbuf));
 		} else
 			send_smb(Client, outbuf);
 	}
@@ -2794,7 +2793,7 @@ static bool send_one_packet(char *buf, int len, struct in_addr ip, int port,
 	/* create a socket to write to */
 	out_fd = socket(AF_INET, type, 0);
 	if (out_fd == -1) {
-		LOG(0, ("socket failed"));
+		ERROR("socket failed");
 		return false;
 	}
 
@@ -2815,8 +2814,8 @@ static bool send_one_packet(char *buf, int len, struct in_addr ip, int port,
 	              sizeof(sock_out)) >= 0);
 
 	if (!ret)
-		LOG(0, ("Packet send to %s(%d) failed ERRNO=%s\n",
-		        inet_ntoa(ip), port, strerror(errno)));
+		ERROR("Packet send to %s(%d) failed ERRNO=%s\n", inet_ntoa(ip),
+		      port, strerror(errno));
 
 	close(out_fd);
 	return ret;
@@ -2952,8 +2951,8 @@ usage on the program
 ****************************************************************************/
 static void usage(void)
 {
-	LOG(0, ("Incorrect program usage - are you sure the command line is "
-	        "correct?\n"));
+	ERROR("Incorrect program usage - are you sure the command line is "
+	      "correct?\n");
 
 	printf("Rumba version " VERSION "\n"
 	       "Usage: rumba_smbd [-a] [-W workgroup] [-p port] "

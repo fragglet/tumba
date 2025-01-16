@@ -184,7 +184,7 @@ int log_output(char *format_str, ...)
 	if (syslog_level < lp_syslog()) {
 		/*
 		 * map debug levels to syslog() priorities
-		 * note that not all LOG(0, ...) calls are
+		 * note that not all ERROR( ...) calls are
 		 * necessarily errors
 		 */
 		static int priority_map[] = {
@@ -738,11 +738,11 @@ void close_low_fds(void)
 		if (fd < 0)
 			fd = open("/dev/null", O_WRONLY, 0);
 		if (fd < 0) {
-			LOG(0, ("Can't open /dev/null\n"));
+			ERROR("Can't open /dev/null\n");
 			return;
 		}
 		if (fd != i) {
-			LOG(0, ("Didn't get file descriptor %d\n", i));
+			ERROR("Didn't get file descriptor %d\n", i);
 			return;
 		}
 	}
@@ -760,9 +760,9 @@ static int write_socket(int fd, char *buf, int len)
 
 	LOG(6, ("write_socket(%d,%d) wrote %d\n", fd, len, ret));
 	if (ret <= 0)
-		LOG(0, ("write_socket: Error writing %d bytes to socket %d: "
-		        "ERRNO = %s\n",
-		        len, fd, strerror(errno)));
+		ERROR("write_socket: Error writing %d bytes to socket %d: "
+		      "ERRNO = %s\n",
+		      len, fd, strerror(errno));
 
 	return ret;
 }
@@ -971,9 +971,8 @@ bool send_smb(int fd, char *buffer)
 	while (nwritten < len) {
 		ret = write_socket(fd, buffer + nwritten, len - nwritten);
 		if (ret <= 0) {
-			LOG(0,
-			    ("Error writing %d bytes to client. %d. Exiting\n",
-			     len, ret));
+			ERROR("Error writing %d bytes to client. %d. Exiting\n",
+			      len, ret);
 			exit(1);
 		}
 		nwritten += ret;
@@ -1454,8 +1453,8 @@ const char *client_addr(void)
 	}
 
 	if (getpeername(Client, (struct sockaddr *) &sockin, &length) < 0) {
-		LOG(0, ("getpeername failed for fd=%d, error=%s\n", Client,
-		        strerror(errno)));
+		ERROR("getpeername failed for fd=%d, error=%s\n", Client,
+		      strerror(errno));
 		return "(error getting peer address)";
 	}
 
@@ -1513,8 +1512,8 @@ char *safe_strcpy(char *dest, const char *src, int dest_size)
 
 	len = strlcpy(dest, src, dest_size);
 	if (len > dest_size - 1) {
-		LOG(0, ("ERROR: string overflow by %d in safe_strcpy [%.50s]\n",
-		        len - dest_size + 1, src));
+		ERROR("ERROR: string overflow by %d in safe_strcpy [%.50s]\n",
+		      len - dest_size + 1, src);
 	}
 
 	return dest;
@@ -1534,8 +1533,8 @@ char *safe_strcat(char *dest, const char *src, int dest_size)
 
 	len = strlcat(dest, src, dest_size);
 	if (len > dest_size - 1) {
-		LOG(0, ("ERROR: string overflow by %d in safe_strcat [%.50s]\n",
-		        len - dest_size + 1, src));
+		ERROR("ERROR: string overflow by %d in safe_strcat [%.50s]\n",
+		      len - dest_size + 1, src);
 	}
 
 	return dest;

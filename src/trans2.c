@@ -1769,14 +1769,14 @@ int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize)
 			    !ret) {
 				outsize = set_message(outbuf, 0, 0, true);
 				if (ret)
-					LOG(0, ("reply_trans2: Invalid "
-					        "secondary trans2 packet\n"));
+					ERROR("reply_trans2: Invalid "
+					      "secondary trans2 packet\n");
 				else
-					LOG(0, ("reply_trans2: %s in getting "
-					        "secondary trans2 response.\n",
-					        (smb_read_error == READ_ERROR)
-					            ? "error"
-					            : "timeout"));
+					ERROR("reply_trans2: %s in getting "
+					      "secondary trans2 response.\n",
+					      (smb_read_error == READ_ERROR)
+					          ? "error"
+					          : "timeout");
 				free(params);
 				free(data);
 				return ERROR_CODE(ERRSRV, ERRerror);

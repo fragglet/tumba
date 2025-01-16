@@ -98,7 +98,7 @@ static void dptr_idleoldest(void)
 	if (oldi != -1)
 		dptr_idle(oldi);
 	else
-		LOG(0, ("No dptrs available to idle??\n"));
+		ERROR("No dptrs available to idle??\n");
 }
 
 /****************************************************************************
@@ -315,7 +315,7 @@ int dptr_create(int cnum, char *path, bool expect_close, int pid)
 	}
 
 	if (i == -1) {
-		LOG(0, ("Error - all dirptrs in use??\n"));
+		ERROR("Error - all dirptrs in use??\n");
 		return -1;
 	}
 

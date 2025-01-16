@@ -807,14 +807,14 @@ int reply_trans(char *inbuf, char *outbuf, int size, int bufsize)
 
 		if ((ret && (CVAL(inbuf, smb_com) != SMBtrans)) || !ret) {
 			if (ret)
-				LOG(0, ("reply_trans: Invalid secondary "
-				        "trans packet\n"));
+				ERROR("reply_trans: Invalid secondary "
+				      "trans packet\n");
 			else
-				LOG(0, ("reply_trans: %s in getting "
-				        "secondary trans response.\n",
-				        (smb_read_error == READ_ERROR)
-				            ? "error"
-				            : "timeout"));
+				ERROR("reply_trans: %s in getting "
+				      "secondary trans response.\n",
+				      (smb_read_error == READ_ERROR)
+				          ? "error"
+				          : "timeout");
 			free(params);
 			free(data);
 			free(setup);

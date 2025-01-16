@@ -64,7 +64,7 @@ int reply_special(char *inbuf, char *outbuf)
 		CVAL(outbuf, 3) = 0;
 		if (name_len(inbuf + 4) > 50 ||
 		    name_len(inbuf + 4 + name_len(inbuf + 4)) > 50) {
-			LOG(0, ("Invalid name length in session request\n"));
+			ERROR("Invalid name length in session request\n");
 			return 0;
 		}
 		name_extract(inbuf, 4, name1);
@@ -100,7 +100,7 @@ int reply_special(char *inbuf, char *outbuf)
 	case 0x82: /* positive session response */
 	case 0x83: /* negative session response */
 	case 0x84: /* retarget session response */
-		LOG(0, ("Unexpected session response\n"));
+		ERROR("Unexpected session response\n");
 		break;
 
 	case 0x85: /* session keepalive */
@@ -283,8 +283,8 @@ int reply_unknown(char *inbuf, char *outbuf)
 	cnum = SVAL(inbuf, smb_tid);
 	type = CVAL(inbuf, smb_com);
 
-	LOG(0, ("unknown command type (%s): cnum=%d type=%d (0x%X)\n",
-	        smb_fn_name(type), cnum, type, type));
+	ERROR("unknown command type (%s): cnum=%d type=%d (0x%X)\n",
+	      smb_fn_name(type), cnum, type, type);
 
 	return ERROR_CODE(ERRSRV, ERRunknownsmb);
 }
@@ -1034,9 +1034,9 @@ int reply_mknew(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	unix_convert(fname, cnum, 0, &bad_path);
 
 	if (createmode & aVOLID) {
-		LOG(0, ("Attempt to create file (%s) with volid set - please "
-		        "report this\n",
-		        fname));
+		ERROR("Attempt to create file (%s) with volid set - please "
+		      "report this\n",
+		      fname);
 	}
 
 	fnum = find_free_file();
@@ -1303,7 +1303,7 @@ static int transfer_file(int infd, int outfd, int n, char *header, int headlen,
 	}
 
 	if (!buf) {
-		LOG(0, ("Can't allocate transfer buffer!\n"));
+		ERROR("Can't allocate transfer buffer!\n");
 		exit(1);
 	}
 
@@ -1418,9 +1418,9 @@ int reply_readbraw(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	}
 
 	if (ret != nread + 4)
-		LOG(0,
-		    ("ERROR: file read failure on %s at %d for %d bytes (%d)\n",
-		     fname, startpos, nread, ret));
+		ERROR(
+		    "ERROR: file read failure on %s at %d for %d bytes (%d)\n",
+		    fname, startpos, nread, ret);
 
 #else
 	ret = read_file(fnum, header + 4, startpos, nread);
@@ -1604,7 +1604,7 @@ int reply_writebraw(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	CVAL(outbuf, smb_com) = SMBwritec;
 
 	if (seek_file(fnum, startpos) != startpos)
-		LOG(0, ("couldn't seek to %d in writebraw\n", startpos));
+		ERROR("couldn't seek to %d in writebraw\n", startpos);
 
 	if (numtowrite > 0)
 		nwritten = write_file(fnum, data, numtowrite);
@@ -2087,7 +2087,7 @@ int reply_echo(char *inbuf, char *outbuf, int size, int bufsize)
 		memcpy(smb_buf(outbuf), smb_buf(inbuf), data_len);
 
 	if (smb_reverb > 100) {
-		LOG(0, ("large reverb (%d)?? Setting to 100\n", smb_reverb));
+		ERROR("large reverb (%d)?? Setting to 100\n", smb_reverb);
 		smb_reverb = 100;
 	}
 
