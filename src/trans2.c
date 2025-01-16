@@ -172,9 +172,9 @@ static int send_trans2_replies(char *outbuf, int bufsize, char *params,
 
 		/* Sanity check */
 		if (params_to_send < 0 || data_to_send < 0) {
-			LOG(2, ("send_trans2_replies failed sanity check pts "
-			        "= %d, dts = %d\n!!!",
-			        params_to_send, data_to_send));
+			NOTICE("send_trans2_replies failed sanity check pts "
+			       "= %d, dts = %d\n!!!",
+			       params_to_send, data_to_send);
 			return -1;
 		}
 	}
@@ -859,7 +859,7 @@ resume_key = %d resume name = %s continue=%d level = %d\n",
 
 	/* Get the wildcard mask from the dptr */
 	if ((p = dptr_wcard(dptr_num)) == NULL) {
-		LOG(2, ("dptr_num %d has no wildcard\n", dptr_num));
+		NOTICE("dptr_num %d has no wildcard\n", dptr_num);
 		return ERROR_CODE(ERRDOS, ERRnofiles);
 	}
 	pstrcpy(mask, p);
@@ -1029,8 +1029,8 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
 	    ("call_trans2qfsinfo: cnum = %d, level = %d\n", cnum, info_level));
 
 	if (stat(".", &st) != 0) {
-		LOG(2, ("call_trans2qfsinfo: stat of . failed (%s)\n",
-		        strerror(errno)));
+		NOTICE("call_trans2qfsinfo: stat of . failed (%s)\n",
+		       strerror(errno));
 		return ERROR_CODE(ERRSRV, ERRinvdevice);
 	}
 
@@ -1529,7 +1529,7 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 	/* check the mode isn't different, before changing it */
 	if (mode != dos_mode(cnum, fname, &st) &&
 	    dos_chmod(cnum, fname, mode, NULL)) {
-		LOG(2, ("chmod of %s failed (%s)\n", fname, strerror(errno)));
+		NOTICE("chmod of %s failed (%s)\n", fname, strerror(errno));
 		return ERROR_CODE(ERRDOS, ERRnoaccess);
 	}
 
@@ -1733,7 +1733,7 @@ int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize)
 	/* All trans2 messages we handle have smb_sucnt == 1 - ensure this
 	   is so as a sanity check */
 	if (suwcnt != 1) {
-		LOG(2, ("Invalid smb_sucnt in trans2 call\n"));
+		NOTICE("Invalid smb_sucnt in trans2 call\n");
 		return ERROR_CODE(ERRSRV, ERRerror);
 	}
 
@@ -1855,7 +1855,7 @@ int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize)
 		break;
 	default:
 		/* Error in request */
-		LOG(2, ("Unknown request %d in trans2 call\n", tran_call));
+		NOTICE("Unknown request %d in trans2 call\n", tran_call);
 		free(params);
 		free(data);
 		return ERROR_CODE(ERRSRV, ERRerror);

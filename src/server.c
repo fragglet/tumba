@@ -1076,10 +1076,10 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 		string_set(&fsp->name, fname);
 		fsp->wbmpx_ptr = NULL;
 
-		LOG(2, ("opened file %s read=%s write=%s (numopen=%d "
-		        "fnum=%d)\n",
-		        fname, BOOLSTR(fsp->can_read), BOOLSTR(fsp->can_write),
-		        Connections[cnum].num_files_open, fnum));
+		NOTICE("opened file %s read=%s write=%s (numopen=%d "
+		       "fnum=%d)\n",
+		       fname, BOOLSTR(fsp->can_read), BOOLSTR(fsp->can_write),
+		       Connections[cnum].num_files_open, fnum);
 	}
 }
 
@@ -1105,8 +1105,8 @@ void close_file(int fnum, bool normal_close)
 
 	fd_attempt_close(fs_p->fd_ptr);
 
-	LOG(2, ("closed file %s (numopen=%d)\n", fs_p->name,
-	        Connections[cnum].num_files_open));
+	NOTICE("closed file %s (numopen=%d)\n", fs_p->name,
+	       Connections[cnum].num_files_open);
 
 	if (fs_p->name) {
 		string_free(&fs_p->name);
@@ -1197,7 +1197,7 @@ void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
 	}
 
 	if (deny_mode > DENY_NONE && deny_mode != DENY_FCB) {
-		LOG(2, ("Invalid deny mode %d on file %s\n", deny_mode, fname));
+		NOTICE("Invalid deny mode %d on file %s\n", deny_mode, fname);
 		errno = EINVAL;
 		return;
 	}
@@ -1621,7 +1621,7 @@ static bool open_sockets(int port)
 
 	/* now accept incoming connections - forking a new process
 	   for each incoming connection */
-	LOG(2, ("waiting for a connection\n"));
+	NOTICE("waiting for a connection\n");
 	while (1) {
 		fd_set listen_set;
 		int num;
@@ -2338,7 +2338,7 @@ void exit_server(char *reason)
 		exit(0);
 	firsttime = 0;
 
-	LOG(2, ("Closing connections\n"));
+	NOTICE("Closing connections\n");
 	for (i = 0; i < MAX_CONNECTIONS; i++)
 		if (Connections[i].open)
 			close_cnum(i);
@@ -2533,7 +2533,7 @@ static int switch_message(int type, char *inbuf, char *outbuf, int size,
 
 	/* make sure this is an SMB packet */
 	if (strncmp(smb_base(inbuf), "\377SMB", 4) != 0) {
-		LOG(2, ("Non-SMB packet of length %d\n", smb_len(inbuf)));
+		NOTICE("Non-SMB packet of length %d\n", smb_len(inbuf));
 		return -1;
 	}
 
@@ -2594,9 +2594,9 @@ static int switch_message(int type, char *inbuf, char *outbuf, int size,
 		smb_messages[match].time += this_time;
 		total_time += this_time;
 	}
-	LOG(2, ("TIME %s  %d usecs   %g pct\n", smb_fn_name(type),
-	        smb_messages[match].time,
-	        (100.0 * smb_messages[match].time) / total_time));
+	NOTICE("TIME %s  %d usecs   %g pct\n", smb_fn_name(type),
+	       smb_messages[match].time,
+	       (100.0 * smb_messages[match].time) / total_time);
 #endif
 
 	return outsize;
@@ -2881,7 +2881,7 @@ static void process(void)
 			/* automatic timeout if all connections are closed */
 			if (num_connections_open == 0 &&
 			    counter >= IDLE_CLOSED_TIMEOUT) {
-				LOG(2, ("Closing idle connection\n"));
+				NOTICE("Closing idle connection\n");
 				return;
 			}
 
@@ -2901,7 +2901,7 @@ static void process(void)
 				}
 
 			if (allidle && num_connections_open > 0) {
-				LOG(2, ("Closing idle connection 2\n"));
+				NOTICE("Closing idle connection 2\n");
 				return;
 			}
 		}
@@ -3034,11 +3034,11 @@ int main(int argc, char *argv[])
 
 	reopen_logs();
 
-	LOG(2, ("smbd version %s started\n", VERSION));
-	LOG(2, ("Copyright Andrew Tridgell 1992-1997\n"));
+	NOTICE("smbd version %s started\n", VERSION);
+	NOTICE("Copyright Andrew Tridgell 1992-1997\n");
 
-	LOG(2, ("uid=%d gid=%d euid=%d egid=%d\n", getuid(), getgid(),
-	        geteuid(), getegid()));
+	NOTICE("uid=%d gid=%d euid=%d egid=%d\n", getuid(), getgid(), geteuid(),
+	       getegid());
 
 	init_structs();
 

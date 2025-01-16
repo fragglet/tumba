@@ -69,7 +69,7 @@ int reply_special(char *inbuf, char *outbuf)
 		}
 		name_extract(inbuf, 4, name1);
 		name_extract(inbuf, 4 + name_len(inbuf + 4), name2);
-		LOG(2, ("netbios connect: name1=%s name2=%s\n", name1, name2));
+		NOTICE("netbios connect: name1=%s name2=%s\n", name1, name2);
 
 		fstrcpy(local_machine, name1);
 		len = strlen(local_machine);
@@ -1080,7 +1080,7 @@ int reply_mknew(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	SSVAL(outbuf, smb_vwv0, fnum);
 	/* Note we grant no oplocks. See comment in reply_open_and_X() */
 
-	LOG(2, ("new file %s\n", fname));
+	NOTICE("new file %s\n", fname);
 	LOG(3, ("mknew %s fd=%d fnum=%d cnum=%d dmode=%d\n", fname,
 	        Files[fnum].fd_ptr->fd, fnum, cnum, createmode));
 
@@ -1145,7 +1145,7 @@ int reply_ctemp(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	/* Note we grant no oplocks. See comment in reply_open_and_X() */
 
-	LOG(2, ("created temp file %s\n", fname2));
+	NOTICE("created temp file %s\n", fname2);
 	LOG(3, ("ctemp %s fd=%d fnum=%d cnum=%d dmode=%d\n", fname2,
 	        Files[fnum].fd_ptr->fd, fnum, cnum, createmode));
 
