@@ -193,7 +193,7 @@ void dptr_close(int key)
 	}
 
 	if (key < 0 || key >= NUMDIRPTRS) {
-		LOG(3, ("Invalid key %d given to dptr_close\n", key));
+		INFO("Invalid key %d given to dptr_close\n", key);
 		return;
 	}
 
@@ -333,8 +333,8 @@ int dptr_create(int cnum, char *path, bool expect_close, int pid)
 	dirptrs[i].attr = 0;     /* Only used in lanman2 searches */
 	dirptrs[i].valid = true;
 
-	LOG(3, ("creating new dirptr %d for path %s, expect_close = %d\n", i,
-	        path, expect_close));
+	INFO("creating new dirptr %d for path %s, expect_close = %d\n", i, path,
+	     expect_close);
 
 	return i;
 }
@@ -377,14 +377,14 @@ void *dptr_fetch(char *buf, int *num)
 	void *p = dptr_get(key, dircounter++);
 	uint32_t offset;
 	if (!p) {
-		LOG(3, ("fetched null dirptr %d\n", key));
+		INFO("fetched null dirptr %d\n", key);
 		return NULL;
 	}
 	*num = key;
 	offset = IVAL(buf, 1) & ~DPTR_MASK;
 	seek_dir(p, offset);
-	LOG(3, ("fetching dirptr %d for path %s at offset %d\n", key,
-	        dptr_path(key), offset));
+	INFO("fetching dirptr %d for path %s at offset %d\n", key,
+	     dptr_path(key), offset);
 	return p;
 }
 
@@ -396,11 +396,10 @@ void *dptr_fetch_lanman2(int dptr_num)
 	void *p = dptr_get(dptr_num, dircounter++);
 
 	if (!p) {
-		LOG(3, ("fetched null dirptr %d\n", dptr_num));
+		INFO("fetched null dirptr %d\n", dptr_num);
 		return NULL;
 	}
-	LOG(3, ("fetching dirptr %d for path %s\n", dptr_num,
-	        dptr_path(dptr_num)));
+	INFO("fetching dirptr %d for path %s\n", dptr_num, dptr_path(dptr_num));
 	return p;
 }
 

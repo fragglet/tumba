@@ -665,7 +665,7 @@ void unix_clean_name(char *s)
 {
 	char *p = NULL;
 
-	LOG(3, ("unix_clean_name [%s]\n", s));
+	INFO("unix_clean_name [%s]\n", s);
 
 	/* remove any double slashes */
 	string_sub(s, "//", "/");

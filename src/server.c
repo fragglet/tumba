@@ -406,7 +406,7 @@ static bool scan_directory(char *path, char *name, int cnum, bool docache)
 
 	/* open the directory */
 	if (!(cur_dir = open_dir(cnum, path))) {
-		LOG(3, ("scan dir didn't open dir [%s]\n", path));
+		INFO("scan dir didn't open dir [%s]\n", path);
 		return false;
 	}
 
@@ -654,12 +654,11 @@ bool check_name(char *name, int cnum)
 		return true;
 	}
 	if (getcwd(old_wd, sizeof(old_wd)) == NULL) {
-		LOG(3, ("check_name: denied: getcwd() errno=%d\n", top, errno));
+		INFO("check_name: denied: getcwd() errno=%d\n", top, errno);
 		return false;
 	}
 	if (chdir(top) != 0) {
-		LOG(3,
-		    ("check_name: denied: chdir(%s) errno=%d\n", top, errno));
+		INFO("check_name: denied: chdir(%s) errno=%d\n", top, errno);
 		return false;
 	}
 
@@ -684,26 +683,25 @@ bool check_name(char *name, int cnum)
 		set_parent_dir(parent, name);
 		canon_path = realpath(parent, NULL);
 		if (canon_path == NULL) {
-			LOG(3, ("check_name: realpath(%s) errno=%d (parent)\n",
-			        parent, errno));
+			INFO("check_name: realpath(%s) errno=%d (parent)\n",
+			     parent, errno);
 		}
 		success = canon_path != NULL && path_within(canon_path, top);
 		if (success) {
-			LOG(3, ("check_name: no file %s but parent %s "
-			        "within %s\n",
-			        name, parent, top));
+			INFO("check_name: no file %s but parent %s "
+			     "within %s\n",
+			     name, parent, top);
 		}
 		free(canon_path);
 	}
 
 	if (!success) {
-		LOG(3, ("check_name: denied: %s not within %s subtree\n", name,
-		        top));
+		INFO("check_name: denied: %s not within %s subtree\n", name,
+		     top);
 	}
 
 	if (chdir(old_wd) != 0) {
-		LOG(3,
-		    ("check_name: ending chdir(%s) errno=%d\n", old_wd, errno));
+		INFO("check_name: ending chdir(%s) errno=%d\n", old_wd, errno);
 	}
 
 	return success;
@@ -719,7 +717,7 @@ static void check_for_pipe(char *fname)
 	strlcpy(s, fname, sizeof(s));
 	strlower(s);
 	if (strstr(s, "pipe/")) {
-		LOG(3, ("Rejecting named pipe open for %s\n", fname));
+		INFO("Rejecting named pipe open for %s\n", fname);
 		unix_ERR_class = ERRSRV;
 		unix_ERR_code = ERRaccess;
 	}
@@ -784,10 +782,9 @@ static file_fd_struct *fd_get_already_open(struct stat *sbuf)
 		    (((uint32_t) sbuf->st_dev) == fd_ptr->dev) &&
 		    (((uint32_t) sbuf->st_ino) == fd_ptr->inode)) {
 			fd_ptr->ref_count++;
-			LOG(3,
-			    ("Re-used file_fd_struct %d, dev = %x, inode "
+			INFO("Re-used file_fd_struct %d, dev = %x, inode "
 			     "= %x, ref_count = %d\n",
-			     i, fd_ptr->dev, fd_ptr->inode, fd_ptr->ref_count));
+			     i, fd_ptr->dev, fd_ptr->inode, fd_ptr->ref_count);
 			return fd_ptr;
 		}
 	}
@@ -817,9 +814,9 @@ static file_fd_struct *fd_get_new(void)
 			   on search time when re-using */
 			if (i > max_file_fd_used)
 				max_file_fd_used = i;
-			LOG(3, ("Allocated new file_fd_struct %d, dev = %x, "
-			        "inode = %x\n",
-			        i, fd_ptr->dev, fd_ptr->inode));
+			INFO("Allocated new file_fd_struct %d, dev = %x, "
+			     "inode = %x\n",
+			     i, fd_ptr->dev, fd_ptr->inode);
 			return fd_ptr;
 		}
 	}
@@ -854,10 +851,10 @@ Decrements the ref_count and returns it.
 ****************************************************************************/
 static int fd_attempt_close(file_fd_struct *fd_ptr)
 {
-	LOG(3, ("fd_attempt_close on file_fd_struct %d, fd = %d, dev = %x, "
-	        "inode = %x, open_flags = %d, ref_count = %d.\n",
-	        fd_ptr - &FileFd[0], fd_ptr->fd, fd_ptr->dev, fd_ptr->inode,
-	        fd_ptr->real_open_flags, fd_ptr->ref_count));
+	INFO("fd_attempt_close on file_fd_struct %d, fd = %d, dev = %x, "
+	     "inode = %x, open_flags = %d, ref_count = %d.\n",
+	     fd_ptr - &FileFd[0], fd_ptr->fd, fd_ptr->dev, fd_ptr->inode,
+	     fd_ptr->real_open_flags, fd_ptr->ref_count);
 	if (fd_ptr->ref_count > 0) {
 		fd_ptr->ref_count--;
 		if (fd_ptr->ref_count == 0) {
@@ -911,7 +908,7 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 	if (!CAN_WRITE(cnum)) {
 		/* It's a read-only share - fail if we wanted to write. */
 		if (accmode != O_RDONLY) {
-			LOG(3, ("Permission denied opening %s\n", fname));
+			INFO("Permission denied opening %s\n", fname);
 			check_for_pipe(fname);
 			return;
 		} else if (flags & O_CREAT) {
@@ -925,7 +922,7 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 
 	/*
 	  if (flags == O_WRONLY)
-	    LOG(3,("Bug in client? Set O_WRONLY without O_CREAT\n"));
+	    INFO(("Bug in client? Set O_WRONLY without O_CREAT\n"));
 	*/
 
 	/*
@@ -935,8 +932,8 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 	if (sbuf == 0) {
 		if (stat(fname, &statbuf) < 0) {
 			if (errno != ENOENT) {
-				LOG(3, ("Error doing stat on file %s (%s)\n",
-				        fname, strerror(errno)));
+				INFO("Error doing stat on file %s (%s)\n",
+				     fname, strerror(errno));
 
 				check_for_pipe(fname);
 				return;
@@ -985,10 +982,10 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 		     (fd_ptr->real_open_flags == O_WRONLY)) ||
 		    ((accmode == O_RDWR) &&
 		     (fd_ptr->real_open_flags != O_RDWR))) {
-			LOG(3, ("Error opening (already open for flags=%d) "
-			        "file %s (%s) (flags=%d)\n",
-			        fd_ptr->real_open_flags, fname,
-			        strerror(EACCES), flags));
+			INFO("Error opening (already open for flags=%d) "
+			     "file %s (%s) (flags=%d)\n",
+			     fd_ptr->real_open_flags, fname, strerror(EACCES),
+			     flags);
 			check_for_pipe(fname);
 			fd_ptr->ref_count--;
 			return;
@@ -1033,8 +1030,8 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 	}
 
 	if (fd_ptr->fd < 0) {
-		LOG(3, ("Error opening file %s (%s) (flags=%d)\n", fname,
-		        strerror(errno), flags));
+		INFO("Error opening file %s (%s) (flags=%d)\n", fname,
+		     strerror(errno), flags);
 		/* Ensure the ref_count is decremented. */
 		fd_attempt_close(fd_ptr);
 		check_for_pipe(fname);
@@ -1046,9 +1043,9 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 			/* Do the fstat */
 			if (fstat(fd_ptr->fd, &statbuf) == -1) {
 				/* Error - backout !! */
-				LOG(3, ("Error doing fstat on fd %d, file %s "
-				        "(%s)\n",
-				        fd_ptr->fd, fname, strerror(errno)));
+				INFO("Error doing fstat on fd %d, file %s "
+				     "(%s)\n",
+				     fd_ptr->fd, fname, strerror(errno));
 				/* Ensure the ref_count is decremented. */
 				fd_attempt_close(fd_ptr);
 				return;
@@ -1280,7 +1277,7 @@ int read_file(int fnum, char *data, uint32_t pos, int n)
 		return ret;
 
 	if (seek_file(fnum, pos) != pos) {
-		LOG(3, ("Failed to seek to %d\n", pos));
+		INFO("Failed to seek to %d\n", pos);
 		return ret;
 	}
 
@@ -1426,12 +1423,12 @@ int error_packet(char *inbuf, char *outbuf, int error_class,
 	CVAL(outbuf, smb_rcls) = error_class;
 	SSVAL(outbuf, smb_err, error_code);
 
-	LOG(3, ("error packet at line %d cmd=%d (%s) eclass=%d ecode=%d\n",
-	        line, (int) CVAL(inbuf, smb_com),
-	        smb_fn_name(CVAL(inbuf, smb_com)), error_class, error_code));
+	INFO("error packet at line %d cmd=%d (%s) eclass=%d ecode=%d\n", line,
+	     (int) CVAL(inbuf, smb_com), smb_fn_name(CVAL(inbuf, smb_com)),
+	     error_class, error_code);
 
 	if (errno != 0)
-		LOG(3, ("error string = %s\n", strerror(errno)));
+		INFO("error string = %s\n", strerror(errno));
 
 	return outsize;
 }
@@ -1548,7 +1545,7 @@ static int open_server_socket(int type, int port, int dlevel,
 
 		return -1;
 	}
-	LOG(3, ("bind succeeded on port %d\n", port));
+	INFO("bind succeeded on port %d\n", port);
 
 	return res;
 }
@@ -1874,7 +1871,7 @@ int make_connection(char *service, char *dev)
 	share = lookup_share(service);
 	if (share == NULL) {
 		if (strequal(service, "IPC$")) {
-			LOG(3, ("refusing IPC connection\n"));
+			INFO("refusing IPC connection\n");
 			return -3;
 		}
 
@@ -1924,12 +1921,12 @@ int make_connection(char *service, char *dev)
 		   thing and expects all files to be subpaths. */
 		canon_path = realpath(s, NULL);
 		if (canon_path == NULL) {
-			LOG(3, ("realpath(%s) failed, errno=%d\n", s, errno));
+			INFO("realpath(%s) failed, errno=%d\n", s, errno);
 			pcon->open = false;
 			return -1;
 		}
 		string_set(&pcon->connectpath, canon_path);
-		LOG(3, ("Connect path is %s\n", canon_path));
+		INFO("Connect path is %s\n", canon_path);
 		free(canon_path);
 	}
 
@@ -2009,7 +2006,7 @@ again:
 
 	for (i = hash + 1; i != hash;) {
 		if (!Connections[i].open && Connections[i].used == used) {
-			LOG(3, ("found free connection number %d\n", i));
+			INFO("found free connection number %d\n", i);
 			return i;
 		}
 		i++;
@@ -2255,7 +2252,7 @@ static int reply_negprot(char *inbuf, char *outbuf, int size, int bufsize)
 	p = smb_buf(inbuf) + 1;
 	while (p < (smb_buf(inbuf) + bcc)) {
 		Index++;
-		LOG(3, ("Requested protocol [%s]\n", p));
+		INFO("Requested protocol [%s]\n", p);
 		p += strlen(p) + 2;
 	}
 
@@ -2278,8 +2275,8 @@ static int reply_negprot(char *inbuf, char *outbuf, int size, int bufsize)
 	SSVAL(outbuf, smb_vwv0, choice);
 	if (choice != -1) {
 		outsize = supported_protocols[protocol].proto_reply_fn(outbuf);
-		LOG(3, ("Selected protocol %s\n",
-		        supported_protocols[protocol].proto_name));
+		INFO("Selected protocol %s\n",
+		     supported_protocols[protocol].proto_name);
 	} else {
 		ERROR("No protocol supported !\n");
 	}
@@ -2357,7 +2354,7 @@ void exit_server(char *reason)
 		      "===========\n");
 	}
 
-	LOG(3, ("Server exit  (%s)\n", reason ? reason : ""));
+	INFO("Server exit  (%s)\n", reason ? reason : "");
 	exit(0);
 }
 
@@ -2545,8 +2542,8 @@ static int switch_message(int type, char *inbuf, char *outbuf, int size,
 		ERROR("Unknown message type %d!\n", type);
 		outsize = reply_unknown(inbuf, outbuf);
 	} else {
-		LOG(3, ("switch message %s (pid %d)\n",
-		        smb_messages[match].name, pid));
+		INFO("switch message %s (pid %d)\n", smb_messages[match].name,
+		     pid);
 
 		if (smb_messages[match].fn) {
 			int cnum = SVAL(inbuf, smb_tid);
@@ -2676,7 +2673,7 @@ int chain_reply(char *inbuf, char *outbuf, int size, int bufsize)
 	SSVAL(outbuf2, smb_uid, SVAL(inbuf2, smb_uid));
 	SSVAL(outbuf2, smb_mid, SVAL(inbuf2, smb_mid));
 
-	LOG(3, ("Chained message\n"));
+	INFO("Chained message\n");
 	show_msg(inbuf2);
 
 	/* process the request */
@@ -2758,7 +2755,7 @@ static void process_smb(char *inbuf, char *outbuf)
 	int nread = len + 4;
 
 	LOG(6, ("got message type 0x%x of len 0x%x\n", msg_type, len));
-	LOG(3, ("Transaction %d of length %d\n", trans_num, nread));
+	INFO("Transaction %d of length %d\n", trans_num, nread);
 
 	if (msg_type == 0)
 		show_msg(inbuf);
@@ -2804,10 +2801,10 @@ static bool send_one_packet(char *buf, int len, struct in_addr ip, int port,
 	sock_out.sin_port = htons(port);
 
 	if (LOGLEVEL > 0)
-		LOG(3, ("sending a packet of len %d to (%s) on port %d of "
-		        "type %s\n",
-		        len, inet_ntoa(ip), port,
-		        type == SOCK_DGRAM ? "DGRAM" : "STREAM"));
+		INFO("sending a packet of len %d to (%s) on port %d of "
+		     "type %s\n",
+		     len, inet_ntoa(ip), port,
+		     type == SOCK_DGRAM ? "DGRAM" : "STREAM");
 
 	/* send it */
 	ret = (sendto(out_fd, buf, len, 0, (struct sockaddr *) &sock_out,
@@ -2835,7 +2832,7 @@ static void process(void)
 	OutBuffer += SMB_ALIGNMENT;
 
 #if PRIME_NMBD
-	LOG(3, ("priming nmbd\n"));
+	INFO("priming nmbd\n");
 	{
 		struct in_addr ip = {htonl(INADDR_LOOPBACK)};
 		*OutBuffer = 0;
@@ -2866,13 +2863,13 @@ static void process(void)
 			}
 
 			if (smb_read_error == READ_EOF) {
-				LOG(3, ("end of file from client\n"));
+				INFO("end of file from client\n");
 				return;
 			}
 
 			if (smb_read_error == READ_ERROR) {
-				LOG(3, ("receive_smb error (%s) exiting\n",
-				        strerror(errno)));
+				INFO("receive_smb error (%s) exiting\n",
+				     strerror(errno));
 				return;
 			}
 
@@ -3049,7 +3046,7 @@ int main(int argc, char *argv[])
 	/* Setup the signals that allow the debug log level
 	   to by dynamically changed. */
 
-	LOG(3, ("loaded services\n"));
+	INFO("loaded services\n");
 
 	if (!open_sockets(port))
 		exit(1);

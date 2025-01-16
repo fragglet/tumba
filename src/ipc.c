@@ -211,7 +211,7 @@ static bool api_RNetServerEnum(int cnum, char *param, char *data, int mdrcnt,
 	SSVAL(*rparam, 4, 0);
 	SSVAL(*rparam, 6, 0);
 
-	LOG(3, ("NetServerEnum\n"));
+	INFO("NetServerEnum\n");
 
 	return true;
 }
@@ -442,8 +442,8 @@ static bool api_RNetShareEnum(int cnum, char *param, char *data, int mdrcnt,
 	SSVAL(*rparam, 4, shares_count());
 	SSVAL(*rparam, 6, total);
 
-	LOG(3, ("RNetShareEnum gave %d entries of %d (%d %d %d %d)\n",
-	        shares_count(), total, uLevel, buf_len, *rdata_len, mdrcnt));
+	INFO("RNetShareEnum gave %d entries of %d (%d %d %d %d)\n",
+	     shares_count(), total, uLevel, buf_len, *rdata_len, mdrcnt);
 	return true;
 }
 
@@ -629,7 +629,7 @@ static bool api_TooSmall(int cnum, char *param, char *data, int mdrcnt,
 
 	SSVAL(*rparam, 0, NERR_BufTooSmall);
 
-	LOG(3, ("Supplied buffer too small in API command\n"));
+	INFO("Supplied buffer too small in API command\n");
 
 	return true;
 }
@@ -649,7 +649,7 @@ static bool api_Unsupported(int cnum, char *param, char *data, int mdrcnt,
 	SSVAL(*rparam, 0, NERR_notsupported);
 	SSVAL(*rparam, 2, 0); /* converter word */
 
-	LOG(3, ("Unsupported API command\n"));
+	INFO("Unsupported API command\n");
 
 	return true;
 }
@@ -681,14 +681,14 @@ static int api_reply(int cnum, char *outbuf, char *data, char *params,
 	bool reply = false;
 	int i;
 
-	LOG(3, ("Got API command %d of form <%s> <%s> "
-	        "(tdscnt=%d,tpscnt=%d,mdrcnt=%d,mprcnt=%d)\n",
-	        api_command, params + 2, skip_string(params + 2, 1), tdscnt,
-	        tpscnt, mdrcnt, mprcnt));
+	INFO("Got API command %d of form <%s> <%s> "
+	     "(tdscnt=%d,tpscnt=%d,mdrcnt=%d,mprcnt=%d)\n",
+	     api_command, params + 2, skip_string(params + 2, 1), tdscnt,
+	     tpscnt, mdrcnt, mprcnt);
 
 	for (i = 0; api_commands[i].name; i++)
 		if (api_commands[i].id == api_command && api_commands[i].fn) {
-			LOG(3, ("Doing %s\n", api_commands[i].name));
+			INFO("Doing %s\n", api_commands[i].name);
 			break;
 		}
 
@@ -726,15 +726,15 @@ static int named_pipe(int cnum, char *outbuf, char *name, uint16_t *setup,
                       char *data, char *params, int suwcnt, int tdscnt,
                       int tpscnt, int msrcnt, int mdrcnt, int mprcnt)
 {
-	LOG(3, ("named pipe command on <%s> name\n", name));
+	INFO("named pipe command on <%s> name\n", name);
 
 	if (strequal(name, "LANMAN")) {
 		return api_reply(cnum, outbuf, data, params, tdscnt, tpscnt,
 		                 mdrcnt, mprcnt);
 	}
 	if (setup) {
-		LOG(3, ("unknown named pipe: setup 0x%X setup1=%d\n",
-		        (int) setup[0], (int) setup[1]));
+		INFO("unknown named pipe: setup 0x%X setup1=%d\n",
+		     (int) setup[0], (int) setup[1]);
 	}
 
 	return 0;
@@ -847,8 +847,8 @@ int reply_trans(char *inbuf, char *outbuf, int size, int bufsize)
 			memcpy(data + ddisp, smb_base(inbuf) + doff, dcnt);
 	}
 
-	LOG(3, ("trans <%s> data=%d params=%d setup=%d\n", name, tdscnt, tpscnt,
-	        suwcnt));
+	INFO("trans <%s> data=%d params=%d setup=%d\n", name, tdscnt, tpscnt,
+	     suwcnt);
 
 	if (strncmp(name, "\\PIPE\\", strlen("\\PIPE\\")) == 0) {
 		LOG(5, ("calling named_pipe\n"));
@@ -856,7 +856,7 @@ int reply_trans(char *inbuf, char *outbuf, int size, int bufsize)
 		                     setup, data, params, suwcnt, tdscnt,
 		                     tpscnt, msrcnt, mdrcnt, mprcnt);
 	} else {
-		LOG(3, ("invalid pipe name\n"));
+		INFO("invalid pipe name\n");
 		outsize = 0;
 	}
 
