@@ -63,7 +63,7 @@
 #ifndef QSORT_CAST
 #define QSORT_CAST (int (*)(const void *, const void *))
 #endif /* QSORT_CAST */
-#define SIGNAL_CAST (__sighandler_t)
+#define SIGNAL_CAST (void (*)(int))
 #define USE_GETCWD
 #define USE_SETSID
 #define USE_SIGPROCMASK
