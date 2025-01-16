@@ -395,7 +395,7 @@ static bool api_RNetShareEnum(int cnum, char *param, char *data, int mdrcnt,
 	int uLevel = SVAL(p, 0);
 	int buf_len = SVAL(p, 2);
 	char *p2;
-	int total = 0, counted = 0;
+	int total = 0;
 	bool missed = false;
 	int i;
 	int data_len, fixed_len, string_len;
@@ -413,7 +413,6 @@ static bool api_RNetShareEnum(int cnum, char *param, char *data, int mdrcnt,
 		data_len +=
 		    fill_share_info(cnum, s, uLevel, 0, &f_len, 0, &s_len, 0);
 		if (data_len <= buf_len) {
-			counted++;
 			fixed_len += f_len;
 			string_len += s_len;
 		} else {
