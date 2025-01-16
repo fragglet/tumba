@@ -929,7 +929,7 @@ int reply_open_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	   will fall back to the LANMAN approach instead. However, it does
 	   introduce a brief pause. */
 	if (CONN_SHARE(cnum) == ipc_service) {
-		LOG(1, ("Tried to open IPC %s\n", fname));
+		WARNING("Tried to open IPC %s\n", fname);
 		return ERROR_CODE(ERRSRV, ERRinvdevice);
 	}
 

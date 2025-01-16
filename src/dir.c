@@ -350,7 +350,7 @@ bool dptr_fill(char *buf1, unsigned int key)
 	void *p = dptr_get(key, 0);
 	uint32_t offset;
 	if (!p) {
-		LOG(1, ("filling null dirptr %d\n", key));
+		WARNING("filling null dirptr %d\n", key);
 		return false;
 	}
 	offset = tell_dir(p);

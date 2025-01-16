@@ -823,8 +823,8 @@ static file_fd_struct *fd_get_new(void)
 			return fd_ptr;
 		}
 	}
-	LOG(1, ("ERROR! Out of file_fd structures - perhaps increase "
-	        "MAX_OPEN_FILES?\n"));
+	WARNING("ERROR! Out of file_fd structures - perhaps increase "
+	        "MAX_OPEN_FILES?\n");
 	return 0;
 }
 
@@ -1892,7 +1892,7 @@ int make_connection(char *service, char *dev)
 	/* if the request is as a printer and you can't print then refuse */
 	strupper(dev);
 	if (strncmp(dev, "LPT", 3) == 0) {
-		LOG(1, ("Attempt to connect to non-printer as a printer\n"));
+		WARNING("Attempt to connect to non-printer as a printer\n");
 		return -6;
 	}
 
@@ -1944,8 +1944,8 @@ int make_connection(char *service, char *dev)
 
 	num_connections_open++;
 
-	LOG(1, ("connect to service %s (pid %d)\n", CONN_SHARE(cnum)->name,
-	        (int) getpid()));
+	WARNING("connect to service %s (pid %d)\n", CONN_SHARE(cnum)->name,
+	        (int) getpid());
 
 	return cnum;
 }
@@ -1989,8 +1989,8 @@ int find_free_file(void)
 			return i;
 		}
 
-	LOG(1, ("ERROR! Out of file structures - perhaps increase "
-	        "MAX_OPEN_FILES?\n"));
+	WARNING("ERROR! Out of file structures - perhaps increase "
+	        "MAX_OPEN_FILES?\n");
 	return -1;
 }
 
@@ -2022,7 +2022,7 @@ again:
 		goto again;
 	}
 
-	LOG(1, ("ERROR! Out of connection structures\n"));
+	WARNING("ERROR! Out of connection structures\n");
 	return -1;
 }
 
@@ -2314,7 +2314,7 @@ void close_cnum(int cnum)
 		return;
 	}
 
-	LOG(1, ("closed connection to service %s\n", CONN_SHARE(cnum)->name));
+	WARNING("closed connection to service %s\n", CONN_SHARE(cnum)->name);
 
 	close_open_files(cnum);
 	dptr_closecnum(cnum);
