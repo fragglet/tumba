@@ -1517,8 +1517,7 @@ static void drop_privileges(void)
 	}
 }
 
-static int open_server_socket(int type, int port, int dlevel,
-                              in_addr_t socket_addr)
+static int open_server_socket(int type, int port, in_addr_t socket_addr)
 {
 	struct sockaddr_in sock;
 	int one = 1;
@@ -1538,8 +1537,8 @@ static int open_server_socket(int type, int port, int dlevel,
 
 	/* now we've got a socket - we need to bind it */
 	if (bind(res, (struct sockaddr *) &sock, sizeof(sock)) < 0) {
-		LOG(dlevel, "bind failed on port %d socket_addr=%s (%s)\n",
-		    port, inet_ntoa(sock.sin_addr), strerror(errno));
+		ERROR("bind failed on port %d socket_addr=%s (%s)\n", port,
+		      inet_ntoa(sock.sin_addr), strerror(errno));
 		close(res);
 
 		return -1;
@@ -1601,7 +1600,7 @@ static bool open_sockets(int port)
 		      bind_addr);
 		return false;
 	}
-	server_socket = open_server_socket(SOCK_STREAM, port, 0, addr.s_addr);
+	server_socket = open_server_socket(SOCK_STREAM, port, addr.s_addr);
 	if (server_socket == -1) {
 		return false;
 	}
