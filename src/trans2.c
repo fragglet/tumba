@@ -1165,6 +1165,7 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
 	pstring fname1;
 	time_t create_time;
 	char *fname;
+	pstring short_name;
 	char *p;
 	int l, pos;
 	bool bad_path = false;
@@ -1295,7 +1296,6 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
 
 	/* Get the 8.3 name - used if NT SMB was negotiated. */
 	case SMB_QUERY_FILE_ALT_NAME_INFO:
-		pstring short_name;
 		pstrcpy(short_name, fname);
 		/* Mangle if not already 8.3 */
 		if (!is_8_3(short_name, true)) {
