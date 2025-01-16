@@ -51,6 +51,7 @@ ssize_t sys_getxattr(const char *path, const char *name, void *value,
 	   differently with the BSD API? */
 	return extattr_get_file(path, EXTATTR_NAMESPACE_USER, name, value, size);
 #else
+#warning No xattr support - DOS a/h/s file attributes will not be preserved!
 	errno = ENOSYS;
 	return -1;
 #endif
