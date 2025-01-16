@@ -44,24 +44,18 @@ fstring local_machine = "";
 
 int smb_read_error = 0;
 
-static bool stdout_logging = false;
 static bool log_start_of_line = true;
 
 /*******************************************************************
   get ready for syslog stuff
   ******************************************************************/
-void setup_logging(char *pname, bool interactive)
+void setup_logging(char *pname)
 {
-	if (!interactive) {
-		char *p = strrchr(pname, '/');
-		if (p)
-			pname = p + 1;
-		openlog(pname, LOG_PID, SYSLOG_FACILITY);
+	char *p = strrchr(pname, '/');
+	if (p) {
+		pname = p + 1;
 	}
-	if (interactive) {
-		stdout_logging = true;
-		dbf = stdout;
-	}
+	openlog(pname, LOG_PID, SYSLOG_FACILITY);
 }
 
 /****************************************************************************
@@ -159,14 +153,6 @@ int log_output(int level, char *format_str, ...)
 	va_list ap;
 	int old_errno = errno;
 	size_t n;
-
-	if (stdout_logging) {
-		va_start(ap, format_str);
-		vfprintf(dbf, format_str, ap);
-		va_end(ap);
-		errno = old_errno;
-		return 0;
-	}
 
 	if (!dbf) {
 		int oldumask = umask(022);

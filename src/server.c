@@ -2979,7 +2979,7 @@ int main(int argc, char *argv[])
 
 	pstrcpy(debugf, SMBLOGFILE);
 
-	setup_logging(argv[0], false);
+	setup_logging(argv[0]);
 
 	init_dos_char_table();
 

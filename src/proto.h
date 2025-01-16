@@ -193,7 +193,7 @@ int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize);
 
 /*The following definitions come from  util.c  */
 
-void setup_logging(char *pname, bool interactive);
+void setup_logging(char *pname);
 void reopen_logs(void);
 void force_check_log_size(void);
 bool file_exist(char *fname, struct stat *sbuf);
