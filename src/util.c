@@ -195,6 +195,8 @@ int log_output(char *format_str, ...)
 		};
 		int priority;
 		pstring msgbuf;
+		char *buf;
+		size_t buf_len;
 
 		if (syslog_level >=
 		        sizeof(priority_map) / sizeof(priority_map[0]) ||
@@ -203,8 +205,18 @@ int log_output(char *format_str, ...)
 		else
 			priority = priority_map[syslog_level];
 
+		buf = msgbuf;
+		buf_len = sizeof(msgbuf);
+
+		if (log_start_of_line) {
+			slprintf(buf, buf_len - 1, "[%s] ", client_addr());
+			n = strlen(buf);
+			buf += n;
+			buf_len -= n;
+		}
+
 		va_start(ap, format_str);
-		vslprintf(msgbuf, sizeof(msgbuf) - 1, format_str, ap);
+		vslprintf(buf, buf_len - 1, format_str, ap);
 		va_end(ap);
 
 		msgbuf[255] = '\0';
@@ -214,6 +226,10 @@ int log_output(char *format_str, ...)
 	if (log_start_of_line) {
 		log_start_of_line = false;
 		fprintf(dbf, "%s ", timestring());
+
+		if (Client != -1) {
+			fprintf(dbf, "[%s] ", client_addr());
+		}
 	}
 
 	va_start(ap, format_str);

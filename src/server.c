@@ -1879,8 +1879,7 @@ int make_connection(char *service, char *dev)
 			return -3;
 		}
 
-		LOG(0, ("(%s) couldn't find service %s\n", client_addr(),
-		        service));
+		LOG(0, ("couldn't find service %s\n", service));
 		return -2;
 	}
 
@@ -1946,7 +1945,7 @@ int make_connection(char *service, char *dev)
 
 	num_connections_open++;
 
-	LOG(1, ("(%s) connect to service %s (pid %d)\n", client_addr(),
+	LOG(1, ("connect to service %s (pid %d)\n",
 	        CONN_SHARE(cnum)->name, (int) getpid()));
 
 	return cnum;
@@ -2316,7 +2315,7 @@ void close_cnum(int cnum)
 		return;
 	}
 
-	LOG(1, ("(%s) closed connection to service %s\n", client_addr(),
+	LOG(1, ("closed connection to service %s\n",
 	        CONN_SHARE(cnum)->name));
 
 	close_open_files(cnum);
