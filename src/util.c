@@ -452,52 +452,53 @@ void unix_format(char *fname)
 	}
 }
 
-static void print_asc(int level, unsigned char *buf, int len)
+static void print_asc(unsigned char *buf, int len)
 {
 	int i;
-	for (i = 0; i < len; i++)
-		LOG(level, "%c", isprint(buf[i]) ? buf[i] : '.');
+	for (i = 0; i < len; i++) {
+		DEBUG("%c", isprint(buf[i]) ? buf[i] : '.');
+	}
 }
 
-static void dump_data(int level, char *buf1, int len)
+static void dump_data(char *buf1, int len)
 {
 	unsigned char *buf = (unsigned char *) buf1;
 	int i = 0;
 	if (len <= 0)
 		return;
 
-	LOG(level, "[%03X] ", i);
+	DEBUG("[%03X] ", i);
 	for (i = 0; i < len;) {
-		LOG(level, "%02X ", (int) buf[i]);
+		DEBUG("%02X ", (int) buf[i]);
 		i++;
 		if (i % 8 == 0)
-			LOG(level, " ");
+			DEBUG(" ");
 		if (i % 16 == 0) {
-			print_asc(level, &buf[i - 16], 8);
-			LOG(level, " ");
-			print_asc(level, &buf[i - 8], 8);
-			LOG(level, "\n");
+			print_asc(&buf[i - 16], 8);
+			DEBUG(" ");
+			print_asc(&buf[i - 8], 8);
+			DEBUG("\n");
 			if (i < len)
-				LOG(level, "[%03X] ", i);
+				DEBUG("[%03X] ", i);
 		}
 	}
 	if (i % 16) {
 		int n;
 
 		n = 16 - (i % 16);
-		LOG(level, " ");
+		DEBUG(" ");
 		if (n > 8)
-			LOG(level, " ");
+			DEBUG(" ");
 		while (n--)
-			LOG(level, "   ");
+			DEBUG("   ");
 
 		n = MIN(8, i % 16);
-		print_asc(level, &buf[i - (i % 16)], n);
-		LOG(level, " ");
+		print_asc(&buf[i - (i % 16)], n);
+		DEBUG(" ");
 		n = (i % 16) - n;
 		if (n > 0)
-			print_asc(level, &buf[i - n], n);
-		LOG(level, "\n");
+			print_asc(&buf[i - n], n);
+		DEBUG("\n");
 	}
 }
 
@@ -532,7 +533,7 @@ void show_msg(char *buf)
 	if (LOGLEVEL < 10)
 		return;
 
-	dump_data(10, smb_buf(buf), MIN(bcc, 512));
+	dump_data(smb_buf(buf), MIN(bcc, 512));
 }
 
 /*******************************************************************
