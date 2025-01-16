@@ -777,9 +777,9 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 		slprintf(directory, sizeof(directory) - 1, "(%s)",
 		         dptr_path(dptr_num));
 
-	LOG(4, ("%s %s mask=%s directory=%s cnum=%d dirtype=%d numentries=%d\n",
-	        timestring(), smb_fn_name(CVAL(inbuf, smb_com)), mask,
-	        directory, cnum, dirtype, numentries));
+	LOG(4, ("%s mask=%s directory=%s cnum=%d dirtype=%d numentries=%d\n",
+	        smb_fn_name(CVAL(inbuf, smb_com)), mask, directory, cnum,
+	        dirtype, numentries));
 
 	return -1;
 }
@@ -1001,9 +1001,9 @@ resume_key = %d resume name = %s continue=%d level = %d\n",
 		slprintf(directory, sizeof(directory) - 1, "(%s)",
 		         dptr_path(dptr_num));
 
-	LOG(3, ("%s %s mask=%s directory=%s cnum=%d dirtype=%d numentries=%d\n",
-	        timestring(), smb_fn_name(CVAL(inbuf, smb_com)), mask,
-	        directory, cnum, dirtype, numentries));
+	LOG(3, ("%s mask=%s directory=%s cnum=%d dirtype=%d numentries=%d\n",
+	        smb_fn_name(CVAL(inbuf, smb_com)), mask, directory, cnum,
+	        dirtype, numentries));
 
 	return -1;
 }
@@ -1115,8 +1115,8 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
 
 	send_trans2_replies(outbuf, bufsize, params, 0, pdata, data_len);
 
-	LOG(4, ("%s %s info_level =%d\n", timestring(),
-	        smb_fn_name(CVAL(inbuf, smb_com)), info_level));
+	LOG(4, ("%s info_level =%d\n", smb_fn_name(CVAL(inbuf, smb_com)),
+	        info_level));
 
 	return -1;
 }
@@ -1674,8 +1674,7 @@ int reply_findclose(char *inbuf, char *outbuf, int length, int bufsize)
 
 	outsize = set_message(outbuf, 0, 0, true);
 
-	LOG(3, ("%s SMBfindclose cnum=%d, dptr_num = %d\n", timestring(), cnum,
-	        dptr_num));
+	LOG(3, ("SMBfindclose cnum=%d, dptr_num = %d\n", cnum, dptr_num));
 
 	return outsize;
 }
@@ -1701,8 +1700,7 @@ int reply_findnclose(char *inbuf, char *outbuf, int length, int bufsize)
 
 	outsize = set_message(outbuf, 0, 0, true);
 
-	LOG(3, ("%s SMB_findnclose cnum=%d, dptr_num = %d\n", timestring(),
-	        cnum, dptr_num));
+	LOG(3, ("SMB_findnclose cnum=%d, dptr_num = %d\n", cnum, dptr_num));
 
 	return outsize;
 }
@@ -1857,8 +1855,7 @@ int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize)
 		break;
 	default:
 		/* Error in request */
-		LOG(2, ("%s Unknown request %d in trans2 call\n", timestring(),
-		        tran_call));
+		LOG(2, ("Unknown request %d in trans2 call\n", tran_call));
 		free(params);
 		free(data);
 		return ERROR(ERRSRV, ERRerror);

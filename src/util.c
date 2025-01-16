@@ -46,6 +46,7 @@ fstring local_machine = "";
 int smb_read_error = 0;
 
 static bool stdout_logging = false;
+static bool log_start_of_line = true;
 
 /*******************************************************************
   get ready for syslog stuff
@@ -158,6 +159,7 @@ int Debug1(char *format_str, ...)
 {
 	va_list ap;
 	int old_errno = errno;
+	size_t n;
 
 	if (stdout_logging) {
 		va_start(ap, format_str);
@@ -209,11 +211,20 @@ int Debug1(char *format_str, ...)
 		syslog(priority, "%s", msgbuf);
 	}
 
+	if (log_start_of_line) {
+		log_start_of_line = false;
+		fprintf(dbf, "%s ", timestring());
+	}
+
 	va_start(ap, format_str);
 	vfprintf(dbf, format_str, ap);
 	va_end(ap);
 	fflush(dbf);
 
+	n = strlen(format_str);
+	if (n > 0 && format_str[strlen(format_str) - 1] == '\n') {
+		log_start_of_line = true;
+	}
 	check_log_size();
 
 	errno = old_errno;

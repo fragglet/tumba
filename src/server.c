@@ -1076,10 +1076,9 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 		string_set(&fsp->name, fname);
 		fsp->wbmpx_ptr = NULL;
 
-		LOG(2, ("%s opened file %s read=%s write=%s (numopen=%d "
+		LOG(2, ("opened file %s read=%s write=%s (numopen=%d "
 		        "fnum=%d)\n",
-		        timestring(), fname, BOOLSTR(fsp->can_read),
-		        BOOLSTR(fsp->can_write),
+		        fname, BOOLSTR(fsp->can_read), BOOLSTR(fsp->can_write),
 		        Connections[cnum].num_files_open, fnum));
 	}
 }
@@ -1106,7 +1105,7 @@ void close_file(int fnum, bool normal_close)
 
 	fd_attempt_close(fs_p->fd_ptr);
 
-	LOG(2, ("%s closed file %s (numopen=%d)\n", timestring(), fs_p->name,
+	LOG(2, ("closed file %s (numopen=%d)\n", fs_p->name,
 	        Connections[cnum].num_files_open));
 
 	if (fs_p->name) {
@@ -1336,7 +1335,7 @@ static bool become_service(int cnum)
 
 	if (CONN_SHARE(cnum) != ipc_service &&
 	    chdir(Connections[cnum].connectpath) != 0) {
-		LOG(0, ("%s chdir (%s) failed cnum=%d\n", timestring(),
+		LOG(0, ("chdir (%s) failed cnum=%d\n",
 		        Connections[cnum].connectpath, cnum));
 		return false;
 	}
@@ -1427,8 +1426,8 @@ int error_packet(char *inbuf, char *outbuf, int error_class,
 	CVAL(outbuf, smb_rcls) = error_class;
 	SSVAL(outbuf, smb_err, error_code);
 
-	LOG(3, ("%s error packet at line %d cmd=%d (%s) eclass=%d ecode=%d\n",
-	        timestring(), line, (int) CVAL(inbuf, smb_com),
+	LOG(3, ("error packet at line %d cmd=%d (%s) eclass=%d ecode=%d\n",
+	        line, (int) CVAL(inbuf, smb_com),
 	        smb_fn_name(CVAL(inbuf, smb_com)), error_class, error_code));
 
 	if (errno != 0)
@@ -1876,12 +1875,12 @@ int make_connection(char *service, char *dev)
 	share = lookup_share(service);
 	if (share == NULL) {
 		if (strequal(service, "IPC$")) {
-			LOG(3, ("%s refusing IPC connection\n", timestring()));
+			LOG(3, ("refusing IPC connection\n"));
 			return -3;
 		}
 
-		LOG(0, ("%s (%s) couldn't find service %s\n", timestring(),
-		        client_addr(), service));
+		LOG(0, ("(%s) couldn't find service %s\n", client_addr(),
+		        service));
 		return -2;
 	}
 
@@ -1901,7 +1900,7 @@ int make_connection(char *service, char *dev)
 
 	cnum = find_free_connection(str_checksum(service));
 	if (cnum < 0) {
-		LOG(0, ("%s couldn't find free connection\n", timestring()));
+		LOG(0, ("couldn't find free connection\n"));
 		return -1;
 	}
 
@@ -1947,8 +1946,8 @@ int make_connection(char *service, char *dev)
 
 	num_connections_open++;
 
-	LOG(1, ("%s (%s) connect to service %s (pid %d)\n", timestring(),
-	        client_addr(), CONN_SHARE(cnum)->name, (int) getpid()));
+	LOG(1, ("(%s) connect to service %s (pid %d)\n", client_addr(),
+	        CONN_SHARE(cnum)->name, (int) getpid()));
 
 	return cnum;
 }
@@ -2288,7 +2287,7 @@ static int reply_negprot(char *inbuf, char *outbuf, int size, int bufsize)
 	}
 	SSVAL(outbuf, smb_vwv0, choice);
 
-	LOG(5, ("%s negprot index=%d\n", timestring(), choice));
+	LOG(5, ("negprot index=%d\n", choice));
 
 	return outsize;
 }
@@ -2317,8 +2316,8 @@ void close_cnum(int cnum)
 		return;
 	}
 
-	LOG(1, ("%s (%s) closed connection to service %s\n", timestring(),
-	        client_addr(), CONN_SHARE(cnum)->name));
+	LOG(1, ("(%s) closed connection to service %s\n", client_addr(),
+	        CONN_SHARE(cnum)->name));
 
 	close_open_files(cnum);
 	dptr_closecnum(cnum);
@@ -2361,7 +2360,7 @@ void exit_server(char *reason)
 		        "===========\n"));
 	}
 
-	LOG(3, ("%s Server exit  (%s)\n", timestring(), reason ? reason : ""));
+	LOG(3, ("Server exit  (%s)\n", reason ? reason : ""));
 	exit(0);
 }
 
@@ -2762,8 +2761,7 @@ static void process_smb(char *inbuf, char *outbuf)
 	int nread = len + 4;
 
 	LOG(6, ("got message type 0x%x of len 0x%x\n", msg_type, len));
-	LOG(3, ("%s Transaction %d of length %d\n", timestring(), trans_num,
-	        nread));
+	LOG(3, ("Transaction %d of length %d\n", trans_num, nread));
 
 	if (msg_type == 0)
 		show_msg(inbuf);
@@ -2886,8 +2884,7 @@ static void process(void)
 			/* automatic timeout if all connections are closed */
 			if (num_connections_open == 0 &&
 			    counter >= IDLE_CLOSED_TIMEOUT) {
-				LOG(2, ("%s Closing idle connection\n",
-				        timestring()));
+				LOG(2, ("Closing idle connection\n"));
 				return;
 			}
 
@@ -2907,8 +2904,7 @@ static void process(void)
 				}
 
 			if (allidle && num_connections_open > 0) {
-				LOG(2, ("%s Closing idle connection 2\n",
-				        timestring()));
+				LOG(2, ("Closing idle connection 2\n"));
 				return;
 			}
 		}
@@ -3041,7 +3037,7 @@ int main(int argc, char *argv[])
 
 	reopen_logs();
 
-	LOG(2, ("%s smbd version %s started\n", timestring(), VERSION));
+	LOG(2, ("smbd version %s started\n", VERSION));
 	LOG(2, ("Copyright Andrew Tridgell 1992-1997\n"));
 
 	LOG(2, ("uid=%d gid=%d euid=%d egid=%d\n", getuid(), getgid(),
@@ -3056,7 +3052,7 @@ int main(int argc, char *argv[])
 	/* Setup the signals that allow the debug log level
 	   to by dynamically changed. */
 
-	LOG(3, ("%s loaded services\n", timestring()));
+	LOG(3, ("loaded services\n"));
 
 	if (!open_sockets(port))
 		exit(1);

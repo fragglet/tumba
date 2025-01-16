@@ -108,8 +108,7 @@ int reply_special(char *inbuf, char *outbuf)
 		return 0;
 	}
 
-	LOG(5, ("%s init msg_type=0x%x msg_flags=0x%x\n", timestring(),
-	        msg_type, msg_flags));
+	LOG(5, ("init msg_type=0x%x msg_flags=0x%x\n", msg_type, msg_flags));
 
 	return outsize;
 }
@@ -198,8 +197,8 @@ int reply_tcon(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	SSVAL(outbuf, smb_vwv1, connection_num);
 	SSVAL(outbuf, smb_tid, connection_num);
 
-	LOG(3, ("%s tcon service=%s user=%s cnum=%d\n", timestring(), service,
-	        user, connection_num));
+	LOG(3, ("tcon service=%s user=%s cnum=%d\n", service, user,
+	        connection_num));
 
 	return outsize;
 }
@@ -264,8 +263,8 @@ int reply_tcon_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 		SSVAL(outbuf, smb_vwv2, 0x0); /* optional support */
 	}
 
-	LOG(3, ("%s tconX service=%s user=%s cnum=%d\n", timestring(), service,
-	        user, connection_num));
+	LOG(3, ("tconX service=%s user=%s cnum=%d\n", service, user,
+	        connection_num));
 
 	/* set the incoming and outgoing tid to the just created one */
 	SSVAL(inbuf, smb_tid, connection_num);
@@ -284,8 +283,8 @@ int reply_unknown(char *inbuf, char *outbuf)
 	cnum = SVAL(inbuf, smb_tid);
 	type = CVAL(inbuf, smb_com);
 
-	LOG(0, ("%s unknown command type (%s): cnum=%d type=%d (0x%X)\n",
-	        timestring(), smb_fn_name(type), cnum, type, type));
+	LOG(0, ("unknown command type (%s): cnum=%d type=%d (0x%X)\n",
+	        smb_fn_name(type), cnum, type, type));
 
 	return ERROR(ERRSRV, ERRunknownsmb);
 }
@@ -386,8 +385,7 @@ int reply_chkpth(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	outsize = set_message(outbuf, 0, 0, true);
 
-	LOG(3,
-	    ("%s chkpth %s cnum=%d mode=%d\n", timestring(), name, cnum, mode));
+	LOG(3, ("chkpth %s cnum=%d mode=%d\n", name, cnum, mode));
 
 	return outsize;
 }
@@ -458,8 +456,7 @@ int reply_getatr(char *inbuf, char *outbuf, int in_size, int buffsize)
 			SSVAL(outbuf, smb_flg2, flg2 | 0x40); /* IS_LONG_NAME */
 	}
 
-	LOG(3, ("%s getatr name=%s mode=%d size=%d\n", timestring(), fname,
-	        mode, size));
+	LOG(3, ("getatr name=%s mode=%d size=%d\n", fname, mode, size));
 
 	return outsize;
 }
@@ -503,7 +500,7 @@ int reply_setatr(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	outsize = set_message(outbuf, 0, 0, true);
 
-	LOG(3, ("%s setatr name=%s mode=%d\n", timestring(), fname, mode));
+	LOG(3, ("setatr name=%s mode=%d\n", fname, mode));
 
 	return outsize;
 }
@@ -528,7 +525,7 @@ int reply_dskattr(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	SSVAL(outbuf, smb_vwv2, 512);
 	SSVAL(outbuf, smb_vwv3, dfree);
 
-	LOG(3, ("%s dskattr cnum=%d dfree=%d\n", timestring(), cnum, dfree));
+	LOG(3, ("dskattr cnum=%d dfree=%d\n", cnum, dfree));
 
 	return outsize;
 }
@@ -785,9 +782,9 @@ search_empty:
 		slprintf(directory, sizeof(directory) - 1, "(%s)",
 		         dptr_path(dptr_num));
 
-	LOG(4, ("%s %s mask=%s path=%s cnum=%d dtype=%d nument=%d of %d\n",
-	        timestring(), smb_fn_name(CVAL(inbuf, smb_com)), mask,
-	        directory, cnum, dirtype, numentries, maxentries));
+	LOG(4, ("%s mask=%s path=%s cnum=%d dtype=%d nument=%d of %d\n",
+	        smb_fn_name(CVAL(inbuf, smb_com)), mask, directory, cnum,
+	        dirtype, numentries, maxentries));
 
 	return outsize;
 }
@@ -822,7 +819,7 @@ int reply_fclose(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	SSVAL(outbuf, smb_vwv0, 0);
 
-	LOG(3, ("%s search close cnum=%d\n", timestring(), cnum));
+	LOG(3, ("search close cnum=%d\n", cnum));
 
 	return outsize;
 }
@@ -1009,7 +1006,7 @@ int reply_ulogoffX(char *inbuf, char *outbuf, int length, int bufsize)
 {
 	set_message(outbuf, 2, 0, true);
 
-	LOG(3, ("%s ulogoffX\n", timestring()));
+	LOG(3, ("ulogoffX\n"));
 
 	return chain_reply(inbuf, outbuf, length, bufsize);
 }
@@ -1083,8 +1080,8 @@ int reply_mknew(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	/* Note we grant no oplocks. See comment in reply_open_and_X() */
 
 	LOG(2, ("new file %s\n", fname));
-	LOG(3, ("%s mknew %s fd=%d fnum=%d cnum=%d dmode=%d\n", timestring(),
-	        fname, Files[fnum].fd_ptr->fd, fnum, cnum, createmode));
+	LOG(3, ("mknew %s fd=%d fnum=%d cnum=%d dmode=%d\n", fname,
+	        Files[fnum].fd_ptr->fd, fnum, cnum, createmode));
 
 	return outsize;
 }
@@ -1148,8 +1145,8 @@ int reply_ctemp(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	/* Note we grant no oplocks. See comment in reply_open_and_X() */
 
 	LOG(2, ("created temp file %s\n", fname2));
-	LOG(3, ("%s ctemp %s fd=%d fnum=%d cnum=%d dmode=%d\n", timestring(),
-	        fname2, Files[fnum].fd_ptr->fd, fnum, cnum, createmode));
+	LOG(3, ("ctemp %s fd=%d fnum=%d cnum=%d dmode=%d\n", fname2,
+	        Files[fnum].fd_ptr->fd, fnum, cnum, createmode));
 
 	return outsize;
 }
@@ -1404,8 +1401,8 @@ int reply_readbraw(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	if (nread < mincount)
 		nread = 0;
 
-	LOG(3, ("%s readbraw fnum=%d cnum=%d start=%d max=%d min=%d nread=%d\n",
-	        timestring(), fnum, cnum, startpos, maxcount, mincount, nread));
+	LOG(3, ("readbraw fnum=%d cnum=%d start=%d max=%d min=%d nread=%d\n",
+	        fnum, cnum, startpos, maxcount, mincount, nread));
 
 #if UNSAFE_READRAW
 	{
@@ -1477,8 +1474,8 @@ int reply_lockread(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	SSVAL(outbuf, smb_vwv5, nread + 3);
 	SSVAL(smb_buf(outbuf), 1, nread);
 
-	LOG(3, ("%s lockread fnum=%d cnum=%d num=%d nread=%d\n", timestring(),
-	        fnum, cnum, numtoread, nread));
+	LOG(3, ("lockread fnum=%d cnum=%d num=%d nread=%d\n", fnum, cnum,
+	        numtoread, nread));
 
 	return outsize;
 }
@@ -1520,8 +1517,8 @@ int reply_read(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	CVAL(smb_buf(outbuf), 0) = 1;
 	SSVAL(smb_buf(outbuf), 1, nread);
 
-	LOG(3, ("%s read fnum=%d cnum=%d num=%d nread=%d\n", timestring(), fnum,
-	        cnum, numtoread, nread));
+	LOG(3, ("read fnum=%d cnum=%d num=%d nread=%d\n", fnum, cnum, numtoread,
+	        nread));
 
 	return outsize;
 }
@@ -1557,8 +1554,8 @@ int reply_read_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	SSVAL(outbuf, smb_vwv6, smb_offset(data, outbuf));
 	SSVAL(smb_buf(outbuf), -2, nread);
 
-	LOG(3, ("%s readX fnum=%d cnum=%d min=%d max=%d nread=%d\n",
-	        timestring(), fnum, cnum, smb_mincnt, smb_maxcnt, nread));
+	LOG(3, ("readX fnum=%d cnum=%d min=%d max=%d nread=%d\n", fnum, cnum,
+	        smb_mincnt, smb_maxcnt, nread));
 
 	chain_fnum = fnum;
 
@@ -1611,10 +1608,8 @@ int reply_writebraw(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	if (numtowrite > 0)
 		nwritten = write_file(fnum, data, numtowrite);
 
-	LOG(3,
-	    ("%s writebraw1 fnum=%d cnum=%d start=%d num=%d wrote=%d sync=%d\n",
-	     timestring(), fnum, cnum, startpos, numtowrite, nwritten,
-	     write_through));
+	LOG(3, ("writebraw1 fnum=%d cnum=%d start=%d num=%d wrote=%d sync=%d\n",
+	        fnum, cnum, startpos, numtowrite, nwritten, write_through));
 
 	if (nwritten < numtowrite)
 		return UNIXERROR(ERRHRD, ERRdiskfull);
@@ -1657,8 +1652,8 @@ int reply_writebraw(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		SSVAL(outbuf, smb_err, ERRdiskfull);
 	}
 
-	LOG(3, ("%s writebraw2 fnum=%d cnum=%d start=%d num=%d wrote=%d\n",
-	        timestring(), fnum, cnum, startpos, numtowrite, total_written));
+	LOG(3, ("writebraw2 fnum=%d cnum=%d start=%d num=%d wrote=%d\n", fnum,
+	        cnum, startpos, numtowrite, total_written));
 
 	/* we won't return a status if write through is not selected - this
 	   follows what WfWg does */
@@ -1712,8 +1707,8 @@ int reply_writeunlock(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	SSVAL(outbuf, smb_vwv0, nwritten);
 
-	LOG(3, ("%s writeunlock fnum=%d cnum=%d num=%d wrote=%d\n",
-	        timestring(), fnum, cnum, numtowrite, nwritten));
+	LOG(3, ("writeunlock fnum=%d cnum=%d num=%d wrote=%d\n", fnum, cnum,
+	        numtowrite, nwritten));
 
 	return outsize;
 }
@@ -1765,8 +1760,8 @@ int reply_write(char *inbuf, char *outbuf, int dum1, int dum2)
 		SSVAL(outbuf, smb_err, ERRdiskfull);
 	}
 
-	LOG(3, ("%s write fnum=%d cnum=%d num=%d wrote=%d\n", timestring(),
-	        fnum, cnum, numtowrite, nwritten));
+	LOG(3, ("write fnum=%d cnum=%d num=%d wrote=%d\n", fnum, cnum,
+	        numtowrite, nwritten));
 
 	return outsize;
 }
@@ -1815,8 +1810,8 @@ int reply_write_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 		SSVAL(outbuf, smb_err, ERRdiskfull);
 	}
 
-	LOG(3, ("%s writeX fnum=%d cnum=%d num=%d wrote=%d\n", timestring(),
-	        fnum, cnum, smb_dsize, nwritten));
+	LOG(3, ("writeX fnum=%d cnum=%d num=%d wrote=%d\n", fnum, cnum,
+	        smb_dsize, nwritten));
 
 	chain_fnum = fnum;
 
@@ -1864,8 +1859,8 @@ int reply_lseek(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	outsize = set_message(outbuf, 2, 0, true);
 	SIVALS(outbuf, smb_vwv0, res);
 
-	LOG(3, ("%s lseek fnum=%d cnum=%d ofs=%d mode=%d\n", timestring(), fnum,
-	        cnum, startpos, mode));
+	LOG(3, ("lseek fnum=%d cnum=%d ofs=%d mode=%d\n", fnum, cnum, startpos,
+	        mode));
 
 	return outsize;
 }
@@ -1886,7 +1881,7 @@ int reply_flush(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		CHECK_ERROR(fnum);
 	}
 
-	LOG(3, ("%s flush fnum=%d\n", timestring(), fnum));
+	LOG(3, ("flush fnum=%d\n", fnum));
 	return outsize;
 }
 
@@ -1896,7 +1891,7 @@ int reply_flush(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 int reply_exit(char *inbuf, char *outbuf, int size, int bufsize)
 {
 	int outsize = set_message(outbuf, 0, 0, true);
-	LOG(3, ("%s exit\n", timestring()));
+	LOG(3, ("exit\n"));
 
 	return outsize;
 }
@@ -1929,7 +1924,7 @@ int reply_close(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	/* try and set the date */
 	set_filetime(cnum, Files[fnum].name, mtime);
 
-	LOG(3, ("%s close fd=%d fnum=%d cnum=%d (numopen=%d)\n", timestring(),
+	LOG(3, ("close fd=%d fnum=%d cnum=%d (numopen=%d)\n",
 	        Files[fnum].fd_ptr->fd, fnum, cnum,
 	        Connections[cnum].num_files_open));
 
@@ -1972,9 +1967,9 @@ int reply_writeclose(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	set_filetime(cnum, Files[fnum].name, mtime);
 
-	LOG(3, ("%s writeclose fnum=%d cnum=%d num=%d wrote=%d (numopen=%d)\n",
-	        timestring(), fnum, cnum, numtowrite, nwritten,
-	        Connections[cnum].num_files_open));
+	LOG(3,
+	    ("writeclose fnum=%d cnum=%d num=%d wrote=%d (numopen=%d)\n", fnum,
+	     cnum, numtowrite, nwritten, Connections[cnum].num_files_open));
 
 	close_file(fnum, true);
 
@@ -2007,7 +2002,7 @@ int reply_lock(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	count = IVAL(inbuf, smb_vwv1);
 	offset = IVAL(inbuf, smb_vwv3);
 
-	LOG(3, ("%s lock fd=%d fnum=%d cnum=%d ofs=%d cnt=%d\n", timestring(),
+	LOG(3, ("lock fd=%d fnum=%d cnum=%d ofs=%d cnt=%d\n",
 	        Files[fnum].fd_ptr->fd, fnum, cnum, offset, count));
 
 	if (!do_lock(fnum, cnum, count, offset, F_WRLCK, &eclass, &ecode))
@@ -2039,7 +2034,7 @@ int reply_unlock(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	if (!do_unlock(fnum, cnum, count, offset, &eclass, &ecode))
 		return ERROR(eclass, ecode);
 
-	LOG(3, ("%s unlock fd=%d fnum=%d cnum=%d ofs=%d cnt=%d\n", timestring(),
+	LOG(3, ("unlock fd=%d fnum=%d cnum=%d ofs=%d cnt=%d\n",
 	        Files[fnum].fd_ptr->fd, fnum, cnum, offset, count));
 
 	return outsize;
@@ -2064,7 +2059,7 @@ int reply_tdis(char *inbuf, char *outbuf, int size, int bufsize)
 
 	close_cnum(cnum);
 
-	LOG(3, ("%s tdis cnum=%d\n", timestring(), cnum));
+	LOG(3, ("tdis cnum=%d\n", cnum));
 
 	return outsize;
 }
@@ -2103,7 +2098,7 @@ int reply_echo(char *inbuf, char *outbuf, int size, int bufsize)
 		send_smb(Client, outbuf);
 	}
 
-	LOG(3, ("%s echo %d times cnum=%d\n", timestring(), smb_reverb, cnum));
+	LOG(3, ("echo %d times cnum=%d\n", smb_reverb, cnum));
 
 	return -1;
 }
@@ -2167,8 +2162,7 @@ int reply_mkdir(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	outsize = set_message(outbuf, 0, 0, true);
 
-	LOG(3, ("%s mkdir %s cnum=%d ret=%d\n", timestring(), directory, cnum,
-	        ret));
+	LOG(3, ("mkdir %s cnum=%d ret=%d\n", directory, cnum, ret));
 
 	return outsize;
 }
@@ -2207,7 +2201,7 @@ int reply_rmdir(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	outsize = set_message(outbuf, 0, 0, true);
 
-	LOG(3, ("%s rmdir %s\n", timestring(), directory));
+	LOG(3, ("rmdir %s\n", directory));
 
 	return outsize;
 }
@@ -2693,7 +2687,7 @@ int reply_setdir(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 {
 	int cnum = SVAL(inbuf, smb_tid);
 
-	LOG(3, ("%s setdir not supported cnum=%d\n", timestring(), cnum));
+	LOG(3, ("setdir not supported cnum=%d\n", cnum));
 
 	return ERROR(ERRDOS, ERRnoaccess);
 }
@@ -2767,10 +2761,8 @@ int reply_lockingX(char *inbuf, char *outbuf, int length, int bufsize)
 
 	set_message(outbuf, 2, 0, true);
 
-	LOG(3,
-	    ("%s lockingX fnum=%d cnum=%d type=%d num_locks=%d num_ulocks=%d\n",
-	     timestring(), fnum, cnum, (unsigned int) locktype, num_locks,
-	     num_ulocks));
+	LOG(3, ("lockingX fnum=%d cnum=%d type=%d num_locks=%d num_ulocks=%d\n",
+	        fnum, cnum, (unsigned int) locktype, num_locks, num_ulocks));
 
 	chain_fnum = fnum;
 
@@ -2849,8 +2841,8 @@ int reply_writebmpx(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	SSVALS(outbuf, smb_vwv0, -1); /* We don't support smb_remaining */
 
-	LOG(3, ("%s writebmpx fnum=%d cnum=%d num=%d wrote=%d\n", timestring(),
-	        fnum, cnum, numtowrite, nwritten));
+	LOG(3, ("writebmpx fnum=%d cnum=%d num=%d wrote=%d\n", fnum, cnum,
+	        numtowrite, nwritten));
 
 	if (write_through && tcount == nwritten) {
 		/* we need to send both a primary and a secondary response */
@@ -2974,10 +2966,9 @@ int reply_setattrE(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	if ((unix_times.actime == 0) && (unix_times.modtime == 0)) {
 		/* Ignore request */
 		LOG(3,
-		    ("%s reply_setattrE fnum=%d cnum=%d ignoring zero request - \
+		    ("reply_setattrE fnum=%d cnum=%d ignoring zero request - \
 not setting timestamps of 0\n",
-		     timestring(), fnum, cnum, unix_times.actime,
-		     unix_times.modtime));
+		     fnum, cnum, unix_times.actime, unix_times.modtime));
 		return outsize;
 	} else if ((unix_times.actime != 0) && (unix_times.modtime == 0)) {
 		/* set modify time = to access time if modify time was 0 */
@@ -2988,9 +2979,8 @@ not setting timestamps of 0\n",
 	if (sys_utime(Files[fnum].name, &unix_times) != 0)
 		return ERROR(ERRDOS, ERRnoaccess);
 
-	LOG(3,
-	    ("%s reply_setattrE fnum=%d cnum=%d actime=%d modtime=%d\n",
-	     timestring(), fnum, cnum, unix_times.actime, unix_times.modtime));
+	LOG(3, ("reply_setattrE fnum=%d cnum=%d actime=%d modtime=%d\n", fnum,
+	        cnum, unix_times.actime, unix_times.modtime));
 
 	return outsize;
 }
@@ -3034,8 +3024,7 @@ int reply_getattrE(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	}
 	SSVAL(outbuf, smb_vwv10, mode);
 
-	LOG(3,
-	    ("%s reply_getattrE fnum=%d cnum=%d\n", timestring(), fnum, cnum));
+	LOG(3, ("reply_getattrE fnum=%d cnum=%d\n", fnum, cnum));
 
 	return outsize;
 }
