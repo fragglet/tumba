@@ -3013,11 +3013,7 @@ int main(int argc, char *argv[])
 
 	add_ipc_service();
 
-	NOTICE("smbd version %s started\n", VERSION);
-	NOTICE("Copyright Andrew Tridgell 1992-1997\n");
-
-	NOTICE("uid=%d gid=%d euid=%d egid=%d\n", getuid(), getgid(), geteuid(),
-	       getegid());
+	NOTICE("Rumba smbd version %s started\n", VERSION);
 
 	init_structs();
 
