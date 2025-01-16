@@ -85,22 +85,22 @@ implemented */
 #define STYPE_HIDDEN   0x80000000 /* share is a hidden one (ends with $) */
 
 /* SMB X/Open error codes for the ERRdos error class */
-#define ERRbadfunc              1  /* Invalid function (or system call) */
-#define ERRbadfile              2  /* File not found (pathname error) */
-#define ERRbadpath              3  /* Directory not found */
-#define ERRnofids               4  /* Too many open files */
-#define ERRnoaccess             5  /* Access denied */
-#define ERRbadfid               6  /* Invalid fid */
+#define ERRbadfunc              1 /* Invalid function (or system call) */
+#define ERRbadfile              2 /* File not found (pathname error) */
+#define ERRbadpath              3 /* Directory not found */
+#define ERRnofids               4 /* Too many open files */
+#define ERRnoaccess             5 /* Access denied */
+#define ERRbadfid               6 /* Invalid fid */
 /* We should never return this error. We handle memory allocation failures as
    a fatal error, in which case the program aborts. */
-/*#define ERRnomem                8*/  /* Out of memory */
-#define ERRbadmem               9  /* Invalid memory block address */
-#define ERRbadenv               10 /* Invalid environment */
-#define ERRbadaccess            12 /* Invalid open mode */
-#define ERRbaddata              13 /* Invalid data (only from ioctl call) */
-#define ERRres                  14 /* reserved */
-#define ERRbaddrive             15 /* Invalid drive */
-#define ERRremcd                16 /* Attempt to delete current directory */
+/*#define ERRnomem                8*/ /* Out of memory */
+#define ERRbadmem               9     /* Invalid memory block address */
+#define ERRbadenv               10    /* Invalid environment */
+#define ERRbadaccess            12    /* Invalid open mode */
+#define ERRbaddata              13    /* Invalid data (only from ioctl call) */
+#define ERRres                  14    /* reserved */
+#define ERRbaddrive             15    /* Invalid drive */
+#define ERRremcd                16    /* Attempt to delete current directory */
 #define ERRdiffdevice           17 /* rename/move across different filesystems */
 #define ERRnofiles              18 /* no more files found in file search */
 #define ERRbadshare             32 /* Share mode on file conflict with open mode */

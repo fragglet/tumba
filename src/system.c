@@ -49,7 +49,8 @@ ssize_t sys_getxattr(const char *path, const char *name, void *value,
 #elif defined(XATTR_API_BSD)
 	/* TODO: Skip past the "user." prefix since namespace is specified
 	   differently with the BSD API? */
-	return extattr_get_file(path, EXTATTR_NAMESPACE_USER, name, value, size);
+	return extattr_get_file(path, EXTATTR_NAMESPACE_USER, name, value,
+	                        size);
 #else
 #warning No xattr support - DOS a/h/s file attributes will not be preserved!
 	errno = ENOSYS;

@@ -1607,7 +1607,7 @@ static bool open_sockets(int port)
 	/* open an incoming socket */
 	if (inet_aton(bind_addr, &addr) == 0) {
 		DEBUG(0, ("open_sockets: failed to parse bind address %s\n",
-		bind_addr));
+		          bind_addr));
 		return false;
 	}
 	server_socket = open_server_socket(SOCK_STREAM, port, 0, addr.s_addr);
@@ -1663,9 +1663,11 @@ static bool open_sockets(int port)
 		   connections from local peers on the same private IP range. */
 		if (!is_private_peer()) {
 			if (!allow_public_connections) {
-				DEBUG(0, ("open_sockets: rejecting connection from "
-				          "public IP address %s\n",
-				          client_addr()));
+				DEBUG(
+				    0,
+				    ("open_sockets: rejecting connection from "
+				     "public IP address %s\n",
+				     client_addr()));
 				close(Client);
 				Client = -1;
 				continue;
@@ -2577,7 +2579,8 @@ static int switch_message(int type, char *inbuf, char *outbuf, int size,
 
 			/* for the IPC service, only certain messages are
 			 * allowed */
-			if (OPEN_CNUM(cnum) && CONN_SHARE(cnum) == ipc_service &&
+			if (OPEN_CNUM(cnum) &&
+			    CONN_SHARE(cnum) == ipc_service &&
 			    (flags & ALLOWED_IN_IPC) == 0) {
 				return ERROR(ERRSRV, ERRaccess);
 			}

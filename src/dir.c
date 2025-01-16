@@ -638,8 +638,8 @@ void dir_cache_add(char *path, char *name, char *dname,
 	    strlen(path) + 1; /* Bytes required to store path (with nul). */
 	namelen =
 	    strlen(name) + 1; /* Bytes required to store name (with nul). */
-	entry = checked_malloc(sizeof(dir_cache_entry) + pathlen +
-	                       namelen + strlen(dname) + 1);
+	entry = checked_malloc(sizeof(dir_cache_entry) + pathlen + namelen +
+	                       strlen(dname) + 1);
 
 	/* Set pointers correctly and load values. */
 	entry->path = pstrcpy((char *) &entry[1], path);

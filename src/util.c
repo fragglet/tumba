@@ -1392,7 +1392,7 @@ checked result memory functions
 ****************************************************************************/
 void *checked_realloc(void *p, size_t bytes)
 {
-	void *result = (realloc)(p, bytes);
+	void *result = (realloc) (p, bytes);
 
 	assert(result != NULL || bytes == 0);
 
@@ -1401,7 +1401,7 @@ void *checked_realloc(void *p, size_t bytes)
 
 void *checked_calloc(size_t nmemb, size_t size)
 {
-	void *result = (calloc)(nmemb, size);
+	void *result = (calloc) (nmemb, size);
 
 	assert(result != NULL || nmemb == 0 || size == 0);
 
@@ -1410,7 +1410,7 @@ void *checked_calloc(size_t nmemb, size_t size)
 
 char *checked_strdup(const char *s)
 {
-	char *result = (strdup)(s);
+	char *result = (strdup) (s);
 
 	assert(result != NULL);
 

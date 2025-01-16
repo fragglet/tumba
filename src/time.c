@@ -152,8 +152,7 @@ static int time_zone_faster(time_t t)
 		if (dst_table[i].start - low > MAX_DST_SKIP * 2)
 			t = dst_table[i].start - MAX_DST_SKIP;
 		else
-			t = low +
-			    (dst_table[i].start - low) / 2;
+			t = low + (dst_table[i].start - low) / 2;
 		if (time_zone(t) == zone)
 			dst_table[i].start = t;
 		else
@@ -164,8 +163,7 @@ static int time_zone_faster(time_t t)
 		if (high - dst_table[i].end > MAX_DST_SKIP * 2)
 			t = dst_table[i].end + MAX_DST_SKIP;
 		else
-			t = high -
-			    (high - dst_table[i].end) / 2;
+			t = high - (high - dst_table[i].end) / 2;
 		if (time_zone(t) == zone)
 			dst_table[i].end = t;
 		else

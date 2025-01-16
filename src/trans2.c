@@ -870,10 +870,9 @@ resume_key = %d resume name = %s continue=%d level = %d\n",
 	/* Get the attr mask from the dptr */
 	dirtype = dptr_attr(dptr_num);
 
-	DEBUG(3,
-	      ("dptr_num is %d, mask = %s, attr = %x, dirptr=%p,%d)\n",
-	       dptr_num, mask, dirtype, Connections[cnum].dirptr,
-	       tell_dir(Connections[cnum].dirptr)));
+	DEBUG(3, ("dptr_num is %d, mask = %s, attr = %x, dirptr=%p,%d)\n",
+	          dptr_num, mask, dirtype, Connections[cnum].dirptr,
+	          tell_dir(Connections[cnum].dirptr)));
 
 	p = pdata;
 	space_remaining = max_data_bytes;
