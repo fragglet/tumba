@@ -2956,8 +2956,8 @@ static void usage(void)
 	       "   -a                allow connections from all addresses\n"
 	       "   -b addr           bind to given address\n"
 	       "   -p port           listen on the specified port\n"
-	       "   -d debuglevel     set the debuglevel\n"
-	       "   -l log basename.  basename for log/debug files\n"
+	       "   -d level          set the logging level\n"
+	       "   -l filename       write log messages to the given file\n"
 	       "   -W workgroup      override workgroup name\n"
 	       "\n");
 }
