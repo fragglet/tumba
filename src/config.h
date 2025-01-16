@@ -69,10 +69,3 @@ static inline int lp_readsize(void)
 {
 	return 16 * 1024;
 }
-
-// This parameter maps how Samba debug messages are logged onto the system
-// syslog logging levels.
-static inline int lp_syslog(void)
-{
-	return 1;
-}

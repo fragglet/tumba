@@ -58,6 +58,34 @@ void setup_logging(char *pname)
 	openlog(pname, LOG_PID, SYSLOG_FACILITY);
 }
 
+	static const int syslog_priority_map[] = {
+	    LOG_ERR,     /* 0 */
+	    LOG_WARNING, /* 1 */
+	    LOG_NOTICE,  /* 2 */
+	    LOG_INFO,    /* 3 */
+	};
+
+static void syslog_output(int level, char *format_str, va_list ap)
+{
+	int priority = syslog_priority_map[level];
+	pstring msgbuf;
+	char *buf;
+	size_t buf_len, n;
+
+	buf = msgbuf;
+	buf_len = sizeof(msgbuf);
+
+	slprintf(buf, buf_len - 1, "[%s] ", client_addr());
+	n = strlen(buf);
+	buf += n;
+	buf_len -= n;
+
+	vslprintf(buf, buf_len - 1, format_str, ap);
+
+	msgbuf[255] = '\0';
+	syslog(priority, "%s", msgbuf);
+}
+
 /*******************************************************************
 write an debug message on the debugfile. This is called by the LOG
 macro
@@ -80,45 +108,11 @@ int log_output(int level, char *format_str, ...)
 		}
 	}
 
-	if (level < lp_syslog()) {
-		/*
-		 * map debug levels to syslog() priorities
-		 * note that not all ERROR( ...) calls are
-		 * necessarily errors
-		 */
-		static int priority_map[] = {
-		    LOG_ERR,     /* 0 */
-		    LOG_WARNING, /* 1 */
-		    LOG_NOTICE,  /* 2 */
-		    LOG_INFO,    /* 3 */
-		};
-		int priority;
-		pstring msgbuf;
-		char *buf;
-		size_t buf_len;
-
-		if (level >= sizeof(priority_map) / sizeof(priority_map[0]) ||
-		    level < 0)
-			priority = LOG_DEBUG;
-		else
-			priority = priority_map[level];
-
-		buf = msgbuf;
-		buf_len = sizeof(msgbuf);
-
-		if (log_start_of_line) {
-			slprintf(buf, buf_len - 1, "[%s] ", client_addr());
-			n = strlen(buf);
-			buf += n;
-			buf_len -= n;
-		}
-
+	/* we do not pass debug messages to syslog */
+	if (level < 4) {
 		va_start(ap, format_str);
-		vslprintf(buf, buf_len - 1, format_str, ap);
+		syslog_output(level, format_str, ap);
 		va_end(ap);
-
-		msgbuf[255] = '\0';
-		syslog(priority, "%s", msgbuf);
 	}
 
 	if (log_start_of_line) {
