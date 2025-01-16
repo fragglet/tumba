@@ -155,7 +155,7 @@ static void check_log_size(void)
 write an debug message on the debugfile. This is called by the LOG
 macro
 ********************************************************************/
-int Debug1(char *format_str, ...)
+int log_output(char *format_str, ...)
 {
 	va_list ap;
 	int old_errno = errno;

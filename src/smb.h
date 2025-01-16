@@ -46,7 +46,7 @@
 extern int syslog_level;
 
 #define LOG(level, body)                                                       \
-	((LOGLEVEL >= (level)) ? (syslog_level = (level), Debug1 body) : 0)
+	((LOGLEVEL >= (level)) ? (syslog_level = (level), log_output body) : 0)
 
 /* this defines the error codes that receive_smb can put in smb_read_error */
 #define READ_TIMEOUT 1
@@ -465,7 +465,7 @@ struct share {
 #define ERRHRD 0x03 /* Error is an hardware error. */
 #define ERRCMD 0xFF /* Command was not in the "SMB" format. */
 
-int Debug1(char *, ...);
+int log_output(char *, ...);
 int slprintf(char *str, int n, char *format, ...);
 
 #ifndef MIN
