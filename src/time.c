@@ -28,7 +28,7 @@
 
 static int serverzone = 0;
 
-extern int DEBUGLEVEL;
+extern int LOGLEVEL;
 
 #ifndef CHAR_BIT
 #define CHAR_BIT 8
@@ -89,11 +89,11 @@ void time_init(void)
 	serverzone = time_zone(time(NULL));
 
 	if ((serverzone % 60) != 0) {
-		DEBUG(1, ("WARNING: Your timezone is not a multiple of 1 "
-		          "minute.\n"));
+		LOG(1, ("WARNING: Your timezone is not a multiple of 1 "
+		        "minute.\n"));
 	}
 
-	DEBUG(4, ("Serverzone is %d\n", serverzone));
+	LOG(4, ("Serverzone is %d\n", serverzone));
 }
 
 /*******************************************************************

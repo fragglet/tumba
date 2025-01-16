@@ -32,7 +32,7 @@
 */
 
 #include "includes.h"
-extern int DEBUGLEVEL;
+extern int LOGLEVEL;
 extern files_struct Files[];
 
 static bool fcntl_lock(int fd, int op, uint32_t offset, uint32_t count,
@@ -61,8 +61,8 @@ static bool fcntl_lock(int fd, int op, uint32_t offset, uint32_t count,
 	offset = (uint32_t) s_offset;
 	count = (uint32_t) s_count;
 
-	DEBUG(8, ("fcntl_lock %d %d %d %d %d\n", fd, op, (int) offset,
-	          (int) count, type));
+	LOG(8, ("fcntl_lock %d %d %d %d %d\n", fd, op, (int) offset,
+	        (int) count, type));
 
 	lock.l_type = type;
 	lock.l_whence = SEEK_SET;
@@ -75,15 +75,14 @@ static bool fcntl_lock(int fd, int op, uint32_t offset, uint32_t count,
 	ret = fcntl(fd, op, &lock);
 
 	if (errno != 0)
-		DEBUG(3, ("fcntl lock gave errno %d (%s)\n", errno,
-		          strerror(errno)));
+		LOG(3, ("fcntl lock gave errno %d (%s)\n", errno,
+		        strerror(errno)));
 
 	/* a lock query */
 	if (op == F_GETLK) {
 		if ((ret != -1) && (lock.l_type != F_UNLCK) &&
 		    (lock.l_pid != 0) && (lock.l_pid != getpid())) {
-			DEBUG(3,
-			      ("fd %d is locked by pid %d\n", fd, lock.l_pid));
+			LOG(3, ("fd %d is locked by pid %d\n", fd, lock.l_pid));
 			return true;
 		}
 
@@ -93,13 +92,13 @@ static bool fcntl_lock(int fd, int op, uint32_t offset, uint32_t count,
 
 	/* a lock set or unset */
 	if (ret == -1) {
-		DEBUG(3,
-		      ("lock failed at offset %d count %d op %d type %d (%s)\n",
-		       offset, count, op, type, strerror(errno)));
+		LOG(3,
+		    ("lock failed at offset %d count %d op %d type %d (%s)\n",
+		     offset, count, op, type, strerror(errno)));
 
 		/* perhaps it doesn't support this sort of locking?? */
 		if (errno == EINVAL) {
-			DEBUG(3, ("locking not supported? returning true\n"));
+			LOG(3, ("locking not supported? returning true\n"));
 			return true;
 		}
 
@@ -107,7 +106,7 @@ static bool fcntl_lock(int fd, int op, uint32_t offset, uint32_t count,
 	}
 
 	/* everything went OK */
-	DEBUG(8, ("Lock call successful\n"));
+	LOG(8, ("Lock call successful\n"));
 
 	return true;
 }
@@ -126,16 +125,16 @@ static int map_lock_type(files_struct *fsp, int lock_type)
 		 * read-only. Win32 locking semantics allow this. Do the best we
 		 * can and attempt a read-only lock.
 		 */
-		DEBUG(10, ("map_lock_type: Downgrading write lock to read due "
-		           "to read-only file.\n"));
+		LOG(10, ("map_lock_type: Downgrading write lock to read due "
+		         "to read-only file.\n"));
 		return F_RDLCK;
 	} else if ((lock_type == F_RDLCK) &&
 	           (fsp->fd_ptr->real_open_flags == O_WRONLY)) {
 		/*
 		 * Ditto for read locks on write only files.
 		 */
-		DEBUG(10, ("map_lock_type: Changing read lock to write due to "
-		           "write-only file.\n"));
+		LOG(10, ("map_lock_type: Changing read lock to write due to "
+		         "write-only file.\n"));
 		return F_WRLCK;
 	}
 

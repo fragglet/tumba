@@ -21,7 +21,7 @@
 
 #include "includes.h"
 
-extern int DEBUGLEVEL;
+extern int LOGLEVEL;
 
 /* this is like vsnprintf but the 'n' limit does not include
    the terminating null. So if you have a 1024 byte buffer then

@@ -21,7 +21,7 @@
 
 #include "includes.h"
 
-extern int DEBUGLEVEL;
+extern int LOGLEVEL;
 
 /****************************************************************************
  * Provide a checksum on a string
@@ -92,7 +92,7 @@ bool is_8_3(char *fname, bool check_case)
 		fname = slash_pos + 1;
 	len = strlen(fname);
 
-	DEBUG(5, ("checking %s for 8.3\n", fname));
+	LOG(5, ("checking %s for 8.3\n", fname));
 
 	/* can't be longer than 12 chars */
 	if (len == 0 || len > 12)
@@ -201,7 +201,7 @@ void mangle_name_83(char *s, int s_len)
 
 	strupper(s);
 
-	DEBUG(5, ("Mangling name %s to ", s));
+	LOG(5, ("Mangling name %s to ", s));
 
 	if (p) {
 		if (p == s)
@@ -235,7 +235,7 @@ void mangle_name_83(char *s, int s_len)
 		fstrcat(s, ".");
 		fstrcat(s, extension);
 	}
-	DEBUG(5, ("%s\n", s));
+	LOG(5, ("%s\n", s));
 }
 
 /*******************************************************************

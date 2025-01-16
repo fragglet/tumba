@@ -25,7 +25,7 @@
 
 static uint8_t valid_dos_chars[32];
 
-int DEBUGLEVEL = 1;
+int LOGLEVEL = 1;
 
 int Protocol = PROTOCOL_COREPLUS;
 
@@ -71,7 +71,7 @@ void reopen_logs(void)
 {
 	pstring fname;
 
-	if (DEBUGLEVEL > 0) {
+	if (LOGLEVEL > 0) {
 		pstrcpy(fname, debugf);
 		if (strlen(lp_logfile()) > 0) {
 			pstrcpy(fname, lp_logfile());
@@ -151,7 +151,7 @@ static void check_log_size(void)
 }
 
 /*******************************************************************
-write an debug message on the debugfile. This is called by the DEBUG
+write an debug message on the debugfile. This is called by the LOG
 macro
 ********************************************************************/
 int Debug1(char *format_str, ...)
@@ -182,7 +182,7 @@ int Debug1(char *format_str, ...)
 	if (syslog_level < lp_syslog()) {
 		/*
 		 * map debug levels to syslog() priorities
-		 * note that not all DEBUG(0, ...) calls are
+		 * note that not all LOG(0, ...) calls are
 		 * necessarily errors
 		 */
 		static int priority_map[] = {
@@ -431,7 +431,7 @@ static void print_asc(int level, unsigned char *buf, int len)
 {
 	int i;
 	for (i = 0; i < len; i++)
-		DEBUG(level, ("%c", isprint(buf[i]) ? buf[i] : '.'));
+		LOG(level, ("%c", isprint(buf[i]) ? buf[i] : '.'));
 }
 
 static void dump_data(int level, char *buf1, int len)
@@ -441,38 +441,38 @@ static void dump_data(int level, char *buf1, int len)
 	if (len <= 0)
 		return;
 
-	DEBUG(level, ("[%03X] ", i));
+	LOG(level, ("[%03X] ", i));
 	for (i = 0; i < len;) {
-		DEBUG(level, ("%02X ", (int) buf[i]));
+		LOG(level, ("%02X ", (int) buf[i]));
 		i++;
 		if (i % 8 == 0)
-			DEBUG(level, (" "));
+			LOG(level, (" "));
 		if (i % 16 == 0) {
 			print_asc(level, &buf[i - 16], 8);
-			DEBUG(level, (" "));
+			LOG(level, (" "));
 			print_asc(level, &buf[i - 8], 8);
-			DEBUG(level, ("\n"));
+			LOG(level, ("\n"));
 			if (i < len)
-				DEBUG(level, ("[%03X] ", i));
+				LOG(level, ("[%03X] ", i));
 		}
 	}
 	if (i % 16) {
 		int n;
 
 		n = 16 - (i % 16);
-		DEBUG(level, (" "));
+		LOG(level, (" "));
 		if (n > 8)
-			DEBUG(level, (" "));
+			LOG(level, (" "));
 		while (n--)
-			DEBUG(level, ("   "));
+			LOG(level, ("   "));
 
 		n = MIN(8, i % 16);
 		print_asc(level, &buf[i - (i % 16)], n);
-		DEBUG(level, (" "));
+		LOG(level, (" "));
 		n = (i % 16) - n;
 		if (n > 0)
 			print_asc(level, &buf[i - n], n);
-		DEBUG(level, ("\n"));
+		LOG(level, ("\n"));
 	}
 }
 
@@ -484,30 +484,29 @@ void show_msg(char *buf)
 	int i;
 	int bcc = 0;
 
-	if (DEBUGLEVEL < 5)
+	if (LOGLEVEL < 5)
 		return;
 
-	DEBUG(5, ("size=%d\nsmb_com=0x%x\nsmb_rcls=%d\nsmb_reh=%d\nsmb_err=%"
-	          "d\nsmb_flg=%d\nsmb_flg2=%d\n",
-	          smb_len(buf), (int) CVAL(buf, smb_com),
-	          (int) CVAL(buf, smb_rcls), (int) CVAL(buf, smb_reh),
-	          (int) SVAL(buf, smb_err), (int) CVAL(buf, smb_flg),
-	          (int) SVAL(buf, smb_flg2)));
-	DEBUG(5,
-	      ("smb_tid=%d\nsmb_pid=%d\nsmb_uid=%d\nsmb_mid=%d\nsmt_wct=%d\n",
-	       (int) SVAL(buf, smb_tid), (int) SVAL(buf, smb_pid),
-	       (int) SVAL(buf, smb_uid), (int) SVAL(buf, smb_mid),
-	       (int) CVAL(buf, smb_wct)));
+	LOG(5,
+	    ("size=%d\nsmb_com=0x%x\nsmb_rcls=%d\nsmb_reh=%d\nsmb_err=%"
+	     "d\nsmb_flg=%d\nsmb_flg2=%d\n",
+	     smb_len(buf), (int) CVAL(buf, smb_com), (int) CVAL(buf, smb_rcls),
+	     (int) CVAL(buf, smb_reh), (int) SVAL(buf, smb_err),
+	     (int) CVAL(buf, smb_flg), (int) SVAL(buf, smb_flg2)));
+	LOG(5, ("smb_tid=%d\nsmb_pid=%d\nsmb_uid=%d\nsmb_mid=%d\nsmt_wct=%d\n",
+	        (int) SVAL(buf, smb_tid), (int) SVAL(buf, smb_pid),
+	        (int) SVAL(buf, smb_uid), (int) SVAL(buf, smb_mid),
+	        (int) CVAL(buf, smb_wct)));
 
 	for (i = 0; i < (int) CVAL(buf, smb_wct); i++)
-		DEBUG(5,
-		      ("smb_vwv[%d]=%d (0x%X)\n", i, SVAL(buf, smb_vwv + 2 * i),
-		       SVAL(buf, smb_vwv + 2 * i)));
+		LOG(5,
+		    ("smb_vwv[%d]=%d (0x%X)\n", i, SVAL(buf, smb_vwv + 2 * i),
+		     SVAL(buf, smb_vwv + 2 * i)));
 
 	bcc = (int) SVAL(buf, smb_vwv + 2 * (CVAL(buf, smb_wct)));
-	DEBUG(5, ("smb_bcc=%d\n", bcc));
+	LOG(5, ("smb_bcc=%d\n", bcc));
 
-	if (DEBUGLEVEL < 10)
+	if (LOGLEVEL < 10)
 		return;
 
 	dump_data(10, smb_buf(buf), MIN(bcc, 512));
@@ -639,7 +638,7 @@ void unix_clean_name(char *s)
 {
 	char *p = NULL;
 
-	DEBUG(3, ("unix_clean_name [%s]\n", s));
+	LOG(3, ("unix_clean_name [%s]\n", s));
 
 	/* remove any double slashes */
 	string_sub(s, "//", "/");
@@ -712,11 +711,11 @@ void close_low_fds(void)
 		if (fd < 0)
 			fd = open("/dev/null", O_WRONLY, 0);
 		if (fd < 0) {
-			DEBUG(0, ("Can't open /dev/null\n"));
+			LOG(0, ("Can't open /dev/null\n"));
 			return;
 		}
 		if (fd != i) {
-			DEBUG(0, ("Didn't get file descriptor %d\n", i));
+			LOG(0, ("Didn't get file descriptor %d\n", i));
 			return;
 		}
 	}
@@ -729,14 +728,14 @@ static int write_socket(int fd, char *buf, int len)
 {
 	int ret = 0;
 
-	DEBUG(6, ("write_socket(%d,%d)\n", fd, len));
+	LOG(6, ("write_socket(%d,%d)\n", fd, len));
 	ret = write_data(fd, buf, len);
 
-	DEBUG(6, ("write_socket(%d,%d) wrote %d\n", fd, len, ret));
+	LOG(6, ("write_socket(%d,%d) wrote %d\n", fd, len, ret));
 	if (ret <= 0)
-		DEBUG(0, ("write_socket: Error writing %d bytes to socket %d: "
-		          "ERRNO = %s\n",
-		          len, fd, strerror(errno)));
+		LOG(0, ("write_socket: Error writing %d bytes to socket %d: "
+		        "ERRNO = %s\n",
+		        len, fd, strerror(errno)));
 
 	return ret;
 }
@@ -902,10 +901,10 @@ int read_smb_length_return_keepalive(int fd, char *inbuf, int timeout)
 		msg_type = CVAL(inbuf, 0);
 
 		if (msg_type == 0x85)
-			DEBUG(5, ("Got keepalive packet\n"));
+			LOG(5, ("Got keepalive packet\n"));
 	}
 
-	DEBUG(10, ("got smb length of %d\n", len));
+	LOG(10, ("got smb length of %d\n", len));
 
 	return len;
 }
@@ -945,8 +944,7 @@ bool send_smb(int fd, char *buffer)
 	while (nwritten < len) {
 		ret = write_socket(fd, buffer + nwritten, len - nwritten);
 		if (ret <= 0) {
-			DEBUG(
-			    0,
+			LOG(0,
 			    ("Error writing %d bytes to client. %d. Exiting\n",
 			     len, ret));
 			exit(1);
@@ -970,8 +968,7 @@ static char *name_ptr(char *buf, int ofs)
 		memcpy(p, buf + ofs, 2);
 		p[0] &= ~0xC0;
 		l = RSVAL(p, 0);
-		DEBUG(5,
-		      ("name ptr to pos %d from %d is %s\n", l, ofs, buf + l));
+		LOG(5, ("name ptr to pos %d from %d is %s\n", l, ofs, buf + l));
 		return buf + l;
 	} else
 		return buf + ofs;
@@ -1196,7 +1193,7 @@ bool mask_match(char *str, char *regexp, bool trans2)
 	if (strequal(t_pattern, "*"))
 		return true;
 
-	DEBUG(8, ("mask_match str=<%s> regexp=<%s>\n", t_filename, t_pattern));
+	LOG(8, ("mask_match str=<%s> regexp=<%s>\n", t_filename, t_pattern));
 
 	if (trans2) {
 		/*
@@ -1382,7 +1379,7 @@ bool mask_match(char *str, char *regexp, bool trans2)
 		}
 	}
 
-	DEBUG(8, ("mask_match returning %d\n", matched));
+	LOG(8, ("mask_match returning %d\n", matched));
 
 	return matched;
 }
@@ -1430,8 +1427,8 @@ const char *client_addr(void)
 	}
 
 	if (getpeername(Client, (struct sockaddr *) &sockin, &length) < 0) {
-		DEBUG(0, ("getpeername failed for fd=%d, error=%s\n", Client,
-		          strerror(errno)));
+		LOG(0, ("getpeername failed for fd=%d, error=%s\n", Client,
+		        strerror(errno)));
 		return "(error getting peer address)";
 	}
 
@@ -1489,9 +1486,8 @@ char *safe_strcpy(char *dest, const char *src, int dest_size)
 
 	len = strlcpy(dest, src, dest_size);
 	if (len > dest_size - 1) {
-		DEBUG(0,
-		      ("ERROR: string overflow by %d in safe_strcpy [%.50s]\n",
-		       len - dest_size + 1, src));
+		LOG(0, ("ERROR: string overflow by %d in safe_strcpy [%.50s]\n",
+		        len - dest_size + 1, src));
 	}
 
 	return dest;
@@ -1511,9 +1507,8 @@ char *safe_strcat(char *dest, const char *src, int dest_size)
 
 	len = strlcat(dest, src, dest_size);
 	if (len > dest_size - 1) {
-		DEBUG(0,
-		      ("ERROR: string overflow by %d in safe_strcat [%.50s]\n",
-		       len - dest_size + 1, src));
+		LOG(0, ("ERROR: string overflow by %d in safe_strcat [%.50s]\n",
+		        len - dest_size + 1, src));
 	}
 
 	return dest;

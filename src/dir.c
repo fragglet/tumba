@@ -21,7 +21,7 @@
 
 #include "includes.h"
 
-extern int DEBUGLEVEL;
+extern int LOGLEVEL;
 extern connection_struct Connections[];
 
 /*
@@ -74,7 +74,7 @@ idle a dptr - the directory is closed but the control info is kept
 static void dptr_idle(int key)
 {
 	if (dirptrs[key].valid && dirptrs[key].ptr) {
-		DEBUG(4, ("Idling dptr key %d\n", key));
+		LOG(4, ("Idling dptr key %d\n", key));
 		dptrs_open--;
 		close_dir(dirptrs[key].ptr);
 		dirptrs[key].ptr = NULL;
@@ -98,7 +98,7 @@ static void dptr_idleoldest(void)
 	if (oldi != -1)
 		dptr_idle(oldi);
 	else
-		DEBUG(0, ("No dptrs available to idle??\n"));
+		LOG(0, ("No dptrs available to idle??\n"));
 }
 
 /****************************************************************************
@@ -114,7 +114,7 @@ static void *dptr_get(int key, uint32_t lastused)
 		if (!dp->ptr) {
 			if (dptrs_open >= MAXDIR)
 				dptr_idleoldest();
-			DEBUG(4, ("Reopening dptr key %d\n", key));
+			LOG(4, ("Reopening dptr key %d\n", key));
 			if ((dp->ptr = open_dir(dp->cnum, dp->path)))
 				dptrs_open++;
 		}
@@ -193,12 +193,12 @@ void dptr_close(int key)
 	}
 
 	if (key < 0 || key >= NUMDIRPTRS) {
-		DEBUG(3, ("Invalid key %d given to dptr_close\n", key));
+		LOG(3, ("Invalid key %d given to dptr_close\n", key));
 		return;
 	}
 
 	if (dirptrs[key].valid) {
-		DEBUG(4, ("closing dptr key %d\n", key));
+		LOG(4, ("closing dptr key %d\n", key));
 		if (dirptrs[key].ptr) {
 			close_dir(dirptrs[key].ptr);
 			dptrs_open--;
@@ -250,7 +250,7 @@ void dptr_closepath(char *path, int pid)
 ****************************************************************************/
 static bool start_dir(int cnum, char *directory)
 {
-	DEBUG(5, ("start_dir cnum=%d dir=%s\n", cnum, directory));
+	LOG(5, ("start_dir cnum=%d dir=%s\n", cnum, directory));
 
 	if (!check_name(directory, cnum))
 		return false;
@@ -315,7 +315,7 @@ int dptr_create(int cnum, char *path, bool expect_close, int pid)
 	}
 
 	if (i == -1) {
-		DEBUG(0, ("Error - all dirptrs in use??\n"));
+		LOG(0, ("Error - all dirptrs in use??\n"));
 		return -1;
 	}
 
@@ -333,8 +333,8 @@ int dptr_create(int cnum, char *path, bool expect_close, int pid)
 	dirptrs[i].attr = 0;     /* Only used in lanman2 searches */
 	dirptrs[i].valid = true;
 
-	DEBUG(3, ("creating new dirptr %d for path %s, expect_close = %d\n", i,
-	          path, expect_close));
+	LOG(3, ("creating new dirptr %d for path %s, expect_close = %d\n", i,
+	        path, expect_close));
 
 	return i;
 }
@@ -350,11 +350,11 @@ bool dptr_fill(char *buf1, unsigned int key)
 	void *p = dptr_get(key, 0);
 	uint32_t offset;
 	if (!p) {
-		DEBUG(1, ("filling null dirptr %d\n", key));
+		LOG(1, ("filling null dirptr %d\n", key));
 		return false;
 	}
 	offset = tell_dir(p);
-	DEBUG(6, ("fill on key %d dirptr 0x%x now at %d\n", key, p, offset));
+	LOG(6, ("fill on key %d dirptr 0x%x now at %d\n", key, p, offset));
 	buf[0] = key;
 	SIVAL(buf, 1, offset | DPTR_MASK);
 	return true;
@@ -377,14 +377,14 @@ void *dptr_fetch(char *buf, int *num)
 	void *p = dptr_get(key, dircounter++);
 	uint32_t offset;
 	if (!p) {
-		DEBUG(3, ("fetched null dirptr %d\n", key));
+		LOG(3, ("fetched null dirptr %d\n", key));
 		return NULL;
 	}
 	*num = key;
 	offset = IVAL(buf, 1) & ~DPTR_MASK;
 	seek_dir(p, offset);
-	DEBUG(3, ("fetching dirptr %d for path %s at offset %d\n", key,
-	          dptr_path(key), offset));
+	LOG(3, ("fetching dirptr %d for path %s at offset %d\n", key,
+	        dptr_path(key), offset));
 	return p;
 }
 
@@ -396,11 +396,11 @@ void *dptr_fetch_lanman2(int dptr_num)
 	void *p = dptr_get(dptr_num, dircounter++);
 
 	if (!p) {
-		DEBUG(3, ("fetched null dirptr %d\n", dptr_num));
+		LOG(3, ("fetched null dirptr %d\n", dptr_num));
 		return NULL;
 	}
-	DEBUG(3, ("fetching dirptr %d for path %s\n", dptr_num,
-	          dptr_path(dptr_num)));
+	LOG(3, ("fetching dirptr %d for path %s\n", dptr_num,
+	        dptr_path(dptr_num)));
 	return p;
 }
 
@@ -445,9 +445,9 @@ bool get_dir_entry(int cnum, char *mask, int dirtype, char *fname, int *size,
 	while (!found) {
 		dname = read_dir_name(Connections[cnum].dirptr);
 
-		DEBUG(6, ("readdir on dirptr 0x%x now at offset %d\n",
-		          Connections[cnum].dirptr,
-		          tell_dir(Connections[cnum].dirptr)));
+		LOG(6, ("readdir on dirptr 0x%x now at offset %d\n",
+		        Connections[cnum].dirptr,
+		        tell_dir(Connections[cnum].dirptr)));
 
 		if (dname == NULL)
 			return false;
@@ -475,23 +475,22 @@ bool get_dir_entry(int cnum, char *mask, int dirtype, char *fname, int *size,
 		pstrcat(path, fname);
 		pstrcat(pathreal, dname);
 		if (stat(pathreal, &sbuf) != 0) {
-			DEBUG(5, ("Couldn't stat 1 [%s]\n", path));
+			LOG(5, ("Couldn't stat 1 [%s]\n", path));
 			continue;
 		}
 
 		*mode = dos_mode(cnum, pathreal, &sbuf);
 
 		if (!dir_check_ftype(cnum, *mode, &sbuf, dirtype)) {
-			DEBUG(5, ("[%s] attribs didn't match %x\n", filename,
-			          dirtype));
+			LOG(5, ("[%s] attribs didn't match %x\n", filename,
+			        dirtype));
 			continue;
 		}
 
 		*size = sbuf.st_size;
 		*date = sbuf.st_mtime;
 
-		DEBUG(5,
-		      ("get_dir_entry found %s fname=%s\n", pathreal, fname));
+		LOG(5, ("get_dir_entry found %s fname=%s\n", pathreal, fname));
 
 		found = true;
 	}
@@ -655,7 +654,7 @@ void dir_cache_add(char *path, char *name, char *dname,
 	}
 	dir_cache[new_head] = entry;
 	dir_cache_head = new_head;
-	DEBUG(4, ("Added dir cache entry %s %s -> %s\n", path, name, dname));
+	LOG(4, ("Added dir cache entry %s %s -> %s\n", path, name, dname));
 }
 
 /* ------------------------------------------------------------------------ **
@@ -678,8 +677,8 @@ char *dir_cache_check(char *path, char *name, const struct share *share)
 		entry = dir_cache[idx];
 		if (entry->share == share && 0 == strcmp(name, entry->name) &&
 		    0 == strcmp(path, entry->path)) {
-			DEBUG(4, ("Got dir cache hit on %s %s -> %s\n", path,
-			          name, entry->dname));
+			LOG(4, ("Got dir cache hit on %s %s -> %s\n", path,
+			        name, entry->dname));
 			return entry->dname;
 		}
 	}

@@ -45,8 +45,8 @@
 /* debugging code */
 extern int syslog_level;
 
-#define DEBUG(level, body)                                                     \
-	((DEBUGLEVEL >= (level)) ? (syslog_level = (level), Debug1 body) : 0)
+#define LOG(level, body)                                                       \
+	((LOGLEVEL >= (level)) ? (syslog_level = (level), Debug1 body) : 0)
 
 /* this defines the error codes that receive_smb can put in smb_read_error */
 #define READ_TIMEOUT 1

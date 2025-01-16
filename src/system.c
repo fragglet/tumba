@@ -21,7 +21,7 @@
 
 #include "includes.h"
 
-extern int DEBUGLEVEL;
+extern int LOGLEVEL;
 
 /*******************************************************************
 now for utime()
