@@ -56,14 +56,6 @@ static inline bool lp_strip_dot(void)
 	return false;
 }
 
-// This option (an integer in kilobytes) specifies the max size the log file
-// should grow to. Samba periodically checks the size and if it is exceeded it
-// will rename the file, adding a .old extension.
-static inline int lp_max_log_size(void)
-{
-	return 5000;
-}
-
 // This option controls the maximum packet size that will be negotiated by
 // Samba. The default is 65535, which is the maximum.
 static inline int lp_maxxmit(void)

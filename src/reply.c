@@ -87,8 +87,6 @@ int reply_special(char *inbuf, char *outbuf)
 			break;
 		}
 
-		reopen_logs();
-
 		break;
 
 	case 0x89: /* session keepalive request

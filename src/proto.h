@@ -195,7 +195,6 @@ int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize);
 
 void setup_logging(char *pname);
 void reopen_logs(void);
-void force_check_log_size(void);
 bool file_exist(char *fname, struct stat *sbuf);
 bool directory_exist(char *dname, struct stat *st);
 uint32_t file_size(char *file_name);

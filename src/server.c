@@ -1683,20 +1683,6 @@ static bool open_sockets(int port)
 			return true;
 		}
 		close(Client); /* The parent doesn't need this socket */
-
-		/*
-		 * Force parent to check log size after spawning child.
-		 * Fix from klausr@ITAP.Physik.Uni-Stuttgart.De. The
-		 * parent smbd will log to logserver.smb. It writes
-		 * only two messages for each child started/finished.
-		 * But each child writes, say, 50 messages also in
-		 * logserver.smb, begining with the debug_count of the
-		 * parent, before the child opens its own log file
-		 * logserver.client. In a worst case scenario the size
-		 * of logserver.smb would be checked after about
-		 * 50*50=2500 messages (ca. 100kb).
-		 */
-		force_check_log_size();
 	}
 
 	return true;
@@ -3026,8 +3012,6 @@ int main(int argc, char *argv[])
 	}
 
 	add_ipc_service();
-
-	reopen_logs();
 
 	NOTICE("smbd version %s started\n", VERSION);
 	NOTICE("Copyright Andrew Tridgell 1992-1997\n");
