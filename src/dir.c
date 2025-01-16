@@ -74,7 +74,7 @@ idle a dptr - the directory is closed but the control info is kept
 static void dptr_idle(int key)
 {
 	if (dirptrs[key].valid && dirptrs[key].ptr) {
-		LOG(4, ("Idling dptr key %d\n", key));
+		DEBUG("Idling dptr key %d\n", key);
 		dptrs_open--;
 		close_dir(dirptrs[key].ptr);
 		dirptrs[key].ptr = NULL;
@@ -114,7 +114,7 @@ static void *dptr_get(int key, uint32_t lastused)
 		if (!dp->ptr) {
 			if (dptrs_open >= MAXDIR)
 				dptr_idleoldest();
-			LOG(4, ("Reopening dptr key %d\n", key));
+			DEBUG("Reopening dptr key %d\n", key);
 			if ((dp->ptr = open_dir(dp->cnum, dp->path)))
 				dptrs_open++;
 		}
@@ -198,7 +198,7 @@ void dptr_close(int key)
 	}
 
 	if (dirptrs[key].valid) {
-		LOG(4, ("closing dptr key %d\n", key));
+		DEBUG("closing dptr key %d\n", key);
 		if (dirptrs[key].ptr) {
 			close_dir(dirptrs[key].ptr);
 			dptrs_open--;
@@ -250,7 +250,7 @@ void dptr_closepath(char *path, int pid)
 ****************************************************************************/
 static bool start_dir(int cnum, char *directory)
 {
-	LOG(5, ("start_dir cnum=%d dir=%s\n", cnum, directory));
+	DEBUG("start_dir cnum=%d dir=%s\n", cnum, directory);
 
 	if (!check_name(directory, cnum))
 		return false;
@@ -354,7 +354,7 @@ bool dptr_fill(char *buf1, unsigned int key)
 		return false;
 	}
 	offset = tell_dir(p);
-	LOG(6, ("fill on key %d dirptr 0x%x now at %d\n", key, p, offset));
+	DEBUG("fill on key %d dirptr 0x%x now at %d\n", key, p, offset);
 	buf[0] = key;
 	SIVAL(buf, 1, offset | DPTR_MASK);
 	return true;
@@ -444,9 +444,9 @@ bool get_dir_entry(int cnum, char *mask, int dirtype, char *fname, int *size,
 	while (!found) {
 		dname = read_dir_name(Connections[cnum].dirptr);
 
-		LOG(6, ("readdir on dirptr 0x%x now at offset %d\n",
-		        Connections[cnum].dirptr,
-		        tell_dir(Connections[cnum].dirptr)));
+		DEBUG("readdir on dirptr 0x%x now at offset %d\n",
+		      Connections[cnum].dirptr,
+		      tell_dir(Connections[cnum].dirptr));
 
 		if (dname == NULL)
 			return false;
@@ -474,22 +474,22 @@ bool get_dir_entry(int cnum, char *mask, int dirtype, char *fname, int *size,
 		pstrcat(path, fname);
 		pstrcat(pathreal, dname);
 		if (stat(pathreal, &sbuf) != 0) {
-			LOG(5, ("Couldn't stat 1 [%s]\n", path));
+			DEBUG("Couldn't stat 1 [%s]\n", path);
 			continue;
 		}
 
 		*mode = dos_mode(cnum, pathreal, &sbuf);
 
 		if (!dir_check_ftype(cnum, *mode, &sbuf, dirtype)) {
-			LOG(5, ("[%s] attribs didn't match %x\n", filename,
-			        dirtype));
+			DEBUG("[%s] attribs didn't match %x\n", filename,
+			      dirtype);
 			continue;
 		}
 
 		*size = sbuf.st_size;
 		*date = sbuf.st_mtime;
 
-		LOG(5, ("get_dir_entry found %s fname=%s\n", pathreal, fname));
+		DEBUG("get_dir_entry found %s fname=%s\n", pathreal, fname);
 
 		found = true;
 	}
@@ -653,7 +653,7 @@ void dir_cache_add(char *path, char *name, char *dname,
 	}
 	dir_cache[new_head] = entry;
 	dir_cache_head = new_head;
-	LOG(4, ("Added dir cache entry %s %s -> %s\n", path, name, dname));
+	DEBUG("Added dir cache entry %s %s -> %s\n", path, name, dname);
 }
 
 /* ------------------------------------------------------------------------ **
@@ -676,8 +676,8 @@ char *dir_cache_check(char *path, char *name, const struct share *share)
 		entry = dir_cache[idx];
 		if (entry->share == share && 0 == strcmp(name, entry->name) &&
 		    0 == strcmp(path, entry->path)) {
-			LOG(4, ("Got dir cache hit on %s %s -> %s\n", path,
-			        name, entry->dname));
+			DEBUG("Got dir cache hit on %s %s -> %s\n", path, name,
+			      entry->dname);
 			return entry->dname;
 		}
 	}

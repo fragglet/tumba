@@ -108,7 +108,7 @@ int reply_special(char *inbuf, char *outbuf)
 		return 0;
 	}
 
-	LOG(5, ("init msg_type=0x%x msg_flags=0x%x\n", msg_type, msg_flags));
+	DEBUG("init msg_type=0x%x msg_flags=0x%x\n", msg_type, msg_flags);
 
 	return outsize;
 }
@@ -145,7 +145,7 @@ static void parse_connect(char *p, char *service, char *user, char *password,
 {
 	char *p2;
 
-	LOG(4, ("parsing connect string %s\n", p));
+	DEBUG("parsing connect string %s\n", p);
 
 	p2 = strrchr(p, '\\');
 	if (p2 == NULL)
@@ -236,7 +236,7 @@ int reply_tcon_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 		fstrcpy(user, p);
 	}
 	strlcpy(devicename, path + strlen(path) + 1, 7);
-	LOG(4, ("Got device type %s\n", devicename));
+	DEBUG("Got device type %s\n", devicename);
 
 	connection_num = make_connection(service, devicename);
 
@@ -341,7 +341,7 @@ int reply_sesssetup_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	if (!done_sesssetup)
 		max_send = MIN(max_send, smb_bufsize);
 
-	LOG(6, ("Client requested max send size of %d\n", max_send));
+	DEBUG("Client requested max send size of %d\n", max_send);
 
 	done_sesssetup = true;
 
@@ -560,7 +560,7 @@ static void make_dir_struct(char *buf, char *mask, char *fname,
 	SSVAL(buf, 28, size >> 16);
 	strlcpy(buf + 30, fname, 13);
 	strupper(buf + 30);
-	LOG(8, ("put name [%s] into dir struct\n", buf + 30));
+	DEBUG("put name [%s] into dir struct\n", buf + 30);
 }
 
 /****************************************************************************
@@ -607,7 +607,7 @@ int reply_search(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	/* dirtype &= ~aDIR; */
 
-	LOG(5, ("path=%s status_len=%d\n", path, status_len));
+	DEBUG("path=%s status_len=%d\n", path, status_len);
 
 	if (status_len == 0) {
 		pstring dir2;
@@ -667,7 +667,7 @@ int reply_search(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	for (p = mask; *p != '\0'; ++p) {
 		if (*p != '?' && *p != '*' && !isdoschar(*p)) {
-			LOG(5, ("Invalid char [%c] in search mask?\n", *p));
+			DEBUG("Invalid char [%c] in search mask?\n", *p);
 			*p = '?';
 		}
 	}
@@ -680,7 +680,7 @@ int reply_search(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		pstrcat(mask, tmp);
 	}
 
-	LOG(5, ("mask=%s directory=%s\n", mask, directory));
+	DEBUG("mask=%s directory=%s\n", mask, directory);
 
 	if (can_open) {
 		p = smb_buf(outbuf) + 3;
@@ -703,7 +703,7 @@ int reply_search(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 			}
 		}
 
-		LOG(4, ("dptr_num is %d\n", dptr_num));
+		DEBUG("dptr_num is %d\n", dptr_num);
 
 		if (ok) {
 			if ((dirtype & 0x1F) == aVOLID) {
@@ -783,9 +783,9 @@ search_empty:
 		slprintf(directory, sizeof(directory) - 1, "(%s)",
 		         dptr_path(dptr_num));
 
-	LOG(4, ("%s mask=%s path=%s cnum=%d dtype=%d nument=%d of %d\n",
-	        smb_fn_name(CVAL(inbuf, smb_com)), mask, directory, cnum,
-	        dirtype, numentries, maxentries));
+	DEBUG("%s mask=%s path=%s cnum=%d dtype=%d nument=%d of %d\n",
+	      smb_fn_name(CVAL(inbuf, smb_com)), mask, directory, cnum, dirtype,
+	      numentries, maxentries);
 
 	return outsize;
 }
@@ -1289,7 +1289,7 @@ static int transfer_file(int infd, int outfd, int n, char *header, int headlen,
 	char *buf1, *abuf;
 	int total = 0;
 
-	LOG(4, ("transfer_file %d  (head=%d) called\n", n, headlen));
+	DEBUG("transfer_file %d  (head=%d) called\n", n, headlen);
 
 	if (size == 0) {
 		size = lp_readsize();
@@ -1431,7 +1431,7 @@ int reply_readbraw(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	transfer_file(0, Client, 0, header, 4 + ret, 0);
 #endif
 
-	LOG(5, ("readbraw finished\n"));
+	DEBUG("readbraw finished\n");
 	return -1;
 }
 
@@ -2051,7 +2051,7 @@ int reply_tdis(char *inbuf, char *outbuf, int size, int bufsize)
 	cnum = SVAL(inbuf, smb_tid);
 
 	if (!OPEN_CNUM(cnum)) {
-		LOG(4, ("Invalid cnum in tdis (%d)\n", cnum));
+		DEBUG("Invalid cnum in tdis (%d)\n", cnum);
 		return ERROR_CODE(ERRSRV, ERRinvnid);
 	}
 
@@ -2433,20 +2433,20 @@ int reply_mv(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 				slprintf(fname, sizeof(fname) - 1, "%s/%s",
 				         directory, dname);
 				if (!can_rename(fname, cnum)) {
-					LOG(6, ("rename %s refused\n", fname));
+					DEBUG("rename %s refused\n", fname);
 					continue;
 				}
 				pstrcpy(destname, newname);
 
 				if (!resolve_wildcards(fname, destname)) {
-					LOG(6,
-					    ("resolve_wildcards %s %s failed\n",
-					     fname, destname));
+					DEBUG(
+					    "resolve_wildcards %s %s failed\n",
+					    fname, destname);
 					continue;
 				}
 
 				if (file_exist(destname, NULL)) {
-					LOG(6, ("file_exist %s\n", destname));
+					DEBUG("file_exist %s\n", destname);
 					error = 183;
 					continue;
 				}
@@ -2718,9 +2718,9 @@ int reply_lockingX(char *inbuf, char *outbuf, int length, int bufsize)
 	   we have granted an oplock on.
 	 */
 	if (locktype & LOCKING_ANDX_OPLOCK_RELEASE) {
-		LOG(5, ("reply_lockingX: oplock break reply from client for "
-		        "fnum = %d. no oplock granted as not supported.\n",
-		        fnum));
+		DEBUG("reply_lockingX: oplock break reply from client for "
+		      "fnum = %d. no oplock granted as not supported.\n",
+		      fnum);
 		return ERROR_CODE(ERRDOS, ERRlock);
 	}
 

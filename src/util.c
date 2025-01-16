@@ -514,24 +514,22 @@ void show_msg(char *buf)
 	if (LOGLEVEL < 5)
 		return;
 
-	LOG(5,
-	    ("size=%d\nsmb_com=0x%x\nsmb_rcls=%d\nsmb_reh=%d\nsmb_err=%"
-	     "d\nsmb_flg=%d\nsmb_flg2=%d\n",
-	     smb_len(buf), (int) CVAL(buf, smb_com), (int) CVAL(buf, smb_rcls),
-	     (int) CVAL(buf, smb_reh), (int) SVAL(buf, smb_err),
-	     (int) CVAL(buf, smb_flg), (int) SVAL(buf, smb_flg2)));
-	LOG(5, ("smb_tid=%d\nsmb_pid=%d\nsmb_uid=%d\nsmb_mid=%d\nsmt_wct=%d\n",
-	        (int) SVAL(buf, smb_tid), (int) SVAL(buf, smb_pid),
-	        (int) SVAL(buf, smb_uid), (int) SVAL(buf, smb_mid),
-	        (int) CVAL(buf, smb_wct)));
+	DEBUG("size=%d\nsmb_com=0x%x\nsmb_rcls=%d\nsmb_reh=%d\nsmb_err=%"
+	      "d\nsmb_flg=%d\nsmb_flg2=%d\n",
+	      smb_len(buf), (int) CVAL(buf, smb_com), (int) CVAL(buf, smb_rcls),
+	      (int) CVAL(buf, smb_reh), (int) SVAL(buf, smb_err),
+	      (int) CVAL(buf, smb_flg), (int) SVAL(buf, smb_flg2));
+	DEBUG("smb_tid=%d\nsmb_pid=%d\nsmb_uid=%d\nsmb_mid=%d\nsmt_wct=%d\n",
+	      (int) SVAL(buf, smb_tid), (int) SVAL(buf, smb_pid),
+	      (int) SVAL(buf, smb_uid), (int) SVAL(buf, smb_mid),
+	      (int) CVAL(buf, smb_wct));
 
 	for (i = 0; i < (int) CVAL(buf, smb_wct); i++)
-		LOG(5,
-		    ("smb_vwv[%d]=%d (0x%X)\n", i, SVAL(buf, smb_vwv + 2 * i),
-		     SVAL(buf, smb_vwv + 2 * i)));
+		DEBUG("smb_vwv[%d]=%d (0x%X)\n", i, SVAL(buf, smb_vwv + 2 * i),
+		      SVAL(buf, smb_vwv + 2 * i));
 
 	bcc = (int) SVAL(buf, smb_vwv + 2 * (CVAL(buf, smb_wct)));
-	LOG(5, ("smb_bcc=%d\n", bcc));
+	DEBUG("smb_bcc=%d\n", bcc);
 
 	if (LOGLEVEL < 10)
 		return;
@@ -755,10 +753,10 @@ static int write_socket(int fd, char *buf, int len)
 {
 	int ret = 0;
 
-	LOG(6, ("write_socket(%d,%d)\n", fd, len));
+	DEBUG("write_socket(%d,%d)\n", fd, len);
 	ret = write_data(fd, buf, len);
 
-	LOG(6, ("write_socket(%d,%d) wrote %d\n", fd, len, ret));
+	DEBUG("write_socket(%d,%d) wrote %d\n", fd, len, ret);
 	if (ret <= 0)
 		ERROR("write_socket: Error writing %d bytes to socket %d: "
 		      "ERRNO = %s\n",
@@ -928,10 +926,10 @@ int read_smb_length_return_keepalive(int fd, char *inbuf, int timeout)
 		msg_type = CVAL(inbuf, 0);
 
 		if (msg_type == 0x85)
-			LOG(5, ("Got keepalive packet\n"));
+			DEBUG("Got keepalive packet\n");
 	}
 
-	LOG(10, ("got smb length of %d\n", len));
+	DEBUG("got smb length of %d\n", len);
 
 	return len;
 }
@@ -994,7 +992,7 @@ static char *name_ptr(char *buf, int ofs)
 		memcpy(p, buf + ofs, 2);
 		p[0] &= ~0xC0;
 		l = RSVAL(p, 0);
-		LOG(5, ("name ptr to pos %d from %d is %s\n", l, ofs, buf + l));
+		DEBUG("name ptr to pos %d from %d is %s\n", l, ofs, buf + l);
 		return buf + l;
 	} else
 		return buf + ofs;
@@ -1219,7 +1217,7 @@ bool mask_match(char *str, char *regexp, bool trans2)
 	if (strequal(t_pattern, "*"))
 		return true;
 
-	LOG(8, ("mask_match str=<%s> regexp=<%s>\n", t_filename, t_pattern));
+	DEBUG("mask_match str=<%s> regexp=<%s>\n", t_filename, t_pattern);
 
 	if (trans2) {
 		/*
@@ -1405,7 +1403,7 @@ bool mask_match(char *str, char *regexp, bool trans2)
 		}
 	}
 
-	LOG(8, ("mask_match returning %d\n", matched));
+	DEBUG("mask_match returning %d\n", matched);
 
 	return matched;
 }

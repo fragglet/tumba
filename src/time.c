@@ -93,7 +93,7 @@ void time_init(void)
 		        "minute.\n");
 	}
 
-	LOG(4, ("Serverzone is %d\n", serverzone));
+	DEBUG("Serverzone is %d\n", serverzone);
 }
 
 /*******************************************************************

@@ -61,8 +61,8 @@ static bool fcntl_lock(int fd, int op, uint32_t offset, uint32_t count,
 	offset = (uint32_t) s_offset;
 	count = (uint32_t) s_count;
 
-	LOG(8, ("fcntl_lock %d %d %d %d %d\n", fd, op, (int) offset,
-	        (int) count, type));
+	DEBUG("fcntl_lock %d %d %d %d %d\n", fd, op, (int) offset, (int) count,
+	      type);
 
 	lock.l_type = type;
 	lock.l_whence = SEEK_SET;
@@ -104,7 +104,7 @@ static bool fcntl_lock(int fd, int op, uint32_t offset, uint32_t count,
 	}
 
 	/* everything went OK */
-	LOG(8, ("Lock call successful\n"));
+	DEBUG("Lock call successful\n");
 
 	return true;
 }
@@ -123,16 +123,16 @@ static int map_lock_type(files_struct *fsp, int lock_type)
 		 * read-only. Win32 locking semantics allow this. Do the best we
 		 * can and attempt a read-only lock.
 		 */
-		LOG(10, ("map_lock_type: Downgrading write lock to read due "
-		         "to read-only file.\n"));
+		DEBUG("map_lock_type: Downgrading write lock to read due "
+		      "to read-only file.\n");
 		return F_RDLCK;
 	} else if ((lock_type == F_RDLCK) &&
 	           (fsp->fd_ptr->real_open_flags == O_WRONLY)) {
 		/*
 		 * Ditto for read locks on write only files.
 		 */
-		LOG(10, ("map_lock_type: Changing read lock to write due to "
-		         "write-only file.\n"));
+		DEBUG("map_lock_type: Changing read lock to write due to "
+		      "write-only file.\n");
 		return F_WRLCK;
 	}
 

@@ -461,7 +461,7 @@ static bool api_RNetServerGetInfo(int cnum, char *param, char *data, int mdrcnt,
 	char *p2;
 	int struct_len;
 
-	LOG(4, ("NetServerGetInfo level %d\n", uLevel));
+	DEBUG("NetServerGetInfo level %d\n", uLevel);
 
 	/* check it's a supported varient */
 	if (!prefix_ok(str1, "WrLh"))
@@ -558,7 +558,7 @@ static bool api_NetWkstaGetInfo(int cnum, char *param, char *data, int mdrcnt,
 	char *p2;
 	int level = SVAL(p, 0);
 
-	LOG(4, ("NetWkstaGetInfo level %d\n", level));
+	DEBUG("NetWkstaGetInfo level %d\n", level);
 
 	*rparam_len = 6;
 	*rparam = REALLOC(*rparam, *rparam_len);
@@ -851,7 +851,7 @@ int reply_trans(char *inbuf, char *outbuf, int size, int bufsize)
 	     suwcnt);
 
 	if (strncmp(name, "\\PIPE\\", strlen("\\PIPE\\")) == 0) {
-		LOG(5, ("calling named_pipe\n"));
+		DEBUG("calling named_pipe\n");
 		outsize = named_pipe(cnum, outbuf, name + strlen("\\PIPE\\"),
 		                     setup, data, params, suwcnt, tdscnt,
 		                     tpscnt, msrcnt, mdrcnt, mprcnt);

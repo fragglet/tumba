@@ -171,42 +171,42 @@ static void write_dosattrib(const char *path, int attrib)
 	snprintf(buf, sizeof(buf), "0x%02x", attrib);
 	result = sys_setxattr(path, DOSATTRIB_NAME, buf, strlen(buf));
 	if (result != 0) {
-		LOG(8, ("setxattr on %s returned %d (errno=%d)\n", path, result,
-		        errno));
+		DEBUG("setxattr on %s returned %d (errno=%d)\n", path, result,
+		      errno);
 	}
 	if (result == 0 || errno != EACCES) {
 		return;
 	}
 
-	LOG(8, ("permission denied setting DOSATTRIB on %s, "
-	        "trying mode switch workaround\n",
-	        path));
+	DEBUG("permission denied setting DOSATTRIB on %s, "
+	      "trying mode switch workaround\n",
+	      path);
 	/* We got permission denied trying to set the xattr. This may be
 	   because the file is write-protected. So set the permissions to
 	   allow writes and try again. */
 	if (stat(path, &st) != 0) {
-		LOG(8, ("failed to stat %s\n", path));
+		DEBUG("failed to stat %s\n", path);
 		return;
 	}
 	new_mode = st.st_mode | S_IWUSR;
 	if (st.st_mode == new_mode) {
 		/* We got permission denied for a different reason */
-		LOG(8, ("failed to stat %s\n", path));
+		DEBUG("failed to stat %s\n", path);
 		return;
 	}
 	if (chmod(path, new_mode) != 0) {
-		LOG(8, ("failed to chmod %s to %o\n", path, new_mode));
+		DEBUG("failed to chmod %s to %o\n", path, new_mode);
 		return;
 	}
 	result = sys_setxattr(path, DOSATTRIB_NAME, buf, strlen(buf));
 	if (result != 0) {
-		LOG(8, ("setxattr on %s failed (second attempt)\n", path));
+		DEBUG("setxattr on %s failed (second attempt)\n", path);
 	} else {
-		LOG(8, ("mode switch workaround succeeded\n"));
+		DEBUG("mode switch workaround succeeded\n");
 	}
 	/* Change back to the old permissions */
 	if (chmod(path, st.st_mode) != 0) {
-		LOG(8, ("failed to chmod %s back to %o\n", path, st.st_mode));
+		DEBUG("failed to chmod %s back to %o\n", path, st.st_mode);
 	}
 }
 
@@ -217,7 +217,7 @@ int dos_mode(int cnum, char *path, struct stat *sbuf)
 {
 	int result = 0;
 
-	LOG(8, ("dos_mode: %d %s\n", cnum, path));
+	DEBUG("dos_mode: %d %s\n", cnum, path);
 
 	if (CAN_WRITE(cnum)) {
 		if ((sbuf->st_mode & S_IWOTH) == 0 &&
@@ -234,20 +234,20 @@ int dos_mode(int cnum, char *path, struct stat *sbuf)
 	if (S_ISDIR(sbuf->st_mode))
 		result = aDIR | (result & aRONLY);
 
-	LOG(8, ("dos_mode returning "));
+	DEBUG("dos_mode returning ");
 
 	if (result & aHIDDEN)
-		LOG(8, ("h"));
+		DEBUG("h");
 	if (result & aRONLY)
-		LOG(8, ("r"));
+		DEBUG("r");
 	if (result & aSYSTEM)
-		LOG(8, ("s"));
+		DEBUG("s");
 	if (result & aDIR)
-		LOG(8, ("d"));
+		DEBUG("d");
 	if (result & aARCH)
-		LOG(8, ("a"));
+		DEBUG("a");
 
-	LOG(8, ("\n"));
+	DEBUG("\n");
 
 	return result;
 }
@@ -319,8 +319,7 @@ bool set_filetime(int cnum, char *fname, time_t mtime)
 	times.modtime = times.actime = mtime;
 
 	if (sys_utime(fname, &times) != 0) {
-		LOG(4,
-		    ("set_filetime(%s) failed: %s\n", fname, strerror(errno)));
+		DEBUG("set_filetime(%s) failed: %s\n", fname, strerror(errno));
 	}
 
 	return true;
@@ -495,7 +494,7 @@ bool unix_convert(char *name, int cnum, pstring saved_last_component,
 	if (stat(name, &st) == 0)
 		return true;
 
-	LOG(5, ("unix_convert(%s,%d)\n", name, cnum));
+	DEBUG("unix_convert(%s,%d)\n", name, cnum);
 
 	/* now we need to recursively match the name against the real
 	   directory structure */
@@ -524,7 +523,7 @@ bool unix_convert(char *name, int cnum, pstring saved_last_component,
 			if (end && !(st.st_mode & S_IFDIR)) {
 				/* an intermediate part of the name isn't a
 				 * directory */
-				LOG(5, ("Not a dir %s\n", start));
+				DEBUG("Not a dir %s\n", start);
 				*end = '/';
 				return false;
 			}
@@ -545,8 +544,8 @@ bool unix_convert(char *name, int cnum, pstring saved_last_component,
 				if (end) {
 					/* an intermediate part of the name
 					 * can't be found */
-					LOG(5, ("Intermediate not found %s\n",
-					        start));
+					DEBUG("Intermediate not found %s\n",
+					      start);
 					*end = '/';
 					/* We need to return the fact that the
 					   intermediate name resolution failed.
@@ -563,7 +562,7 @@ bool unix_convert(char *name, int cnum, pstring saved_last_component,
 				/* just the last part of the name doesn't exist
 				 */
 
-				LOG(5, ("New file %s\n", start));
+				DEBUG("New file %s\n", start);
 				return true;
 			}
 
@@ -585,7 +584,7 @@ bool unix_convert(char *name, int cnum, pstring saved_last_component,
 	}
 
 	/* the name has been resolved */
-	LOG(5, ("conversion finished %s\n", name));
+	DEBUG("conversion finished %s\n", name);
 	return true;
 }
 
@@ -1203,8 +1202,8 @@ void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
 		deny_mode = DENY_DOS;
 
 	unixmode = unix_mode(cnum, dosmode);
-	LOG(4, ("calling open_file with flags=0x%X flags2=0x%X mode=0%o\n",
-	        flags, flags2, unixmode));
+	DEBUG("calling open_file with flags=0x%X flags2=0x%X mode=0%o\n", flags,
+	      flags2, unixmode);
 
 	open_file(fnum, cnum, fname, flags | (flags2 & ~(O_TRUNC)), unixmode,
 	          file_existed ? &sbuf : 0);
@@ -1447,7 +1446,7 @@ static int sigchld_handler(void)
 	depth++;
 
 	block_signals(true, SIGCHLD);
-	LOG(5, ("got SIGCHLD\n"));
+	DEBUG("got SIGCHLD\n");
 
 	while (waitpid((pid_t) -1, (int *) NULL, WNOHANG) > 0) {
 	}
@@ -1846,7 +1845,7 @@ static bool dir_world_writeable(const char *path)
 	struct stat st;
 
 	if (stat(path, &st) != 0) {
-		LOG(8, ("failed to stat %s, assuming read-only share\n", path));
+		DEBUG("failed to stat %s, assuming read-only share\n", path);
 		return false;
 	}
 
@@ -2282,7 +2281,7 @@ static int reply_negprot(char *inbuf, char *outbuf, int size, int bufsize)
 	}
 	SSVAL(outbuf, smb_vwv0, choice);
 
-	LOG(5, ("negprot index=%d\n", choice));
+	DEBUG("negprot index=%d\n", choice);
 
 	return outsize;
 }
@@ -2754,7 +2753,7 @@ static void process_smb(char *inbuf, char *outbuf)
 	int32_t len = smb_len(inbuf);
 	int nread = len + 4;
 
-	LOG(6, ("got message type 0x%x of len 0x%x\n", msg_type, len));
+	DEBUG("got message type 0x%x of len 0x%x\n", msg_type, len);
 	INFO("Transaction %d of length %d\n", trans_num, nread);
 
 	if (msg_type == 0)
