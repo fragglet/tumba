@@ -211,8 +211,6 @@ static bool api_RNetServerEnum(int cnum, char *param, char *data, int mdrcnt,
 	SSVAL(*rparam, 4, 0);
 	SSVAL(*rparam, 6, 0);
 
-	INFO("NetServerEnum\n");
-
 	return true;
 }
 
@@ -442,8 +440,8 @@ static bool api_RNetShareEnum(int cnum, char *param, char *data, int mdrcnt,
 	SSVAL(*rparam, 4, shares_count());
 	SSVAL(*rparam, 6, total);
 
-	INFO("RNetShareEnum gave %d entries of %d (%d %d %d %d)\n",
-	     shares_count(), total, uLevel, buf_len, *rdata_len, mdrcnt);
+	DEBUG("RNetShareEnum gave %d entries of %d (%d %d %d %d)\n",
+	      shares_count(), total, uLevel, buf_len, *rdata_len, mdrcnt);
 	return true;
 }
 
@@ -681,14 +679,14 @@ static int api_reply(int cnum, char *outbuf, char *data, char *params,
 	bool reply = false;
 	int i;
 
-	INFO("Got API command %d of form <%s> <%s> "
-	     "(tdscnt=%d,tpscnt=%d,mdrcnt=%d,mprcnt=%d)\n",
-	     api_command, params + 2, skip_string(params + 2, 1), tdscnt,
-	     tpscnt, mdrcnt, mprcnt);
+	DEBUG("Got API command %d of form <%s> <%s> "
+	      "(tdscnt=%d,tpscnt=%d,mdrcnt=%d,mprcnt=%d)\n",
+	      api_command, params + 2, skip_string(params + 2, 1), tdscnt,
+	      tpscnt, mdrcnt, mprcnt);
 
 	for (i = 0; api_commands[i].name; i++)
 		if (api_commands[i].id == api_command && api_commands[i].fn) {
-			INFO("Doing %s\n", api_commands[i].name);
+			DEBUG("Doing %s\n", api_commands[i].name);
 			break;
 		}
 
@@ -726,15 +724,15 @@ static int named_pipe(int cnum, char *outbuf, char *name, uint16_t *setup,
                       char *data, char *params, int suwcnt, int tdscnt,
                       int tpscnt, int msrcnt, int mdrcnt, int mprcnt)
 {
-	INFO("named pipe command on <%s> name\n", name);
+	DEBUG("named pipe command on <%s> name\n", name);
 
 	if (strequal(name, "LANMAN")) {
 		return api_reply(cnum, outbuf, data, params, tdscnt, tpscnt,
 		                 mdrcnt, mprcnt);
 	}
 	if (setup) {
-		INFO("unknown named pipe: setup 0x%X setup1=%d\n",
-		     (int) setup[0], (int) setup[1]);
+		DEBUG("unknown named pipe: setup 0x%X setup1=%d\n",
+		      (int) setup[0], (int) setup[1]);
 	}
 
 	return 0;
@@ -847,8 +845,8 @@ int reply_trans(char *inbuf, char *outbuf, int size, int bufsize)
 			memcpy(data + ddisp, smb_base(inbuf) + doff, dcnt);
 	}
 
-	INFO("trans <%s> data=%d params=%d setup=%d\n", name, tdscnt, tpscnt,
-	     suwcnt);
+	DEBUG("trans <%s> data=%d params=%d setup=%d\n", name, tdscnt, tpscnt,
+	      suwcnt);
 
 	if (strncmp(name, "\\PIPE\\", strlen("\\PIPE\\")) == 0) {
 		DEBUG("calling named_pipe\n");

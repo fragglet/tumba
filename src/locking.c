@@ -81,7 +81,7 @@ static bool fcntl_lock(int fd, int op, uint32_t offset, uint32_t count,
 	if (op == F_GETLK) {
 		if ((ret != -1) && (lock.l_type != F_UNLCK) &&
 		    (lock.l_pid != 0) && (lock.l_pid != getpid())) {
-			INFO("fd %d is locked by pid %d\n", fd, lock.l_pid);
+			DEBUG("fd %d is locked by pid %d\n", fd, lock.l_pid);
 			return true;
 		}
 
@@ -91,12 +91,12 @@ static bool fcntl_lock(int fd, int op, uint32_t offset, uint32_t count,
 
 	/* a lock set or unset */
 	if (ret == -1) {
-		INFO("lock failed at offset %d count %d op %d type %d (%s)\n",
-		     offset, count, op, type, strerror(errno));
+		DEBUG("lock failed at offset %d count %d op %d type %d (%s)\n",
+		      offset, count, op, type, strerror(errno));
 
 		/* perhaps it doesn't support this sort of locking?? */
 		if (errno == EINVAL) {
-			INFO("locking not supported? returning true\n");
+			DEBUG("locking not supported? returning true\n");
 			return true;
 		}
 

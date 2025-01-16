@@ -204,8 +204,8 @@ static int call_trans2open(char *inbuf, char *outbuf, int bufsize, int cnum,
 
 	pstrcpy(fname, pname);
 
-	INFO("trans2open %s cnum=%d mode=%d attr=%d ofun=%d size=%d\n", fname,
-	     cnum, open_mode, open_attr, open_ofun, open_size);
+	DEBUG("trans2open %s cnum=%d mode=%d attr=%d ofun=%d size=%d\n", fname,
+	      cnum, open_mode, open_attr, open_ofun, open_size);
 
 	/* XXXX we need to handle passed times, sattr and flags */
 
@@ -648,11 +648,11 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 
 	*directory = *mask = 0;
 
-	INFO("call_trans2findfirst: dirtype = %d, maxentries = %d, "
-	     "close_after_first=%d, close_if_end = %d requires_resume_key "
-	     "= %d level = %d, max_data_bytes = %d\n",
-	     dirtype, maxentries, close_after_first, close_if_end,
-	     requires_resume_key, info_level, max_data_bytes);
+	DEBUG("call_trans2findfirst: dirtype = %d, maxentries = %d, "
+	      "close_after_first=%d, close_if_end = %d requires_resume_key "
+	      "= %d level = %d, max_data_bytes = %d\n",
+	      dirtype, maxentries, close_after_first, close_if_end,
+	      requires_resume_key, info_level, max_data_bytes);
 
 	switch (info_level) {
 	case 1:
@@ -821,7 +821,7 @@ static int call_trans2findnext(char *inbuf, char *outbuf, int length,
 
 	pstrcpy(resume_name, params + 12);
 
-	INFO(
+	DEBUG(
 	    "call_trans2findnext: dirhandle = %d, max_data_bytes = %d, maxentries = %d, \
 close_after_request=%d, close_if_end = %d requires_resume_key = %d \
 resume_key = %d resume name = %s continue=%d level = %d\n",
@@ -858,7 +858,7 @@ resume_key = %d resume name = %s continue=%d level = %d\n",
 
 	/* Get the wildcard mask from the dptr */
 	if ((p = dptr_wcard(dptr_num)) == NULL) {
-		NOTICE("dptr_num %d has no wildcard\n", dptr_num);
+		DEBUG("dptr_num %d has no wildcard\n", dptr_num);
 		return ERROR_CODE(ERRDOS, ERRnofiles);
 	}
 	pstrcpy(mask, p);
@@ -867,9 +867,9 @@ resume_key = %d resume name = %s continue=%d level = %d\n",
 	/* Get the attr mask from the dptr */
 	dirtype = dptr_attr(dptr_num);
 
-	INFO("dptr_num is %d, mask = %s, attr = %x, dirptr=%p,%d)\n", dptr_num,
-	     mask, dirtype, Connections[cnum].dirptr,
-	     tell_dir(Connections[cnum].dirptr));
+	DEBUG("dptr_num is %d, mask = %s, attr = %x, dirptr=%p,%d)\n", dptr_num,
+	      mask, dirtype, Connections[cnum].dirptr,
+	      tell_dir(Connections[cnum].dirptr));
 
 	p = pdata;
 	space_remaining = max_data_bytes;
@@ -999,9 +999,9 @@ resume_key = %d resume name = %s continue=%d level = %d\n",
 		slprintf(directory, sizeof(directory) - 1, "(%s)",
 		         dptr_path(dptr_num));
 
-	INFO("%s mask=%s directory=%s cnum=%d dirtype=%d numentries=%d\n",
-	     smb_fn_name(CVAL(inbuf, smb_com)), mask, directory, cnum, dirtype,
-	     numentries);
+	DEBUG("%s mask=%s directory=%s cnum=%d dirtype=%d numentries=%d\n",
+	      smb_fn_name(CVAL(inbuf, smb_com)), mask, directory, cnum, dirtype,
+	      numentries);
 
 	return -1;
 }
@@ -1023,7 +1023,7 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
 	int dfree, dsize, bsize, volname_len;
 	char *vname = share->name;
 
-	INFO("call_trans2qfsinfo: cnum = %d, level = %d\n", cnum, info_level);
+	DEBUG("call_trans2qfsinfo: cnum = %d, level = %d\n", cnum, info_level);
 
 	if (stat(".", &st) != 0) {
 		NOTICE("call_trans2qfsinfo: stat of . failed (%s)\n",
@@ -1128,7 +1128,7 @@ static int call_trans2setfsinfo(char *inbuf, char *outbuf, int length,
 	/* Just say yes we did it - there is nothing that
 	   can be set here so it doesn't matter. */
 	int outsize;
-	INFO("call_trans2setfsinfo\n");
+	DEBUG("call_trans2setfsinfo\n");
 
 	if (!CAN_WRITE(cnum))
 		return ERROR_CODE(ERRSRV, ERRaccess);
@@ -1171,8 +1171,8 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
 
 		fname = Files[fnum].name;
 		if (fstat(Files[fnum].fd_ptr->fd, &sbuf) != 0) {
-			INFO("fstat of fnum %d failed (%s)\n", fnum,
-			     strerror(errno));
+			DEBUG("fstat of fnum %d failed (%s)\n", fnum,
+			      strerror(errno));
 			return UNIX_ERROR_CODE(ERRDOS, ERRbadfid);
 		}
 		pos = lseek(Files[fnum].fd_ptr->fd, 0, SEEK_CUR);
@@ -1183,8 +1183,8 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
 		pstrcpy(fname, &params[6]);
 		unix_convert(fname, cnum, 0, &bad_path);
 		if (!check_name(fname, cnum) || stat(fname, &sbuf)) {
-			INFO("fileinfo of %s failed (%s)\n", fname,
-			     strerror(errno));
+			DEBUG("fileinfo of %s failed (%s)\n", fname,
+			      strerror(errno));
 			if ((errno == ENOENT) && bad_path) {
 				unix_ERR_class = ERRDOS;
 				unix_ERR_code = ERRbadpath;
@@ -1194,8 +1194,8 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
 		pos = 0;
 	}
 
-	INFO("call_trans2qfilepathinfo %s level=%d call=%d total_data=%d\n",
-	     fname, info_level, tran_call, total_data);
+	DEBUG("call_trans2qfilepathinfo %s level=%d call=%d total_data=%d\n",
+	      fname, info_level, tran_call, total_data);
 
 	p = strrchr(fname, '/');
 	if (!p)
@@ -1394,8 +1394,8 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 		fd = Files[fnum].fd_ptr->fd;
 
 		if (fstat(fd, &st) != 0) {
-			INFO("fstat of %s failed (%s)\n", fname,
-			     strerror(errno));
+			DEBUG("fstat of %s failed (%s)\n", fname,
+			      strerror(errno));
 			return ERROR_CODE(ERRDOS, ERRbadpath);
 		}
 	} else {
@@ -1413,8 +1413,8 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 		}
 
 		if (stat(fname, &st) != 0) {
-			INFO("stat of %s failed (%s)\n", fname,
-			     strerror(errno));
+			DEBUG("stat of %s failed (%s)\n", fname,
+			      strerror(errno));
 			if ((errno == ENOENT) && bad_path) {
 				unix_ERR_class = ERRDOS;
 				unix_ERR_code = ERRbadpath;
@@ -1423,8 +1423,8 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 		}
 	}
 
-	INFO("call_trans2setfilepathinfo(%d) %s info_level=%d totdata=%d\n",
-	     tran_call, fname, info_level, total_data);
+	DEBUG("call_trans2setfilepathinfo(%d) %s info_level=%d totdata=%d\n",
+	      tran_call, fname, info_level, total_data);
 
 	/* checked_realloc the parameter and data sizes */
 	params = *pparams = checked_realloc(*pparams, 2);
@@ -1568,7 +1568,7 @@ static int call_trans2mkdir(char *inbuf, char *outbuf, int length, int bufsize,
 
 	pstrcpy(directory, &params[4]);
 
-	INFO("call_trans2mkdir : name = %s\n", directory);
+	DEBUG("call_trans2mkdir : name = %s\n", directory);
 
 	unix_convert(directory, cnum, 0, &bad_path);
 	if (check_name(directory, cnum))
@@ -1604,7 +1604,7 @@ static int call_trans2findnotifyfirst(char *inbuf, char *outbuf, int length,
 	char *params = *pparams;
 	uint16_t info_level = SVAL(params, 4);
 
-	INFO("call_trans2findnotifyfirst - info_level %d\n", info_level);
+	DEBUG("call_trans2findnotifyfirst - info_level %d\n", info_level);
 
 	switch (info_level) {
 	case 1:
@@ -1640,7 +1640,7 @@ static int call_trans2findnotifynext(char *inbuf, char *outbuf, int length,
 {
 	char *params = *pparams;
 
-	INFO("call_trans2findnotifynext\n");
+	DEBUG("call_trans2findnotifynext\n");
 
 	params = *pparams = checked_realloc(*pparams, 4);
 
@@ -1663,13 +1663,13 @@ int reply_findclose(char *inbuf, char *outbuf, int length, int bufsize)
 
 	cnum = SVAL(inbuf, smb_tid);
 
-	INFO("reply_findclose, cnum = %d, dptr_num = %d\n", cnum, dptr_num);
+	DEBUG("reply_findclose, cnum = %d, dptr_num = %d\n", cnum, dptr_num);
 
 	dptr_close(dptr_num);
 
 	outsize = set_message(outbuf, 0, 0, true);
 
-	INFO("SMBfindclose cnum=%d, dptr_num = %d\n", cnum, dptr_num);
+	DEBUG("SMBfindclose cnum=%d, dptr_num = %d\n", cnum, dptr_num);
 
 	return outsize;
 }
@@ -1686,7 +1686,7 @@ int reply_findnclose(char *inbuf, char *outbuf, int length, int bufsize)
 	cnum = SVAL(inbuf, smb_tid);
 	dptr_num = SVAL(inbuf, smb_vwv0);
 
-	INFO("reply_findnclose, cnum = %d, dptr_num = %d\n", cnum, dptr_num);
+	DEBUG("reply_findnclose, cnum = %d, dptr_num = %d\n", cnum, dptr_num);
 
 	/* We never give out valid handles for a
 	   findnotifyfirst - so any dptr_num is ok here.
@@ -1694,7 +1694,7 @@ int reply_findnclose(char *inbuf, char *outbuf, int length, int bufsize)
 
 	outsize = set_message(outbuf, 0, 0, true);
 
-	INFO("SMB_findnclose cnum=%d, dptr_num = %d\n", cnum, dptr_num);
+	DEBUG("SMB_findnclose cnum=%d, dptr_num = %d\n", cnum, dptr_num);
 
 	return outsize;
 }

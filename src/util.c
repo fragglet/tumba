@@ -58,12 +58,12 @@ void setup_logging(char *pname)
 	openlog(pname, LOG_PID, SYSLOG_FACILITY);
 }
 
-	static const int syslog_priority_map[] = {
-	    LOG_ERR,     /* 0 */
-	    LOG_WARNING, /* 1 */
-	    LOG_NOTICE,  /* 2 */
-	    LOG_INFO,    /* 3 */
-	};
+static const int syslog_priority_map[] = {
+    LOG_ERR,     /* 0 */
+    LOG_WARNING, /* 1 */
+    LOG_NOTICE,  /* 2 */
+    LOG_INFO,    /* 3 */
+};
 
 static void syslog_output(int level, char *format_str, va_list ap)
 {
@@ -557,7 +557,7 @@ void unix_clean_name(char *s)
 {
 	char *p = NULL;
 
-	INFO("unix_clean_name [%s]\n", s);
+	DEBUG("unix_clean_name [%s]\n", s);
 
 	/* remove any double slashes */
 	string_sub(s, "//", "/");

@@ -333,8 +333,8 @@ int dptr_create(int cnum, char *path, bool expect_close, int pid)
 	dirptrs[i].attr = 0;     /* Only used in lanman2 searches */
 	dirptrs[i].valid = true;
 
-	INFO("creating new dirptr %d for path %s, expect_close = %d\n", i, path,
-	     expect_close);
+	DEBUG("creating new dirptr %d for path %s, expect_close = %d\n", i,
+	      path, expect_close);
 
 	return i;
 }
@@ -383,8 +383,8 @@ void *dptr_fetch(char *buf, int *num)
 	*num = key;
 	offset = IVAL(buf, 1) & ~DPTR_MASK;
 	seek_dir(p, offset);
-	INFO("fetching dirptr %d for path %s at offset %d\n", key,
-	     dptr_path(key), offset);
+	DEBUG("fetching dirptr %d for path %s at offset %d\n", key,
+	      dptr_path(key), offset);
 	return p;
 }
 
@@ -399,7 +399,8 @@ void *dptr_fetch_lanman2(int dptr_num)
 		INFO("fetched null dirptr %d\n", dptr_num);
 		return NULL;
 	}
-	INFO("fetching dirptr %d for path %s\n", dptr_num, dptr_path(dptr_num));
+	DEBUG("fetching dirptr %d for path %s\n", dptr_num,
+	      dptr_path(dptr_num));
 	return p;
 }
 
