@@ -1113,19 +1113,6 @@ void close_file(int fnum, bool normal_close)
 }
 
 /****************************************************************************
-  C. Hoch 11/22/95
-  Helper for open_file_shared.
-  Truncate a file after checking locking; close file if locked.
-  **************************************************************************/
-static void truncate_unless_locked(int fnum, int cnum, int token,
-                                   bool *share_locked)
-{
-	if (Files[fnum].can_write) {
-		ftruncate(Files[fnum].fd_ptr->fd, 0);
-	}
-}
-
-/****************************************************************************
 open a file with a share mode
 ****************************************************************************/
 void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
@@ -1138,9 +1125,7 @@ void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
 	int unixmode;
 	struct stat sbuf;
 	bool file_existed = file_exist(fname, &sbuf);
-	bool share_locked = false;
 	bool fcbopen = false;
-	int token;
 
 	fs_p->open = false;
 	fs_p->fd_ptr = 0;
@@ -1246,9 +1231,14 @@ void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
 				*action = 3;
 		}
 
-		if ((flags2 & O_TRUNC) && file_existed)
-			truncate_unless_locked(fnum, cnum, token,
-			                       &share_locked);
+		if ((flags2 & O_TRUNC) && file_existed &&
+		    Files[fnum].can_write &&
+		    ftruncate(Files[fnum].fd_ptr->fd, 0) != 0) {
+			DEBUG("Error truncating file %s: %s\n", fname,
+			      strerror(errno));
+			close_file(fnum, false);
+			return;
+		}
 	}
 }
 
