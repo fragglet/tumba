@@ -171,7 +171,7 @@ ssize_t sys_setxattr(const char *path, const char *name, void *value,
 /*The following definitions come from  time.c  */
 
 void time_init(void);
-int time_diff(time_t t);
+int time_zone(time_t t);
 time_t interpret_long_date(char *p);
 void put_long_date(char *p, time_t t);
 bool null_mtime(time_t mtime);

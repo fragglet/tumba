@@ -2065,7 +2065,7 @@ static int reply_lanman1(char *outbuf)
 	SSVAL(outbuf, smb_vwv5, raw); /* tell redirector we support
 	                                 readbraw writebraw (possibly) */
 	SIVAL(outbuf, smb_vwv6, getpid());
-	SSVAL(outbuf, smb_vwv10, time_diff(t) / 60);
+	SSVAL(outbuf, smb_vwv10, time_zone(t) / 60);
 
 	put_dos_date(outbuf, smb_vwv8, t);
 
@@ -2094,7 +2094,7 @@ static int reply_lanman2(char *outbuf)
 	SSVAL(outbuf, smb_vwv3, MAX_MUX);
 	SSVAL(outbuf, smb_vwv4, 1);
 	SSVAL(outbuf, smb_vwv5, raw); /* readbraw and/or writebraw */
-	SSVAL(outbuf, smb_vwv10, time_diff(t) / 60);
+	SSVAL(outbuf, smb_vwv10, time_zone(t) / 60);
 	put_dos_date(outbuf, smb_vwv8, t);
 
 	return smb_len(outbuf) + 4;
@@ -2142,7 +2142,7 @@ static int reply_nt1(char *outbuf)
 	SIVAL(outbuf, smb_vwv7 + 1, getpid());     /* session key */
 	SIVAL(outbuf, smb_vwv9 + 1, capabilities); /* capabilities */
 	put_long_date(outbuf + smb_vwv11 + 1, t);
-	SSVALS(outbuf, smb_vwv15 + 1, time_diff(t) / 60);
+	SSVALS(outbuf, smb_vwv15 + 1, time_zone(t) / 60);
 	SSVAL(outbuf, smb_vwv17,
 	      data_len); /* length of challenge+domain strings */
 

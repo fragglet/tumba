@@ -68,7 +68,7 @@ static int tm_diff(struct tm *a, struct tm *b)
 /*******************************************************************
   return the UTC offset in seconds west of UTC, or 0 if it cannot be determined
   ******************************************************************/
-static int time_zone(time_t t)
+int time_zone(time_t t)
 {
 	struct tm *tm = gmtime(&t);
 	struct tm tm_utc;
@@ -96,91 +96,6 @@ void time_init(void)
 	DEBUG("Serverzone is %d\n", serverzone);
 }
 
-/*******************************************************************
-return the same value as time_zone, but it should be more efficient.
-
-We keep a table of DST offsets to prevent calling localtime() on each
-call of this function. This saves a LOT of time on many unixes.
-
-Updated by Paul Eggert <eggert@twinsun.com>
-********************************************************************/
-static int time_zone_faster(time_t t)
-{
-	static struct dst_table {
-		time_t start, end;
-		int zone;
-	} *dst_table = NULL;
-	static int table_size = 0;
-	time_t low, high;
-	int i;
-	int zone = 0;
-
-	if (t == 0)
-		t = time(NULL);
-
-	/* Tunis has a 8 day DST region, we need to be careful ... */
-#define MAX_DST_WIDTH (365 * 24 * 60 * 60)
-#define MAX_DST_SKIP  (7 * 24 * 60 * 60)
-
-	for (i = 0; i < table_size; i++)
-		if (t >= dst_table[i].start && t <= dst_table[i].end)
-			break;
-
-	if (i < table_size) {
-		return dst_table[i].zone;
-	}
-
-	zone = time_zone(t);
-	dst_table = (struct dst_table *) checked_realloc(
-	    dst_table, sizeof(dst_table[0]) * (i + 1));
-	table_size++;
-
-	dst_table[i].zone = zone;
-	dst_table[i].start = dst_table[i].end = t;
-
-	/* no entry will cover more than 6 months */
-	low = t - MAX_DST_WIDTH / 2;
-	if (t < low)
-		low = TIME_T_MIN;
-
-	high = t + MAX_DST_WIDTH / 2;
-	if (high < t)
-		high = TIME_T_MAX;
-
-	/* widen the new entry using two bisection searches */
-	while (low + 60 * 60 < dst_table[i].start) {
-		if (dst_table[i].start - low > MAX_DST_SKIP * 2)
-			t = dst_table[i].start - MAX_DST_SKIP;
-		else
-			t = low + (dst_table[i].start - low) / 2;
-		if (time_zone(t) == zone)
-			dst_table[i].start = t;
-		else
-			low = t;
-	}
-
-	while (high - 60 * 60 > dst_table[i].end) {
-		if (high - dst_table[i].end > MAX_DST_SKIP * 2)
-			t = dst_table[i].end + MAX_DST_SKIP;
-		else
-			t = high - (high - dst_table[i].end) / 2;
-		if (time_zone(t) == zone)
-			dst_table[i].end = t;
-		else
-			high = t;
-	}
-
-	return zone;
-}
-
-/****************************************************************************
-  return the UTC offset in seconds west of UTC, adjusted for extra time offset
-  **************************************************************************/
-int time_diff(time_t t)
-{
-	return time_zone_faster(t);
-}
-
 /****************************************************************************
   return the UTC offset in seconds west of UTC, adjusted for extra time
   offset, for a local time value.  If ut = lt + loc_time_diff(lt), then
@@ -191,7 +106,7 @@ int time_diff(time_t t)
 static int loc_time_diff(time_t lte)
 {
 	time_t lt = lte;
-	int d = time_zone_faster(lt);
+	int d = time_zone(lt);
 	time_t t = lt + d;
 
 	/* if overflow occurred, ignore all the adjustments so far */
@@ -200,7 +115,7 @@ static int loc_time_diff(time_t lte)
 
 	/* now t should be close enough to the true UTC to yield the right
 	 * answer */
-	return time_diff(t);
+	return time_zone(t);
 }
 
 #define TIME_FIXUP_CONSTANT                                                    \
@@ -364,7 +279,7 @@ localtime for this sort of date)
 void put_dos_date3(char *buf, int offset, time_t unixdate)
 {
 	if (!null_mtime(unixdate))
-		unixdate -= time_diff(unixdate);
+		unixdate -= time_zone(unixdate);
 	SIVAL(buf, offset, unixdate);
 }
 
