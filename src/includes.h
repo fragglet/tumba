@@ -35,6 +35,7 @@
 #include <sys/types.h>
 #include <time.h>
 #include <utime.h>
+#include <fcntl.h>
 
 #include <errno.h>
 #include <grp.h>
