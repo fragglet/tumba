@@ -198,7 +198,7 @@ typedef struct {
 } write_bmpx_struct;
 
 /*
- * Structure used to indirect fd's from the files_struct.
+ * Structure used to indirect fd's from the struct open_file.
  * Needed as POSIX locking is based on file and process, not
  * file descriptor and process.
  */
@@ -213,7 +213,7 @@ typedef struct {
 	int real_open_flags;
 } file_fd_struct;
 
-typedef struct {
+struct open_file {
 	int cnum;
 	file_fd_struct *fd_ptr;
 	int pos;
@@ -229,7 +229,7 @@ typedef struct {
 	bool modified;
 	bool reserved;
 	char *name;
-} files_struct;
+};
 
 typedef struct {
 	const struct share *share;

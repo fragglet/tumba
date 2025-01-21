@@ -50,7 +50,7 @@ extern int smb_read_error;
 extern int Client;
 
 connection_struct Connections[MAX_CONNECTIONS];
-files_struct Files[MAX_OPEN_FILES];
+struct open_file Files[MAX_OPEN_FILES];
 
 /*
  * Indirection for file fd's. Needed as POSIX locking is based on file/process,
@@ -883,7 +883,7 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 	pstring fname;
 	struct stat statbuf;
 	file_fd_struct *fd_ptr;
-	files_struct *fsp = &Files[fnum];
+	struct open_file *fsp = &Files[fnum];
 	int accmode = (flags & (O_RDONLY | O_WRONLY | O_RDWR));
 
 	fsp->open = false;
@@ -1089,7 +1089,7 @@ magic scripts are not run
 ****************************************************************************/
 void close_file(int fnum, bool normal_close)
 {
-	files_struct *fs_p = &Files[fnum];
+	struct open_file *fs_p = &Files[fnum];
 	int cnum = fs_p->cnum;
 
 	Files[fnum].reserved = false;
@@ -1118,7 +1118,7 @@ open a file with a share mode
 void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
                       int dosmode, int *Access, int *action)
 {
-	files_struct *fs_p = &Files[fnum];
+	struct open_file *fs_p = &Files[fnum];
 	int flags = 0;
 	int flags2 = 0;
 	int deny_mode = (share_mode >> 4) & 7;

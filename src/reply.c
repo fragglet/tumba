@@ -33,7 +33,7 @@ extern int max_send;
 extern int max_recv;
 extern int chain_fnum;
 extern connection_struct Connections[];
-extern files_struct Files[];
+extern struct open_file Files[];
 extern const char *workgroup;
 extern int Client;
 
@@ -839,7 +839,7 @@ int reply_open(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	int rmode = 0;
 	struct stat sbuf;
 	bool bad_path = false;
-	files_struct *fsp;
+	struct open_file *fsp;
 
 	cnum = SVAL(inbuf, smb_tid);
 
@@ -915,7 +915,7 @@ int reply_open_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	struct stat sbuf;
 	int smb_action = 0;
 	bool bad_path = false;
-	files_struct *fsp;
+	struct open_file *fsp;
 
 	/* XXXX we need to handle passed times, sattr and flags */
 
@@ -1022,7 +1022,7 @@ int reply_mknew(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	int createmode;
 	int ofun = 0;
 	bool bad_path = false;
-	files_struct *fsp;
+	struct open_file *fsp;
 
 	com = SVAL(inbuf, smb_com);
 	cnum = SVAL(inbuf, smb_tid);
@@ -1097,7 +1097,7 @@ int reply_ctemp(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	int outsize = 0;
 	int createmode;
 	bool bad_path = false;
-	files_struct *fsp;
+	struct open_file *fsp;
 
 	cnum = SVAL(inbuf, smb_tid);
 	createmode = SVAL(inbuf, smb_vwv0);

@@ -33,7 +33,7 @@
 
 #include "includes.h"
 extern int LOGLEVEL;
-extern files_struct Files[];
+extern struct open_file Files[];
 
 static bool fcntl_lock(int fd, int op, uint32_t offset, uint32_t count,
                        int type)
@@ -114,7 +114,7 @@ static bool fcntl_lock(int fd, int op, uint32_t offset, uint32_t count,
  mode of a file.
 ****************************************************************************/
 
-static int map_lock_type(files_struct *fsp, int lock_type)
+static int map_lock_type(struct open_file *fsp, int lock_type)
 {
 	if ((lock_type == F_WRLCK) &&
 	    (fsp->fd_ptr->real_open_flags == O_RDONLY)) {
@@ -152,7 +152,7 @@ bool do_lock(int fnum, int cnum, uint32_t count, uint32_t offset, int lock_type,
              int *eclass, uint32_t *ecode)
 {
 	bool ok = false;
-	files_struct *fsp = &Files[fnum];
+	struct open_file *fsp = &Files[fnum];
 
 	if (count == 0) {
 		*eclass = ERRDOS;
@@ -180,7 +180,7 @@ bool do_unlock(int fnum, int cnum, uint32_t count, uint32_t offset, int *eclass,
                uint32_t *ecode)
 {
 	bool ok = false;
-	files_struct *fsp = &Files[fnum];
+	struct open_file *fsp = &Files[fnum];
 
 	if (OPEN_FNUM(fnum) && fsp->can_lock && (fsp->cnum == cnum))
 		ok = fcntl_lock(fsp->fd_ptr->fd, F_SETLK, offset, count,

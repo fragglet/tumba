@@ -29,7 +29,7 @@
 extern int LOGLEVEL;
 extern int Protocol;
 extern connection_struct Connections[];
-extern files_struct Files[];
+extern struct open_file Files[];
 extern int Client;
 extern int smb_read_error;
 extern fstring local_machine;
