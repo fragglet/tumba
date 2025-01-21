@@ -203,7 +203,7 @@ struct bmpx_data {
  * file descriptor and process.
  */
 
-typedef struct {
+struct open_fd {
 	uint16_t ref_count;
 	uint32_t dev;
 	uint32_t inode;
@@ -211,11 +211,11 @@ typedef struct {
 	int fd_readonly;
 	int fd_writeonly;
 	int real_open_flags;
-} file_fd_struct;
+};
 
 struct open_file {
 	int cnum;
-	file_fd_struct *fd_ptr;
+	struct open_fd *fd_ptr;
 	int pos;
 	uint32_t size;
 	int mode;

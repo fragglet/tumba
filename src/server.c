@@ -58,7 +58,7 @@ struct open_file Files[MAX_OPEN_FILES];
  * <https://www.samba.org/samba/news/articles/low_point/tale_two_stds_os2.html>
  * TODO: The 2024 POSIX spec now includes OFD locks, so this can be replaced
  */
-static file_fd_struct FileFd[MAX_OPEN_FILES];
+static struct open_fd FileFd[MAX_OPEN_FILES];
 static int max_file_fd_used = 0;
 
 extern int Protocol;
@@ -765,12 +765,12 @@ static int fd_attempt_open(char *fname, int flags, int mode)
 
 /****************************************************************************
 fd support routines - attempt to find an already open file by dev
-and inode - increments the ref_count of the returned file_fd_struct *.
+and inode - increments the ref_count of the returned struct open_fd *.
 ****************************************************************************/
-static file_fd_struct *fd_get_already_open(struct stat *sbuf)
+static struct open_fd *fd_get_already_open(struct stat *sbuf)
 {
 	int i;
-	file_fd_struct *fd_ptr;
+	struct open_fd *fd_ptr;
 
 	if (sbuf == 0)
 		return 0;
@@ -781,7 +781,7 @@ static file_fd_struct *fd_get_already_open(struct stat *sbuf)
 		    (((uint32_t) sbuf->st_dev) == fd_ptr->dev) &&
 		    (((uint32_t) sbuf->st_ino) == fd_ptr->inode)) {
 			fd_ptr->ref_count++;
-			DEBUG("Re-used file_fd_struct %d, dev = %x, inode "
+			DEBUG("Re-used struct open_fd %d, dev = %x, inode "
 			      "= %x, ref_count = %d\n",
 			      i, fd_ptr->dev, fd_ptr->inode, fd_ptr->ref_count);
 			return fd_ptr;
@@ -794,10 +794,10 @@ static file_fd_struct *fd_get_already_open(struct stat *sbuf)
 fd support routines - attempt to find a empty slot in the FileFd array.
 Increments the ref_count of the returned entry.
 ****************************************************************************/
-static file_fd_struct *fd_get_new(void)
+static struct open_fd *fd_get_new(void)
 {
 	int i;
-	file_fd_struct *fd_ptr;
+	struct open_fd *fd_ptr;
 
 	for (i = 0; i < MAX_OPEN_FILES; i++) {
 		fd_ptr = &FileFd[i];
@@ -813,7 +813,7 @@ static file_fd_struct *fd_get_new(void)
 			   on search time when re-using */
 			if (i > max_file_fd_used)
 				max_file_fd_used = i;
-			DEBUG("Allocated new file_fd_struct %d, dev = %x, "
+			DEBUG("Allocated new struct open_fd %d, dev = %x, "
 			      "inode = %x\n",
 			      i, fd_ptr->dev, fd_ptr->inode);
 			return fd_ptr;
@@ -828,7 +828,7 @@ static file_fd_struct *fd_get_new(void)
 fd support routines - attempt to re-open an already open fd as O_RDWR.
 Save the already open fd (we cannot close due to POSIX file locking braindamage.
 ****************************************************************************/
-static void fd_attempt_reopen(char *fname, int mode, file_fd_struct *fd_ptr)
+static void fd_attempt_reopen(char *fname, int mode, struct open_fd *fd_ptr)
 {
 	int fd = open(fname, O_RDWR, mode);
 
@@ -848,9 +848,9 @@ static void fd_attempt_reopen(char *fname, int mode, file_fd_struct *fd_ptr)
 fd support routines - attempt to close the file referenced by this fd.
 Decrements the ref_count and returns it.
 ****************************************************************************/
-static int fd_attempt_close(file_fd_struct *fd_ptr)
+static int fd_attempt_close(struct open_fd *fd_ptr)
 {
-	DEBUG("fd_attempt_close on file_fd_struct %d, fd = %d, dev = %x, "
+	DEBUG("fd_attempt_close on struct open_fd %d, fd = %d, dev = %x, "
 	      "inode = %x, open_flags = %d, ref_count = %d.\n",
 	      fd_ptr - &FileFd[0], fd_ptr->fd, fd_ptr->dev, fd_ptr->inode,
 	      fd_ptr->real_open_flags, fd_ptr->ref_count);
@@ -882,7 +882,7 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 {
 	pstring fname;
 	struct stat statbuf;
-	file_fd_struct *fd_ptr;
+	struct open_fd *fd_ptr;
 	struct open_file *fsp = &Files[fnum];
 	int accmode = (flags & (O_RDONLY | O_WRONLY | O_RDWR));
 
@@ -992,7 +992,7 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 
 	} else {
 		int open_flags;
-		/* We need to allocate a new file_fd_struct (this increments the
+		/* We need to allocate a new struct open_fd (this increments the
 		   ref_count). */
 		if ((fd_ptr = fd_get_new()) == 0)
 			return;
@@ -2910,7 +2910,7 @@ static void init_structs(void)
 	}
 
 	for (i = 0; i < MAX_OPEN_FILES; i++) {
-		file_fd_struct *fd_ptr = &FileFd[i];
+		struct open_fd *fd_ptr = &FileFd[i];
 		fd_ptr->ref_count = 0;
 		fd_ptr->dev = (int32_t) -1;
 		fd_ptr->inode = (int32_t) -1;
