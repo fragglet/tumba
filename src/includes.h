@@ -60,18 +60,9 @@
 #include <dirent.h>
 #include <netinet/in.h>
 #include <string.h>
-#ifndef QSORT_CAST
-#define QSORT_CAST (int (*)(const void *, const void *))
-#endif /* QSORT_CAST */
-#define SIGNAL_CAST (void (*)(int))
-#define USE_GETCWD
-#define USE_SETSID
-#define USE_SIGPROCMASK
-#define USE_WAITPID
 
-#ifndef FD_SETSIZE
-#define FD_SETSIZE 255
-#endif
+#define SIGNAL_CAST (void (*)(int))
+#define USE_SIGPROCMASK
 
 /* xattrs are system-specific: */
 #ifdef linux
@@ -106,32 +97,12 @@
 
 #include "byteorder.h"
 
-#ifndef MAXCODEPAGELINES
-#define MAXCODEPAGELINES 256
-#endif
-
 /***** automatically generated prototypes *****/
 #include "config.h"
 #include "proto.h"
 
 #ifndef EDQUOT
 #define EDQUOT ENOSPC
-#endif
-
-#ifndef SOL_TCP
-#define SOL_TCP 6
-#endif
-
-#ifndef WAIT3_CAST2
-#define WAIT3_CAST2 (struct rusage *)
-#endif
-
-#ifndef WAIT3_CAST1
-#define WAIT3_CAST1 (int *)
-#endif
-
-#ifndef QSORT_CAST
-#define QSORT_CAST (int (*)(void *, void *))
 #endif
 
 #ifdef strcpy
