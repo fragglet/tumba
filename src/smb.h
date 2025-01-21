@@ -244,13 +244,6 @@ typedef struct {
 	int num_files_open;
 } connection_struct;
 
-/* used for server information: client, nameserv and ipc */
-struct server_info_struct {
-	fstring name;
-	uint32_t type;
-	fstring comment;
-};
-
 struct share {
 	char *name;
 	char *path;
