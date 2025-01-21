@@ -49,7 +49,7 @@ static time_t smb_last_time = (time_t) 0;
 extern int smb_read_error;
 extern int Client;
 
-connection_struct Connections[MAX_CONNECTIONS];
+struct service_connection Connections[MAX_CONNECTIONS];
 struct open_file Files[MAX_OPEN_FILES];
 
 /*
@@ -1844,7 +1844,7 @@ int make_connection(char *service, char *dev)
 {
 	const struct share *share;
 	int cnum;
-	connection_struct *pcon;
+	struct service_connection *pcon;
 
 	strlower(service);
 

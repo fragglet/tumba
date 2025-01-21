@@ -32,7 +32,7 @@ extern int LOGLEVEL;
 extern int max_send;
 extern int max_recv;
 extern int chain_fnum;
-extern connection_struct Connections[];
+extern struct service_connection Connections[];
 extern struct open_file Files[];
 extern const char *workgroup;
 extern int Client;

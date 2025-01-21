@@ -31,7 +31,7 @@
 extern int LOGLEVEL;
 extern int max_send;
 extern struct open_file Files[];
-extern connection_struct Connections[];
+extern struct service_connection Connections[];
 
 extern fstring local_machine;
 extern const char *workgroup;

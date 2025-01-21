@@ -231,7 +231,7 @@ struct open_file {
 	char *name;
 };
 
-typedef struct {
+struct service_connection {
 	const struct share *share;
 	void *dirptr;
 	bool open;
@@ -242,7 +242,7 @@ typedef struct {
 	time_t lastused;
 	bool used;
 	int num_files_open;
-} connection_struct;
+};
 
 struct share {
 	char *name;

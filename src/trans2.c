@@ -28,7 +28,7 @@
 
 extern int LOGLEVEL;
 extern int Protocol;
-extern connection_struct Connections[];
+extern struct service_connection Connections[];
 extern struct open_file Files[];
 extern int Client;
 extern int smb_read_error;

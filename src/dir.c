@@ -22,7 +22,7 @@
 #include "includes.h"
 
 extern int LOGLEVEL;
-extern connection_struct Connections[];
+extern struct service_connection Connections[];
 
 /*
    This module implements directory related functions for Samba.
