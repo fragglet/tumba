@@ -467,7 +467,6 @@ struct share {
 #define ERRCMD 0xFF /* Command was not in the "SMB" format. */
 
 int log_output(int level, char *, ...);
-int slprintf(char *str, int n, char *format, ...);
 
 #ifndef MIN
 #define MIN(a, b) ((a) < (b) ? (a) : (b))

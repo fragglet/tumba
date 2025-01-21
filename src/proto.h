@@ -156,10 +156,6 @@ void add_ipc_service(void);
 const struct share *get_share(unsigned int idx);
 int shares_count(void);
 
-/*The following definitions come from  slprintf.c  */
-
-int vslprintf(char *str, int n, char *format, va_list ap);
-
 /*The following definitions come from  system.c  */
 
 int sys_utime(char *fname, struct utimbuf *times);
