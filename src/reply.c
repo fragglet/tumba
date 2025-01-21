@@ -778,7 +778,7 @@ search_empty:
 	smb_setlen(outbuf, outsize - 4);
 
 	if ((!*directory) && dptr_path(dptr_num))
-		slprintf(directory, sizeof(directory) - 1, "(%s)",
+		snprintf(directory, sizeof(directory), "(%s)",
 		         dptr_path(dptr_num));
 
 	DEBUG("%s mask=%s path=%s cnum=%d dtype=%d nument=%d of %d\n",
@@ -1246,7 +1246,7 @@ int reply_unlink(char *inbuf, char *outbuf, int dum_size, int dum_bufsize)
 				}
 
 				error = ERRnoaccess;
-				slprintf(fname, sizeof(fname) - 1, "%s/%s",
+				snprintf(fname, sizeof(fname), "%s/%s",
 				         directory, dname);
 				if (!can_delete(fname, cnum, dirtype))
 					continue;
@@ -2430,7 +2430,7 @@ int reply_mv(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 				}
 
 				error = ERRnoaccess;
-				slprintf(fname, sizeof(fname) - 1, "%s/%s",
+				snprintf(fname, sizeof(fname), "%s/%s",
 				         directory, dname);
 				if (!can_rename(fname, cnum)) {
 					DEBUG("rename %s refused\n", fname);
@@ -2646,7 +2646,7 @@ int reply_copy(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 				}
 
 				error = ERRnoaccess;
-				slprintf(fname, sizeof(fname) - 1, "%s/%s",
+				snprintf(fname, sizeof(fname), "%s/%s",
 				         directory, dname);
 				pstrcpy(destname, newname);
 				if (resolve_wildcards(fname, destname) &&

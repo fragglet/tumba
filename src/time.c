@@ -365,7 +365,7 @@ char *timestring(void)
 	struct tm *tm = localtime(&t);
 
 	if (!tm)
-		slprintf(time_buf, sizeof(time_buf) - 1,
+		snprintf(time_buf, sizeof(time_buf),
 		         "%ld seconds since the Epoch", (long) t);
 	else
 		strftime(time_buf, 100, "%Y/%m/%d %r", tm);

@@ -77,13 +77,13 @@ static void syslog_output(int level, char *format_str, va_list ap)
 	buf_len = sizeof(msgbuf);
 
 	if (client_addr[0] != '\0') {
-		slprintf(buf, buf_len - 1, "[%s] ", client_addr);
+		snprintf(buf, buf_len, "[%s] ", client_addr);
 		n = strlen(buf);
 		buf += n;
 		buf_len -= n;
 	}
 
-	vslprintf(buf, buf_len - 1, format_str, ap);
+	vsnprintf(buf, buf_len, format_str, ap);
 
 	msgbuf[255] = '\0';
 	syslog(priority, "%s", msgbuf);

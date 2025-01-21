@@ -228,7 +228,7 @@ void mangle_name_83(char *s, int s_len)
 
 	csum = csum % (36 * 36);
 
-	slprintf(s, s_len - 1, "%s%c%c%c", base, MAGIC_CHAR, base36(csum / 36),
+	snprintf(s, s_len, "%s%c%c%c", base, MAGIC_CHAR, base36(csum / 36),
 	         base36(csum % 36));
 
 	if (*extension) {
