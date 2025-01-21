@@ -188,14 +188,14 @@ typedef char pstring[1024];
 typedef char fstring[128];
 
 /* Structure used when SMBwritebmpx is active */
-typedef struct {
+struct bmpx_data {
 	int wr_total_written; /* So we know when to discard this */
 	int32_t wr_timeout;
 	int32_t wr_errclass;
 	int32_t wr_error; /* Cached errors */
 	bool wr_mode;     /* write through mode) */
 	bool wr_discard;  /* discard all further data */
-} write_bmpx_struct;
+};
 
 /*
  * Structure used to indirect fd's from the struct open_file.
@@ -219,7 +219,7 @@ struct open_file {
 	int pos;
 	uint32_t size;
 	int mode;
-	write_bmpx_struct *wbmpx_ptr;
+	struct bmpx_data *wbmpx_ptr;
 	struct timeval open_time;
 	bool open;
 	bool can_lock;
@@ -561,7 +561,7 @@ enum protocol_types {
 #define SMB_LKOFF_OFFSET(indx) (2 + (10 * (indx)))
 #define SMB_LKLEN_OFFSET(indx) (6 + (10 * (indx)))
 
-/* Macro to cache an error in a write_bmpx_struct */
+/* Macro to cache an error in a struct bmpx_data */
 #define CACHE_ERROR_CODE(w, c, e)                                              \
 	((w)->wr_errclass = (c), (w)->wr_error = (e), w->wr_discard = true, -1)
 /* Macro to test if an error has been cached for this fnum */

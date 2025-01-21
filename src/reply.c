@@ -2817,12 +2817,12 @@ int reply_writebmpx(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	   up a secondary struct to be attached to this
 	   fd, we will use this to cache error messages etc. */
 	if (tcount > nwritten) {
-		write_bmpx_struct *wbms;
+		struct bmpx_data *wbms;
 		if (Files[fnum].wbmpx_ptr != NULL)
 			wbms =
 			    Files[fnum].wbmpx_ptr; /* Use an existing struct */
 		else
-			wbms = checked_malloc(sizeof(write_bmpx_struct));
+			wbms = checked_malloc(sizeof(struct bmpx_data));
 		wbms->wr_mode = write_through;
 		wbms->wr_discard = false; /* No errors yet */
 		wbms->wr_total_written = nwritten;
@@ -2867,7 +2867,7 @@ int reply_writebs(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	int32_t startpos;
 	int tcount, write_through, smb_doff;
 	char *data;
-	write_bmpx_struct *wbms;
+	struct bmpx_data *wbms;
 	bool send_response = false;
 
 	cnum = SVAL(inbuf, smb_tid);

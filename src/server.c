@@ -1339,7 +1339,7 @@ static bool become_service(int cnum)
 ****************************************************************************/
 int cached_error_packet(char *inbuf, char *outbuf, int fnum, int line)
 {
-	write_bmpx_struct *wbmpx = Files[fnum].wbmpx_ptr;
+	struct bmpx_data *wbmpx = Files[fnum].wbmpx_ptr;
 
 	int32_t eclass = wbmpx->wr_errclass;
 	int32_t err = wbmpx->wr_error;
