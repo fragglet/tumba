@@ -452,7 +452,10 @@ static bool api_NetRemoteTOD(int cnum, char *param, char *data, int mdrcnt,
                              int mprcnt, char **rdata, char **rparam,
                              int *rdata_len, int *rparam_len)
 {
+	struct tm *t;
+	time_t unixdate = time(NULL);
 	char *p;
+
 	*rparam_len = 4;
 	*rparam = REALLOC(*rparam, *rparam_len);
 
@@ -464,35 +467,28 @@ static bool api_NetRemoteTOD(int cnum, char *param, char *data, int mdrcnt,
 
 	p = *rdata;
 
-	{
-		struct tm *t;
-		time_t unixdate = time(NULL);
+	put_dos_date3(p, 0, unixdate); /* this is the time that is looked at
+	                                  by NT in a "net time" operation,
+	                                  it seems to ignore the one below */
 
-		put_dos_date3(p, 0,
-		              unixdate); /* this is the time that is looked at
-		                            by NT in a "net time" operation,
-		                            it seems to ignore the one below */
+	/* the client expects to get localtime, not GMT, in this bit
+	   (I think, this needs testing) */
+	t = localtime(&unixdate);
 
-		/* the client expects to get localtime, not GMT, in this bit
-		   (I think, this needs testing) */
-		t = localtime(&unixdate);
+	SIVAL(p, 4, 0); /* msecs ? */
+	CVAL(p, 8) = t->tm_hour;
+	CVAL(p, 9) = t->tm_min;
+	CVAL(p, 10) = t->tm_sec;
+	CVAL(p, 11) = 0; /* hundredths of seconds */
+	SSVALS(p, 12,
+	       time_zone(unixdate) / 60); /* timezone in minutes from GMT */
+	SSVAL(p, 14, 10000);              /* timer interval in 0.0001 of sec */
+	CVAL(p, 16) = t->tm_mday;
+	CVAL(p, 17) = t->tm_mon + 1;
+	SSVAL(p, 18, 1900 + t->tm_year);
+	CVAL(p, 20) = t->tm_wday;
 
-		SIVAL(p, 4, 0); /* msecs ? */
-		CVAL(p, 8) = t->tm_hour;
-		CVAL(p, 9) = t->tm_min;
-		CVAL(p, 10) = t->tm_sec;
-		CVAL(p, 11) = 0; /* hundredths of seconds */
-		SSVALS(p, 12,
-		       time_zone(unixdate) /
-		           60);      /* timezone in minutes from GMT */
-		SSVAL(p, 14, 10000); /* timer interval in 0.0001 of sec */
-		CVAL(p, 16) = t->tm_mday;
-		CVAL(p, 17) = t->tm_mon + 1;
-		SSVAL(p, 18, 1900 + t->tm_year);
-		CVAL(p, 20) = t->tm_wday;
-	}
-
-	return (true);
+	return true;
 }
 
 /****************************************************************************
