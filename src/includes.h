@@ -58,8 +58,10 @@
 
 #include <arpa/inet.h>
 #include <dirent.h>
+#include <limits.h>
 #include <netinet/in.h>
 #include <string.h>
+#include <strings.h>
 
 #define SIGNAL_CAST (void (*)(int))
 #define USE_SIGPROCMASK
