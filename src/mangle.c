@@ -27,10 +27,10 @@
 #include <string.h>
 #include <strings.h>
 
-#include "local.h"
-#include "smb.h"
 #include "config.h"
 #include "includes.h"
+#include "local.h"
+#include "smb.h"
 #include "util.h"
 
 extern int LOGLEVEL;

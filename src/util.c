@@ -21,9 +21,12 @@
 
 #include "util.h"
 
+#include <arpa/inet.h>
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <netinet/in.h>
 #include <signal.h>
 #include <stdarg.h>
 #include <stdbool.h>
@@ -32,22 +35,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <arpa/inet.h>
-#include <fcntl.h>
-#include <netinet/in.h>
 #include <strings.h>
-#include <syslog.h>
-#include <unistd.h>
 #include <sys/param.h>
+#include <sys/select.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/time.h>
-#include <sys/select.h>
+#include <syslog.h>
+#include <unistd.h>
 
-#include "local.h"
-#include "smb.h"
 #include "byteorder.h"
 #include "includes.h"
+#include "local.h"
+#include "smb.h"
 #include "timefunc.h"
 
 static uint8_t valid_dos_chars[32];

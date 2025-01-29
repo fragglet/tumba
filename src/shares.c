@@ -19,8 +19,8 @@
 #include "shares.h"
 
 #include <assert.h>
-#include <stddef.h>
 #include <libgen.h>
+#include <stddef.h>
 
 #include "smb.h"
 #include "util.h"

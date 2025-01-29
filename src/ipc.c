@@ -33,16 +33,16 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <strings.h>
 #include <sys/param.h>
+#include <time.h>
 
-#include "smb.h"
 #include "byteorder.h"
 #include "config.h"
 #include "includes.h"
 #include "server.h"
 #include "shares.h"
+#include "smb.h"
 #include "timefunc.h"
 #include "util.h"
 

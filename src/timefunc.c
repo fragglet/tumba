@@ -25,12 +25,12 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <time.h>
 #include <sys/param.h>
 #include <sys/stat.h>
+#include <time.h>
 
-#include "smb.h"
 #include "byteorder.h"
+#include "smb.h"
 
 struct tm;
 

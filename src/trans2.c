@@ -24,27 +24,27 @@
 #include "trans2.h"
 
 #include <errno.h>
+#include <fcntl.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
-#include <fcntl.h>
 #include <strings.h>
-#include <unistd.h>
-#include <utime.h>
 #include <sys/param.h>
 #include <sys/stat.h>
+#include <time.h>
+#include <unistd.h>
+#include <utime.h>
 
-#include "local.h"
-#include "smb.h"
 #include "byteorder.h"
-#include "includes.h"
 #include "dir.h"
+#include "includes.h"
+#include "local.h"
 #include "mangle.h"
 #include "server.h"
+#include "smb.h"
 #include "system.h"
 #include "timefunc.h"
 #include "util.h"

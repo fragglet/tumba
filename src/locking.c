@@ -34,10 +34,10 @@
 #include "locking.h"
 
 #include <errno.h>
+#include <fcntl.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
-#include <fcntl.h>
 #include <unistd.h>
 
 #include "smb.h"

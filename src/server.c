@@ -54,23 +54,23 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#include "local.h"
-#include "smb.h"
-#include "version.h"
 #include "byteorder.h"
 #include "config.h"
 #include "dir.h"
+#include "includes.h"
 #include "ipc.h"
+#include "local.h"
 #include "locking.h"
 #include "mangle.h"
 #include "reply.h"
 #include "server.h"
 #include "shares.h"
+#include "smb.h"
 #include "system.h"
 #include "timefunc.h"
-#include "util.h"
-#include "includes.h"
 #include "trans2.h"
+#include "util.h"
+#include "version.h"
 
 #define RUN_AS_USER    "nobody"
 #define DOSATTRIB_NAME "user.DOSATTRIB"

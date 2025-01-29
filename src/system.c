@@ -22,8 +22,8 @@
 #include "system.h"
 
 #include <stddef.h>
-#include <utime.h>
 #include <sys/types.h>
+#include <utime.h>
 
 extern int LOGLEVEL;
 

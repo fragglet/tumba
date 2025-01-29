@@ -21,21 +21,21 @@
 
 #include "dir.h"
 
+#include <dirent.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
-#include <dirent.h>
 #include <sys/param.h>
 #include <sys/stat.h>
+#include <time.h>
 
-#include "local.h"
-#include "smb.h"
 #include "byteorder.h"
 #include "includes.h"
+#include "local.h"
 #include "mangle.h"
 #include "server.h"
+#include "smb.h"
 #include "util.h"
 
 extern int LOGLEVEL;
