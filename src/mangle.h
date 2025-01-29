@@ -16,13 +16,8 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "dir.h"
-#include "ipc.h"
-#include "locking.h"
-#include "mangle.h"
-#include "reply.h"
-#include "server.h"
-#include "shares.h"
-#include "system.h"
-#include "timefunc.h"
-#include "util.h"
+int str_checksum(char *s);
+bool is_8_3(char *fname, bool check_case);
+bool is_mangled(char *s);
+void mangle_name_83(char *s, int s_len);
+void name_map_mangle(char *OutName, bool need83, const struct share *share);

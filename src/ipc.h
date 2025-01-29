@@ -16,13 +16,4 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "dir.h"
-#include "ipc.h"
-#include "locking.h"
-#include "mangle.h"
-#include "reply.h"
-#include "server.h"
-#include "shares.h"
-#include "system.h"
-#include "timefunc.h"
-#include "util.h"
+int reply_trans(char *inbuf, char *outbuf, int size, int bufsize);

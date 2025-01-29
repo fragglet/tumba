@@ -16,13 +16,15 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "dir.h"
-#include "ipc.h"
-#include "locking.h"
-#include "mangle.h"
-#include "reply.h"
-#include "server.h"
-#include "shares.h"
-#include "system.h"
-#include "timefunc.h"
-#include "util.h"
+void time_init(void);
+int time_zone(time_t t);
+time_t interpret_long_date(char *p);
+void put_long_date(char *p, time_t t);
+bool null_mtime(time_t mtime);
+void put_dos_date(char *buf, int offset, time_t unixdate);
+void put_dos_date2(char *buf, int offset, time_t unixdate);
+void put_dos_date3(char *buf, int offset, time_t unixdate);
+time_t make_unix_date2(void *date_ptr);
+time_t make_unix_date3(void *date_ptr);
+char *timestring(void);
+time_t get_create_time(struct stat *st);

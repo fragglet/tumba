@@ -234,4 +234,10 @@ Byte offset   Type     name                description
 
 #define NT_FILE_ATTRIBUTE_NORMAL 0x80
 
+void mask_convert(char *mask);
+int reply_findclose(char *inbuf, char *outbuf, int length, int bufsize);
+int reply_findnclose(char *inbuf, char *outbuf, int length, int bufsize);
+int reply_transs2(char *inbuf, char *outbuf, int length, int bufsize);
+int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize);
+
 #endif

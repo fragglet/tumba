@@ -16,13 +16,8 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "dir.h"
-#include "ipc.h"
-#include "locking.h"
-#include "mangle.h"
-#include "reply.h"
-#include "server.h"
-#include "shares.h"
-#include "system.h"
-#include "timefunc.h"
-#include "util.h"
+const struct share *lookup_share(const char *name);
+const struct share *add_share(const char *path);
+void add_ipc_service(void);
+const struct share *get_share(unsigned int idx);
+int shares_count(void);

@@ -16,13 +16,8 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "dir.h"
-#include "ipc.h"
-#include "locking.h"
-#include "mangle.h"
-#include "reply.h"
-#include "server.h"
-#include "shares.h"
-#include "system.h"
-#include "timefunc.h"
-#include "util.h"
+int sys_utime(char *fname, struct utimbuf *times);
+ssize_t sys_getxattr(const char *path, const char *name, void *value,
+                     size_t size);
+ssize_t sys_setxattr(const char *path, const char *name, void *value,
+                     size_t size);
