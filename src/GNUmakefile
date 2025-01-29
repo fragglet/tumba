@@ -28,7 +28,7 @@ OBJECTS = \
 	strlcat.o            \
 	strlcpy.o            \
 	system.o             \
-	time.o               \
+	timefunc.o           \
 	trans2.o             \
 	util.o
 

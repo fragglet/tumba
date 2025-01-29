@@ -164,7 +164,7 @@ ssize_t sys_getxattr(const char *path, const char *name, void *value,
 ssize_t sys_setxattr(const char *path, const char *name, void *value,
                      size_t size);
 
-/*The following definitions come from  time.c  */
+/*The following definitions come from  timefunc.c  */
 
 void time_init(void);
 int time_zone(time_t t);
