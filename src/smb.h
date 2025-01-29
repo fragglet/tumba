@@ -475,10 +475,6 @@ int log_output(int level, char *, ...);
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #endif
 
-#ifndef SIGNAL_CAST
-#define SIGNAL_CAST
-#endif
-
 /* these are used in NetServerEnum to choose what to receive */
 #define SV_TYPE_WORKSTATION       0x00000001
 #define SV_TYPE_SERVER            0x00000002
