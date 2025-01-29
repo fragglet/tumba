@@ -87,9 +87,6 @@ static int last_message = -1;
 extern int LOGLEVEL;
 static time_t smb_last_time = (time_t) 0;
 
-extern int smb_read_error;
-extern int Client;
-
 struct service_connection Connections[MAX_CONNECTIONS];
 struct open_file Files[MAX_OPEN_FILES];
 
@@ -2769,7 +2766,6 @@ static int construct_reply(char *inbuf, char *outbuf, int size, int bufsize)
 
 static void process_smb(char *inbuf, char *outbuf)
 {
-	extern int Client;
 	static int trans_num;
 	int msg_type = CVAL(inbuf, 0);
 	int32_t len = smb_len(inbuf);
@@ -2844,8 +2840,6 @@ static bool send_one_packet(char *buf, int len, struct in_addr ip, int port,
 ****************************************************************************/
 static void process(void)
 {
-	extern int Client;
-
 	InBuffer = checked_malloc(BUFFER_SIZE + SAFETY_MARGIN);
 	OutBuffer = checked_malloc(BUFFER_SIZE + SAFETY_MARGIN);
 

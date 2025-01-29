@@ -47,12 +47,8 @@
 #include "util.h"
 
 extern int LOGLEVEL;
-extern int max_send;
 extern struct open_file Files[];
 extern struct service_connection Connections[];
-
-extern fstring local_machine;
-extern const char *workgroup;
 
 #define NERR_Success      0
 #define NERR_notsupported 50
@@ -66,9 +62,6 @@ extern const char *workgroup;
 #define ACCESS_CREATE 0x04
 
 #define SHPWLEN 8 /* share password length */
-
-extern int Client;
-extern int smb_read_error;
 
 static bool api_Unsupported(int cnum, char *param, char *data, int mdrcnt,
                             int mprcnt, char **rdata, char **rparam,

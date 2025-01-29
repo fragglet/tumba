@@ -55,9 +55,6 @@ extern int LOGLEVEL;
 extern int Protocol;
 extern struct service_connection Connections[];
 extern struct open_file Files[];
-extern int Client;
-extern int smb_read_error;
-extern fstring local_machine;
 
 /****************************************************************************
   Send the required number of replies back.
@@ -74,7 +71,6 @@ static int send_trans2_replies(char *outbuf, int bufsize, char *params,
 	   global struct. These different max_xmit variables should
 	   be merged as this is now too confusing */
 
-	extern int max_send;
 	int data_to_send = datasize;
 	int params_to_send = paramsize;
 	int useable_space;

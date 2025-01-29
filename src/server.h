@@ -18,6 +18,11 @@
 
 #include <sys/stat.h>
 
+extern const char *workgroup;
+extern int chain_fnum;
+extern int max_send;
+extern int max_recv;
+
 mode_t unix_mode(int cnum, int dosmode);
 int dos_mode(int cnum, char *path, struct stat *sbuf);
 int dos_chmod(int cnum, char *fname, int dosmode, struct stat *st);

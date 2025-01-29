@@ -20,7 +20,13 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "smb.h"
+
 struct stat;
+
+extern int Client;
+extern int smb_read_error;
+extern fstring local_machine;
 
 void setup_logging(char *pname);
 void reopen_logs(void);

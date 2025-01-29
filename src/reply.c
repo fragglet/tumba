@@ -57,13 +57,8 @@
 /* look in server.c for some explanation of these variables */
 extern int Protocol;
 extern int LOGLEVEL;
-extern int max_send;
-extern int max_recv;
-extern int chain_fnum;
 extern struct service_connection Connections[];
 extern struct open_file Files[];
-extern const char *workgroup;
-extern int Client;
 
 /* this macro should always be used to extract an fnum (smb_fid) from
 a packet to ensure chaining works correctly */
@@ -78,7 +73,6 @@ int reply_special(char *inbuf, char *outbuf)
 	int msg_type = CVAL(inbuf, 0);
 	int msg_flags = CVAL(inbuf, 1);
 	pstring name1, name2;
-	extern fstring local_machine;
 	int len;
 	char name_type = 0;
 
