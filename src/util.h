@@ -16,6 +16,12 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
+struct stat;
+
 void setup_logging(char *pname);
 void reopen_logs(void);
 bool file_exist(char *fname, struct stat *sbuf);

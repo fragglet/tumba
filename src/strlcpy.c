@@ -20,7 +20,6 @@
 /* TODO: Remove this file once this function's addition to glibc is less recent
  */
 
-#include <stdlib.h>
 #include <string.h>
 
 /*

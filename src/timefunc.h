@@ -16,6 +16,11 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <stdbool.h>
+#include <time.h>
+
+struct stat;
+
 void time_init(void);
 int time_zone(time_t t);
 time_t interpret_long_date(char *p);

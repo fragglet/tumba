@@ -21,11 +21,9 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <ctype.h>
+#include "trans2.h"
+
 #include <errno.h>
-#include <limits.h>
-#include <signal.h>
-#include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -33,37 +31,23 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-
-#include <arpa/inet.h>
-#include <dirent.h>
 #include <fcntl.h>
-#include <grp.h>
-#include <net/if.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <pwd.h>
 #include <strings.h>
-#include <syslog.h>
 #include <unistd.h>
 #include <utime.h>
-
-#include <sys/file.h>
-#include <sys/ioctl.h>
 #include <sys/param.h>
-#include <sys/socket.h>
 #include <sys/stat.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <sys/wait.h>
 
-#include "trans2.h"
 #include "local.h"
 #include "smb.h"
-#include "version.h"
 #include "byteorder.h"
-#include "config.h"
-#include "proto.h"
 #include "includes.h"
+#include "dir.h"
+#include "mangle.h"
+#include "server.h"
+#include "system.h"
+#include "timefunc.h"
+#include "util.h"
 
 #define DIR_ENTRY_SAFETY_MARGIN 4096
 

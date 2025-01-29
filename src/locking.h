@@ -16,6 +16,9 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <stdbool.h>
+#include <stdint.h>
+
 bool do_lock(int fnum, int cnum, uint32_t count, uint32_t offset, int lock_type,
              int *eclass, uint32_t *ecode);
 bool do_unlock(int fnum, int cnum, uint32_t count, uint32_t offset, int *eclass,

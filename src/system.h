@@ -16,6 +16,11 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <stddef.h>
+#include <sys/types.h>
+
+struct utimbuf;
+
 int sys_utime(char *fname, struct utimbuf *times);
 ssize_t sys_getxattr(const char *path, const char *name, void *value,
                      size_t size);

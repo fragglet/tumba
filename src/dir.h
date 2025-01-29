@@ -16,6 +16,13 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <stdbool.h>
+#include <stdint.h>
+#include <time.h>
+
+struct share;
+struct stat;
+
 void init_dptrs(void);
 char *dptr_path(int key);
 char *dptr_wcard(int key);

@@ -9,6 +9,10 @@ SMBLOGFILE = /var/log/rumba_smbd.log
 DEFINES = -DSMBLOGFILE=\"$(SMBLOGFILE)\" \
           -D_FORTIFY_SOURCE=1
 
+IWYU = iwyu
+IWYU_FLAGS = --error
+IWYU_TRANSFORMED_FLAGS = $(patsubst %,-Xiwyu %,$(IWYU_FLAGS))
+
 CFLAGS = -O2 -MMD -Wall $(DEFINES)
 LDFLAGS =
 
@@ -59,6 +63,11 @@ install:
 	install -m 644 doc-readonly.txt $(DESTDIR)$(DATADIR)/readonly/README.txt
 	mkdir -m 755 -p $(DESTDIR)$(MANPATH)/man8
 	install rumba_smbd.8 $(DESTDIR)$(MANPATH)/man8/rumba_smbd.8
+
+fixincludes:
+	for d in $(patsubst %.o,%.c,$(OBJECTS)); do \
+		$(IWYU) $(IWYU_TRANSFORMED_FLAGS) 2>&1 $$d | fix_include; \
+	done
 
 .PHONY: clean format all install
 

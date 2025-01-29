@@ -16,6 +16,8 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <sys/stat.h>
+
 mode_t unix_mode(int cnum, int dosmode);
 int dos_mode(int cnum, char *path, struct stat *sbuf);
 int dos_chmod(int cnum, char *fname, int dosmode, struct stat *st);

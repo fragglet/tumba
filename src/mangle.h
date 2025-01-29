@@ -16,6 +16,10 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <stdbool.h>
+
+struct share;
+
 int str_checksum(char *s);
 bool is_8_3(char *fname, bool check_case);
 bool is_mangled(char *s);
