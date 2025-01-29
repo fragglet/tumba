@@ -57,6 +57,12 @@
 #include <sys/wait.h>
 
 #include "trans2.h"
+#include "local.h"
+#include "smb.h"
+#include "version.h"
+#include "byteorder.h"
+#include "config.h"
+#include "proto.h"
 #include "includes.h"
 
 #define DIR_ENTRY_SAFETY_MARGIN 4096

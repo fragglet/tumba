@@ -66,6 +66,12 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include "local.h"
+#include "smb.h"
+#include "version.h"
+#include "byteorder.h"
+#include "config.h"
+#include "proto.h"
 #include "includes.h"
 
 extern int LOGLEVEL;

@@ -26,8 +26,6 @@
    and add a section for the new unix below.
 */
 
-#include "local.h"
-
 #define SIGNAL_CAST (void (*)(int))
 #define USE_SIGPROCMASK
 
@@ -58,15 +56,6 @@
 #ifndef MAXHOSTNAMELEN
 #define MAXHOSTNAMELEN 255
 #endif
-
-#include "smb.h"
-#include "version.h"
-
-#include "byteorder.h"
-
-/***** automatically generated prototypes *****/
-#include "config.h"
-#include "proto.h"
 
 #ifndef EDQUOT
 #define EDQUOT ENOSPC
