@@ -29,23 +29,6 @@
 #define SIGNAL_CAST (void (*)(int))
 #define USE_SIGPROCMASK
 
-/* xattrs are system-specific: */
-#ifdef linux
-
-#include <sys/xattr.h>
-#define XATTR_API_LINUX
-
-#elif defined(__FreeBSD__) || defined(__NetBSD__)
-
-#include <sys/extattr.h>
-#define XATTR_API_BSD
-
-#else
-
-#define XATTR_API_NONE
-
-#endif
-
 /* some unixes have ENOTTY instead of TIOCNOTTY */
 #ifndef TIOCNOTTY
 #ifdef ENOTTY
