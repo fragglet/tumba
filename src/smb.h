@@ -24,6 +24,13 @@
 #ifndef _SMB_H
 #define _SMB_H
 
+#include <stdbool.h>
+#include <stdint.h>
+#include <sys/time.h>
+#include <time.h>
+
+#include "local.h"
+
 #define BUFFER_SIZE   (0xFFFF)
 #define SAFETY_MARGIN 1024
 

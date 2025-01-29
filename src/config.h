@@ -16,6 +16,8 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "version.h"
+
 // The following were config options, but have been replaced with inline
 // functions that return constants. The function comments are from the manpage
 // for smb.conf.
