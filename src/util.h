@@ -36,6 +36,11 @@
 #define INFO(...)    LOG(3, __VA_ARGS__)
 #define DEBUG(...)   LOG(4, __VA_ARGS__)
 
+/* limiting size of ipc replies */
+#define REALLOC(ptr, size) checked_realloc(ptr, MAX((size), 4 * 1024))
+
+#define checked_malloc(bytes) checked_realloc(NULL, bytes)
+
 struct stat;
 
 extern int Client;

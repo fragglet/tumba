@@ -36,9 +36,6 @@
 #define BITSETW(ptr, bit) ((SVAL(ptr, 0) & (1 << (bit))) != 0)
 #define PTR_DIFF(p1, p2)  ((ptrdiff_t) (((char *) (p1)) - (char *) (p2)))
 
-/* limiting size of ipc replies */
-#define REALLOC(ptr, size) checked_realloc(ptr, MAX((size), 4 * 1024))
-
 /* how long to wait for secondary SMB packets (milli-seconds) */
 #define SMB_SECONDARY_WAIT (60 * 1000)
 

@@ -64,8 +64,6 @@
 #define calloc(x, y)  __ERROR__XX_NEVER_USE_CALLOC__;
 #define strdup(x)     __ERROR__XX_NEVER_USE_STRDUP__;
 
-#define checked_malloc(bytes) checked_realloc(NULL, bytes)
-
 /* TODO: Remove these once their addition to glibc is less recent */
 size_t strlcat(char *, const char *, size_t);
 size_t strlcpy(char *, const char *, size_t);
