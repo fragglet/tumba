@@ -33,7 +33,6 @@
 #include "smb.h"
 #include "util.h"
 
-extern int LOGLEVEL;
 
 /****************************************************************************
  * Provide a checksum on a string

@@ -56,7 +56,6 @@
 
 /* look in server.c for some explanation of these variables */
 extern int Protocol;
-extern int LOGLEVEL;
 extern struct service_connection Connections[];
 extern struct open_file Files[];
 

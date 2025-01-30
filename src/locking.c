@@ -41,8 +41,7 @@
 #include <unistd.h>
 
 #include "smb.h"
-
-extern int LOGLEVEL;
+#include "util.h"
 extern struct open_file Files[];
 
 static bool fcntl_lock(int fd, int op, uint32_t offset, uint32_t count,

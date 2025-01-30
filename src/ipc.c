@@ -46,7 +46,6 @@
 #include "timefunc.h"
 #include "util.h"
 
-extern int LOGLEVEL;
 extern struct open_file Files[];
 extern struct service_connection Connections[];
 

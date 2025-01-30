@@ -22,11 +22,26 @@
 
 #include "smb.h"
 
+/* logging interface */
+#define LOG(level, ...)                                                        \
+	do {                                                                   \
+		if (LOGLEVEL >= (level)) {                                     \
+			log_output(level, __VA_ARGS__);                        \
+		}                                                              \
+	} while (0)
+
+#define ERROR(...)   LOG(0, __VA_ARGS__)
+#define WARNING(...) LOG(1, __VA_ARGS__)
+#define NOTICE(...)  LOG(2, __VA_ARGS__)
+#define INFO(...)    LOG(3, __VA_ARGS__)
+#define DEBUG(...)   LOG(4, __VA_ARGS__)
+
 struct stat;
 
 extern int Client;
 extern int smb_read_error;
 extern fstring local_machine;
+extern int LOGLEVEL;
 
 void setup_logging(char *pname);
 void reopen_logs(void);

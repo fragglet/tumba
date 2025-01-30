@@ -25,7 +25,6 @@
 #include <sys/types.h>
 #include <utime.h>
 
-extern int LOGLEVEL;
 
 /*******************************************************************
 now for utime()

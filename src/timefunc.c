@@ -31,6 +31,7 @@
 
 #include "byteorder.h"
 #include "smb.h"
+#include "util.h"
 
 struct tm;
 
@@ -40,8 +41,6 @@ struct tm;
   */
 
 static int serverzone = 0;
-
-extern int LOGLEVEL;
 
 #ifndef CHAR_BIT
 #define CHAR_BIT 8

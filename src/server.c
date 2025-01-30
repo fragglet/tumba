@@ -93,7 +93,6 @@ static int last_message = -1;
 /* a useful macro to debug the last message processed */
 #define LAST_MESSAGE() smb_fn_name(last_message)
 
-extern int LOGLEVEL;
 static time_t smb_last_time = (time_t) 0;
 
 struct service_connection Connections[MAX_CONNECTIONS];

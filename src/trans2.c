@@ -51,7 +51,6 @@
 
 #define DIR_ENTRY_SAFETY_MARGIN 4096
 
-extern int LOGLEVEL;
 extern int Protocol;
 extern struct service_connection Connections[];
 extern struct open_file Files[];

@@ -38,7 +38,6 @@
 #include "smb.h"
 #include "util.h"
 
-extern int LOGLEVEL;
 extern struct service_connection Connections[];
 
 /*
