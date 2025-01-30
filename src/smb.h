@@ -24,11 +24,6 @@
 #ifndef _SMB_H
 #define _SMB_H
 
-#include <stdbool.h>
-#include <stdint.h>
-#include <sys/time.h>
-#include <time.h>
-
 #include "local.h"
 
 #define BUFFER_SIZE   (0xFFFF)
@@ -179,63 +174,6 @@ implemented */
 
 typedef char pstring[1024];
 typedef char fstring[128];
-
-/* Structure used when SMBwritebmpx is active */
-struct bmpx_data {
-	int wr_total_written; /* So we know when to discard this */
-	int32_t wr_timeout;
-	int32_t wr_errclass;
-	int32_t wr_error; /* Cached errors */
-	bool wr_mode;     /* write through mode) */
-	bool wr_discard;  /* discard all further data */
-};
-
-/*
- * Structure used to indirect fd's from the struct open_file.
- * Needed as POSIX locking is based on file and process, not
- * file descriptor and process.
- */
-
-struct open_fd {
-	uint16_t ref_count;
-	uint32_t dev;
-	uint32_t inode;
-	int fd;
-	int fd_readonly;
-	int fd_writeonly;
-	int real_open_flags;
-};
-
-struct open_file {
-	int cnum;
-	struct open_fd *fd_ptr;
-	int pos;
-	uint32_t size;
-	int mode;
-	struct bmpx_data *wbmpx_ptr;
-	struct timeval open_time;
-	bool open;
-	bool can_lock;
-	bool can_read;
-	bool can_write;
-	bool share_mode;
-	bool modified;
-	bool reserved;
-	char *name;
-};
-
-struct service_connection {
-	const struct share *share;
-	void *dirptr;
-	bool open;
-	bool read_only;
-	char *dirpath;
-	char *connectpath;
-
-	time_t lastused;
-	bool used;
-	int num_files_open;
-};
 
 /* these are useful macros for checking validity of handles */
 #define VALID_FNUM(fnum) (((fnum) >= 0) && ((fnum) < MAX_OPEN_FILES))
