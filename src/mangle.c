@@ -31,6 +31,7 @@
 #include "includes.h"
 #include "local.h"
 #include "smb.h"
+#include "strfunc.h"
 #include "util.h"
 
 /****************************************************************************

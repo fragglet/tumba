@@ -36,6 +36,7 @@
 #include "mangle.h"
 #include "server.h"
 #include "smb.h"
+#include "strfunc.h"
 #include "util.h"
 
 /*

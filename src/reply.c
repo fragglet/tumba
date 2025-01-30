@@ -49,6 +49,7 @@
 #include "server.h"
 #include "shares.h"
 #include "smb.h"
+#include "strfunc.h"
 #include "system.h"
 #include "timefunc.h"
 #include "trans2.h"

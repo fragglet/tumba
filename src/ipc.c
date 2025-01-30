@@ -43,6 +43,7 @@
 #include "server.h"
 #include "shares.h"
 #include "smb.h"
+#include "strfunc.h"
 #include "timefunc.h"
 #include "util.h"
 

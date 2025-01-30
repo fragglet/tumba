@@ -22,6 +22,7 @@
 #include <libgen.h>
 #include <stddef.h>
 
+#include "strfunc.h"
 #include "util.h"
 
 #define IPC_NAME "IPC$"

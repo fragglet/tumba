@@ -29,6 +29,7 @@ OBJECTS = \
 	reply.o              \
 	server.o             \
 	shares.o             \
+	strfunc.o            \
 	strlcat.o            \
 	strlcpy.o            \
 	system.o             \
