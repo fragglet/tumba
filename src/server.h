@@ -24,12 +24,33 @@
 
 #include "strfunc.h"
 
+#define NMB_PORT   137
+#define DGRAM_PORT 138
+#define SMB_PORT   139
+
 /* set these to define the limits of the server. NOTE These are on a
    per-client basis. Thus any one machine can't connect to more than
    MAX_CONNECTIONS services, but any number of machines may connect at
    one time. */
 #define MAX_CONNECTIONS 127
 #define MAX_OPEN_FILES  100
+
+/* Macro to cache an error in a struct bmpx_data */
+#define CACHE_ERROR_CODE(w, c, e)                                              \
+	((w)->wr_errclass = (c), (w)->wr_error = (e), w->wr_discard = true, -1)
+/* Macro to test if an error has been cached for this fnum */
+#define HAS_CACHED_ERROR_CODE(fnum)                                            \
+	(Files[(fnum)].open && Files[(fnum)].wbmpx_ptr &&                      \
+	 Files[(fnum)].wbmpx_ptr->wr_discard)
+/* Macro to turn the cached error into an error packet */
+#define CACHED_ERROR_CODE(fnum)                                                \
+	cached_error_packet(inbuf, outbuf, fnum, __LINE__)
+
+#define ERROR_CODE(class, x) error_packet(inbuf, outbuf, class, x, __LINE__)
+
+/* this is how errors are generated */
+#define UNIX_ERROR_CODE(defclass, deferror)                                    \
+	unix_error_packet(inbuf, outbuf, defclass, deferror, __LINE__)
 
 /* these are useful macros for checking validity of handles */
 #define VALID_FNUM(fnum) (((fnum) >= 0) && ((fnum) < MAX_OPEN_FILES))

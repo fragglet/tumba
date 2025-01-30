@@ -27,11 +27,6 @@
 #define BUFFER_SIZE   (0xFFFF)
 #define SAFETY_MARGIN 1024
 
-#define NMB_PORT   137
-#define DGRAM_PORT 138
-#define SMB_PORT   139
-
-#define BOOLSTR(b)        ((b) ? "Yes" : "No")
 #define BITSETB(ptr, bit) ((((char *) ptr)[0] & (1 << (bit))) != 0)
 #define BITSETW(ptr, bit) ((SVAL(ptr, 0) & (1 << (bit))) != 0)
 #define PTR_DIFF(p1, p2)  ((ptrdiff_t) (((char *) (p1)) - (char *) (p2)))
@@ -437,23 +432,6 @@ enum protocol_types {
    on different machines/compilers. */
 #define SMB_LKOFF_OFFSET(indx) (2 + (10 * (indx)))
 #define SMB_LKLEN_OFFSET(indx) (6 + (10 * (indx)))
-
-/* Macro to cache an error in a struct bmpx_data */
-#define CACHE_ERROR_CODE(w, c, e)                                              \
-	((w)->wr_errclass = (c), (w)->wr_error = (e), w->wr_discard = true, -1)
-/* Macro to test if an error has been cached for this fnum */
-#define HAS_CACHED_ERROR_CODE(fnum)                                            \
-	(Files[(fnum)].open && Files[(fnum)].wbmpx_ptr &&                      \
-	 Files[(fnum)].wbmpx_ptr->wr_discard)
-/* Macro to turn the cached error into an error packet */
-#define CACHED_ERROR_CODE(fnum)                                                \
-	cached_error_packet(inbuf, outbuf, fnum, __LINE__)
-
-#define ERROR_CODE(class, x) error_packet(inbuf, outbuf, class, x, __LINE__)
-
-/* this is how errors are generated */
-#define UNIX_ERROR_CODE(defclass, deferror)                                    \
-	unix_error_packet(inbuf, outbuf, defclass, deferror, __LINE__)
 
 #define ROUNDUP(x, g) (((x) + ((g) - 1)) & ~((g) - 1))
 
