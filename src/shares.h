@@ -22,6 +22,8 @@ struct share {
 	char *description;
 };
 
+extern const struct share *ipc_service;
+
 const struct share *lookup_share(const char *name);
 const struct share *add_share(const char *path);
 void add_ipc_service(void);

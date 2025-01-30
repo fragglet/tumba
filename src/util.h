@@ -45,6 +45,7 @@ extern int LOGLEVEL;
 extern int Protocol;
 extern int chain_size;
 extern pstring debugf;
+extern char client_addr[32];
 
 void setup_logging(char *pname);
 void reopen_logs(void);

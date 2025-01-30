@@ -84,6 +84,10 @@ extern int max_recv;
 extern struct open_file Files[];
 extern struct service_connection Connections[];
 
+/* Integers used to override error codes.  */
+extern int unix_ERR_class;
+extern int unix_ERR_code;
+
 mode_t unix_mode(int cnum, int dosmode);
 int dos_mode(int cnum, char *path, struct stat *sbuf);
 int dos_chmod(int cnum, char *fname, int dosmode, struct stat *st);

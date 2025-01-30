@@ -22,7 +22,6 @@
 #include <libgen.h>
 #include <stddef.h>
 
-#include "smb.h"
 #include "util.h"
 
 #define IPC_NAME "IPC$"

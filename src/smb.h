@@ -500,12 +500,6 @@ enum protocol_types {
 
 #define UID_FIELD_INVALID 0
 
-/*
- * Integers used to override error codes.
- */
-extern int unix_ERR_class;
-extern int unix_ERR_code;
-
 /***************************************************************
  OPLOCK section.
 ****************************************************************/
@@ -521,9 +515,4 @@ extern int unix_ERR_code;
  End of OPLOCK section.
 ****************************************************************/
 
-extern const struct share *ipc_service;
-
-extern char client_addr[32];
-
 #endif /* _SMB_H */
-/* _SMB_H */
