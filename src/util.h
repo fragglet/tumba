@@ -70,7 +70,6 @@ bool send_smb(int fd, char *buffer);
 void *checked_realloc(void *p, size_t bytes);
 void *checked_calloc(size_t nmemb, size_t size);
 char *checked_strdup(const char *s);
-const char *get_peer_addr(int fd);
 char *gidtoname(int gid);
 void block_signals(bool block, int signum);
 void ajt_panic(void);

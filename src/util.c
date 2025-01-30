@@ -21,12 +21,10 @@
 
 #include "util.h"
 
-#include <arpa/inet.h>
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <netinet/in.h>
 #include <signal.h>
 #include <stdarg.h>
 #include <stdbool.h>
@@ -38,7 +36,6 @@
 #include <strings.h>
 #include <sys/param.h>
 #include <sys/select.h>
-#include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <syslog.h>
@@ -671,23 +668,6 @@ char *checked_strdup(const char *s)
 	assert(result != NULL);
 
 	return result;
-}
-
-/*******************************************************************
- return the IP addr of the remote host connected to a socket
- ******************************************************************/
-const char *get_peer_addr(int fd)
-{
-	struct sockaddr_in sockin;
-	socklen_t length = sizeof(sockin);
-
-	if (getpeername(fd, (struct sockaddr *) &sockin, &length) < 0) {
-		ERROR("getpeername failed for fd=%d, error=%s\n", fd,
-		      strerror(errno));
-		return "(error getting peer address)";
-	}
-
-	return inet_ntoa(sockin.sin_addr);
 }
 
 /*******************************************************************

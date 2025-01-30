@@ -1614,6 +1614,23 @@ static bool is_private_peer(void)
 	return false;
 }
 
+/*******************************************************************
+ return the IP addr of the remote host connected to a socket
+ ******************************************************************/
+static const char *get_peer_addr(int fd)
+{
+	struct sockaddr_in sockin;
+	socklen_t length = sizeof(sockin);
+
+	if (getpeername(fd, (struct sockaddr *) &sockin, &length) < 0) {
+		ERROR("getpeername failed for fd=%d, error=%s\n", fd,
+		      strerror(errno));
+		return "(error getting peer address)";
+	}
+
+	return inet_ntoa(sockin.sin_addr);
+}
+
 /****************************************************************************
   open the socket communication
 ****************************************************************************/
