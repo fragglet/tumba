@@ -48,6 +48,7 @@ extern pstring debugf;
 extern char client_addr[32];
 
 void setup_logging(char *pname);
+int log_output(int level, char *, ...);
 void reopen_logs(void);
 bool file_exist(char *fname, struct stat *sbuf);
 bool directory_exist(char *dname, struct stat *st);

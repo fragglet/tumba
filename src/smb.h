@@ -391,8 +391,6 @@ typedef char fstring[128];
 #define ERRHRD 0x03 /* Error is an hardware error. */
 #define ERRCMD 0xFF /* Command was not in the "SMB" format. */
 
-int log_output(int level, char *, ...);
-
 #ifndef MIN
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #endif
