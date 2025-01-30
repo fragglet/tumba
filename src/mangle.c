@@ -29,10 +29,13 @@
 
 #include "config.h"
 #include "includes.h"
-#include "local.h"
 #include "smb.h"
 #include "strfunc.h"
 #include "util.h"
+
+/* shall filenames with illegal chars in them get mangled in long
+   filename listings? */
+#define MANGLE_LONG_FILENAMES
 
 /****************************************************************************
  * Provide a checksum on a string

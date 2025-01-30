@@ -24,8 +24,6 @@
 #ifndef _SMB_H
 #define _SMB_H
 
-#include "local.h"
-
 #define BUFFER_SIZE   (0xFFFF)
 #define SAFETY_MARGIN 1024
 

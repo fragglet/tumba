@@ -32,16 +32,18 @@
 
 #include "byteorder.h"
 #include "includes.h"
-#include "local.h"
 #include "mangle.h"
 #include "server.h"
 #include "smb.h"
 #include "strfunc.h"
 #include "util.h"
 
-/*
-   This module implements directory related functions for Samba.
-*/
+/* max number of directories open at once */
+/* note that with the new directory code this no longer requires a
+   file handle per directory, but large numbers do use more memory */
+#define MAXDIR 64
+
+#define DIRCACHESIZE 20
 
 static uint32_t dircounter = 0;
 

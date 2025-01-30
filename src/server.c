@@ -59,7 +59,6 @@
 #include "dir.h"
 #include "includes.h"
 #include "ipc.h"
-#include "local.h"
 #include "locking.h"
 #include "mangle.h"
 #include "reply.h"
@@ -72,6 +71,19 @@
 #include "trans2.h"
 #include "util.h"
 #include "version.h"
+
+#define SMB_ALIGNMENT 1
+
+/* the following control timings of various actions. Don't change
+   them unless you know what you are doing. These are all in seconds */
+#define DEFAULT_SMBD_TIMEOUT (60 * 60 * 24 * 7)
+#define IDLE_CLOSED_TIMEOUT  (60)
+#define DPTR_IDLE_TIMEOUT    (120)
+#define SMBD_SELECT_LOOP     (10)
+
+/* do you want smbd to send a 1 byte packet to nmbd to trigger it to start
+   when smbd starts? */
+#define PRIME_NMBD
 
 #define RUN_AS_USER    "nobody"
 #define DOSATTRIB_NAME "user.DOSATTRIB"
@@ -2866,7 +2878,8 @@ static void process(void)
 	InBuffer += SMB_ALIGNMENT;
 	OutBuffer += SMB_ALIGNMENT;
 
-#if PRIME_NMBD
+#ifdef PRIME_NMBD
+	/* TODO: Needed? */
 	DEBUG("priming nmbd\n");
 	{
 		struct in_addr ip = {htonl(INADDR_LOOPBACK)};

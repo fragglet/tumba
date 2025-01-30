@@ -41,7 +41,6 @@
 #include "byteorder.h"
 #include "dir.h"
 #include "includes.h"
-#include "local.h"
 #include "mangle.h"
 #include "server.h"
 #include "shares.h"
@@ -50,6 +49,10 @@
 #include "system.h"
 #include "timefunc.h"
 #include "util.h"
+
+/* what type of filesystem do we want this to show up as in a NT file
+   manager window? */
+#define FSTYPE_STRING "Rumba"
 
 #define DIR_ENTRY_SAFETY_MARGIN 4096
 

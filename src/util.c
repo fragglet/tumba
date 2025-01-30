@@ -43,9 +43,11 @@
 
 #include "byteorder.h"
 #include "includes.h"
-#include "local.h"
 #include "smb.h"
 #include "timefunc.h"
+
+/* To which file do our syslog messages go? */
+#define SYSLOG_FACILITY LOG_DAEMON
 
 char client_addr[32] = "";
 
