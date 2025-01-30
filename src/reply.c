@@ -43,7 +43,7 @@
 #include "byteorder.h"
 #include "config.h"
 #include "dir.h"
-#include "includes.h"
+#include "guards.h" /* IWYU pragma: keep */
 #include "locking.h"
 #include "mangle.h"
 #include "server.h"

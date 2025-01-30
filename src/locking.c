@@ -40,6 +40,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "guards.h" /* IWYU pragma: keep */
 #include "server.h"
 #include "smb.h"
 #include "util.h"

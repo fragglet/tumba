@@ -40,7 +40,7 @@
 
 #include "byteorder.h"
 #include "dir.h"
-#include "includes.h"
+#include "guards.h" /* IWYU pragma: keep */
 #include "mangle.h"
 #include "server.h"
 #include "shares.h"

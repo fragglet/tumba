@@ -28,7 +28,7 @@
 #include <strings.h>
 
 #include "config.h"
-#include "includes.h"
+#include "guards.h" /* IWYU pragma: keep */
 #include "smb.h"
 #include "strfunc.h"
 #include "util.h"

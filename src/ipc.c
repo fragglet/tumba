@@ -39,7 +39,7 @@
 
 #include "byteorder.h"
 #include "config.h"
-#include "includes.h"
+#include "guards.h" /* IWYU pragma: keep */
 #include "server.h"
 #include "shares.h"
 #include "smb.h"

@@ -42,7 +42,7 @@
 #include <unistd.h>
 
 #include "byteorder.h"
-#include "includes.h"
+#include "guards.h" /* IWYU pragma: keep */
 #include "smb.h"
 #include "timefunc.h"
 

@@ -27,7 +27,7 @@
 #include <strings.h>
 
 #include "byteorder.h"
-#include "includes.h"
+#include "guards.h" /* IWYU pragma: keep */
 #include "smb.h"
 #include "util.h"
 
@@ -38,7 +38,7 @@ void init_dos_char_table(void)
 	int i;
 
 #ifdef LC_ALL
-	/* include <locale.h> in includes.h if available for OS */
+	/* include <locale.h> if available for OS */
 	/* we take only standard 7-bit ASCII definitions from ctype */
 	setlocale(LC_ALL, "C");
 #endif

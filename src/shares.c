@@ -22,6 +22,7 @@
 #include <libgen.h>
 #include <stddef.h>
 
+#include "guards.h" /* IWYU pragma: keep */
 #include "strfunc.h"
 #include "util.h"
 

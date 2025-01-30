@@ -31,7 +31,7 @@
 #include <time.h>
 
 #include "byteorder.h"
-#include "includes.h"
+#include "guards.h" /* IWYU pragma: keep */
 #include "mangle.h"
 #include "server.h"
 #include "smb.h"

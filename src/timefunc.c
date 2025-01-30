@@ -30,6 +30,7 @@
 #include <time.h>
 
 #include "byteorder.h"
+#include "guards.h" /* IWYU pragma: keep */
 #include "strfunc.h"
 #include "util.h"
 
