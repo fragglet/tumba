@@ -31,6 +31,8 @@ char *skip_string(char *buf, int n);
 bool trim_string(char *s, char *front, char *back);
 void unix_clean_name(char *s);
 bool strhasupper(char *s);
+int name_extract(char *buf, int ofs, char *name);
+int name_len(char *s);
 bool string_init(char **dest, char *src);
 void string_free(char **s);
 bool string_set(char **dest, char *src);

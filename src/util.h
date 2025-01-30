@@ -67,8 +67,6 @@ int write_data(int fd, char *buffer, int N);
 int read_smb_length_return_keepalive(int fd, char *inbuf, int timeout);
 int read_smb_length(int fd, char *inbuf, int timeout);
 bool send_smb(int fd, char *buffer);
-int name_extract(char *buf, int ofs, char *name);
-int name_len(char *s);
 void *checked_realloc(void *p, size_t bytes);
 void *checked_calloc(size_t nmemb, size_t size);
 char *checked_strdup(const char *s);

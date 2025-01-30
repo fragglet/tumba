@@ -26,6 +26,7 @@
 #include <string.h>
 #include <strings.h>
 
+#include "byteorder.h"
 #include "includes.h"
 #include "smb.h"
 #include "util.h"
@@ -233,6 +234,96 @@ bool strhasupper(char *s)
 		s++;
 	}
 	return false;
+}
+
+/****************************************************************************
+interpret the weird netbios "name". Return the name type
+****************************************************************************/
+static int name_interpret(char *in, char *out)
+{
+	int ret;
+	int len = (*in++) / 2;
+
+	*out = 0;
+
+	if (len > 30 || len < 1)
+		return 0;
+
+	while (len--) {
+		if (in[0] < 'A' || in[0] > 'P' || in[1] < 'A' || in[1] > 'P') {
+			*out = 0;
+			return 0;
+		}
+		*out = ((in[0] - 'A') << 4) + (in[1] - 'A');
+		in += 2;
+		out++;
+	}
+	*out = 0;
+	ret = out[-1];
+
+#ifdef NETBIOS_SCOPE
+	/* Handle any scope names */
+	while (*in) {
+		*out++ = '.'; /* Scope names are separated by periods */
+		len = *(unsigned char *) in++;
+		strlcpy(out, in, len + 1);
+		out += len;
+		*out = 0;
+		in += len;
+	}
+#endif
+	return ret;
+}
+
+/****************************************************************************
+find a pointer to a netbios name
+****************************************************************************/
+static char *name_ptr(char *buf, int ofs)
+{
+	unsigned char c = *(unsigned char *) (buf + ofs);
+
+	if ((c & 0xC0) == 0xC0) {
+		uint16_t l;
+		char p[2];
+		memcpy(p, buf + ofs, 2);
+		p[0] &= ~0xC0;
+		l = RSVAL(p, 0);
+		DEBUG("name ptr to pos %d from %d is %s\n", l, ofs, buf + l);
+		return buf + l;
+	} else
+		return buf + ofs;
+}
+
+/****************************************************************************
+extract a netbios name from a buf
+****************************************************************************/
+int name_extract(char *buf, int ofs, char *name)
+{
+	char *p = name_ptr(buf, ofs);
+	int d = PTR_DIFF(p, buf + ofs);
+	pstrcpy(name, "");
+	if (d < -50 || d > 50)
+		return 0;
+	return name_interpret(p, name);
+}
+
+/****************************************************************************
+return the total storage length of a mangled name
+****************************************************************************/
+int name_len(char *s)
+{
+	int len;
+
+	/* If the two high bits of the byte are set, return 2. */
+	if (0xC0 == (*(unsigned char *) s & 0xC0))
+		return 2;
+
+	/* Add up the length bytes. */
+	for (len = 1; (*s); s += (*s) + 1) {
+		len += *s + 1;
+	}
+
+	return len;
 }
 
 /* this is used to prevent lots of mallocs of size 1 */
