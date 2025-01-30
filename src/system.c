@@ -85,6 +85,7 @@ ssize_t sys_setxattr(const char *path, const char *name, void *value,
 
 #else
 
+#include <errno.h>
 #warning No xattr support - DOS a/h/s file attributes will not be preserved!
 
 /* Different OSes have different versions of getxattr */
