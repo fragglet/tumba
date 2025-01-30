@@ -172,32 +172,6 @@ implemented */
 #define ERRsharebufexc 36 /* share buffer exceeded */
 #define ERRdiskfull    39
 
-/* these are useful macros for checking validity of handles */
-#define VALID_FNUM(fnum) (((fnum) >= 0) && ((fnum) < MAX_OPEN_FILES))
-#define OPEN_FNUM(fnum)  (VALID_FNUM(fnum) && Files[fnum].open)
-#define VALID_CNUM(cnum) (((cnum) >= 0) && ((cnum) < MAX_CONNECTIONS))
-#define OPEN_CNUM(cnum)  (VALID_CNUM(cnum) && Connections[cnum].open)
-#define FNUM_OK(fnum, c) (OPEN_FNUM(fnum) && (c) == Files[fnum].cnum)
-
-#define CHECK_FNUM(fnum, c)                                                    \
-	if (!FNUM_OK(fnum, c))                                                 \
-	return (ERROR_CODE(ERRDOS, ERRbadfid))
-#define CHECK_READ(fnum)                                                       \
-	if (!Files[fnum].can_read)                                             \
-	return (ERROR_CODE(ERRDOS, ERRbadaccess))
-#define CHECK_WRITE(fnum)                                                      \
-	if (!Files[fnum].can_write)                                            \
-	return (ERROR_CODE(ERRDOS, ERRbadaccess))
-#define CHECK_ERROR(fnum)                                                      \
-	if (HAS_CACHED_ERROR_CODE(fnum))                                       \
-	return (CACHED_ERROR_CODE(fnum))
-
-/* translates a connection number into a service number */
-#define CONN_SHARE(cnum) (Connections[cnum].share)
-
-/* access various service details */
-#define CAN_WRITE(cnum) (OPEN_CNUM(cnum) && !Connections[cnum].read_only)
-
 /* the basic packet size, assuming no words or bytes */
 #define smb_size 39
 

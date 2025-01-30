@@ -10,13 +10,6 @@
 #define SYSLOG_FACILITY LOG_DAEMON
 #endif
 
-/* set these to define the limits of the server. NOTE These are on a
-   per-client basis. Thus any one machine can't connect to more than
-   MAX_CONNECTIONS services, but any number of machines may connect at
-   one time. */
-#define MAX_CONNECTIONS 127
-#define MAX_OPEN_FILES  100
-
 /* max number of directories open at once */
 /* note that with the new directory code this no longer requires a
    file handle per directory, but large numbers do use more memory */

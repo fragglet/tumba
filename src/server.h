@@ -24,6 +24,39 @@
 
 #include "strfunc.h"
 
+/* set these to define the limits of the server. NOTE These are on a
+   per-client basis. Thus any one machine can't connect to more than
+   MAX_CONNECTIONS services, but any number of machines may connect at
+   one time. */
+#define MAX_CONNECTIONS 127
+#define MAX_OPEN_FILES  100
+
+/* these are useful macros for checking validity of handles */
+#define VALID_FNUM(fnum) (((fnum) >= 0) && ((fnum) < MAX_OPEN_FILES))
+#define OPEN_FNUM(fnum)  (VALID_FNUM(fnum) && Files[fnum].open)
+#define VALID_CNUM(cnum) (((cnum) >= 0) && ((cnum) < MAX_CONNECTIONS))
+#define OPEN_CNUM(cnum)  (VALID_CNUM(cnum) && Connections[cnum].open)
+#define FNUM_OK(fnum, c) (OPEN_FNUM(fnum) && (c) == Files[fnum].cnum)
+
+#define CHECK_FNUM(fnum, c)                                                    \
+	if (!FNUM_OK(fnum, c))                                                 \
+	return (ERROR_CODE(ERRDOS, ERRbadfid))
+#define CHECK_READ(fnum)                                                       \
+	if (!Files[fnum].can_read)                                             \
+	return (ERROR_CODE(ERRDOS, ERRbadaccess))
+#define CHECK_WRITE(fnum)                                                      \
+	if (!Files[fnum].can_write)                                            \
+	return (ERROR_CODE(ERRDOS, ERRbadaccess))
+#define CHECK_ERROR(fnum)                                                      \
+	if (HAS_CACHED_ERROR_CODE(fnum))                                       \
+	return (CACHED_ERROR_CODE(fnum))
+
+/* translates a connection number into a service number */
+#define CONN_SHARE(cnum) (Connections[cnum].share)
+
+/* access various service details */
+#define CAN_WRITE(cnum) (OPEN_CNUM(cnum) && !Connections[cnum].read_only)
+
 /* Structure used to indirect fd's from the struct open_file. Needed as POSIX
  * locking is based on file and process, not file descriptor and process. */
 struct open_fd {
