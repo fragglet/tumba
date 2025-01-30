@@ -16,6 +16,12 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+struct share {
+	char *name;
+	char *path;
+	char *description;
+};
+
 const struct share *lookup_share(const char *name);
 const struct share *add_share(const char *path);
 void add_ipc_service(void);

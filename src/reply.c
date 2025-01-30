@@ -47,6 +47,7 @@
 #include "locking.h"
 #include "mangle.h"
 #include "server.h"
+#include "shares.h"
 #include "smb.h"
 #include "system.h"
 #include "timefunc.h"

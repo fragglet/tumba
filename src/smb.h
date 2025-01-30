@@ -237,12 +237,6 @@ struct service_connection {
 	int num_files_open;
 };
 
-struct share {
-	char *name;
-	char *path;
-	char *description;
-};
-
 /* these are useful macros for checking validity of handles */
 #define VALID_FNUM(fnum) (((fnum) >= 0) && ((fnum) < MAX_OPEN_FILES))
 #define OPEN_FNUM(fnum)  (VALID_FNUM(fnum) && Files[fnum].open)
