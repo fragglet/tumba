@@ -49,7 +49,6 @@ extern char client_addr[32];
 
 void setup_logging(char *pname);
 int log_output(int level, char *, ...);
-void reopen_logs(void);
 bool file_exist(char *fname, struct stat *sbuf);
 bool directory_exist(char *dname, struct stat *st);
 uint32_t file_size(char *file_name);
@@ -70,6 +69,4 @@ bool send_smb(int fd, char *buffer);
 void *checked_realloc(void *p, size_t bytes);
 void *checked_calloc(size_t nmemb, size_t size);
 char *checked_strdup(const char *s);
-char *gidtoname(int gid);
 void block_signals(bool block, int signum);
-void ajt_panic(void);
