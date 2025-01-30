@@ -49,6 +49,8 @@
 /* To which file do our syslog messages go? */
 #define SYSLOG_FACILITY LOG_DAEMON
 
+#define USE_SIGPROCMASK
+
 char client_addr[32] = "";
 
 int LOGLEVEL = 1;

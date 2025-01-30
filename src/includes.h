@@ -26,24 +26,6 @@
    and add a section for the new unix below.
 */
 
-#define SIGNAL_CAST (void (*)(int))
-#define USE_SIGPROCMASK
-
-/* some unixes have ENOTTY instead of TIOCNOTTY */
-#ifndef TIOCNOTTY
-#ifdef ENOTTY
-#define TIOCNOTTY ENOTTY
-#endif
-#endif
-
-#ifndef MAXHOSTNAMELEN
-#define MAXHOSTNAMELEN 255
-#endif
-
-#ifndef EDQUOT
-#define EDQUOT ENOSPC
-#endif
-
 #ifdef strcpy
 #undef strcpy
 #endif /* strcpy */

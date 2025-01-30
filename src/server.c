@@ -73,6 +73,7 @@
 #include "version.h"
 
 #define SMB_ALIGNMENT 1
+#define SIGNAL_CAST   (void (*)(int))
 
 /* the following control timings of various actions. Don't change
    them unless you know what you are doing. These are all in seconds */
@@ -1404,6 +1405,10 @@ int cached_error_packet(char *inbuf, char *outbuf, int fnum, int line)
 	Files[fnum].wbmpx_ptr = NULL;
 	return error_packet(inbuf, outbuf, eclass, err, line);
 }
+
+#ifndef EDQUOT
+#define EDQUOT ENOSPC
+#endif
 
 struct {
 	int unixerror;
