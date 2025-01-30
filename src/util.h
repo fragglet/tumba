@@ -20,7 +20,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "smb.h"
+#include "strfunc.h"
 
 /* logging interface */
 #define LOG(level, ...)                                                        \

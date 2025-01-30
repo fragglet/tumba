@@ -64,11 +64,6 @@
 #define calloc(x, y)  __ERROR__XX_NEVER_USE_CALLOC__;
 #define strdup(x)     __ERROR__XX_NEVER_USE_STRDUP__;
 
-#define pstrcpy(d, s) safe_strcpy((d), (s), sizeof(pstring))
-#define pstrcat(d, s) safe_strcat((d), (s), sizeof(pstring))
-#define fstrcpy(d, s) safe_strcpy((d), (s), sizeof(fstring))
-#define fstrcat(d, s) safe_strcat((d), (s), sizeof(fstring))
-
 #define checked_malloc(bytes) checked_realloc(NULL, bytes)
 
 /* TODO: Remove these once their addition to glibc is less recent */

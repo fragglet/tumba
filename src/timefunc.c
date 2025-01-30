@@ -30,7 +30,7 @@
 #include <time.h>
 
 #include "byteorder.h"
-#include "smb.h"
+#include "strfunc.h"
 #include "util.h"
 
 struct tm;

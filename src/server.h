@@ -22,7 +22,7 @@
 #include <sys/time.h>
 #include <time.h>
 
-#include "smb.h"
+#include "strfunc.h"
 
 /* Structure used to indirect fd's from the struct open_file. Needed as POSIX
  * locking is based on file and process, not file descriptor and process. */

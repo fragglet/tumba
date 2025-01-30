@@ -18,6 +18,14 @@
 
 #include <stdbool.h>
 
+#define pstrcpy(d, s) safe_strcpy((d), (s), sizeof(pstring))
+#define pstrcat(d, s) safe_strcat((d), (s), sizeof(pstring))
+#define fstrcpy(d, s) safe_strcpy((d), (s), sizeof(fstring))
+#define fstrcat(d, s) safe_strcat((d), (s), sizeof(fstring))
+
+typedef char pstring[1024];
+typedef char fstring[128];
+
 int isdoschar(int c);
 void init_dos_char_table(void);
 bool strequal(const char *s1, const char *s2);

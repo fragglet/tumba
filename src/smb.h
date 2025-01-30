@@ -172,9 +172,6 @@ implemented */
 #define ERRsharebufexc 36 /* share buffer exceeded */
 #define ERRdiskfull    39
 
-typedef char pstring[1024];
-typedef char fstring[128];
-
 /* these are useful macros for checking validity of handles */
 #define VALID_FNUM(fnum) (((fnum) >= 0) && ((fnum) < MAX_OPEN_FILES))
 #define OPEN_FNUM(fnum)  (VALID_FNUM(fnum) && Files[fnum].open)
