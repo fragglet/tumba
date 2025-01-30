@@ -18,10 +18,14 @@
 
 #include <sys/stat.h>
 
+#include "smb.h"
+
 extern const char *workgroup;
 extern int chain_fnum;
 extern int max_send;
 extern int max_recv;
+extern struct open_file Files[];
+extern struct service_connection Connections[];
 
 mode_t unix_mode(int cnum, int dosmode);
 int dos_mode(int cnum, char *path, struct stat *sbuf);

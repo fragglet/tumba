@@ -33,7 +33,6 @@
 #include "smb.h"
 #include "util.h"
 
-
 /****************************************************************************
  * Provide a checksum on a string
  *

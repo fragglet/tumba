@@ -40,9 +40,9 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "server.h"
 #include "smb.h"
 #include "util.h"
-extern struct open_file Files[];
 
 static bool fcntl_lock(int fd, int op, uint32_t offset, uint32_t count,
                        int type)

@@ -42,6 +42,9 @@ extern int Client;
 extern int smb_read_error;
 extern fstring local_machine;
 extern int LOGLEVEL;
+extern int Protocol;
+extern int chain_size;
+extern pstring debugf;
 
 void setup_logging(char *pname);
 void reopen_logs(void);

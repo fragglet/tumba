@@ -51,10 +51,6 @@
 
 #define DIR_ENTRY_SAFETY_MARGIN 4096
 
-extern int Protocol;
-extern struct service_connection Connections[];
-extern struct open_file Files[];
-
 /****************************************************************************
   Send the required number of replies back.
   We assume all fields other than the data fields are

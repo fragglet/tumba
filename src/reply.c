@@ -54,11 +54,6 @@
 #include "util.h"
 #include "version.h"
 
-/* look in server.c for some explanation of these variables */
-extern int Protocol;
-extern struct service_connection Connections[];
-extern struct open_file Files[];
-
 /* this macro should always be used to extract an fnum (smb_fid) from
 a packet to ensure chaining works correctly */
 #define GETFNUM(buf, where) (chain_fnum != -1 ? chain_fnum : SVAL(buf, where))

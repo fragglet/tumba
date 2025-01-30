@@ -46,9 +46,6 @@
 #include "timefunc.h"
 #include "util.h"
 
-extern struct open_file Files[];
-extern struct service_connection Connections[];
-
 #define NERR_Success      0
 #define NERR_notsupported 50
 

@@ -38,8 +38,6 @@
 #include "smb.h"
 #include "util.h"
 
-extern struct service_connection Connections[];
-
 /*
    This module implements directory related functions for Samba.
 */

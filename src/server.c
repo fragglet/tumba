@@ -77,8 +77,6 @@
 
 #define MAX_MUX 50
 
-extern pstring debugf;
-
 static bool allow_public_connections = false;
 
 static char *InBuffer = NULL;
@@ -106,8 +104,6 @@ struct open_file Files[MAX_OPEN_FILES];
  */
 static struct open_fd FileFd[MAX_OPEN_FILES];
 static int max_file_fd_used = 0;
-
-extern int Protocol;
 
 const char *workgroup = "WORKGROUP";
 static const char *bind_addr = "0.0.0.0";
@@ -2638,7 +2634,6 @@ int chain_reply(char *inbuf, char *outbuf, int size, int bufsize)
 	int outsize2, ofs;
 	char inbuf_saved[smb_wct];
 	char outbuf_saved[smb_wct];
-	extern int chain_size;
 	int wct = CVAL(outbuf, smb_wct);
 	int outsize = smb_size + 2 * wct + SVAL(outbuf, smb_vwv0 + 2 * wct);
 
@@ -2730,7 +2725,6 @@ static int construct_reply(char *inbuf, char *outbuf, int size, int bufsize)
 	int type = CVAL(inbuf, smb_com);
 	int outsize = 0;
 	int msg_type = CVAL(inbuf, 0);
-	extern int chain_size;
 
 	smb_last_time = time(NULL);
 
