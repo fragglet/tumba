@@ -2994,7 +2994,6 @@ int main(int argc, char *argv[])
 {
 	int port = SMB_PORT;
 	int opt;
-	extern char *optarg;
 
 #ifdef NEED_AUTH_PARAMETERS
 	set_auth_parameters(argc, argv);
