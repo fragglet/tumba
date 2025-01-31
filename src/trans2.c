@@ -501,7 +501,6 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 		p += 2 + 24;
 		/* nameptr = p;  */
 		pstrcpy(p, fname);
-		p += strlen(p);
 		p = pdata + len;
 		break;
 

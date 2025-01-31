@@ -189,8 +189,6 @@ static bool api_RNetServerEnum(int cnum, char *param, char *data, int mdrcnt,
 	char *p = skip_string(str2, 1);
 	int uLevel = SVAL(p, 0);
 
-	p += 8;
-
 	if (!prefix_ok(str1, "WrLehD"))
 		return false;
 	if (!check_server_info(uLevel, str2))
@@ -645,7 +643,6 @@ static bool api_NetWkstaGetInfo(int cnum, char *param, char *data, int mdrcnt,
 	SIVAL(p, 0, PTR_DIFF(p2, *rdata)); /* don't know */
 	pstrcpy(p2, "");
 	p2 = skip_string(p2, 1);
-	p += 4;
 
 	*rdata_len = PTR_DIFF(p2, *rdata);
 

@@ -451,10 +451,7 @@ int reply_getatr(char *inbuf, char *outbuf, int in_size, int buffsize)
 	SIVAL(outbuf, smb_vwv3, size);
 
 	if (Protocol >= PROTOCOL_NT1) {
-		char *p = strrchr(fname, '/');
 		uint16_t flg2 = SVAL(outbuf, smb_flg2);
-		if (!p)
-			p = fname;
 		if (!is_8_3(fname, true))
 			SSVAL(outbuf, smb_flg2, flg2 | 0x40); /* IS_LONG_NAME */
 	}
@@ -719,7 +716,6 @@ int reply_search(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 					numentries = 1;
 				else
 					numentries = 0;
-				p += DIR_STRUCT_SIZE;
 			} else {
 				for (i = numentries;
 				     (i < maxentries) && !finished; i++) {
