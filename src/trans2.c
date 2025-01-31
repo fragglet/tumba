@@ -636,7 +636,7 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 	   requested. */
 	uint32_t max_data_bytes = SVAL(inbuf, smb_mdrcnt);
 	char *params = *pparams;
-	char *pdata = *ppdata;
+	char *pdata;
 	int dirtype = SVAL(params, 0);
 	int maxentries = SVAL(params, 2);
 	bool close_after_first = BITSETW(params + 4, 0);
@@ -805,7 +805,7 @@ static int call_trans2findnext(char *inbuf, char *outbuf, int length,
 	   requested. */
 	int max_data_bytes = SVAL(inbuf, smb_mdrcnt);
 	char *params = *pparams;
-	char *pdata = *ppdata;
+	char *pdata;
 	int16_t dptr_num = SVAL(params, 0);
 	int maxentries = SVAL(params, 2);
 	uint16_t info_level = SVAL(params, 4);
@@ -1016,7 +1016,7 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
                               char **ppdata)
 {
 	int max_data_bytes = SVAL(inbuf, smb_mdrcnt);
-	char *pdata = *ppdata;
+	char *pdata;
 	char *params = *pparams;
 	uint16_t info_level = SVAL(params, 0);
 	int data_len;
@@ -1146,7 +1146,7 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
 {
 	int max_data_bytes = SVAL(inbuf, smb_mdrcnt);
 	char *params = *pparams;
-	char *pdata = *ppdata;
+	char *pdata;
 	uint16_t tran_call = SVAL(inbuf, smb_setup0);
 	uint16_t info_level;
 	int mode = 0;
@@ -1637,7 +1637,7 @@ static int call_trans2findnotifynext(char *inbuf, char *outbuf, int length,
                                      int bufsize, int cnum, char **pparams,
                                      char **ppdata)
 {
-	char *params = *pparams;
+	char *params;
 
 	params = *pparams = checked_realloc(*pparams, 4);
 

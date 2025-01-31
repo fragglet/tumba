@@ -1727,8 +1727,6 @@ int reply_write(char *inbuf, char *outbuf, int dum1, int dum2)
 	int startpos;
 	char *data;
 
-	dum1 = dum2 = 0;
-
 	cnum = SVAL(inbuf, smb_tid);
 	fnum = GETFNUM(inbuf, smb_vwv0);
 
