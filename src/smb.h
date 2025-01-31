@@ -25,7 +25,6 @@
 #define _SMB_H
 
 #define BUFFER_SIZE   (0xFFFF)
-#define SAFETY_MARGIN 1024
 
 #define BITSETB(ptr, bit) ((((char *) ptr)[0] & (1 << (bit))) != 0)
 #define BITSETW(ptr, bit) ((SVAL(ptr, 0) & (1 << (bit))) != 0)

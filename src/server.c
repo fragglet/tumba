@@ -75,6 +75,7 @@
 #define SMB_ALIGNMENT 1
 #define SIGNAL_CAST   (void (*)(int))
 #define BOOLSTR(b)    ((b) ? "Yes" : "No")
+#define SAFETY_MARGIN 1024
 
 /* the following control timings of various actions. Don't change
    them unless you know what you are doing. These are all in seconds */
