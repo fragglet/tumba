@@ -2970,8 +2970,8 @@ int reply_setattrE(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	if ((unix_times.actime == 0) && (unix_times.modtime == 0)) {
 		/* Ignore request */
-		DEBUG("reply_setattrE fnum=%d cnum=%d ignoring zero request - \
-not setting timestamps of 0\n",
+		DEBUG("reply_setattrE fnum=%d cnum=%d ignoring zero request - "
+		      "not setting timestamps of 0\n",
 		      fnum, cnum, unix_times.actime, unix_times.modtime);
 		return outsize;
 	} else if ((unix_times.actime != 0) && (unix_times.modtime == 0)) {

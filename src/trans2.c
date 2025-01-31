@@ -833,13 +833,13 @@ static int call_trans2findnext(char *inbuf, char *outbuf, int length,
 
 	pstrcpy(resume_name, params + 12);
 
-	DEBUG(
-	    "call_trans2findnext: dirhandle = %d, max_data_bytes = %d, maxentries = %d, \
-close_after_request=%d, close_if_end = %d requires_resume_key = %d \
-resume_key = %d resume name = %s continue=%d level = %d\n",
-	    dptr_num, max_data_bytes, maxentries, close_after_request,
-	    close_if_end, requires_resume_key, resume_key, resume_name,
-	    continue_bit, info_level);
+	DEBUG("call_trans2findnext: dirhandle = %d, max_data_bytes = %d, "
+	      "maxentries = %d, close_after_request=%d, close_if_end = %d "
+	      "requires_resume_key = %d resume_key = %d resume name = %s "
+	      "continue=%d level = %d\n",
+	      dptr_num, max_data_bytes, maxentries, close_after_request,
+	      close_if_end, requires_resume_key, resume_key, resume_name,
+	      continue_bit, info_level);
 
 	switch (info_level) {
 	case 1:
