@@ -28,6 +28,7 @@
 #define NOTICE(...)  LOG(0, 0, 2, __VA_ARGS__)
 #define INFO(...)    LOG(0, 0, 3, __VA_ARGS__)
 #define DEBUG(...)   LOG(__func__, __LINE__, 4, __VA_ARGS__)
+#define DEBUG_(...)  LOG(0, 0, 4, __VA_ARGS__)
 
 /* limiting size of ipc replies */
 #define REALLOC(ptr, size) checked_realloc(ptr, MAX((size), 4 * 1024))

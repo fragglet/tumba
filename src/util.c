@@ -213,7 +213,7 @@ static void print_asc(unsigned char *buf, int len)
 {
 	int i;
 	for (i = 0; i < len; i++) {
-		DEBUG("%c", isprint(buf[i]) ? buf[i] : '.');
+		DEBUG_("%c", isprint(buf[i]) ? buf[i] : '.');
 	}
 }
 
@@ -224,38 +224,38 @@ static void dump_data(char *buf1, int len)
 	if (len <= 0)
 		return;
 
-	DEBUG("[%03X] ", i);
+	DEBUG_("[%03X] ", i);
 	for (i = 0; i < len;) {
-		DEBUG("%02X ", (int) buf[i]);
+		DEBUG_("%02X ", (int) buf[i]);
 		i++;
 		if (i % 8 == 0)
-			DEBUG(" ");
+			DEBUG_(" ");
 		if (i % 16 == 0) {
 			print_asc(&buf[i - 16], 8);
-			DEBUG(" ");
+			DEBUG_(" ");
 			print_asc(&buf[i - 8], 8);
-			DEBUG("\n");
+			DEBUG_("\n");
 			if (i < len)
-				DEBUG("[%03X] ", i);
+				DEBUG_("[%03X] ", i);
 		}
 	}
 	if (i % 16) {
 		int n;
 
 		n = 16 - (i % 16);
-		DEBUG(" ");
+		DEBUG_(" ");
 		if (n > 8)
-			DEBUG(" ");
+			DEBUG_(" ");
 		while (n--)
-			DEBUG("   ");
+			DEBUG_("   ");
 
 		n = MIN(8, i % 16);
 		print_asc(&buf[i - (i % 16)], n);
-		DEBUG(" ");
+		DEBUG_(" ");
 		n = (i % 16) - n;
 		if (n > 0)
 			print_asc(&buf[i - n], n);
-		DEBUG("\n");
+		DEBUG_("\n");
 	}
 }
 
@@ -270,22 +270,23 @@ void show_msg(char *buf)
 	if (LOGLEVEL < 5)
 		return;
 
-	DEBUG("size=%d\nsmb_com=0x%x\nsmb_rcls=%d\nsmb_reh=%d\nsmb_err=%"
-	      "d\nsmb_flg=%d\nsmb_flg2=%d\n",
-	      smb_len(buf), (int) CVAL(buf, smb_com), (int) CVAL(buf, smb_rcls),
-	      (int) CVAL(buf, smb_reh), (int) SVAL(buf, smb_err),
-	      (int) CVAL(buf, smb_flg), (int) SVAL(buf, smb_flg2));
-	DEBUG("smb_tid=%d\nsmb_pid=%d\nsmb_uid=%d\nsmb_mid=%d\nsmt_wct=%d\n",
-	      (int) SVAL(buf, smb_tid), (int) SVAL(buf, smb_pid),
-	      (int) SVAL(buf, smb_uid), (int) SVAL(buf, smb_mid),
-	      (int) CVAL(buf, smb_wct));
+	DEBUG_("size=%d\nsmb_com=0x%x\nsmb_rcls=%d\nsmb_reh=%d\nsmb_err=%d\n"
+	       "smb_flg=%d\nsmb_flg2=%d\n",
+	       smb_len(buf), (int) CVAL(buf, smb_com),
+	       (int) CVAL(buf, smb_rcls), (int) CVAL(buf, smb_reh),
+	       (int) SVAL(buf, smb_err), (int) CVAL(buf, smb_flg),
+	       (int) SVAL(buf, smb_flg2));
+	DEBUG_("smb_tid=%d\nsmb_pid=%d\nsmb_uid=%d\nsmb_mid=%d\nsmt_wct=%d\n",
+	       (int) SVAL(buf, smb_tid), (int) SVAL(buf, smb_pid),
+	       (int) SVAL(buf, smb_uid), (int) SVAL(buf, smb_mid),
+	       (int) CVAL(buf, smb_wct));
 
 	for (i = 0; i < (int) CVAL(buf, smb_wct); i++)
-		DEBUG("smb_vwv[%d]=%d (0x%X)\n", i, SVAL(buf, smb_vwv + 2 * i),
-		      SVAL(buf, smb_vwv + 2 * i));
+		DEBUG_("smb_vwv[%d]=%d (0x%X)\n", i, SVAL(buf, smb_vwv + 2 * i),
+		       SVAL(buf, smb_vwv + 2 * i));
 
 	bcc = (int) SVAL(buf, smb_vwv + 2 * (CVAL(buf, smb_wct)));
-	DEBUG("smb_bcc=%d\n", bcc);
+	DEBUG_("smb_bcc=%d\n", bcc);
 
 	if (LOGLEVEL < 10)
 		return;
