@@ -12,6 +12,10 @@
 
 <img src="win98.png" width="800">
 
+## Windows ME
+
+<img src="winme.png" width="1024">
+
 ## Windows NT 4
 
 <img src="nt4.png" width="1024">
