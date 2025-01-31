@@ -265,7 +265,7 @@ int dos_mode(int cnum, char *path, struct stat *sbuf)
 {
 	int result = 0;
 
-	DEBUG("dos_mode: %d %s\n", cnum, path);
+	DEBUG("cnum=%d path=%s\n", cnum, path);
 
 	if (CAN_WRITE(cnum)) {
 		if ((sbuf->st_mode & S_IWOTH) == 0 &&
@@ -282,7 +282,7 @@ int dos_mode(int cnum, char *path, struct stat *sbuf)
 	if (S_ISDIR(sbuf->st_mode))
 		result = aDIR | (result & aRONLY);
 
-	DEBUG("dos_mode returning ");
+	DEBUG("returning ");
 
 	if (result & aHIDDEN)
 		DEBUG("h");
@@ -367,7 +367,7 @@ bool set_filetime(int cnum, char *fname, time_t mtime)
 	times.modtime = times.actime = mtime;
 
 	if (sys_utime(fname, &times) != 0) {
-		DEBUG("set_filetime(%s) failed: %s\n", fname, strerror(errno));
+		DEBUG("fname=%s failed: %s\n", fname, strerror(errno));
 	}
 
 	return true;
@@ -542,7 +542,7 @@ bool unix_convert(char *name, int cnum, pstring saved_last_component,
 	if (stat(name, &st) == 0)
 		return true;
 
-	DEBUG("unix_convert(%s,%d)\n", name, cnum);
+	DEBUG("name=%s cnum=%d\n", name, cnum);
 
 	/* now we need to recursively match the name against the real
 	   directory structure */
@@ -701,11 +701,11 @@ bool check_name(char *name, int cnum)
 		return true;
 	}
 	if (getcwd(old_wd, sizeof(old_wd)) == NULL) {
-		DEBUG("check_name: denied: getcwd() errno=%d\n", top, errno);
+		DEBUG("denied: getcwd() errno=%d\n", top, errno);
 		return false;
 	}
 	if (chdir(top) != 0) {
-		DEBUG("check_name: denied: chdir(%s) errno=%d\n", top, errno);
+		DEBUG("denied: chdir(%s) errno=%d\n", top, errno);
 		return false;
 	}
 
@@ -730,14 +730,13 @@ bool check_name(char *name, int cnum)
 		set_parent_dir(parent, name);
 		canon_path = realpath(parent, NULL);
 		if (canon_path == NULL) {
-			DEBUG("check_name: realpath(%s) errno=%d (parent)\n",
-			      parent, errno);
+			DEBUG("realpath(%s) errno=%d (parent)\n", parent,
+			      errno);
 		}
 		success = canon_path != NULL && path_within(canon_path, top);
 		if (success) {
-			DEBUG("check_name: no file %s but parent %s "
-			      "within %s\n",
-			      name, parent, top);
+			DEBUG("no file %s but parent %s within %s\n", name,
+			      parent, top);
 		}
 		free(canon_path);
 	}
@@ -748,7 +747,7 @@ bool check_name(char *name, int cnum)
 	}
 
 	if (chdir(old_wd) != 0) {
-		DEBUG("check_name: ending chdir(%s) errno=%d\n", old_wd, errno);
+		DEBUG("ending chdir(%s) errno=%d\n", old_wd, errno);
 	}
 
 	return success;
@@ -898,7 +897,7 @@ Decrements the ref_count and returns it.
 ****************************************************************************/
 static int fd_attempt_close(struct open_fd *fd_ptr)
 {
-	DEBUG("fd_attempt_close on struct open_fd %d, fd = %d, dev = %x, "
+	DEBUG("open_fd %d, fd = %d, dev = %x, "
 	      "inode = %x, open_flags = %d, ref_count = %d.\n",
 	      fd_ptr - &FileFd[0], fd_ptr->fd, fd_ptr->dev, fd_ptr->inode,
 	      fd_ptr->real_open_flags, fd_ptr->ref_count);
@@ -3083,7 +3082,6 @@ int main(int argc, char *argv[])
 
 	/* Setup the signals that allow the debug log level
 	   to by dynamically changed. */
-
 	DEBUG("loaded services\n");
 
 	if (!open_sockets(port))

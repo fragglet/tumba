@@ -96,7 +96,7 @@ bool is_8_3(char *fname, bool check_case)
 		fname = slash_pos + 1;
 	len = strlen(fname);
 
-	DEBUG("checking %s for 8.3\n", fname);
+	DEBUG("fname=%s\n", fname);
 
 	/* can't be longer than 12 chars */
 	if (len == 0 || len > 12)

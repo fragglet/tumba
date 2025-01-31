@@ -15,7 +15,7 @@
 #ifndef _SMB_H
 #define _SMB_H
 
-#define BUFFER_SIZE   (0xFFFF)
+#define BUFFER_SIZE (0xFFFF)
 
 #define BITSETB(ptr, bit) ((((char *) ptr)[0] & (1 << (bit))) != 0)
 #define BITSETW(ptr, bit) ((SVAL(ptr, 0) & (1 << (bit))) != 0)

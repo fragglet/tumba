@@ -188,7 +188,7 @@ void unix_clean_name(char *s)
 {
 	char *p = NULL;
 
-	DEBUG("unix_clean_name [%s]\n", s);
+	DEBUG("s=%s\n", s);
 
 	/* remove any double slashes */
 	string_sub(s, "//", "/");
@@ -281,7 +281,7 @@ static char *name_ptr(char *buf, int ofs)
 		memcpy(p, buf + ofs, 2);
 		p[0] &= ~0xC0;
 		l = RSVAL(p, 0);
-		DEBUG("name ptr to pos %d from %d is %s\n", l, ofs, buf + l);
+		DEBUG("to pos %d from %d is %s\n", l, ofs, buf + l);
 		return buf + l;
 	} else
 		return buf + ofs;
@@ -521,7 +521,7 @@ bool mask_match(char *str, char *regexp, bool trans2)
 	if (strequal(t_pattern, "*"))
 		return true;
 
-	DEBUG("mask_match str=<%s> regexp=<%s>\n", t_filename, t_pattern);
+	DEBUG("str=<%s> regexp=<%s>\n", t_filename, t_pattern);
 
 	if (trans2) {
 		/*
@@ -707,7 +707,7 @@ bool mask_match(char *str, char *regexp, bool trans2)
 		}
 	}
 
-	DEBUG("mask_match returning %d\n", matched);
+	DEBUG("returning %d\n", matched);
 
 	return matched;
 }

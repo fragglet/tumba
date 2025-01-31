@@ -202,8 +202,7 @@ int reply_tcon(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	SSVAL(outbuf, smb_vwv1, connection_num);
 	SSVAL(outbuf, smb_tid, connection_num);
 
-	DEBUG("tcon service=%s user=%s cnum=%d\n", service, user,
-	      connection_num);
+	DEBUG("service=%s user=%s cnum=%d\n", service, user, connection_num);
 
 	return outsize;
 }
@@ -268,8 +267,7 @@ int reply_tcon_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 		SSVAL(outbuf, smb_vwv2, 0x0); /* optional support */
 	}
 
-	DEBUG("tconX service=%s user=%s cnum=%d\n", service, user,
-	      connection_num);
+	DEBUG("service=%s user=%s cnum=%d\n", service, user, connection_num);
 
 	/* set the incoming and outgoing tid to the just created one */
 	SSVAL(inbuf, smb_tid, connection_num);
@@ -390,7 +388,7 @@ int reply_chkpth(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	outsize = set_message(outbuf, 0, 0, true);
 
-	DEBUG("chkpth %s cnum=%d mode=%d\n", name, cnum, mode);
+	DEBUG("name=%s cnum=%d mode=%d\n", name, cnum, mode);
 
 	return outsize;
 }
@@ -461,7 +459,7 @@ int reply_getatr(char *inbuf, char *outbuf, int in_size, int buffsize)
 			SSVAL(outbuf, smb_flg2, flg2 | 0x40); /* IS_LONG_NAME */
 	}
 
-	DEBUG("getatr name=%s mode=%d size=%d\n", fname, mode, size);
+	DEBUG("name=%s mode=%d size=%d\n", fname, mode, size);
 
 	return outsize;
 }
@@ -505,7 +503,7 @@ int reply_setatr(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	outsize = set_message(outbuf, 0, 0, true);
 
-	DEBUG("setatr name=%s mode=%d\n", fname, mode);
+	DEBUG("name=%s mode=%d\n", fname, mode);
 
 	return outsize;
 }
@@ -530,7 +528,7 @@ int reply_dskattr(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	SSVAL(outbuf, smb_vwv2, 512);
 	SSVAL(outbuf, smb_vwv3, dfree);
 
-	DEBUG("dskattr cnum=%d dfree=%d\n", cnum, dfree);
+	DEBUG("cnum=%d dfree=%d\n", cnum, dfree);
 
 	return outsize;
 }
@@ -1012,7 +1010,7 @@ int reply_ulogoffX(char *inbuf, char *outbuf, int length, int bufsize)
 {
 	set_message(outbuf, 2, 0, true);
 
-	DEBUG("ulogoffX\n");
+	DEBUG("\n");
 
 	return chain_reply(inbuf, outbuf, length, bufsize);
 }
@@ -1086,7 +1084,7 @@ int reply_mknew(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	/* Note we grant no oplocks. See comment in reply_open_and_X() */
 
 	DEBUG("new file %s\n", fname);
-	DEBUG("mknew %s fd=%d fnum=%d cnum=%d dmode=%d\n", fname,
+	DEBUG("fname=%s fd=%d fnum=%d cnum=%d dmode=%d\n", fname,
 	      Files[fnum].fd_ptr->fd, fnum, cnum, createmode);
 
 	return outsize;
@@ -1151,7 +1149,7 @@ int reply_ctemp(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	/* Note we grant no oplocks. See comment in reply_open_and_X() */
 
 	DEBUG("created temp file %s\n", fname2);
-	DEBUG("ctemp %s fd=%d fnum=%d cnum=%d dmode=%d\n", fname2,
+	DEBUG("fname=%s fd=%d fnum=%d cnum=%d dmode=%d\n", fname2,
 	      Files[fnum].fd_ptr->fd, fnum, cnum, createmode);
 
 	return outsize;
@@ -1203,7 +1201,7 @@ int reply_unlink(char *inbuf, char *outbuf, int dum_size, int dum_bufsize)
 
 	pstrcpy(name, smb_buf(inbuf) + 1);
 
-	DEBUG("reply_unlink : %s\n", name);
+	DEBUG("name=%s\n", name);
 
 	unix_convert(name, cnum, 0, &bad_path);
 
@@ -1259,8 +1257,7 @@ int reply_unlink(char *inbuf, char *outbuf, int dum_size, int dum_bufsize)
 					continue;
 				if (!unlink(fname))
 					count++;
-				DEBUG("reply_unlink : doing unlink on %s\n",
-				      fname);
+				DEBUG("doing unlink on %s\n", fname);
 			}
 			close_dir(dirptr);
 		}
@@ -1294,7 +1291,7 @@ static int transfer_file(int infd, int outfd, int n, char *header, int headlen,
 	char *buf1, *abuf;
 	int total = 0;
 
-	DEBUG("transfer_file %d  (head=%d) called\n", n, headlen);
+	DEBUG("n=%d (head=%d)\n", n, headlen);
 
 	if (size == 0) {
 		size = lp_readsize();
@@ -1407,8 +1404,8 @@ int reply_readbraw(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	if (nread < mincount)
 		nread = 0;
 
-	DEBUG("readbraw fnum=%d cnum=%d start=%d max=%d min=%d nread=%d\n",
-	      fnum, cnum, startpos, maxcount, mincount, nread);
+	DEBUG("fnum=%d cnum=%d start=%d max=%d min=%d nread=%d\n", fnum, cnum,
+	      startpos, maxcount, mincount, nread);
 
 #if UNSAFE_READRAW
 	{
@@ -1436,7 +1433,7 @@ int reply_readbraw(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	transfer_file(0, Client, 0, header, 4 + ret, 0);
 #endif
 
-	DEBUG("readbraw finished\n");
+	DEBUG("finished\n");
 	return -1;
 }
 
@@ -1480,8 +1477,8 @@ int reply_lockread(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	SSVAL(outbuf, smb_vwv5, nread + 3);
 	SSVAL(smb_buf(outbuf), 1, nread);
 
-	DEBUG("lockread fnum=%d cnum=%d num=%d nread=%d\n", fnum, cnum,
-	      numtoread, nread);
+	DEBUG("fnum=%d cnum=%d num=%d nread=%d\n", fnum, cnum, numtoread,
+	      nread);
 
 	return outsize;
 }
@@ -1523,7 +1520,7 @@ int reply_read(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	CVAL(smb_buf(outbuf), 0) = 1;
 	SSVAL(smb_buf(outbuf), 1, nread);
 
-	DEBUG("read fnum=%d cnum=%d num=%d nread=%d\n", fnum, cnum, numtoread,
+	DEBUG("fnum=%d cnum=%d num=%d nread=%d\n", fnum, cnum, numtoread,
 	      nread);
 
 	return outsize;
@@ -1560,7 +1557,7 @@ int reply_read_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	SSVAL(outbuf, smb_vwv6, smb_offset(data, outbuf));
 	SSVAL(smb_buf(outbuf), -2, nread);
 
-	DEBUG("readX fnum=%d cnum=%d min=%d max=%d nread=%d\n", fnum, cnum,
+	DEBUG("fnum=%d cnum=%d min=%d max=%d nread=%d\n", fnum, cnum,
 	      smb_mincnt, smb_maxcnt, nread);
 
 	chain_fnum = fnum;
@@ -1614,8 +1611,8 @@ int reply_writebraw(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	if (numtowrite > 0)
 		nwritten = write_file(fnum, data, numtowrite);
 
-	DEBUG("writebraw1 fnum=%d cnum=%d start=%d num=%d wrote=%d sync=%d\n",
-	      fnum, cnum, startpos, numtowrite, nwritten, write_through);
+	DEBUG("fnum=%d cnum=%d start=%d num=%d wrote=%d sync=%d\n", fnum, cnum,
+	      startpos, numtowrite, nwritten, write_through);
 
 	if (nwritten < numtowrite)
 		return UNIX_ERROR_CODE(ERRHRD, ERRdiskfull);
@@ -1658,8 +1655,8 @@ int reply_writebraw(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		SSVAL(outbuf, smb_err, ERRdiskfull);
 	}
 
-	DEBUG("writebraw2 fnum=%d cnum=%d start=%d num=%d wrote=%d\n", fnum,
-	      cnum, startpos, numtowrite, total_written);
+	DEBUG("fnum=%d cnum=%d start=%d num=%d wrote=%d\n", fnum, cnum,
+	      startpos, numtowrite, total_written);
 
 	/* we won't return a status if write through is not selected - this
 	   follows what WfWg does */
@@ -1713,8 +1710,8 @@ int reply_writeunlock(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	SSVAL(outbuf, smb_vwv0, nwritten);
 
-	DEBUG("writeunlock fnum=%d cnum=%d num=%d wrote=%d\n", fnum, cnum,
-	      numtowrite, nwritten);
+	DEBUG("fnum=%d cnum=%d num=%d wrote=%d\n", fnum, cnum, numtowrite,
+	      nwritten);
 
 	return outsize;
 }
@@ -1766,7 +1763,7 @@ int reply_write(char *inbuf, char *outbuf, int dum1, int dum2)
 		SSVAL(outbuf, smb_err, ERRdiskfull);
 	}
 
-	DEBUG("write fnum=%d cnum=%d num=%d wrote=%d\n", fnum, cnum, numtowrite,
+	DEBUG("fnum=%d cnum=%d num=%d wrote=%d\n", fnum, cnum, numtowrite,
 	      nwritten);
 
 	return outsize;
@@ -1816,7 +1813,7 @@ int reply_write_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 		SSVAL(outbuf, smb_err, ERRdiskfull);
 	}
 
-	DEBUG("writeX fnum=%d cnum=%d num=%d wrote=%d\n", fnum, cnum, smb_dsize,
+	DEBUG("fnum=%d cnum=%d num=%d wrote=%d\n", fnum, cnum, smb_dsize,
 	      nwritten);
 
 	chain_fnum = fnum;
@@ -1865,8 +1862,7 @@ int reply_lseek(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	outsize = set_message(outbuf, 2, 0, true);
 	SIVALS(outbuf, smb_vwv0, res);
 
-	DEBUG("lseek fnum=%d cnum=%d ofs=%d mode=%d\n", fnum, cnum, startpos,
-	      mode);
+	DEBUG("fnum=%d cnum=%d ofs=%d mode=%d\n", fnum, cnum, startpos, mode);
 
 	return outsize;
 }
@@ -1887,7 +1883,7 @@ int reply_flush(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		CHECK_ERROR(fnum);
 	}
 
-	DEBUG("flush fnum=%d\n", fnum);
+	DEBUG("fnum=%d\n", fnum);
 	return outsize;
 }
 
@@ -1897,7 +1893,7 @@ int reply_flush(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 int reply_exit(char *inbuf, char *outbuf, int size, int bufsize)
 {
 	int outsize = set_message(outbuf, 0, 0, true);
-	DEBUG("exit\n");
+	DEBUG("\n");
 
 	return outsize;
 }
@@ -1930,9 +1926,8 @@ int reply_close(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	/* try and set the date */
 	set_filetime(cnum, Files[fnum].name, mtime);
 
-	DEBUG("close fd=%d fnum=%d cnum=%d (numopen=%d)\n",
-	      Files[fnum].fd_ptr->fd, fnum, cnum,
-	      Connections[cnum].num_files_open);
+	DEBUG("fd=%d fnum=%d cnum=%d (numopen=%d)\n", Files[fnum].fd_ptr->fd,
+	      fnum, cnum, Connections[cnum].num_files_open);
 
 	close_file(fnum, true);
 
@@ -1973,8 +1968,8 @@ int reply_writeclose(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	set_filetime(cnum, Files[fnum].name, mtime);
 
-	DEBUG("writeclose fnum=%d cnum=%d num=%d wrote=%d (numopen=%d)\n", fnum,
-	      cnum, numtowrite, nwritten, Connections[cnum].num_files_open);
+	DEBUG("fnum=%d cnum=%d num=%d wrote=%d (numopen=%d)\n", fnum, cnum,
+	      numtowrite, nwritten, Connections[cnum].num_files_open);
 
 	close_file(fnum, true);
 
@@ -2007,8 +2002,8 @@ int reply_lock(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	count = IVAL(inbuf, smb_vwv1);
 	offset = IVAL(inbuf, smb_vwv3);
 
-	DEBUG("lock fd=%d fnum=%d cnum=%d ofs=%d cnt=%d\n",
-	      Files[fnum].fd_ptr->fd, fnum, cnum, offset, count);
+	DEBUG("fd=%d fnum=%d cnum=%d ofs=%d cnt=%d\n", Files[fnum].fd_ptr->fd,
+	      fnum, cnum, offset, count);
 
 	if (!do_lock(fnum, cnum, count, offset, F_WRLCK, &eclass, &ecode))
 		return ERROR_CODE(eclass, ecode);
@@ -2039,8 +2034,8 @@ int reply_unlock(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	if (!do_unlock(fnum, cnum, count, offset, &eclass, &ecode))
 		return ERROR_CODE(eclass, ecode);
 
-	DEBUG("unlock fd=%d fnum=%d cnum=%d ofs=%d cnt=%d\n",
-	      Files[fnum].fd_ptr->fd, fnum, cnum, offset, count);
+	DEBUG("fd=%d fnum=%d cnum=%d ofs=%d cnt=%d\n", Files[fnum].fd_ptr->fd,
+	      fnum, cnum, offset, count);
 
 	return outsize;
 }
@@ -2064,7 +2059,7 @@ int reply_tdis(char *inbuf, char *outbuf, int size, int bufsize)
 
 	close_cnum(cnum);
 
-	DEBUG("tdis cnum=%d\n", cnum);
+	DEBUG("cnum=%d\n", cnum);
 
 	return outsize;
 }
@@ -2103,7 +2098,7 @@ int reply_echo(char *inbuf, char *outbuf, int size, int bufsize)
 		send_smb(Client, outbuf);
 	}
 
-	DEBUG("echo %d times cnum=%d\n", smb_reverb, cnum);
+	DEBUG("reverb=%d cnum=%d\n", smb_reverb, cnum);
 
 	return -1;
 }
@@ -2167,7 +2162,7 @@ int reply_mkdir(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	outsize = set_message(outbuf, 0, 0, true);
 
-	DEBUG("mkdir %s cnum=%d ret=%d\n", directory, cnum, ret);
+	DEBUG("directory=%s cnum=%d ret=%d\n", directory, cnum, ret);
 
 	return outsize;
 }
@@ -2206,7 +2201,7 @@ int reply_rmdir(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	outsize = set_message(outbuf, 0, 0, true);
 
-	DEBUG("rmdir %s\n", directory);
+	DEBUG("directory=%s\n", directory);
 
 	return outsize;
 }
@@ -2320,7 +2315,7 @@ int reply_mv(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	pstrcpy(name, smb_buf(inbuf) + 1);
 	pstrcpy(newname, smb_buf(inbuf) + 3 + strlen(name));
 
-	DEBUG("reply_mv : %s -> %s\n", name, newname);
+	DEBUG("%s -> %s\n", name, newname);
 
 	unix_convert(name, cnum, 0, &bad_path1);
 	unix_convert(newname, cnum, newname_last_component, &bad_path2);
@@ -2363,9 +2358,8 @@ int reply_mv(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 			pstrcpy(newname, tmpstr);
 		}
 
-		DEBUG("reply_mv : "
-		      "directory = %s, newname = "
-		      "%s, newname_last_component = %s, is_8_3 = %d\n",
+		DEBUG("directory=%s, newname=%s, newname_last_component=%s, "
+		      "is_8_3=%d\n",
 		      directory, newname, newname_last_component,
 		      is_short_name);
 
@@ -2404,7 +2398,7 @@ int reply_mv(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 			count++;
 		}
 
-		DEBUG("reply_mv : %s doing rename on %s -> %s\n",
+		DEBUG("%s doing rename on %s -> %s\n",
 		      (count != 0) ? "succeeded" : "failed", directory,
 		      newname);
 
@@ -2460,8 +2454,8 @@ int reply_mv(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 				if (rename(fname, destname) == 0) {
 					count++;
 				}
-				DEBUG("reply_mv : doing rename on %s -> %s\n",
-				      fname, destname);
+				DEBUG("doing rename on %s -> %s\n", fname,
+				      destname);
 			}
 			close_dir(dirptr);
 		}
@@ -2582,7 +2576,7 @@ int reply_copy(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	pstrcpy(name, smb_buf(inbuf));
 	pstrcpy(newname, smb_buf(inbuf) + 1 + strlen(name));
 
-	DEBUG("reply_copy : %s -> %s\n", name, newname);
+	DEBUG("%s -> %s\n", name, newname);
 
 	if (tid2 != cnum) {
 		/* can't currently handle inter share copies XXXX */
@@ -2660,8 +2654,8 @@ int reply_copy(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 				    copy_file(directory, newname, cnum, ofun,
 				              count, target_is_directory))
 					count++;
-				DEBUG("reply_copy : doing copy on %s -> %s\n",
-				      fname, destname);
+				DEBUG("doing copy on %s -> %s\n", fname,
+				      destname);
 			}
 			close_dir(dirptr);
 		}
@@ -2692,7 +2686,7 @@ int reply_setdir(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 {
 	int cnum = SVAL(inbuf, smb_tid);
 
-	DEBUG("setdir not supported cnum=%d\n", cnum);
+	DEBUG("not supported cnum=%d\n", cnum);
 
 	return ERROR_CODE(ERRDOS, ERRnoaccess);
 }
@@ -2725,7 +2719,7 @@ int reply_lockingX(char *inbuf, char *outbuf, int length, int bufsize)
 	   we have granted an oplock on.
 	 */
 	if (locktype & LOCKING_ANDX_OPLOCK_RELEASE) {
-		DEBUG("reply_lockingX: oplock break reply from client for "
+		DEBUG("oplock break reply from client for "
 		      "fnum = %d. no oplock granted as not supported.\n",
 		      fnum);
 		return ERROR_CODE(ERRDOS, ERRlock);
@@ -2766,8 +2760,8 @@ int reply_lockingX(char *inbuf, char *outbuf, int length, int bufsize)
 
 	set_message(outbuf, 2, 0, true);
 
-	DEBUG("lockingX fnum=%d cnum=%d type=%d num_locks=%d num_ulocks=%d\n",
-	      fnum, cnum, (unsigned int) locktype, num_locks, num_ulocks);
+	DEBUG("fnum=%d cnum=%d type=%d num_locks=%d num_ulocks=%d\n", fnum,
+	      cnum, (unsigned int) locktype, num_locks, num_ulocks);
 
 	chain_fnum = fnum;
 
@@ -2846,8 +2840,8 @@ int reply_writebmpx(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	SSVALS(outbuf, smb_vwv0, -1); /* We don't support smb_remaining */
 
-	DEBUG("writebmpx fnum=%d cnum=%d num=%d wrote=%d\n", fnum, cnum,
-	      numtowrite, nwritten);
+	DEBUG("fnum=%d cnum=%d num=%d wrote=%d\n", fnum, cnum, numtowrite,
+	      nwritten);
 
 	if (write_through && tcount == nwritten) {
 		/* we need to send both a primary and a secondary response */
@@ -2970,7 +2964,7 @@ int reply_setattrE(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	if ((unix_times.actime == 0) && (unix_times.modtime == 0)) {
 		/* Ignore request */
-		DEBUG("reply_setattrE fnum=%d cnum=%d ignoring zero request - "
+		DEBUG("fnum=%d cnum=%d ignoring zero request - "
 		      "not setting timestamps of 0\n",
 		      fnum, cnum, unix_times.actime, unix_times.modtime);
 		return outsize;
@@ -2983,8 +2977,8 @@ int reply_setattrE(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	if (sys_utime(Files[fnum].name, &unix_times) != 0)
 		return ERROR_CODE(ERRDOS, ERRnoaccess);
 
-	DEBUG("reply_setattrE fnum=%d cnum=%d actime=%d modtime=%d\n", fnum,
-	      cnum, unix_times.actime, unix_times.modtime);
+	DEBUG("fnum=%d cnum=%d actime=%d modtime=%d\n", fnum, cnum,
+	      unix_times.actime, unix_times.modtime);
 
 	return outsize;
 }
@@ -3028,7 +3022,7 @@ int reply_getattrE(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	}
 	SSVAL(outbuf, smb_vwv10, mode);
 
-	DEBUG("reply_getattrE fnum=%d cnum=%d\n", fnum, cnum);
+	DEBUG("fnum=%d cnum=%d\n", fnum, cnum);
 
 	return outsize;
 }

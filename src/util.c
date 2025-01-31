@@ -412,10 +412,10 @@ static int write_socket(int fd, char *buf, int len)
 {
 	int ret = 0;
 
-	DEBUG("write_socket(%d,%d)\n", fd, len);
+	DEBUG("fd=%d len=%d\n", fd, len);
 	ret = write_data(fd, buf, len);
 
-	DEBUG("write_socket(%d,%d) wrote %d\n", fd, len, ret);
+	DEBUG("wrote %d\n", ret);
 	if (ret <= 0)
 		ERROR("write_socket: Error writing %d bytes to socket %d: "
 		      "ERRNO = %s\n",

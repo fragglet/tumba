@@ -165,11 +165,11 @@ static int send_trans2_replies(char *outbuf, int bufsize, char *params,
 			           params_sent_thistime + data_alignment_offset,
 			       pd, data_sent_thistime);
 
-		DEBUG("t2_rep: params_sent_thistime = %d, "
-		      "data_sent_thistime = %d, useable_space = %d\n",
-		      params_sent_thistime, data_sent_thistime, useable_space);
-		DEBUG("t2_rep: params_to_send = %d, data_to_send = %d, "
+		DEBUG("params_sent_thistime = %d, "
+		      "data_sent_thistime = %d, useable_space = %d, "
+		      "params_to_send = %d, data_to_send = %d, "
 		      "paramsize = %d, datasize = %d\n",
+		      params_sent_thistime, data_sent_thistime, useable_space,
 		      params_to_send, data_to_send, paramsize, datasize);
 
 		/* Send the packet */
@@ -216,8 +216,8 @@ static int call_trans2open(char *inbuf, char *outbuf, int bufsize, int cnum,
 
 	pstrcpy(fname, pname);
 
-	DEBUG("trans2open %s cnum=%d mode=%d attr=%d ofun=%d size=%d\n", fname,
-	      cnum, open_mode, open_attr, open_ofun, open_size);
+	DEBUG("fname=%s cnum=%d mode=%d attr=%d ofun=%d size=%d\n", fname, cnum,
+	      open_mode, open_attr, open_ofun, open_size);
 
 	/* XXXX we need to handle passed times, sattr and flags */
 
@@ -341,8 +341,7 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 
 		reskey = 0;
 
-		DEBUG("get_lanman2_dir_entry:readdir on dirptr %p now at "
-		      "offset %d\n",
+		DEBUG("readdir on dirptr %p now at offset %d\n",
 		      Connections[cnum].dirptr,
 		      tell_dir(Connections[cnum].dirptr));
 
@@ -363,9 +362,8 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 				pstrcat(pathreal, "/");
 			pstrcat(pathreal, dname);
 			if (stat(pathreal, &sbuf) != 0) {
-				DEBUG("get_lanman2_dir_entry:Couldn't stat "
-				      "[%s] (%s)\n",
-				      pathreal, strerror(errno));
+				DEBUG("Couldn't stat [%s] (%s)\n", pathreal,
+				      strerror(errno));
 				continue;
 			}
 
@@ -384,8 +382,7 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 			if (mode & aDIR)
 				size = 0;
 
-			DEBUG("get_lanman2_dir_entry found %s fname=%s\n",
-			      pathreal, fname);
+			DEBUG("found %s fname=%s\n", pathreal, fname);
 
 			found = true;
 		}
@@ -585,7 +582,7 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 		/* Move the dirptr back to prev_dirpos */
 		seek_dir(Connections[cnum].dirptr, prev_dirpos);
 		*out_of_space = true;
-		DEBUG("get_lanman2_dir_entry: out of space\n");
+		DEBUG("out of space\n");
 		return false; /* Not finished - just out of space */
 	}
 
@@ -660,9 +657,9 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 
 	*directory = *mask = 0;
 
-	DEBUG("call_trans2findfirst: dirtype = %d, maxentries = %d, "
-	      "close_after_first=%d, close_if_end = %d requires_resume_key "
-	      "= %d level = %d, max_data_bytes = %d\n",
+	DEBUG("dirtype=%d, maxentries=%d, close_after_first=%d, "
+	      "close_if_end=%d requires_resume_key=%d level=%d "
+	      "max_data_bytes=%d\n",
 	      dirtype, maxentries, close_after_first, close_if_end,
 	      requires_resume_key, info_level, max_data_bytes);
 
@@ -759,8 +756,7 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 	/* Check if we can close the dirptr */
 	if (close_after_first || (finished && close_if_end)) {
 		dptr_close(dptr_num);
-		DEBUG("call_trans2findfirst - (2) closing dptr_num %d\n",
-		      dptr_num);
+		DEBUG("closing dptr_num %d\n", dptr_num);
 		dptr_num = -1;
 	}
 
@@ -833,7 +829,7 @@ static int call_trans2findnext(char *inbuf, char *outbuf, int length,
 
 	pstrcpy(resume_name, params + 12);
 
-	DEBUG("call_trans2findnext: dirhandle = %d, max_data_bytes = %d, "
+	DEBUG("dirhandle = %d, max_data_bytes = %d, "
 	      "maxentries = %d, close_after_request=%d, close_if_end = %d "
 	      "requires_resume_key = %d resume_key = %d resume name = %s "
 	      "continue=%d level = %d\n",
@@ -910,8 +906,7 @@ static int call_trans2findnext(char *inbuf, char *outbuf, int length,
 		void *dirptr = Connections[cnum].dirptr;
 		start_pos = tell_dir(dirptr);
 		for (current_pos = start_pos; current_pos >= 0; current_pos--) {
-			DEBUG("call_trans2findnext: seeking to pos %d\n",
-			      current_pos);
+			DEBUG("seeking to pos %d\n", current_pos);
 
 			seek_dir(dirptr, current_pos);
 			dname = read_dir_name(dirptr);
@@ -928,9 +923,7 @@ static int call_trans2findnext(char *inbuf, char *outbuf, int length,
 
 			if (dname && strcsequal(resume_name, dname)) {
 				seek_dir(dirptr, current_pos + 1);
-				DEBUG("call_trans2findnext: got match at "
-				      "pos %d\n",
-				      current_pos + 1);
+				DEBUG("got match at pos %d\n", current_pos + 1);
 				break;
 			}
 		}
@@ -940,9 +933,7 @@ static int call_trans2findnext(char *inbuf, char *outbuf, int length,
 		 */
 
 		if (current_pos < 0) {
-			DEBUG("call_trans2findnext: notfound: seeking to "
-			      "pos %d\n",
-			      start_pos);
+			DEBUG("notfound: seeking to pos %d\n", start_pos);
 			seek_dir(dirptr, start_pos);
 			for (current_pos = start_pos;
 			     (dname = read_dir_name(dirptr)) != NULL;
@@ -960,8 +951,7 @@ static int call_trans2findnext(char *inbuf, char *outbuf, int length,
 
 				if (dname && strcsequal(resume_name, dname)) {
 					seek_dir(dirptr, current_pos + 1);
-					DEBUG("call_trans2findnext: got "
-					      "match at pos %d\n",
+					DEBUG("got match at pos %d\n",
 					      current_pos + 1);
 					break;
 				}
@@ -994,7 +984,7 @@ static int call_trans2findnext(char *inbuf, char *outbuf, int length,
 	/* Check if we can close the dirptr */
 	if (close_after_request || (finished && close_if_end)) {
 		dptr_close(dptr_num); /* This frees up the saved mask */
-		DEBUG("call_trans2findnext: closing dptr_num = %d\n", dptr_num);
+		DEBUG("closing dptr_num = %d\n", dptr_num);
 		dptr_num = -1;
 	}
 
@@ -1035,7 +1025,7 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
 	int dfree, dsize, bsize, volname_len;
 	char *vname = share->name;
 
-	DEBUG("call_trans2qfsinfo: cnum = %d, level = %d\n", cnum, info_level);
+	DEBUG("cnum = %d, level = %d\n", cnum, info_level);
 
 	if (stat(".", &st) != 0) {
 		NOTICE("call_trans2qfsinfo: stat of . failed (%s)\n",
@@ -1056,7 +1046,7 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
 		SIVAL(pdata, l1_cUnit, dsize);
 		SIVAL(pdata, l1_cUnitAvail, dfree);
 		SSVAL(pdata, l1_cbSector, 512);
-		DEBUG("call_trans2qfsinfo : bsize=%d, id=%x, cSectorUnit=%d, "
+		DEBUG("bsize=%d, id=%x, cSectorUnit=%d, "
 		      "cUnit=%d, cUnitAvail=%d, cbSector=%d\n",
 		      bsize, st.st_dev, bsize / 512, dsize, dfree, 512);
 		break;
@@ -1073,9 +1063,8 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
 		          (str_checksum(local_machine) << 16));
 		SCVAL(pdata, l2_vol_cch, volname_len);
 		strlcpy(pdata + l2_vol_szVolLabel, vname, volname_len + 1);
-		DEBUG("call_trans2qfsinfo : time = %x, namelen = %d, name "
-		      "= %s\n",
-		      st.st_ctime, volname_len, pdata + l2_vol_szVolLabel);
+		DEBUG("time = %x, namelen = %d, name = %s\n", st.st_ctime,
+		      volname_len, pdata + l2_vol_szVolLabel);
 		break;
 	case SMB_QUERY_FS_ATTRIBUTE_INFO:
 		data_len = 12 + 2 * strlen(FSTYPE_STRING);
@@ -1101,8 +1090,7 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
 		          (str_checksum(local_machine) << 16));
 		SIVAL(pdata, 12, 2 * strlen(vname));
 		put_unicode(pdata + 18, vname);
-		DEBUG("call_trans2qfsinfo : SMB_QUERY_FS_VOLUME_INFO "
-		      "namelen = %d, vol = %s\n",
+		DEBUG("SMB_QUERY_FS_VOLUME_INFO namelen = %d, vol = %s\n",
 		      strlen(vname), vname);
 		break;
 	case SMB_QUERY_FS_SIZE_INFO:
@@ -1140,7 +1128,6 @@ static int call_trans2setfsinfo(char *inbuf, char *outbuf, int length,
 	/* Just say yes we did it - there is nothing that
 	   can be set here so it doesn't matter. */
 	int outsize;
-	DEBUG("call_trans2setfsinfo\n");
 
 	if (!CAN_WRITE(cnum))
 		return ERROR_CODE(ERRSRV, ERRaccess);
@@ -1206,8 +1193,8 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
 		pos = 0;
 	}
 
-	DEBUG("call_trans2qfilepathinfo %s level=%d call=%d total_data=%d\n",
-	      fname, info_level, tran_call, total_data);
+	DEBUG("%s level=%d call=%d total_data=%d\n", fname, info_level,
+	      tran_call, total_data);
 
 	p = strrchr(fname, '/');
 	if (!p)
@@ -1435,8 +1422,8 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 		}
 	}
 
-	DEBUG("call_trans2setfilepathinfo(%d) %s info_level=%d totdata=%d\n",
-	      tran_call, fname, info_level, total_data);
+	DEBUG("tran_call=%d fname=%s info_level=%d totdata=%d\n", tran_call,
+	      fname, info_level, total_data);
 
 	/* checked_realloc the parameter and data sizes */
 	params = *pparams = checked_realloc(*pparams, 2);
@@ -1580,14 +1567,14 @@ static int call_trans2mkdir(char *inbuf, char *outbuf, int length, int bufsize,
 
 	pstrcpy(directory, &params[4]);
 
-	DEBUG("call_trans2mkdir : name = %s\n", directory);
+	DEBUG("name=%s\n", directory);
 
 	unix_convert(directory, cnum, 0, &bad_path);
 	if (check_name(directory, cnum))
 		ret = mkdir(directory, unix_mode(cnum, aDIR));
 
 	if (ret < 0) {
-		DEBUG("call_trans2mkdir error (%s)\n", strerror(errno));
+		DEBUG("error (%s)\n", strerror(errno));
 		if ((errno == ENOENT) && bad_path) {
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
@@ -1616,7 +1603,7 @@ static int call_trans2findnotifyfirst(char *inbuf, char *outbuf, int length,
 	char *params = *pparams;
 	uint16_t info_level = SVAL(params, 4);
 
-	DEBUG("call_trans2findnotifyfirst - info_level %d\n", info_level);
+	DEBUG("info_level=%d\n", info_level);
 
 	switch (info_level) {
 	case 1:
@@ -1652,8 +1639,6 @@ static int call_trans2findnotifynext(char *inbuf, char *outbuf, int length,
 {
 	char *params = *pparams;
 
-	DEBUG("call_trans2findnotifynext\n");
-
 	params = *pparams = checked_realloc(*pparams, 4);
 
 	SSVAL(params, 0, 0); /* No changes */
@@ -1675,7 +1660,7 @@ int reply_findclose(char *inbuf, char *outbuf, int length, int bufsize)
 
 	cnum = SVAL(inbuf, smb_tid);
 
-	DEBUG("reply_findclose, cnum = %d, dptr_num = %d\n", cnum, dptr_num);
+	DEBUG("cnum = %d, dptr_num = %d\n", cnum, dptr_num);
 
 	dptr_close(dptr_num);
 
@@ -1698,7 +1683,7 @@ int reply_findnclose(char *inbuf, char *outbuf, int length, int bufsize)
 	cnum = SVAL(inbuf, smb_tid);
 	dptr_num = SVAL(inbuf, smb_vwv0);
 
-	DEBUG("reply_findnclose, cnum = %d, dptr_num = %d\n", cnum, dptr_num);
+	DEBUG("cnum = %d, dptr_num = %d\n", cnum, dptr_num);
 
 	/* We never give out valid handles for a
 	   findnotifyfirst - so any dptr_num is ok here.

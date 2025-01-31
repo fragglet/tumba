@@ -257,7 +257,7 @@ void dptr_closepath(char *path, int pid)
 ****************************************************************************/
 static bool start_dir(int cnum, char *directory)
 {
-	DEBUG("start_dir cnum=%d dir=%s\n", cnum, directory);
+	DEBUG("cnum=%d dir=%s\n", cnum, directory);
 
 	if (!check_name(directory, cnum))
 		return false;
@@ -497,7 +497,7 @@ bool get_dir_entry(int cnum, char *mask, int dirtype, char *fname, int *size,
 		*size = sbuf.st_size;
 		*date = sbuf.st_mtime;
 
-		DEBUG("get_dir_entry found %s fname=%s\n", pathreal, fname);
+		DEBUG("found %s fname=%s\n", pathreal, fname);
 
 		found = true;
 	}

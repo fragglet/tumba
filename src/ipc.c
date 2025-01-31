@@ -435,8 +435,8 @@ static bool api_RNetShareEnum(int cnum, char *param, char *data, int mdrcnt,
 	SSVAL(*rparam, 4, shares_count());
 	SSVAL(*rparam, 6, total);
 
-	DEBUG("RNetShareEnum gave %d entries of %d (%d %d %d %d)\n",
-	      shares_count(), total, uLevel, buf_len, *rdata_len, mdrcnt);
+	DEBUG("gave %d entries of %d (%d %d %d %d)\n", shares_count(), total,
+	      uLevel, buf_len, *rdata_len, mdrcnt);
 	return true;
 }
 
@@ -500,7 +500,7 @@ static bool api_RNetServerGetInfo(int cnum, char *param, char *data, int mdrcnt,
 	char *p2;
 	int struct_len;
 
-	DEBUG("NetServerGetInfo level %d\n", uLevel);
+	DEBUG("level %d\n", uLevel);
 
 	/* check it's a supported varient */
 	if (!prefix_ok(str1, "WrLh"))
@@ -597,7 +597,7 @@ static bool api_NetWkstaGetInfo(int cnum, char *param, char *data, int mdrcnt,
 	char *p2;
 	int level = SVAL(p, 0);
 
-	DEBUG("NetWkstaGetInfo level %d\n", level);
+	DEBUG("level %d\n", level);
 
 	*rparam_len = 6;
 	*rparam = REALLOC(*rparam, *rparam_len);
@@ -766,7 +766,7 @@ static int named_pipe(int cnum, char *outbuf, char *name, uint16_t *setup,
                       char *data, char *params, int suwcnt, int tdscnt,
                       int tpscnt, int msrcnt, int mdrcnt, int mprcnt)
 {
-	DEBUG("named pipe command on <%s> name\n", name);
+	DEBUG("command on <%s> name\n", name);
 
 	if (strequal(name, "LANMAN")) {
 		return api_reply(cnum, outbuf, data, params, tdscnt, tpscnt,
@@ -891,7 +891,6 @@ int reply_trans(char *inbuf, char *outbuf, int size, int bufsize)
 	      suwcnt);
 
 	if (strncmp(name, "\\PIPE\\", strlen("\\PIPE\\")) == 0) {
-		DEBUG("calling named_pipe\n");
 		outsize = named_pipe(cnum, outbuf, name + strlen("\\PIPE\\"),
 		                     setup, data, params, suwcnt, tdscnt,
 		                     tpscnt, msrcnt, mdrcnt, mprcnt);
