@@ -110,7 +110,8 @@ static void syslog_output(int level, char *format_str, va_list ap)
 write an debug message on the debugfile. This is called by the LOG
 macro
 ********************************************************************/
-int log_output(int level, char *format_str, ...)
+int log_output(const char *funcname, int linenum, int level, char *format_str,
+               ...)
 {
 	va_list ap;
 	int old_errno = errno;
@@ -141,6 +142,9 @@ int log_output(int level, char *format_str, ...)
 
 		if (client_addr[0] != '\0') {
 			fprintf(dbf, "[%s] ", client_addr);
+		}
+		if (funcname != NULL) {
+			fprintf(dbf, "%s (#%d): ", funcname, linenum);
 		}
 	}
 

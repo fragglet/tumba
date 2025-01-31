@@ -16,18 +16,18 @@
 #include "strfunc.h"
 
 /* logging interface */
-#define LOG(level, ...)                                                        \
+#define LOG(funcname, linenum, level, ...)                                     \
 	do {                                                                   \
 		if (LOGLEVEL >= (level)) {                                     \
-			log_output(level, __VA_ARGS__);                        \
+			log_output(funcname, linenum, level, __VA_ARGS__);     \
 		}                                                              \
 	} while (0)
 
-#define ERROR(...)   LOG(0, __VA_ARGS__)
-#define WARNING(...) LOG(1, __VA_ARGS__)
-#define NOTICE(...)  LOG(2, __VA_ARGS__)
-#define INFO(...)    LOG(3, __VA_ARGS__)
-#define DEBUG(...)   LOG(4, __VA_ARGS__)
+#define ERROR(...)   LOG(0, 0, 0, __VA_ARGS__)
+#define WARNING(...) LOG(0, 0, 1, __VA_ARGS__)
+#define NOTICE(...)  LOG(0, 0, 2, __VA_ARGS__)
+#define INFO(...)    LOG(0, 0, 3, __VA_ARGS__)
+#define DEBUG(...)   LOG(__func__, __LINE__, 4, __VA_ARGS__)
 
 /* limiting size of ipc replies */
 #define REALLOC(ptr, size) checked_realloc(ptr, MAX((size), 4 * 1024))
@@ -46,7 +46,8 @@ extern pstring debugf;
 extern char client_addr[32];
 
 void setup_logging(char *pname);
-int log_output(int level, char *, ...);
+int log_output(const char *funcname, int linenum, int level, char *format_str,
+               ...);
 bool file_exist(char *fname, struct stat *sbuf);
 bool directory_exist(char *dname, struct stat *st);
 uint32_t file_size(char *file_name);
