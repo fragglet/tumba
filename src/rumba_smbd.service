@@ -17,5 +17,9 @@ SocketBindAllow=ipv4:tcp:139
 Nice=19
 IOSchedulingPriority=7
 
+# Shared directories are world-writable by network users, so for consistency we
+# set a umask that makes them world-writable by local users too.
+UMask=0
+
 [Install]
 WantedBy=default.target
