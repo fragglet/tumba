@@ -64,7 +64,7 @@ $(READONLY_SHARE):
 	mkdir -m 755 -p $@
 	install -m 644 doc-readonly.txt $@/README.txt
 
-install: $(PUBLIC_SHARE) $(READONLY_SHARE)
+install: $(PUBLIC_SHARE) $(READONLY_SHARE) rumba_smbd
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	install -m 755 rumba_smbd $(DESTDIR)$(PREFIX)/bin/rumba_smbd
 	mkdir -p $(DESTDIR)$(PREFIX)/lib/systemd/system
