@@ -145,8 +145,7 @@ static int connection_error(char *inbuf, char *outbuf, int connection_num)
 /****************************************************************************
   parse a share descriptor string
 ****************************************************************************/
-static void parse_connect(char *p, char *service, char *user, char *password,
-                          int *pwlen, char *dev)
+static void parse_connect(char *p, char *service, char *dev)
 {
 	char *p2;
 
@@ -160,18 +159,14 @@ static void parse_connect(char *p, char *service, char *user, char *password,
 
 	p += strlen(p) + 2;
 
-	fstrcpy(password, p);
-	*pwlen = strlen(password);
-
+	/* Skip password */
 	p += strlen(p) + 2;
 
 	fstrcpy(dev, p);
 
-	*user = 0;
 	p = strchr(service, '%');
 	if (p != NULL) {
 		*p = 0;
-		fstrcpy(user, p + 1);
 	}
 }
 
@@ -181,16 +176,13 @@ static void parse_connect(char *p, char *service, char *user, char *password,
 int reply_tcon(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 {
 	pstring service;
-	pstring user;
-	pstring password;
 	pstring dev;
 	int connection_num;
 	int outsize = 0;
-	int pwlen = 0;
 
-	*service = *user = *password = *dev = 0;
+	*service = *dev = 0;
 
-	parse_connect(smb_buf(inbuf) + 1, service, user, password, &pwlen, dev);
+	parse_connect(smb_buf(inbuf) + 1, service, dev);
 
 	connection_num = make_connection(service, dev);
 
@@ -202,7 +194,7 @@ int reply_tcon(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	SSVAL(outbuf, smb_vwv1, connection_num);
 	SSVAL(outbuf, smb_tid, connection_num);
 
-	DEBUG("service=%s user=%s cnum=%d\n", service, user, connection_num);
+	DEBUG("service=%s cnum=%d\n", service, connection_num);
 
 	return outsize;
 }
@@ -213,14 +205,12 @@ int reply_tcon(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 int reply_tcon_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 {
 	pstring service;
-	pstring user;
-	pstring password;
 	pstring devicename;
 	int connection_num;
 	int passlen = SVAL(inbuf, smb_vwv3);
 	char *path, *p;
 
-	*service = *user = *password = *devicename = 0;
+	*service = *devicename = 0;
 
 	/* we might have to close an old one */
 	if ((SVAL(inbuf, smb_vwv2) & 0x1) != 0)
@@ -237,7 +227,6 @@ int reply_tcon_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	p = strchr(service, '%');
 	if (p) {
 		*p++ = 0;
-		fstrcpy(user, p);
 	}
 	strlcpy(devicename, path + strlen(path) + 1, 7);
 	DEBUG("Got device type %s\n", devicename);
@@ -267,7 +256,7 @@ int reply_tcon_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 		SSVAL(outbuf, smb_vwv2, 0x0); /* optional support */
 	}
 
-	DEBUG("service=%s user=%s cnum=%d\n", service, user, connection_num);
+	DEBUG("service=%s cnum=%d\n", service, connection_num);
 
 	/* set the incoming and outgoing tid to the just created one */
 	SSVAL(inbuf, smb_tid, connection_num);
