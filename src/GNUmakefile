@@ -4,6 +4,9 @@ PREFIX = /usr/local
 MANPATH = $(PREFIX)/share/man
 DATADIR = /var/rumba
 
+PUBLIC_SHARE = $(DESTDIR)$(DATADIR)/public
+READONLY_SHARE = $(DESTDIR)$(DATADIR)/readonly
+
 SMBLOGFILE = /var/log/rumba_smbd.log
 
 DEFINES = -DSMBLOGFILE=\"$(SMBLOGFILE)\" \
@@ -53,15 +56,19 @@ clean:
 format:
 	clang-format -i *.[ch]
 
-install:
+$(PUBLIC_SHARE):
+	mkdir -m 777 -p $@
+	install -m 666 doc-public.txt $@/README.txt
+
+$(READONLY_SHARE):
+	mkdir -m 755 -p $@
+	install -m 644 doc-readonly.txt $@/README.txt
+
+install: $(PUBLIC_SHARE) $(READONLY_SHARE)
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	install -m 755 rumba_smbd $(DESTDIR)$(PREFIX)/bin/rumba_smbd
 	mkdir -p $(DESTDIR)$(PREFIX)/lib/systemd/system
 	install -m 644 rumba_smbd.service $(DESTDIR)$(PREFIX)/lib/systemd/system/rumba_smbd.service
-	mkdir -m 777 -p $(DESTDIR)$(DATADIR)/public
-	install -m 666 doc-public.txt $(DESTDIR)$(DATADIR)/public/README.txt
-	mkdir -m 755 -p $(DESTDIR)$(DATADIR)/readonly
-	install -m 644 doc-readonly.txt $(DESTDIR)$(DATADIR)/readonly/README.txt
 	mkdir -m 755 -p $(DESTDIR)$(MANPATH)/man8
 	install rumba_smbd.8 $(DESTDIR)$(MANPATH)/man8/rumba_smbd.8
 
