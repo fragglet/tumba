@@ -11,8 +11,13 @@
 #include "shares.h"
 
 #include <assert.h>
+#include <ctype.h>
 #include <libgen.h>
+#include <stdbool.h>
 #include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "guards.h" /* IWYU pragma: keep */
 #include "strfunc.h"
@@ -53,21 +58,57 @@ static struct share *_add_share(void)
 	return result;
 }
 
+static bool valid_share_name_char(char c)
+{
+	return isalnum(c) || c == '_' || c == '-';
+}
+
+static char *share_name_for_path(const char *path)
+{
+	char *base = basename((char *) path);
+	int i;
+
+	/* A special case that is probably a bad idea: */
+	if (!strcmp(base, "/")) {
+		base = checked_strdup("root");
+	} else {
+		base = checked_strdup(base);
+	}
+
+	/* Squash any unusual characters: */
+	for (i = 0; base[i] != '\0'; ++i) {
+		if (!valid_share_name_char(base[i])) {
+			base[i] = '_';
+		}
+	}
+
+	/* The happy case: */
+	if (lookup_share(base) == NULL) {
+		return base;
+	}
+
+	/* Find an alternative name: */
+	for (i = 2;; ++i) {
+		fstring result;
+		snprintf(result, sizeof(result), "%s_%d", base, i);
+		if (lookup_share(result) == NULL) {
+			free(base);
+			return checked_strdup(result);
+		}
+	}
+}
+
 const struct share *add_share(const char *path)
 {
+	char *share_name = share_name_for_path(path);
 	struct share *result;
-	char *name = basename((char *) path);
-
-	assert(lookup_share(name) == NULL);
 
 	result = _add_share();
-	result->name = checked_strdup(name);
-	assert(result->name != NULL);
+	result->name = share_name;
 	result->path = checked_strdup(path);
-	assert(result->path != NULL);
 	result->description = checked_strdup(path);
-	assert(result->path != NULL);
 
+	INFO("Sharing path %s as share name %s\n", result->path, result->name);
 	return result;
 }
 
