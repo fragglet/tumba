@@ -695,6 +695,7 @@ static bool check_path_contained(const char *name, const char *top)
 			free(canon_path);
 
 			if (!success) {
+				errno = EACCES;
 				return false;
 			}
 		} else if (errno != ENOENT) {
