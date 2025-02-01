@@ -665,16 +665,53 @@ static bool path_within(const char *path, const char *top)
 	       (path[top_len] == '/' || path[top_len] == '\0');
 }
 
-static void set_parent_dir(char *parent, char *path)
+/* Returns true only if the path specified by `name` is contained entirely
+ * within the path given in `top`. */
+static bool check_path_contained(const char *name, const char *top)
 {
+	pstring path;
 	char *p;
 
-	pstrcpy(parent, path);
-	p = strrchr(parent, '/');
-	if (p != NULL) {
+	pstrcpy(path, name);
+
+	/* To check for a valid path, we check the realpath()-expanded
+	   filename (with all symlinks removed) is a subpath of the top-level
+	   directory for the share. Then we repeat the process, walking up the
+	   containing parent directories to check them too.
+
+	   If the file doesn't exist, the check still passes - we just want to
+	   confirm that nothing is being accessed outside the top-level path
+	   (including anything weird like an intermediate directory that is
+	   outside the share but then points back inside again)
+
+	   TODO: There should maybe be an option to allow symlinks to certain
+	   allow-listed directories. */
+
+	for (;;) {
+		char *canon_path = realpath(path, NULL);
+		if (canon_path != NULL) {
+			/* We have a path to a real file or directory. */
+			bool success = path_within(canon_path, top);
+			free(canon_path);
+
+			if (!success) {
+				return false;
+			}
+		} else if (errno != ENOENT) {
+			/* It's okay if the file/dir doesn't exist;
+			   eg. directory listings will specify "*.*" as a path.
+			   However, we don't tolerate other error types. */
+			DEBUG("realpath(%s) failed; errno=%d\n", path, errno);
+			return false;
+		}
+
+		/* Walk up to the parent directory; we will check that too. */
+		p = strrchr(path, '/');
+		if (p == NULL) {
+			return true;
+		}
+
 		*p = '\0';
-	} else {
-		pstrcpy(parent, ".");
 	}
 }
 
@@ -687,7 +724,6 @@ a valid one for the user to access.
 ****************************************************************************/
 bool check_name(char *name, int cnum)
 {
-	char *canon_path;
 	const char *top = Connections[cnum].connectpath;
 	char old_wd[PATH_MAX];
 	bool success = false;
@@ -711,36 +747,7 @@ bool check_name(char *name, int cnum)
 
 	/* TODO: There should maybe be an option to allow symlinks to certain
 	   allow-listed directories. */
-
-	/* To check it's a valid path, we check the realpath()-expanded
-	   filename (with all symlinks removed) is either equal to the
-	   top-level directory or is a subpath. This guarantees that it is
-	   never possible to use a symlink to escape from the share dir. */
-	canon_path = realpath(name, NULL);
-	if (canon_path != NULL) {
-		/* We have a path to a real file or directory. */
-		success = path_within(canon_path, top);
-		free(canon_path);
-	} else if (errno == ENOENT) {
-		pstring parent;
-
-		/* The file doesn't exist, but we aren't done; for example,
-		   "*.*" is used for directory listings. Check the enclosing
-		   directory is valid. */
-		set_parent_dir(parent, name);
-		canon_path = realpath(parent, NULL);
-		if (canon_path == NULL) {
-			DEBUG("realpath(%s) errno=%d (parent)\n", parent,
-			      errno);
-		}
-		success = canon_path != NULL && path_within(canon_path, top);
-		if (success) {
-			DEBUG("no file %s but parent %s within %s\n", name,
-			      parent, top);
-		}
-		free(canon_path);
-	}
-
+	success = check_path_contained(name, top);
 	if (!success) {
 		INFO("check_name: denied: %s not within %s subtree\n", name,
 		     top);
