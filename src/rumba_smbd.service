@@ -12,5 +12,10 @@ Restart=on-failure
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 SocketBindAllow=ipv4:tcp:139
 
+# We run at the lowest CPU and I/O priority levels; preference is given to
+# processes on this local machine rather than network users.
+Nice=19
+IOSchedulingPriority=7
+
 [Install]
 WantedBy=default.target
