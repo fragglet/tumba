@@ -32,7 +32,7 @@ purely for fun and personal use by hobbyists and retro enthusiasts. You should
 
 ## Tested with
 
-* Windows 3.11, 95, 98
+* Windows 3.11, 95, 98, ME
 * Windows NT 3.51, 4
 * Windows 2000, XP
 * OS/2 Warp 4.52
