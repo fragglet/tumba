@@ -39,7 +39,7 @@ static int serverzone = 0;
 
 #ifndef TIME_T_MIN
 #define TIME_T_MIN                                                             \
-	((time_t) 0 < (time_t) -1                                              \
+	((time_t) 0 < (time_t) (-1)                                            \
 	     ? (time_t) 0                                                      \
 	     : ~(time_t) 0 << (sizeof(time_t) * CHAR_BIT - 1))
 #endif
