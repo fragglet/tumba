@@ -41,6 +41,17 @@ purely for fun and personal use by hobbyists and retro enthusiasts. You should
 
 Check out some [screenshots](sshot/README.md).
 
+Rumba has been compiled/run successfully on:
+
+* Debian GNU/Linux
+* FreeBSD
+* NetBSD
+
+It has also been built on OpenBSD, Haiku and Tribblix (Illumos / OpenSolaris),
+but support is currently incomplete; Rumba uses extended filesystem attributes
+to preserve DOS file attributes, and system-specific code to support these
+systems has not yet been written.
+
 ## FAQ
 
 * **Why is there no support for password protected shares?** The old SMBv1
