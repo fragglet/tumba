@@ -667,7 +667,7 @@ void construct_dgram_reply(char *inbuf, char *outbuf)
 /****************************************************************************
   process commands from the client
 ****************************************************************************/
-void process(char *lookup)
+void process(void)
 {
 	static int trans_num = 0;
 	time_t timer = 0;
@@ -676,17 +676,6 @@ void process(char *lookup)
 	OutBuffer = (char *) malloc(BUFFER_SIZE);
 	if ((InBuffer == NULL) || (OutBuffer == NULL))
 		return;
-
-	if (*lookup) {
-		struct in_addr ip;
-		if (name_query(InBuffer, OutBuffer, lookup, bcast_ip, &ip, 5,
-		               NULL)) {
-			printf("%s %s\n", inet_ntoa(ip), lookup);
-			name_status(InBuffer, OutBuffer, lookup);
-		} else
-			printf("couldn't find name %s\n", lookup);
-		return;
-	}
 
 	while (True) {
 		if (browse) {
@@ -849,7 +838,6 @@ void usage(char *pname)
 	printf("\t-B broadcast address  the address to use for broadcasts\n");
 	printf("\t-N netmask           the netmask to use for subnet "
 	       "determination\n");
-	printf("\t-L name              lookup this netbios name then exit\n");
 	printf("\t-S                   serve queries via DNS if not on the "
 	       "same subnet\n");
 	printf("\t-A                   serve queries even if on the same "
@@ -870,7 +858,6 @@ int main(int argc, char *argv[])
 	int opt;
 	extern FILE *dbf;
 	extern char *optarg;
-	pstring lookup = "";
 	pstring host_file = "";
 
 	sprintf(debugf, "%s.nmb.debug", DEBUGFILE);
@@ -879,7 +866,7 @@ int main(int argc, char *argv[])
 	strcpy(host_file, LMHOSTS);
 #endif
 
-	while ((opt = getopt(argc, argv, "C:bAL:i:B:N:Rn:l:d:Dp:hPSH:G:")) !=
+	while ((opt = getopt(argc, argv, "C:bAi:B:N:Rn:l:d:Dp:hPSH:G:")) !=
 	       EOF)
 		switch (opt) {
 		case 'C':
@@ -927,9 +914,6 @@ int main(int argc, char *argv[])
 		case 'i':
 			strcpy(scope, optarg);
 			break;
-		case 'L':
-			strcpy(lookup, optarg);
-			break;
 		case 'D':
 			is_daemon = True;
 			break;
@@ -952,9 +936,6 @@ int main(int argc, char *argv[])
 	   seem to use the opposite byte order to smb packets */
 	NeedSwap = !big_endian();
 
-	if (*lookup)
-		DEBUGLEVEL++;
-
 	if (DEBUGLEVEL > 10) {
 		extern FILE *login, *logout;
 		pstring fname = "";
@@ -962,12 +943,6 @@ int main(int argc, char *argv[])
 		login = fopen(fname, "w");
 		sprintf(fname, "%s.out", debugf);
 		logout = fopen(fname, "w");
-	}
-
-	if (*lookup) {
-		if (dbf)
-			fclose(dbf);
-		dbf = stdout;
 	}
 
 	DEBUG(1, ("%s netbios nameserver version %s started\n", timestring(),
@@ -1001,8 +976,8 @@ int main(int argc, char *argv[])
 		become_daemon();
 	}
 
-	if (open_sockets(is_daemon || *lookup, *lookup ? 8000 : port)) {
-		process(lookup);
+	if (open_sockets(is_daemon, port)) {
+		process();
 		close_sockets();
 	}
 	if (dbf)
