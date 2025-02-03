@@ -30,7 +30,6 @@ extern BOOL NeedSwap;
 extern pstring scope;
 
 BOOL reply_only = False;
-BOOL browse = True;
 
 extern struct in_addr lastip;
 extern int lastport;
@@ -557,49 +556,43 @@ void process(void)
 		return;
 
 	while (True) {
-		if (browse) {
-			fd_set fds;
-			int selrtn;
-			struct timeval timeout;
-			int nread;
+		fd_set fds;
+		int selrtn;
+		struct timeval timeout;
+		int nread;
 
-			if (!timer || (time(NULL) - timer) > 60) {
-				do_browse_hook(InBuffer, OutBuffer, False);
-				timer = time(NULL);
-			}
+		if (!timer || (time(NULL) - timer) > 60) {
+			do_browse_hook(InBuffer, OutBuffer, False);
+			timer = time(NULL);
+		}
 
-			FD_ZERO(&fds);
-			FD_SET(Client, &fds);
-			if (Client_dgram >= 0)
-				FD_SET(Client_dgram, &fds);
+		FD_ZERO(&fds);
+		FD_SET(Client, &fds);
+		if (Client_dgram >= 0)
+			FD_SET(Client_dgram, &fds);
 
-			timeout.tv_sec = 10;
-			timeout.tv_usec = 0;
+		timeout.tv_sec = 10;
+		timeout.tv_usec = 0;
 
-			do {
-				selrtn = select(255, SELECT_CAST & fds, NULL,
-				                NULL, &timeout);
-			} while (selrtn < 0 && errno == EINTR);
+		do {
+			selrtn = select(255, SELECT_CAST & fds, NULL, NULL,
+			                &timeout);
+		} while (selrtn < 0 && errno == EINTR);
 
-			if (Client_dgram >= 0 && FD_ISSET(Client_dgram, &fds)) {
-				nread = read_udp_socket(Client_dgram, InBuffer,
-				                        BUFFER_SIZE);
-				if (nread > 0)
-					construct_dgram_reply(InBuffer,
-					                      OutBuffer);
-			}
+		if (Client_dgram >= 0 && FD_ISSET(Client_dgram, &fds)) {
+			nread = read_udp_socket(Client_dgram, InBuffer,
+			                        BUFFER_SIZE);
+			if (nread > 0)
+				construct_dgram_reply(InBuffer, OutBuffer);
+		}
 
-			if (FD_ISSET(Client, &fds)) {
-				nread = read_udp_socket(Client, InBuffer,
-				                        BUFFER_SIZE);
-				if (nread <= 0)
-					continue;
-			} else
-				continue;
-		} else {
-			if (!receive_nmb(InBuffer,
-			                 is_daemon ? 0 : idle_timeout))
-				return;
+		if (!FD_ISSET(Client, &fds)) {
+			continue;
+		}
+
+		nread = read_udp_socket(Client, InBuffer, BUFFER_SIZE);
+		if (nread <= 0) {
+			continue;
 		}
 
 		if (nmb_len(InBuffer) <= 0)
@@ -715,8 +708,6 @@ void usage(char *pname)
 	printf("\t-N netmask           the netmask to use for subnet "
 	       "determination\n");
 	printf("\t-G group name        add a group name to be part of\n");
-	printf("\t-b                   toggles browsing support (defaults to "
-	       "on)\n");
 	printf("\n");
 }
 
@@ -732,16 +723,13 @@ int main(int argc, char *argv[])
 
 	sprintf(debugf, "%s.nmb.debug", DEBUGFILE);
 
-	while ((opt = getopt(argc, argv, "C:bi:B:N:Rn:l:d:Dp:hPSG:")) != EOF)
+	while ((opt = getopt(argc, argv, "C:i:B:N:Rn:l:d:Dp:hPSG:")) != EOF)
 		switch (opt) {
 		case 'C':
 			strcpy(comment, optarg);
 			break;
 		case 'G':
 			add_group_name(optarg);
-			break;
-		case 'b':
-			browse = !browse;
 			break;
 		case 'B': {
 			unsigned long a = interpret_addr(optarg);
