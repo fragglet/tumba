@@ -34,9 +34,6 @@ BOOL browse = True;
 
 BOOL always_reply = False;
 
-/* shall I server DNS names as well ?? */
-BOOL dns_serve = False;
-
 extern struct in_addr lastip;
 extern int lastport;
 extern struct in_addr myip;
@@ -322,59 +319,8 @@ void reply_name_query(char *inbuf, char *outbuf)
 		nb_flags = names[i].nb_flags;
 		DEBUG(2, (" sending positive reply\n"));
 	} else {
-		if (!dns_serve) {
-			DEBUG(2, ("\n"));
-			return;
-		} else
-		/* try a DNS query to get the IP */
-		{
-			struct hostent *hp;
-			pstring hname;
-
-			strcpy(hname, qname);
-			trim_string(hname, " ", " ");
-			trim_string(hname, ".", ".");
-
-			if ((hp = Get_Hostbyname(hname)) == 0) {
-				DEBUG(2, (": unknown name sending no reply\n"));
-				return;
-			}
-
-			memcpy((char *) &retip, (char *) hp->h_addr,
-			       sizeof(retip));
-
-			/* If it is on the same subnet then don't send a reply
-			   as it might confuse a client to receive a reply from
-			   two hosts. */
-			{
-				unsigned int net1, net2, nmask, subnet1,
-				    subnet2;
-
-				nmask = *(unsigned int *) &Netmask;
-				net1 = (*(unsigned int *) &myip);
-				subnet1 = net1 & nmask;
-				net2 = (*(unsigned int *) &retip);
-				subnet2 = net2 & nmask;
-
-				if (!always_reply)
-					if ((net1 != net2) && /* it's not me! */
-					    (subnet1 ==
-					     subnet2)) /* ... but it's my subnet
-					                */
-					{
-						DEBUG(2,
-						      (" on same subnet (%s), "
-						       "sending no reply\n",
-						       inet_ntoa(retip)));
-						return;
-					}
-			}
-		}
-
-		DEBUG(2, (" sending positive reply (%s)\n", inet_ntoa(retip)));
-
-		/* add the name for future reference */
-		add_host_name(qname, &retip);
+		DEBUG(2, ("\n"));
+		return;
 	}
 
 	/* Send a POSITIVE NAME QUERY RESPONSE */
@@ -779,8 +725,6 @@ void usage(char *pname)
 	printf("\t-B broadcast address  the address to use for broadcasts\n");
 	printf("\t-N netmask           the netmask to use for subnet "
 	       "determination\n");
-	printf("\t-S                   serve queries via DNS if not on the "
-	       "same subnet\n");
 	printf("\t-A                   serve queries even if on the same "
 	       "subnet\n");
 	printf("\t-G group name        add a group name to be part of\n");
@@ -815,7 +759,6 @@ int main(int argc, char *argv[])
 			break;
 		case 'A':
 			always_reply = True;
-			dns_serve = True;
 			break;
 		case 'B': {
 			unsigned long a = interpret_addr(optarg);
@@ -836,9 +779,6 @@ int main(int argc, char *argv[])
 		} break;
 		case 'R':
 			reply_only = True;
-			break;
-		case 'S':
-			dns_serve = !dns_serve;
 			break;
 		case 'l':
 			sprintf(debugf, "%s.nmb.debug", optarg);

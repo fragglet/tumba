@@ -447,25 +447,6 @@ int set_message(char *buf, int num_words, int num_bytes, BOOL zero)
 }
 
 /*******************************************************************
-trim the specified elements off the front and back of a string
-********************************************************************/
-void trim_string(char *s, char *front, char *back)
-{
-	while (front && *front && strncmp(s, front, strlen(front)) == 0) {
-		char *p = s;
-		while (1) {
-			if (!(*p = p[strlen(front)]))
-				break;
-			p++;
-		}
-	}
-
-	while (back && *back &&
-	       (strncmp(s + strlen(s) - strlen(back), back, strlen(back)) == 0))
-		s[strlen(s) - strlen(back)] = 0;
-}
-
-/*******************************************************************
   return a pointer to the smb_buf data area
 ********************************************************************/
 static int smb_buf_ofs(char *buf)
