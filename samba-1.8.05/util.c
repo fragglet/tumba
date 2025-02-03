@@ -698,123 +698,6 @@ void name_extract(char *buf, int ofs, char *name)
 }
 
 /****************************************************************************
-show a nmb message
-****************************************************************************/
-void show_nmb(char *inbuf)
-{
-	int i, l;
-	int name_trn_id = SVAL(inbuf, 0);
-	int opcode = (CVAL(inbuf, 2) >> 3) & 0xF;
-	int nm_flags = ((CVAL(inbuf, 2) & 0x7) << 4) + (CVAL(inbuf, 3) >> 4);
-	int rcode = CVAL(inbuf, 3) & 0xF;
-	int qdcount = SVAL(inbuf, 4);
-	int ancount = SVAL(inbuf, 6);
-	int nscount = SVAL(inbuf, 8);
-	int arcount = SVAL(inbuf, 10);
-	char name[100];
-
-	DEBUG(3, ("\nPACKET INTERPRETATION\n"));
-
-#if 0
-  if (dbf)
-    fwrite(inbuf,1,nmb_len(inbuf),dbf);
-  DEBUG(0,("\n"));
-#endif
-
-	if (opcode == 5 && ((nm_flags & ~1) == 0x10) && rcode == 0)
-		DEBUG(3, ("NAME REGISTRATION REQUEST (%s)\n",
-		          nm_flags & 1 ? "Broadcast" : "Unicast"));
-
-	if (opcode == 5 && ((nm_flags & ~1) == 0x00) && rcode == 0)
-		DEBUG(3, ("NAME OVERWRITE REQUEST AND DEMAND (%s)\n",
-		          nm_flags & 1 ? "Broadcast" : "Unicast"));
-
-	if (opcode == 9 && ((nm_flags & ~1) == 0x00) && rcode == 0)
-		DEBUG(3, ("NAME REFRESH REQUEST (%s)\n",
-		          nm_flags & 1 ? "Broadcast" : "Unicast"));
-
-	if (opcode == 5 && nm_flags == 0x58 && rcode == 0)
-		DEBUG(3, ("POSITIVE NAME REGISTRATION RESPONSE\n"));
-
-	if (opcode == 5 && nm_flags == 0x58 && rcode != 0 && rcode != 7)
-		DEBUG(3, ("NEGATIVE NAME REGISTRATION RESPONSE\n"));
-
-	if (opcode == 5 && nm_flags == 0x50 && rcode == 0)
-		DEBUG(3, ("END-NODE CHALLENGE REGISTRATION RESPONSE\n"));
-
-	if (opcode == 5 && nm_flags == 0x58 && rcode != 0 && rcode == 7)
-		DEBUG(3, ("NAME CONFLICT DEMAND\n"));
-
-	if (opcode == 6 && (nm_flags & ~1) == 0x00 && rcode == 0)
-		DEBUG(3, ("NAME RELEASE REQUEST & DEMAND (%s)\n",
-		          nm_flags & 1 ? "Broadcast" : "Unicast"));
-
-	if (opcode == 6 && (nm_flags & ~1) == 0x40 && rcode == 0)
-		DEBUG(3, ("POSITIVE NAME RELEASE RESPONSE\n"));
-
-	if (opcode == 6 && (nm_flags & ~1) == 0x40 && rcode != 0)
-		DEBUG(3, ("NEGATIVE NAME RELEASE RESPONSE\n"));
-
-	if (opcode == 0 && (nm_flags & ~1) == 0x10 && rcode == 0)
-		DEBUG(3, ("NAME QUERY REQUEST (%s)\n",
-		          nm_flags & 1 ? "Broadcast" : "Unicast"));
-
-	if (opcode == 0 && (nm_flags & ~0x28) == 0x50 && rcode == 0)
-		DEBUG(3, ("POSITIVE NAME QUERY RESPONSE\n"));
-
-	if (opcode == 0 && (nm_flags & ~0x08) == 0x50 && rcode != 0)
-		DEBUG(3, ("NEGATIVE NAME QUERY RESPONSE\n"));
-
-	if (opcode == 0 && nm_flags == 0x10 && rcode == 0)
-		DEBUG(3, ("REDIRECT NAME QUERY RESPONSE\n"));
-
-	if (opcode == 7 && nm_flags == 0x80 && rcode == 0)
-		DEBUG(3, ("WAIT FOR ACKNOWLEDGEMENT RESPONSE\n"));
-
-	if (opcode == 0 && (nm_flags & ~1) == 0x00 && rcode == 0)
-		DEBUG(3, ("NODE STATUS REQUEST (%s)\n",
-		          nm_flags & 1 ? "Broadcast" : "Unicast"));
-
-	if (opcode == 0 && nm_flags == 0x40 && rcode == 0)
-		DEBUG(3, ("NODE STATUS RESPONSE\n"));
-
-	DEBUG(3, ("name_trn_id=0x%x\nopcode=0x%x\nnm_flags=0x%x\nrcode=0x%x\n",
-	          name_trn_id, opcode, nm_flags, rcode));
-	DEBUG(3, ("qdcount=%d\nancount=%d\nnscount=%d\narcount=%d\n", qdcount,
-	          ancount, nscount, arcount));
-
-	l = 12;
-	for (i = 0; i < qdcount; i++) {
-		int type, class;
-		DEBUG(3, ("QUESTION %d\n", i));
-		name_extract(inbuf, l, name);
-		l += name_len(inbuf + l);
-		type = SVAL(inbuf + l, 0);
-		class = SVAL(inbuf + l, 2);
-		l += 4;
-		DEBUG(3,
-		      ("\t%s\n\ttype=0x%x\n\tclass=0x%x\n", name, type, class));
-	}
-
-	for (i = 0; i < (ancount + nscount + arcount); i++) {
-		int type, class, ttl, rdlength;
-		DEBUG(3, ("RESOURCE %d\n", i));
-		name_extract(inbuf, l, name);
-		l += name_len(inbuf + l);
-		type = SVAL(inbuf + l, 0);
-		class = SVAL(inbuf + l, 2);
-		ttl = IVAL(inbuf + l, 4);
-		rdlength = SVAL(inbuf + l, 8);
-		l += 10 + rdlength;
-		DEBUG(3,
-		      ("\t%s\n\ttype=0x%x\n\tclass=0x%x\n", name, type, class));
-		DEBUG(3, ("\tttl=%d\n\trdlength=%d\n", ttl, rdlength));
-	}
-
-	DEBUG(3, ("\n"));
-}
-
-/****************************************************************************
 return the total storage length of a mangled name
 ****************************************************************************/
 int name_len(char *s)
@@ -1150,7 +1033,6 @@ BOOL name_query(char *inbuf, char *outbuf, char *name, struct in_addr to_ip,
 
 	DEBUG(2, ("Sending name query for %s\n", name));
 
-	show_nmb(outbuf);
 	if (!send_nmb(outbuf, nmb_len(outbuf), &to_ip)) {
 		NeedSwap = saved_swap;
 		return False;
@@ -1165,7 +1047,6 @@ BOOL name_query(char *inbuf, char *outbuf, char *name, struct in_addr to_ip,
 			int nm_flags = ((CVAL(inbuf, 2) & 0x7) << 4) +
 			               (CVAL(inbuf, 3) >> 4);
 			int rcode = CVAL(inbuf, 3) & 0xF;
-			show_nmb(inbuf);
 
 			/* is it a positive response to our request? */
 			if ((rec_name_trn_id == name_trn_id) && opcode == 0 &&

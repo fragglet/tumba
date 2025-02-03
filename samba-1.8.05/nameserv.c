@@ -284,7 +284,6 @@ void reply_reg_request(char *inbuf, char *outbuf)
 		return;
 	}
 
-	show_nmb(outbuf);
 	send_packet(outbuf, nmb_len(outbuf), &ip, 137, SOCK_DGRAM);
 
 	return;
@@ -343,8 +342,6 @@ void reply_name_query(char *inbuf, char *outbuf)
 	p += 12;
 	memcpy(p, (char *) &retip, 4);
 	p += 4;
-
-	show_nmb(outbuf);
 
 	tmpip = lastip;
 	send_packet(outbuf, nmb_len(outbuf), &tmpip,
@@ -612,9 +609,6 @@ void process(void)
 
 		if (nmb_len(InBuffer) <= 0)
 			continue;
-
-		if (DEBUGLEVEL > 2)
-			show_nmb(InBuffer);
 
 		DEBUG(2, ("%s Transaction %d\n", timestring(), trans_num));
 
