@@ -32,8 +32,6 @@ extern pstring scope;
 BOOL reply_only = False;
 BOOL browse = True;
 
-BOOL always_reply = False;
-
 extern struct in_addr lastip;
 extern int lastport;
 extern struct in_addr myip;
@@ -719,8 +717,6 @@ void usage(char *pname)
 	printf("\t-B broadcast address  the address to use for broadcasts\n");
 	printf("\t-N netmask           the netmask to use for subnet "
 	       "determination\n");
-	printf("\t-A                   serve queries even if on the same "
-	       "subnet\n");
 	printf("\t-G group name        add a group name to be part of\n");
 	printf("\t-b                   toggles browsing support (defaults to "
 	       "on)\n");
@@ -739,7 +735,7 @@ int main(int argc, char *argv[])
 
 	sprintf(debugf, "%s.nmb.debug", DEBUGFILE);
 
-	while ((opt = getopt(argc, argv, "C:bAi:B:N:Rn:l:d:Dp:hPSG:")) !=
+	while ((opt = getopt(argc, argv, "C:bi:B:N:Rn:l:d:Dp:hPSG:")) !=
 	       EOF)
 		switch (opt) {
 		case 'C':
@@ -750,9 +746,6 @@ int main(int argc, char *argv[])
 			break;
 		case 'b':
 			browse = !browse;
-			break;
-		case 'A':
-			always_reply = True;
 			break;
 		case 'B': {
 			unsigned long a = interpret_addr(optarg);
