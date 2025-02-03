@@ -15,7 +15,6 @@ CC = gcc
 # These can be overridden by command line switches (see smbd(8))
 # or in smb.conf (see smb.conf(5))
 FLAGS2 = -DDEBUGFILE=\"/usr/local/samba/log\"
-FLAGS4 = -DLMHOSTS=\"/usr/local/samba/lmhosts\"
 
 # where you are going to have the smbrun binary. This defaults to the
 # install directory. This binary is needed for correct printing

@@ -169,65 +169,6 @@ void dump_names(void)
 }
 
 /****************************************************************************
-load a netbios hosts file
-****************************************************************************/
-void load_hosts_file(char *name)
-{
-	int i;
-	FILE *f = fopen(name, "r");
-	pstring line;
-	if (!f) {
-		DEBUG(2, ("Couldn't open hosts file %s\n", name));
-		return;
-	}
-
-	while (!feof(f)) {
-		if (!fgets_slash(line, sizeof(pstring), f))
-			continue;
-
-		if (*line == '#')
-			continue;
-
-		{
-			pstring ip = "", name = "", flags = "";
-			unsigned long a;
-			int count = sscanf(line, "%s%s%s", ip, name, flags);
-			if (count <= 0)
-				continue;
-
-			if (count > 0 && count < 2) {
-				DEBUG(0,
-				      ("Ill formed hosts line [%s]\n", line));
-				continue;
-			}
-
-			i = add_name();
-			if (i < 0) {
-				fclose(f);
-				return;
-			}
-
-			a = interpret_addr(ip);
-			memcpy((char *) &names[i].ip, (char *) &a, sizeof(a));
-
-			names[i].valid = True;
-
-			strupper(name);
-			strcpy(names[i].name, name);
-			strcpy(names[i].flags, flags);
-			if (strchr(flags, 'G'))
-				names[i].nb_flags |= 0x80;
-			if (strchr(flags, 'S'))
-				names[i].subnet = True;
-			if (strchr(flags, 'M') && !ISNET(i))
-				strcpy(myname, name);
-		}
-	}
-
-	fclose(f);
-}
-
-/****************************************************************************
 add a netbios group name
 ****************************************************************************/
 void add_group_name(char *name)
@@ -842,7 +783,6 @@ void usage(char *pname)
 	       "same subnet\n");
 	printf("\t-A                   serve queries even if on the same "
 	       "subnet\n");
-	printf("\t-H hosts file        load a netbios hosts file\n");
 	printf("\t-G group name        add a group name to be part of\n");
 	printf("\t-b                   toggles browsing support (defaults to "
 	       "on)\n");
@@ -858,15 +798,10 @@ int main(int argc, char *argv[])
 	int opt;
 	extern FILE *dbf;
 	extern char *optarg;
-	pstring host_file = "";
 
 	sprintf(debugf, "%s.nmb.debug", DEBUGFILE);
 
-#ifdef LMHOSTS
-	strcpy(host_file, LMHOSTS);
-#endif
-
-	while ((opt = getopt(argc, argv, "C:bAi:B:N:Rn:l:d:Dp:hPSH:G:")) !=
+	while ((opt = getopt(argc, argv, "C:bAi:B:N:Rn:l:d:Dp:hPSG:")) !=
 	       EOF)
 		switch (opt) {
 		case 'C':
@@ -881,9 +816,6 @@ int main(int argc, char *argv[])
 		case 'A':
 			always_reply = True;
 			dns_serve = True;
-			break;
-		case 'H':
-			strcpy(host_file, optarg);
 			break;
 		case 'B': {
 			unsigned long a = interpret_addr(optarg);
@@ -948,11 +880,6 @@ int main(int argc, char *argv[])
 	DEBUG(1, ("%s netbios nameserver version %s started\n", timestring(),
 	          VERSION));
 	DEBUG(1, ("Copyright Andrew Tridgell 1994\n"));
-
-	if (*host_file) {
-		load_hosts_file(host_file);
-		DEBUG(3, ("Loaded hosts file\n"));
-	}
 
 	get_machine_info();
 
