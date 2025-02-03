@@ -533,7 +533,6 @@ BOOL string_sub(char *s, char *pattern, char *insert);
 char *StrnCpy(char *dest, char *src, int n);
 char *validated_username(int vuid);
 BOOL set_user_password(char *user, char *oldpass, char *newpass);
-int smb_buf_ofs(char *buf);
 char *skip_string(char *buf, int n);
 BOOL is_locked(int fnum, int cnum, uint32 count, uint32 offset);
 int read_file(int fnum, char *data, int pos, int mincnt, int maxcnt,
