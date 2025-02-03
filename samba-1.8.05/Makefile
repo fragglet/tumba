@@ -221,7 +221,7 @@ smbrun: smbrun.o
 	$(CC) $(CFLAGS) -o smbrun smbrun.o $(LIBS)
 
 nmbd: nameserv.o util.o
-	$(CC) $(CFLAGS) -o nmbd nameserv.o util.o kanji.o $(LIBS)
+	$(CC) $(CFLAGS) -o nmbd nameserv.o util.o $(LIBS)
 
 smbclient: client.o util.o kanji.o
 	$(CC) $(CFLAGS) -o smbclient client.o util.o kanji.o $(LIBS)
