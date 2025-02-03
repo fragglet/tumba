@@ -7,28 +7,29 @@
 #endif /* MIPS */
 #include <ctype.h>
 #include <time.h>
-#if (!(defined(sun386) || defined(NEXT2) || defined(NEXT3_0) || defined(APOLLO) || defined(MIPS)))
+#if (!(defined(sun386) || defined(NEXT2) || defined(NEXT3_0) ||                \
+       defined(APOLLO) || defined(MIPS)))
 #include <utime.h>
 #endif
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/ioctl.h>
 #include <stddef.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 #ifdef MIPS
-#include <posix/utime.h>
-#include <bsd/sys/time.h>
 #include <bsd/netinet/in.h>
+#include <bsd/sys/time.h>
+#include <posix/utime.h>
 #else
-#include <sys/time.h>
 #include <netinet/in.h>
+#include <sys/time.h>
 #endif /* MIPS */
+#include <errno.h>
+#include <grp.h>
 #include <netdb.h>
 #include <signal.h>
-#include <errno.h>
 #include <sys/file.h>
-#include <sys/stat.h>
 #include <sys/param.h>
-#include <grp.h>
+#include <sys/stat.h>
 #ifndef APOLLO
 #include <sys/mount.h>
 #endif
@@ -38,13 +39,13 @@
 #else
 #include <varargs.h>
 #endif
-#if !defined( NEXT3_0 ) && !defined( APOLLO )
+#if !defined(NEXT3_0) && !defined(APOLLO)
 #include <unistd.h>
 #endif
 #include <sys/wait.h>
-#ifdef CLIX	/* need rusage structure */
+#ifdef CLIX /* need rusage structure */
 #include <sys/resource.h>
-#endif	/* end CLIX */
+#endif /* end CLIX */
 #ifdef ISC
 #include <sys/stream.h>
 #endif
@@ -59,10 +60,10 @@
 #endif
 
 #if defined(GETPWANAM)
-#include <sys/types.h>
-#include <sys/label.h>
-#include <sys/audit.h>
 #include <pwdadj.h>
+#include <sys/audit.h>
+#include <sys/label.h>
+#include <sys/types.h>
 #endif
 
 #if defined(SHADOW_PWD) && !defined(NETBSD)
@@ -82,16 +83,16 @@
 
 #ifdef SUN
 #define HAVE_TIMELOCAL
-#include <sys/dirent.h>
-#include <sys/acct.h>
-#include <sys/vfs.h>
-#include <string.h>
 #include <errno.h>
+#include <string.h>
+#include <sys/acct.h>
+#include <sys/dirent.h>
+#include <sys/vfs.h>
 #ifndef sun386
 #include <utime.h>
 #endif
-#include <sys/wait.h>
 #include <signal.h>
+#include <sys/wait.h>
 #ifdef sun386
 /* Things we need to change for sun386i */
 #define NO_STRFTIME
@@ -100,8 +101,8 @@
 #endif
 #define strerror strerror
 struct utimbuf {
-  time_t actime;
-  time_t modtime;
+	time_t actime;
+	time_t modtime;
 };
 typedef unsigned short mode_t;
 #endif
@@ -112,14 +113,14 @@ extern char *sys_errlist[];
 #endif
 
 #ifdef SOLARIS
-#include <sys/fcntl.h>
 #include <dirent.h>
+#include <string.h>
 #include <sys/acct.h>
+#include <sys/fcntl.h>
+#include <sys/filio.h>
 #include <sys/statfs.h>
 #include <sys/statvfs.h>
 #include <sys/vfs.h>
-#include <sys/filio.h>
-#include <string.h>
 #define HAVE_TIMEZONE
 #define SIGNAL_CAST (void (*)(int))
 #define SYSV
@@ -130,9 +131,9 @@ extern char *sys_errlist[];
 #endif
 
 #ifdef SGI
-#include <sys/statfs.h>
-#include <string.h>
 #include <signal.h>
+#include <string.h>
+#include <sys/statfs.h>
 #define SYSV
 #define SIGNAL_CAST (void (*)())
 #define STATFS4
@@ -140,12 +141,12 @@ extern char *sys_errlist[];
 
 #ifdef MIPS
 #include <bsd/net/soioctl.h>
-#include <string.h>
 #include <dirent.h>
 #include <fcntl.h>
+#include <string.h>
 #include <sys/statfs.h>
-#include <sys/wait.h>
 #include <sys/termio.h>
+#include <sys/wait.h>
 #define SIGNAL_CAST (void (*)())
 typedef int mode_t;
 extern struct group *getgrnam();
@@ -159,13 +160,12 @@ extern char *sys_errlist[];
 #define REPLACE_STRSTR
 #endif /* MIPS */
 
-
 #ifdef DGUX
-#include <string.h>
 #include <dirent.h>
+#include <fcntl.h>
+#include <string.h>
 #include <sys/statfs.h>
 #include <sys/statvfs.h>
-#include <fcntl.h>
 #include <termios.h>
 #define SYSV
 #define USE_WAITPID
@@ -176,15 +176,15 @@ extern char *sys_errlist[];
 #endif
 
 #ifdef SVR4
+#include <dirent.h>
+#include <fcntl.h>
 #include <string.h>
 #include <sys/dir.h>
-#include <dirent.h>
+#include <sys/filio.h>
+#include <sys/sockio.h>
 #include <sys/statfs.h>
 #include <sys/statvfs.h>
 #include <sys/vfs.h>
-#include <sys/filio.h>
-#include <fcntl.h>
-#include <sys/sockio.h>
 #include <termios.h>
 #define SYSV
 #define USE_WAITPID
@@ -195,9 +195,9 @@ extern char *sys_errlist[];
 #endif
 
 #ifdef ULTRIX
-#include <strings.h>
 #include <nfs/nfs_clnt.h>
 #include <nfs/vfs.h>
+#include <strings.h>
 #ifdef ULTRIX_AUTH
 #include <auth.h>
 #endif
@@ -205,28 +205,28 @@ char *getwd(char *);
 #define GID_TYPE int
 #define NOSTRDUP
 #ifdef __STDC__
-#define SIGNAL_CAST (void(*)(int))
+#define SIGNAL_CAST (void (*)(int))
 #endif
 #endif
 
 #ifdef OSF1
-#include <strings.h>
 #include <dirent.h>
+#include <strings.h>
 char *getwd(char *);
 #define STATFS3
 #define USE_F_FSIZE
 #ifdef OSF1_ENH_SEC
-#include <pwd.h>
-#include <sys/types.h>
-#include <sys/security.h>
 #include <prot.h>
+#include <pwd.h>
+#include <sys/security.h>
+#include <sys/types.h>
 #include <unistd.h>
-#endif  /* OSF1_ENH_SEC */
+#endif /* OSF1_ENH_SEC */
 #endif
 
 #ifdef CLIX
 #include <dirent.h>
-#define SIGNAL_CAST	(void (*)())
+#define SIGNAL_CAST (void (*)())
 #include <sys/fcntl.h>
 #include <sys/statfs.h>
 #define HAVE_TIMEZONE
@@ -238,8 +238,7 @@ char *getwd(char *);
 #define USE_GETCWD
 #define USE_SETSID
 #define NO_INITGROUPS
-#endif	/* CLIX */
-
+#endif /* CLIX */
 
 #ifdef BSDI
 #include <string.h>
@@ -251,25 +250,23 @@ char *getwd(char *);
 /* you may not need this */
 #define NO_GETSPNAM
 #define SIGNAL_CAST (void (*)())
-#endif 
-
+#endif
 
 #ifdef FreeBSD
 #include <strings.h>
 #define SIGNAL_CAST (void (*)())
-#define GID_TYPE int
-#endif 
-
+#define GID_TYPE    int
+#endif
 
 #ifdef AIX
+#include <dirent.h>
 #include <strings.h>
 #include <sys/dir.h>
-#include <sys/select.h>
-#include <dirent.h>
-#include <sys/statfs.h>
-#include <sys/vfs.h>
 #include <sys/id.h>
 #include <sys/priv.h>
+#include <sys/select.h>
+#include <sys/statfs.h>
+#include <sys/vfs.h>
 #define HAVE_TIMEZONE
 #define SYSV
 #define USE_WAITPID
@@ -277,12 +274,12 @@ char *getwd(char *);
 #endif
 
 #ifdef HPUX
-#include <string.h>
 #include <dirent.h>
 #include <fcntl.h>
-#include <sys/vfs.h>
-#include <sys/types.h>
 #include <netinet/tcp.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/vfs.h>
 #define SIGNAL_CAST (void (*)(__harg))
 #define SELECT_CAST (int *)
 #define HAVE_TIMEZONE
@@ -302,11 +299,11 @@ typedef int mode_t;
 #endif
 
 #ifdef NEXT
+#include <dirent.h>
 #include <strings.h>
 #include <sys/dir.h>
-#include <dirent.h>
 #include <sys/vfs.h>
-#define bzero(b,len) memset(b,0,len)
+#define bzero(b, len) memset(b, 0, len)
 #include <libc.h>
 #define NOSTRDUP
 #define USE_WAITPID
@@ -316,30 +313,30 @@ typedef int mode_t;
 #endif
 
 #ifdef NEXT2
-#include <sys/types.h>
-#include <strings.h>
 #include <dirent.h>
+#include <strings.h>
+#include <sys/types.h>
 #include <sys/vfs.h>
-#define bzero(b,len) memset(b,0,len)
-#define mode_t int
+#define bzero(b, len) memset(b, 0, len)
+#define mode_t        int
 struct utimbuf {
-  time_t actime;
-  time_t modtime;
+	time_t actime;
+	time_t modtime;
 };
 #include <libc.h>
 #define NOSTRDUP
 #define USE_DIRECT
 #define USE_WAITPID
-#endif 
+#endif
 
 #ifdef NEXT3_0
 #include <strings.h>
 #include <sys/dir.h>
 #include <sys/vfs.h>
-#define bzero(b,len) memset(b,0,len)
+#define bzero(b, len) memset(b, 0, len)
 struct utimbuf {
-  time_t actime;
-  time_t modtime;
+	time_t actime;
+	time_t modtime;
 };
 #include <libc.h>
 #define NOSTRDUP
@@ -347,14 +344,13 @@ struct utimbuf {
 #define mode_t int
 #endif
 
-
 #ifdef APOLLO
-#include <string.h>
 #include <fcntl.h>
+#include <string.h>
 #include <sys/statfs.h>
 struct utimbuf {
-  time_t actime;
-  time_t modtime;
+	time_t actime;
+	time_t modtime;
 };
 #define USE_DIRECT
 #define USE_GETCWD
@@ -368,28 +364,27 @@ struct utimbuf {
 #define S_IFREG 0100000
 #endif
 #ifndef S_ISREG
-#define S_ISREG(mode)   ((mode & 0xF000) == S_IFDIR)
+#define S_ISREG(mode) ((mode & 0xF000) == S_IFDIR)
 #endif
 
 #endif
-
 
 #ifdef SCO
 #include <dirent.h>
-#include <string.h>
 #include <fcntl.h>
+#include <string.h>
 #include <sys/statfs.h>
 #include <sys/stropts.h>
 #ifdef NETGROUP
 #include <rpcsvc/ypclnt.h>
 #endif
 #ifdef SecureWare
-#include <sys/security.h>
-#include <sys/audit.h>
 #include <prot.h>
+#include <sys/audit.h>
+#include <sys/security.h>
 #define crypt bigcrypt
 #endif
-#define ftruncate(f,l) syscall(0x0a28,f,l)
+#define ftruncate(f, l) syscall(0x0a28, f, l)
 #define HAVE_TIMEZONE
 #define SIGNAL_CAST (void (*)(int))
 #define USE_WAITPID
@@ -402,14 +397,14 @@ struct utimbuf {
 #endif
 
 #ifdef ISC
+#include <dirent.h>
+#include <fcntl.h>
 #include <net/errno.h>
 #include <string.h>
-#include <sys/dir.h>
-#include <dirent.h>
-#include <sys/statfs.h>
-#include <fcntl.h>
-#include <sys/sioctl.h>
 #include <stropts.h>
+#include <sys/dir.h>
+#include <sys/sioctl.h>
+#include <sys/statfs.h>
 #define FIONREAD FIORDCHK
 #define SYSV
 #define USE_WAITPID
@@ -423,7 +418,6 @@ struct utimbuf {
 #define HAVE_TIMEZONE
 #endif
 
-
 #ifdef KANJI
 #ifndef _KANJI_C_
 #include "kanji.h"
@@ -432,7 +426,7 @@ struct utimbuf {
 
 #ifdef NO_GETSPNAM
 struct spwd { /* fake shadow password structure */
-       char *sp_pwdp;
+	char *sp_pwdp;
 };
 struct spwd *getspnam(char *username); /* fake shadow password routine */
 #endif
@@ -446,8 +440,8 @@ struct spwd *getspnam(char *username); /* fake shadow password routine */
 #define GID_TYPE gid_t
 #endif
 
-#include "version.h"
 #include "smb.h"
+#include "version.h"
 
 #ifdef UFC_CRYPT
 #define crypt ufc_crypt
@@ -458,7 +452,7 @@ struct spwd *getspnam(char *username); /* fake shadow password routine */
 #endif
 
 #ifdef REPLACE_STRSTR
-#define strstr(s,p) Strstr(s,p)
+#define strstr(s, p) Strstr(s, p)
 #endif
 
 #ifndef NGROUPS_MAX
@@ -498,7 +492,7 @@ it works and getting lots of bug reports */
 
 #ifndef SIGCLD
 #define SIGCLD SIGCHLD
-#endif 
+#endif
 
 #ifndef HAVE_FCNTL_LOCK
 #define HAVE_FCNTL_LOCK 1
@@ -512,15 +506,12 @@ it works and getting lots of bug reports */
 #define WAIT3_CAST1 (int *)
 #endif
 
-
-
 #ifdef NO_EID
-#define geteuid() getuid()
-#define getegid() getgid()
+#define geteuid()  getuid()
+#define getegid()  getgid()
 #define seteuid(x) setuid(x)
 #define setegid(x) setgid(x)
 #endif
-
 
 #if (HAVE_FCNTL_LOCK == 0)
 /* since there is no locking available, system includes  */
@@ -533,7 +524,6 @@ it works and getting lots of bug reports */
 #define F_UNLCK 0
 #endif /* HAVE_FCNTL_LOCK == 0 */
 
-
 /* possibly wrap the malloc calls */
 #if WRAP_MALLOC
 
@@ -543,7 +533,7 @@ it works and getting lots of bug reports */
 #undef malloc
 #endif
 
-#define malloc(size) malloc_wrapped(size,__FILE__,__LINE__)
+#define malloc(size) malloc_wrapped(size, __FILE__, __LINE__)
 
 /* undo the old realloc def if necessary */
 #ifdef realloc
@@ -551,7 +541,7 @@ it works and getting lots of bug reports */
 #undef realloc
 #endif
 
-#define realloc(ptr,size) realloc_wrapped(ptr,size,__FILE__,__LINE__)
+#define realloc(ptr, size) realloc_wrapped(ptr, size, __FILE__, __LINE__)
 
 /* undo the old free def if necessary */
 #ifdef free
@@ -559,13 +549,11 @@ it works and getting lots of bug reports */
 #undef free
 #endif
 
-#define free(ptr) free_wrapped(ptr,__FILE__,__LINE__)
+#define free(ptr) free_wrapped(ptr, __FILE__, __LINE__)
 
 /* and the malloc prototypes */
-void *malloc_wrapped(int,char *,int);
-void *realloc_wrapped(void *,int,char *,int);
-void free_wrapped(void *,char *,int);
+void *malloc_wrapped(int, char *, int);
+void *realloc_wrapped(void *, int, char *, int);
+void free_wrapped(void *, char *, int);
 
 #endif
-
-

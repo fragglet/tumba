@@ -18,7 +18,7 @@
 
 /* This defines the name of the printcap file. It is MOST UNLIKELY that
    this will change BUT! Specifying a file with the format of a printcap
-   file but containing only a subset of the printers actualy in your real 
+   file but containing only a subset of the printers actualy in your real
    printcap file is a quick-n-dirty way to allow dynamic access to a subset
    of available printers.
 */
@@ -35,7 +35,7 @@ This is used by the magic scripts
    MAX_CONNECTIONS services, but any number of machines may connect at
    one time. */
 #define MAX_CONNECTIONS 25
-#define MAX_OPEN_FILES 50
+#define MAX_OPEN_FILES  50
 
 /* max number of directories open at once */
 #define MAXDIR 20
@@ -47,7 +47,6 @@ This is used by the magic scripts
 #endif
 
 #define WORDMAX 0xFFFF
-
 
 /* separators for lists */
 #define LIST_SEP " \t,;:\n\r"
@@ -73,7 +72,6 @@ This is used by the magic scripts
 
 /* define this to replace the string functions with debugging ones */
 /* #define STRING_DEBUG */
-
 
 /* we have two time standards - local and GMT. This will try to sort them out.
  */
