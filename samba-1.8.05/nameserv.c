@@ -109,14 +109,6 @@ int add_name(void)
 }
 
 /****************************************************************************
-delete a netbios name
-****************************************************************************/
-void del_name(int i)
-{
-	names[i].valid = False;
-}
-
-/****************************************************************************
 find a name
 ****************************************************************************/
 int find_name(char *s)
@@ -480,50 +472,11 @@ reply to a name status query
 void reply_name_status(char *inbuf, char *outbuf)
 {
 	char qname[100] = "";
-#if 0
-  int rec_name_trn_id = SVAL(inbuf,0);
-  char *p = inbuf;
-  unsigned char nb_flags = 0;
-  struct in_addr tmpip;
-  struct in_addr retip;
-  int i;
-#endif
 
 	name_extract(inbuf, 12, qname);
 
 	DEBUG(2,
 	      ("(%s) status query on name (%s)\n", inet_ntoa(lastip), qname));
-
-#if 0
-  i = find_name(qname);
-
-  if (i < 0)
-    return;
-  
-  /* Send a POSITIVE NAME STATUS RESPONSE */
-  SSVAL(outbuf,0,rec_name_trn_id);
-  CVAL(outbuf,2) = (1<<7) | (1<<2);
-  CVAL(outbuf,3) = 0;
-  SSVAL(outbuf,4,0);
-  SSVAL(outbuf,6,1);
-  SSVAL(outbuf,8,0);
-  SSVAL(outbuf,10,0);  
-  p = outbuf+12;
-  strcpy(p,inbuf+12);
-  p += name_len(p);
-  SSVAL(p,0,0x21);
-  SSVAL(p,2,0x1);
-  SIVAL(p,4,0);
-  SSVAL(p,8,6);
-
-
-  show_nmb(outbuf);
-
-  tmpip = lastip;
-  send_packet(outbuf,nmb_len(outbuf),&tmpip,lastport>0?lastport:137,SOCK_DGRAM);
-#endif
-
-	return;
 }
 
 /****************************************************************************
@@ -734,20 +687,6 @@ void process(char *lookup)
 			printf("couldn't find name %s\n", lookup);
 		return;
 	}
-
-#if 0
-  if (is_daemon)
-    register_groups();
-
-  if (!reply_only && is_daemon)
-    {
-      int i = find_name(myname);
-      if (i < 0 || !register_name(&names[i],&bcast_ip,is_daemon?NULL:construct_reply))
-	{
-	  DEBUG(0,("Failed to register my own name\n"));
-	}
-    }
-#endif
 
 	while (True) {
 		if (browse) {
