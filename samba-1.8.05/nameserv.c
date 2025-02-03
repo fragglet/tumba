@@ -63,7 +63,6 @@ fstring comment = "";
 int idle_timeout = 1200;
 
 void add_group_name(char *name);
-void add_host_name(char *name, struct in_addr *ip);
 
 BOOL got_bcast = False;
 BOOL got_nmask = False;
@@ -131,9 +130,6 @@ void check_names(void)
 	int i;
 	int group_count = 0;
 
-	/* add the magic __SAMBA__ name */
-	add_host_name("__SAMBA__", &myip);
-
 	for (i = 0; i < num_names; i++)
 		if (ISNET(i))
 			group_count++;
@@ -179,23 +175,6 @@ void add_group_name(char *name)
 	names[i].nb_flags |= 0x80;
 
 	names[i].valid = True;
-}
-
-/****************************************************************************
-add a host name
-****************************************************************************/
-void add_host_name(char *name, struct in_addr *ip)
-{
-	int i = add_name();
-	if (i < 0)
-		return;
-
-	names[i].ip = *ip;
-	strcpy(names[i].name, name);
-	strupper(names[i].name);
-	names[i].valid = True;
-	names[i].start_time = time(NULL);
-	names[i].ttl = 0;
 }
 
 /****************************************************************************
