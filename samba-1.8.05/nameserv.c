@@ -477,59 +477,56 @@ void do_browse_hook(char *inbuf, char *outbuf, BOOL force)
 	if (!force)
 		minute_counter++;
 
-	if (minute_counter >= announce_interval || force) {
-		minute_counter = 0;
+	if (!force && minute_counter < announce_interval) {
+		return;
+	}
 
-		/* possibly reset our masters */
-		if (!force && master_count++ >= master_interval) {
-			master_count = 0;
-			DEBUG(2,
-			      ("%s Redoing browse master ips\n", timestring()));
-			for (i = 0; i < num_names; i++)
-				names[i].found_master = False;
+	minute_counter = 0;
+
+	/* possibly reset our masters */
+	if (!force && master_count++ >= master_interval) {
+		master_count = 0;
+		DEBUG(2, ("%s Redoing browse master ips\n", timestring()));
+		for (i = 0; i < num_names; i++)
+			names[i].found_master = False;
+	}
+
+	/* find the subnet masters */
+	for (i = 0; i < num_names; i++)
+		if (NAMEVALID(i) && ISNET(i) && !names[i].found_master) {
+			struct in_addr new_master;
+
+			sprintf(name, "%-15.15s%c", names[i].name, 0x1d);
+			names[i].found_master =
+			    name_query(inbuf, outbuf, name, names[i].ip,
+			               &new_master, 3, construct_reply);
+			if (!names[i].found_master) {
+				DEBUG(1,
+				      ("Failed to find a master "
+				       "browser for %s using %s\n",
+				       names[i].name, inet_ntoa(names[i].ip)));
+				memset(&names[i].master_ip, 0, 4);
+			} else {
+				if (memcmp(&new_master, &names[i].master_ip,
+				           4) == 0)
+					DEBUG(2, ("Found master browser "
+					          "for %s at %s\n",
+					          names[i].name,
+					          inet_ntoa(new_master)));
+				else
+					DEBUG(1, ("New master browser for "
+					          "%s at %s\n",
+					          names[i].name,
+					          inet_ntoa(new_master)));
+				names[i].master_ip = new_master;
+			}
 		}
 
-		/* find the subnet masters */
-		for (i = 0; i < num_names; i++)
-			if (NAMEVALID(i) && ISNET(i) &&
-			    !names[i].found_master) {
-				struct in_addr new_master;
-
-				sprintf(name, "%-15.15s%c", names[i].name,
-				        0x1d);
-				names[i].found_master =
-				    name_query(inbuf, outbuf, name, names[i].ip,
-				               &new_master, 3, construct_reply);
-				if (!names[i].found_master) {
-					DEBUG(1, ("Failed to find a master "
-					          "browser for %s using %s\n",
-					          names[i].name,
-					          inet_ntoa(names[i].ip)));
-					memset(&names[i].master_ip, 0, 4);
-				} else {
-					if (memcmp(&new_master,
-					           &names[i].master_ip, 4) == 0)
-						DEBUG(2,
-						      ("Found master browser "
-						       "for %s at %s\n",
-						       names[i].name,
-						       inet_ntoa(new_master)));
-					else
-						DEBUG(1,
-						      ("New master browser for "
-						       "%s at %s\n",
-						       names[i].name,
-						       inet_ntoa(new_master)));
-					names[i].master_ip = new_master;
-				}
-			}
-
-		/* do our host announcements */
-		for (i = 0; i < num_names; i++)
-			if (NAMEVALID(i) && names[i].found_master)
-				names[i].found_master = announce_host(
-				    outbuf, names[i].name, names[i].master_ip);
-	}
+	/* do our host announcements */
+	for (i = 0; i < num_names; i++)
+		if (NAMEVALID(i) && names[i].found_master)
+			names[i].found_master = announce_host(
+			    outbuf, names[i].name, names[i].master_ip);
 }
 
 /****************************************************************************
@@ -735,8 +732,7 @@ int main(int argc, char *argv[])
 
 	sprintf(debugf, "%s.nmb.debug", DEBUGFILE);
 
-	while ((opt = getopt(argc, argv, "C:bi:B:N:Rn:l:d:Dp:hPSG:")) !=
-	       EOF)
+	while ((opt = getopt(argc, argv, "C:bi:B:N:Rn:l:d:Dp:hPSG:")) != EOF)
 		switch (opt) {
 		case 'C':
 			strcpy(comment, optarg);
