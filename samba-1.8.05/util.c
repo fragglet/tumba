@@ -354,21 +354,9 @@ BOOL strequal(char *s1, char *s2)
 void strlower(char *s)
 {
 	while (*s) {
-#ifdef KANJI
-		if (is_shift_jis(*s)) {
-			s += 2;
-		} else if (is_kana(*s)) {
-			s++;
-		} else {
-			if (isupper(*s))
-				*s = tolower(*s);
-			s++;
-		}
-#else
 		if (isupper(*s))
 			*s = tolower(*s);
 		s++;
-#endif /* KANJI */
 	}
 }
 
@@ -378,21 +366,9 @@ void strlower(char *s)
 void strupper(char *s)
 {
 	while (*s) {
-#ifdef KANJI
-		if (is_shift_jis(*s)) {
-			s += 2;
-		} else if (is_kana(*s)) {
-			s++;
-		} else {
-			if (islower(*s))
-				*s = toupper(*s);
-			s++;
-		}
-#else
 		if (islower(*s))
 			*s = toupper(*s);
 		s++;
-#endif
 	}
 }
 
