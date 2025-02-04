@@ -519,135 +519,26 @@ struct from_host {
 };
 
 /* and a few prototypes */
-char *fgets_slash(char *s, int maxlen, FILE *f);
-void exit_server(void);
-BOOL process_exists(int pid);
-int lockfread(void *p, int pos, int size, int n, FILE *f);
-BOOL chgpasswd(char *name, char *oldpass, char *newpass);
-void push_mangled_name(char *s);
-void array_promote(char *array, int elsize, int element);
-void string_replace(char *s, char old, char new);
-BOOL user_in_list(char *user, char *list);
 BOOL string_sub(char *s, char *pattern, char *insert);
-char *StrnCpy(char *dest, char *src, int n);
-char *validated_username(int vuid);
-BOOL set_user_password(char *user, char *oldpass, char *newpass);
 char *skip_string(char *buf, int n);
-BOOL is_locked(int fnum, int cnum, uint32 count, uint32 offset);
-int read_file(int fnum, char *data, int pos, int mincnt, int maxcnt,
-              int timeout, BOOL exact);
-BOOL do_lock(int fnum, int cnum, uint32 count, uint32 offset, int *eclass,
-             uint32 *ecode);
-int seek_file(int fnum, int pos);
-BOOL do_unlock(int fnum, int cnum, uint32 count, uint32 offset, int *eclass,
-               uint32 *ecode);
-int get_printqueue(int snum, print_queue_struct **queue);
-int sig_cld();
 int find_free_connection(void);
-void parse_connect(char *buf, char *service, char *user, char *password,
-                   char *dev);
-int make_connection(char *service, char *user, char *password, char *dev,
-                    int vuid);
-void *dptr_get(int key);
-char *dptr_path(int key);
-char *dptr_wcard(int key);
-int dptr_set_wcard(int key, char *wcard);
-int dptr_set_attr(int key, uint16 attr);
-uint16 dptr_attr(int key);
-void dptr_promote(int key);
-void dptr_demote(int key);
-void dptr_close(int key);
-void dptr_closepath(char *path, int pid);
-int dptr_create(void *p, char *path, BOOL expect_close, int pid);
-BOOL dptr_fill(char *buf, unsigned int key);
-BOOL dptr_zero(char *buf);
-void *dptr_fetch(char *buf, int *num);
-void *dptr_fetch_lanman2(char *params, int dptr_num);
-BOOL get_dir_entry(int cnum, char *mask, int dirtype, char *fname, int *size,
-                   int *mode, time_t *date, BOOL check_descend);
-void open_file(int fnum, int cnum, char *fname, int flags, int mode);
-void close_open_files(int cnum);
 void close_file(int fnum);
-int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize);
-int reply_trans(char *inbuf, char *outbuf);
 char *ufc_crypt(char *key, char *salt);
-BOOL authorise_login(int snum, char *user, char *password, BOOL *guest,
-                     int vuid);
-void add_session_user(char *user);
-int valid_uid(int uid);
-BOOL password_ok(char *user, char *password, struct passwd *pwd);
-void register_uid(int uid, char *name, BOOL guest);
-BOOL string_combinations(char *s, int offset, BOOL (*fn)(), int N);
-BOOL fromhost(int sock, struct from_host *f);
 BOOL strhasupper(char *s);
 BOOL strhaslower(char *s);
-void disk_free(char *path, int *bsize, int *dfree, int *dsize);
-int unix_error_packet(char *inbuf, char *outbuf, int def_class, uint32 def_code,
-                      int line);
-time_t make_unix_date2(void *date_ptr);
-int cached_error_packet(char *inbuf, char *outbuf, int fnum, int line);
-BOOL start_dir(int cnum, char *directory);
-mode_t unix_mode(int cnum, int dosmode);
 BOOL check_name(char *name, int cnum);
-int error_packet(char *inbuf, char *outbuf, int error_class, uint32 error_code,
-                 int line);
-int find_free_file(void);
-void unix_convert(char *name, int cnum);
-void unix_convert_lanman2(char *s, char *home, BOOL case_is_sig);
-int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize, int cnum,
-                         char **pparams, char **ppdata);
-int call_trans2qfsinfo(char *inbuf, char *outbuf, int length, int bufsize,
-                       int cnum, char **pparams, char **ppdata);
-int call_trans2findnext(char *inbuf, char *outbuf, int length, int bufsize,
-                        int cnum, char **pparams, char **ppdata);
-void print_file(int fnum);
-void check_magic(int fnum, int cnum);
-int read_smb_length(int fd, char *inbuf, int timeout);
-int read_predict(int fd, int offset, char *buf, int num);
-void invalidate_read_prediction(int fd);
-void do_read_prediction();
-BOOL claim_connection(int cnum, char *name, int max_connections, BOOL Clear);
-BOOL yield_connection(int cnum, char *name, int max_connections);
-BOOL fcntl_lock(int fd, int op, int offset, int count, int type);
-int count_chars(char *s, char c);
-int smbrun(char *);
-void unix_convert_83(char *s, char *home, BOOL mangle, char *MangledMap);
-BOOL name_convert(char *OutName, char *InName, BOOL mangle, char *MangledNames);
 struct hostent *Get_Hostbyname(char *name);
-struct passwd *Get_Pwnam(char *user);
 void Abort(void);
 void safe_memcpy(void *dest, void *src, int size);
 void *Realloc(void *p, int size);
-void send_logout(char *inbuf, char *outbuf);
 void smb_setlen(char *buf, int len);
 int set_message(char *buf, int num_words, int num_bytes, BOOL zero);
 void name_interpret(char *in, char *out);
-BOOL check_access(int snum);
-BOOL in_group(gid_t group, int current_gid, int ngroups, int *groups);
 void *object_byte_swap(void *obj, int size);
 void ssval(char *buf, int pos, uint16 val);
 void sival(char *buf, int pos, uint32 val);
 uint32 ival(char *buf, int pos);
 uint16 sval(char *, int);
-void ssval_s(char *buf, int pos, int16 val);
-void sival_s(char *buf, int pos, int32 val);
-int32 ival_s(char *buf, int pos);
-int16 sval_s(char *, int);
-BOOL string_set(char **dest, char *src);
-BOOL string_init(char **dest, char *src);
-void string_free(char **s);
-char *attrib_string(int mode);
-int do_long_dir(char *inbuf, char *outbuf, char *Mask, int attribute,
-                void (*fn)(), BOOL recurse_dir);
-int do_short_dir(char *inbuf, char *outbuf, char *Mask, int attribute,
-                 void (*fn)(), BOOL recurse_dir);
-void do_dir(char *inbuf, char *outbuf, char *Mask, int attribute, void (*fn)(),
-            BOOL recurse_dir);
-void unix_format(char *fname);
-BOOL directory_exist(char *dname);
-void make_dir_struct(char *buf, char *mask, char *fname, unsigned int size,
-                     int mode, time_t date);
-BOOL in_list(char *s, char *list, BOOL case_sensitive);
 void strupper(char *s);
 BOOL file_exist(char *fname);
 int read_with_timeout(int fd, char *buf, int mincnt, int maxcnt, long time_out,
@@ -661,37 +552,14 @@ int smb_len(char *buf);
 BOOL receive_smb(char *buffer, int timeout);
 void show_msg(char *buf);
 BOOL big_endian(void);
-BOOL become_user(int cnum);
-BOOL unbecome_user(void);
 void become_daemon(void);
-BOOL reduce_name(char *s, char *dir, BOOL widelinks);
 void strlower(char *s);
 void strnorm(char *s);
 char *smb_buf();
-char *smb_trans2_param(char *buf);
-char *smb_trans2_data(char *buf);
 BOOL strequal(char *, char *);
-BOOL mask_match(char *, char *, BOOL, BOOL, BOOL);
-int dos_mode(int, char *, struct stat *);
 char *timestring();
-BOOL ip_equal(struct in_addr *ip1, struct in_addr *ip2);
 BOOL send_packet(char *buf, int len, struct in_addr *ip, int port, int type);
-char *get_home_dir(char *);
-int set_filelen(int fd, long len);
-void put_dos_date(char *buf, int offset, time_t unixdate);
-void put_dos_date2(char *buf, int offset, time_t unixdate);
-uint16 make_dos_time1(time_t unixdate);
-uint16 make_dos_date1(time_t unixdate);
-uint32 make_dos_date(time_t);
-uint32 make_dos_date2(time_t);
-int lp_keepalive(void);
 int name_len(char *s);
-void dos_clean_name(char *s);
-void unix_clean_name(char *s);
-time_t make_unix_date(void *date_ptr);
-void trim_string(char *s, char *front, char *back);
-int byte_checksum(char *buf, int len);
-BOOL yesno(char *p);
 uint32 file_size(char *file_name);
 void dos_format(char *fname);
 char *GetWd(char *s);
@@ -700,21 +568,13 @@ int name_len(char *s);
 void show_nmb(char *inbuf);
 void create_mangled_stack(int size);
 void name_extract(char *buf, int ofs, char *name);
-BOOL name_status(char *inbuf, char *outbuf, char *name);
 void get_broadcast(struct in_addr *if_ipaddr, struct in_addr *if_bcast,
                    struct in_addr *if_nmask);
-BOOL allow_access(char *deny_list, char *allow_list, struct from_host *client);
 #ifdef __STDC__
 int Debug1(char *, ...);
 #else
 int Debug1();
 #endif
-BOOL check_hosts_equiv(char *user);
-char *validate_group(char *group, char *password, int snum);
-int chain_reply(int type, char *inbuf, char *inbuf2, char *outbuf,
-                char *outbuf2, int size, int bufsize);
-void close_cnum(int cnum);
-char *smb_errstr(char *inbuf);
 struct tm *LocalTime(time_t *t, int);
 time_t TimeLocal(struct tm *tm, int);
 int TimeDiff(void);
@@ -722,66 +582,14 @@ void replacestr(char *str1, char *str2, int start, int n);
 void openstr(char *s, int start, int n);
 void closestr(char *s, int start, int n);
 BOOL set_filetime(char *fname, time_t mtime);
-char *dirname_dos(char *path, char *buf);
-char *filename_dos(char *path, char *buf);
 BOOL get_myname(char *myname, struct in_addr *ip);
 BOOL ip_equal(struct in_addr *ip1, struct in_addr *ip2);
-void expand_mask(char *Mask, BOOL);
-BOOL sane_unix_date(time_t unixdate);
-time_t start_of_month(void);
 BOOL register_name(name_struct *name, struct in_addr *destip, void (*)());
 char *smb_fn_name(int cnum);
-int construct_datagram(char *, int, int, int, struct in_addr *, int, char *,
-                       char *);
 int open_socket_in(int type, int port);
 int open_socket_out(struct in_addr *addr, int port);
-int interpret_protocol(char *str, int def);
-int interpret_security(char *str, int def);
-int ChDir(char *path);
-int smb_buflen(char *buf);
-int interpret_short_filename(char *p, file_info *finfo);
-int interpret_long_filename(int level, char *p, file_info *finfo);
 unsigned long interpret_addr(char *str);
-void mangle_name_83(char *s, char *MangledMap);
-void *dptr_get(int);
-char *dptr_path(int);
-char *dptr_wcard(int);
-int dptr_set_wcard(int, char *);
-int dptr_set_attr(int, uint16);
-void *dptr_fetch_lanman2(char *, int);
-uint16 dptr_attr(int);
-void dptr_promote(int);
-void dptr_demote(int);
-void dptr_close(int);
-void dptr_closepath(char *, int);
-int dptr_create(void *, char *, BOOL, int);
-BOOL lp_casesignames(void);
-#ifdef NOSTRDUP
-char *strdup(char *s);
-#endif
-#ifdef REPLACE_STRLEN
-int Strlen(char *);
-#endif
-#ifdef REPLACE_STRSTR
-char *Strstr(char *s, char *p);
-#endif
 
-#ifdef SUN
-struct DIRECT *readdir();
-char *strcpy();
-int fprintf();
-#endif
-
-#ifdef STRING_DEBUG
-#define strcpy  mystrcpy
-#define strchr  mystrchr
-#define strrchr mystrrchr
-#define strlen  mystrlen
-#define strncpy mystrncpy
-#define strcat  mystrcat
-#define memcpy  mymemcpy
-#define memset  mymemset
-#endif
 
 #ifndef MIN
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
