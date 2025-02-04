@@ -16,11 +16,6 @@ CC = gcc
 # or in smb.conf (see smb.conf(5))
 FLAGS2 = -DDEBUGFILE=\"/usr/local/samba/log\"
 
-# where you are going to have the smbrun binary. This defaults to the
-# install directory. This binary is needed for correct printing
-# and magic script execution. This should be an absolute path!
-SMBRUN = smbrun
-
 # Use this for Linux without shadow passwords
 FLAGSM = -DLINUX
 LIBSM = 
@@ -28,7 +23,6 @@ LIBSM =
 ######################################################################
 # DON'T EDIT BELOW THIS LINE
 ######################################################################
-FLAGSS = -DSMBRUN=\"$(SMBRUN)\"
 CFLAGS = $(FLAGS1) $(FLAGS2) $(FLAGS3) $(FLAGS4) $(FLAGS5) $(FLAGS6) $(FLAGS7) $(FLAGSM) $(FLAGSS)
 LIBS = $(LIBS1) $(LIBSM)
 
