@@ -51,18 +51,14 @@ extern struct in_addr myip;
 extern struct in_addr bcast_ip;
 pstring myname = "";
 pstring myhostname = "";
+pstring mygroup = "WORKGROUP";
 int myttl = 0;
 
 int num_names = 0;
-name_struct *names = NULL;
+static name_struct our_hostname, our_group;
 
 int Client_dgram = -1;
 extern int Client;
-
-#define NAMEVALID(i) names[i].valid
-#define ISGROUP(i)   ((names[i].nb_flags & 0x80) != 0)
-#define ISSUBNET(i)  (names[i].subnet)
-#define ISNET(i)     (ISGROUP(i) || ISSUBNET(i))
 
 void construct_reply(char *, char *);
 
@@ -72,42 +68,30 @@ BOOL is_daemon = False;
 /* machine comment */
 fstring comment = "";
 
-void add_group_name(char *name);
-
 BOOL got_bcast = False;
 
-/****************************************************************************
-add a netbios name
-****************************************************************************/
-int add_name(void)
+
+static void init_name(name_struct *n)
 {
-	int i;
-	name_struct *n;
+	memset(n, 0, sizeof(name_struct));
+	n->valid = False;
+	n->found_master = False;
+	n->subnet = False;
+	strcpy(n->name, "");
+	strcpy(n->flags, "");
+	n->ttl = 0;
+	n->start_time = 0;
+	n->nb_flags = 0;
+}
 
-	for (i = 0; i < num_names; i++)
-		if (!names[i].valid)
-			return i;
-
-	if (num_names == 0)
-		n = (name_struct *) malloc(sizeof(name_struct));
-	else
-		n = (name_struct *) realloc(names, sizeof(name_struct) *
-		                                       (num_names + 1));
-	if (!n) {
-		DEBUG(0, ("Can't malloc more names space!\n"));
-		return -1;
-	}
-	n[num_names].valid = False;
-	n[num_names].found_master = False;
-	n[num_names].subnet = False;
-	strcpy(n[num_names].name, "");
-	strcpy(n[num_names].flags, "");
-	n[num_names].ttl = 0;
-	n[num_names].start_time = 0;
-	n[num_names].nb_flags = 0;
-	names = n;
-	num_names++;
-	return num_names - 1;
+static void init_group(name_struct *n, char *name)
+{
+	init_name(n);
+	strcpy(n->name, name);
+	strupper(n->name);
+	strcpy(n->flags, "G");
+	n->nb_flags |= 0x80;
+	n->valid = True;
 }
 
 /****************************************************************************
@@ -128,67 +112,6 @@ static BOOL name_equal(char *s1, char *s2)
 		return True;
 	else
 		return False;
-}
-
-/****************************************************************************
-find a name
-****************************************************************************/
-int find_name(char *s)
-{
-	int i;
-	time_t t = time(NULL);
-
-	for (i = 0; i < num_names; i++)
-		if (names[i].valid) {
-			if ((names[i].ttl > 0) &&
-			    (t > (names[i].start_time + names[i].ttl)))
-				names[i].valid = False;
-			else {
-				if (name_equal(s, names[i].name))
-					return i;
-			}
-		}
-	return -1;
-}
-
-/****************************************************************************
-check names, and change any 0 IPs to myip
-****************************************************************************/
-void check_names(void)
-{
-	int i;
-	int group_count = 0;
-
-	for (i = 0; i < num_names; i++)
-		if (ISNET(i))
-			group_count++;
-
-	if (group_count == 0)
-		add_group_name("LANGROUP");
-
-	for (i = 0; i < num_names; i++)
-		if (names[i].valid &&
-		    strequal((char *) inet_ntoa(names[i].ip), "0.0.0.0"))
-			names[i].ip = (ISNET(i) ? bcast_ip : myip);
-}
-
-/****************************************************************************
-add a netbios group name
-****************************************************************************/
-void add_group_name(char *name)
-{
-	int i = add_name();
-	if (i < 0)
-		return;
-
-	strupper(name);
-	memset((char *) &names[i].ip, 0, sizeof(names[i].ip));
-
-	strcpy(names[i].name, name);
-	strcpy(names[i].flags, "G");
-	names[i].nb_flags |= 0x80;
-
-	names[i].valid = True;
 }
 
 /****************************************************************************
@@ -431,7 +354,6 @@ void reply_reg_request(char *inbuf, char *outbuf)
 	char qname[100] = "";
 	char *p = inbuf;
 	struct in_addr ip;
-	int n = 0;
 	unsigned char nb_flags;
 
 	name_extract(inbuf, 12, qname);
@@ -448,20 +370,8 @@ void reply_reg_request(char *inbuf, char *outbuf)
 	DEBUG(2, ("Name registration request for %s (%s) nb_flags=0x%x\n",
 	          qname, inet_ntoa(ip), nb_flags));
 
-	/* if the name doesn't exist yet then don't respond */
-	if ((n = find_name(qname)) < 0) {
-		DEBUG(3, ("Name doesn't exist\n"));
-		return;
-	}
-
-	/* if it's a group name then ignore it */
-	if (ISNET(n)) {
-		DEBUG(3, ("Group name - ignoring\n"));
-		return;
-	}
-
 	/* if it's not my name then don't worry about it */
-	if (!name_equal(myname, qname)) {
+	if (!name_equal(our_hostname.name, qname)) {
 		DEBUG(3, ("Not my name\n"));
 		return;
 	}
@@ -488,7 +398,7 @@ void reply_reg_request(char *inbuf, char *outbuf)
 	p += name_len(p);
 	SSVAL(p, 0, 0x20);
 	SSVAL(p, 2, 0x1);
-	SIVAL(p, 4, names[n].ttl);
+	SIVAL(p, 4, our_hostname.ttl);
 	SSVAL(p, 8, 6);
 	CVAL(p, 10) = nb_flags;
 	CVAL(p, 11) = 0;
@@ -519,27 +429,20 @@ void reply_name_query(char *inbuf, char *outbuf)
 	unsigned char nb_flags = 0;
 	struct in_addr tmpip;
 	struct in_addr retip;
-	int i;
 
 	name_extract(inbuf, 12, qname);
 
 	DEBUG(2, ("(%s) querying name (%s)", inet_ntoa(lastip), qname));
 
-	i = find_name(qname);
-
-	if (i >= 0) {
-		if (ISNET(i)) {
-			DEBUG(2, (" - group name. No reply\n"));
-			return;
-		}
-
-		retip = names[i].ip;
-		nb_flags = names[i].nb_flags;
-		DEBUG(2, (" sending positive reply\n"));
-	} else {
+	if (!name_equal(qname, our_hostname.name)) {
 		DEBUG(2, ("\n"));
 		return;
 	}
+
+	/* TODO: Choose appropriate IP address based on source
+	   address/interface the query came from */
+	retip = our_hostname.ip;
+	nb_flags = our_hostname.nb_flags;
 
 	/* Send a POSITIVE NAME QUERY RESPONSE */
 	SSVAL(outbuf, 0, rec_name_trn_id);
@@ -565,8 +468,6 @@ void reply_name_query(char *inbuf, char *outbuf)
 	tmpip = lastip;
 	send_packet(outbuf, nmb_len(outbuf), &tmpip,
 	            lastport > 0 ? lastport : 137, SOCK_DGRAM);
-
-	return;
 }
 
 /****************************************************************************
@@ -693,7 +594,6 @@ void do_browse_hook(char *inbuf, char *outbuf, BOOL force)
 	static int master_interval = 4;
 	static int master_count = 0;
 	fstring name = "";
-	int i;
 
 	if (!force)
 		minute_counter++;
@@ -708,46 +608,43 @@ void do_browse_hook(char *inbuf, char *outbuf, BOOL force)
 	if (!force && master_count++ >= master_interval) {
 		master_count = 0;
 		DEBUG(2, ("%s Redoing browse master ips\n", timestring()));
-		for (i = 0; i < num_names; i++)
-			names[i].found_master = False;
+		our_hostname.found_master = False;
+		our_group.found_master = False;
 	}
 
 	/* find the subnet masters */
-	for (i = 0; i < num_names; i++)
-		if (NAMEVALID(i) && ISNET(i) && !names[i].found_master) {
-			struct in_addr new_master;
+	if (our_group.valid && !our_group.found_master) {
+		struct in_addr new_master;
 
-			sprintf(name, "%-15.15s%c", names[i].name, 0x1d);
-			names[i].found_master =
-			    name_query(inbuf, outbuf, name, names[i].ip,
-			               &new_master, 3, construct_reply);
-			if (!names[i].found_master) {
+		sprintf(name, "%-15.15s%c", our_group.name, 0x1d);
+		our_group.found_master =
+		    name_query(inbuf, outbuf, name, our_group.ip, &new_master,
+		               3, construct_reply);
+		if (!our_group.found_master) {
+			DEBUG(1, ("Failed to find a master "
+			          "browser for %s using %s\n",
+			          our_group.name, inet_ntoa(our_group.ip)));
+			memset(&our_group.master_ip, 0, 4);
+		} else {
+			if (memcmp(&new_master, &our_group.master_ip, 4) == 0)
+				DEBUG(2,
+				      ("Found master browser "
+				       "for %s at %s\n",
+				       our_group.name, inet_ntoa(new_master)));
+			else
 				DEBUG(1,
-				      ("Failed to find a master "
-				       "browser for %s using %s\n",
-				       names[i].name, inet_ntoa(names[i].ip)));
-				memset(&names[i].master_ip, 0, 4);
-			} else {
-				if (memcmp(&new_master, &names[i].master_ip,
-				           4) == 0)
-					DEBUG(2, ("Found master browser "
-					          "for %s at %s\n",
-					          names[i].name,
-					          inet_ntoa(new_master)));
-				else
-					DEBUG(1, ("New master browser for "
-					          "%s at %s\n",
-					          names[i].name,
-					          inet_ntoa(new_master)));
-				names[i].master_ip = new_master;
-			}
+				      ("New master browser for "
+				       "%s at %s\n",
+				       our_group.name, inet_ntoa(new_master)));
+			our_group.master_ip = new_master;
 		}
+	}
 
 	/* do our host announcements */
-	for (i = 0; i < num_names; i++)
-		if (NAMEVALID(i) && names[i].found_master)
-			names[i].found_master = announce_host(
-			    outbuf, names[i].name, names[i].master_ip);
+	if (our_hostname.valid && our_hostname.found_master) {
+		our_hostname.found_master = announce_host(
+		    outbuf, our_hostname.name, our_hostname.master_ip);
+	}
 }
 
 /****************************************************************************
@@ -886,19 +783,10 @@ BOOL init_structs(void)
 		strupper(myname);
 	}
 
-	if (find_name(myname) < 0) {
-		int i = add_name();
+	init_name(&our_hostname);
+	strcpy(our_hostname.name, myname);
 
-		if (i < 0)
-			return False;
-
-		strcpy(names[i].name, myname);
-		names[i].ip = myip;
-		names[i].ttl = 0;
-		names[i].nb_flags = 0;
-		names[i].valid = True;
-	} else
-		DEBUG(3, ("Name %s already exists\n", myname));
+	init_group(&our_group, mygroup);
 
 	return True;
 }
@@ -945,7 +833,7 @@ int main(int argc, char *argv[])
 			strcpy(comment, optarg);
 			break;
 		case 'G':
-			add_group_name(optarg);
+			strcpy(mygroup, optarg);
 			break;
 		case 'B': {
 			unsigned long a = interpret_addr(optarg);
@@ -996,10 +884,6 @@ int main(int argc, char *argv[])
 		strcpy(comment, "Samba %v");
 	string_sub(comment, "%v", VERSION);
 	string_sub(comment, "%h", myhostname);
-
-	check_names();
-
-	DEBUG(3, ("Checked names\n"));
 
 	if (is_daemon) {
 		DEBUG(2, ("%s becoming a daemon\n", timestring()));
