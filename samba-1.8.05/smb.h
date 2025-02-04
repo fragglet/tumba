@@ -520,7 +520,6 @@ struct from_host {
 
 /* and a few prototypes */
 char *fgets_slash(char *s, int maxlen, FILE *f);
-int read_udp_socket(int fd, char *buf, int len);
 void exit_server(void);
 BOOL process_exists(int pid);
 int lockfread(void *p, int pos, int size, int n, FILE *f);
@@ -698,14 +697,9 @@ void dos_format(char *fname);
 char *GetWd(char *s);
 int name_mangle(char *in, char *out);
 int name_len(char *s);
-BOOL name_equal(char *s1, char *s2);
 void show_nmb(char *inbuf);
-int nmb_len(char *buf);
 void create_mangled_stack(int size);
-BOOL receive_nmb(char *buffer, int timeout);
 void name_extract(char *buf, int ofs, char *name);
-BOOL name_query(char *inbuf, char *outbuf, char *name, struct in_addr to_ip,
-                struct in_addr *ip, int maxtime, void (*fn)());
 BOOL name_status(char *inbuf, char *outbuf, char *name);
 void get_broadcast(struct in_addr *if_ipaddr, struct in_addr *if_bcast,
                    struct in_addr *if_nmask);
@@ -742,7 +736,6 @@ int construct_datagram(char *, int, int, int, struct in_addr *, int, char *,
 void get_machine_info(void);
 int open_socket_in(int type, int port);
 int open_socket_out(struct in_addr *addr, int port);
-int read_max_udp(int fd, char *buffer, int bufsize, int maxtime);
 int interpret_protocol(char *str, int def);
 int interpret_security(char *str, int def);
 int ChDir(char *path);
