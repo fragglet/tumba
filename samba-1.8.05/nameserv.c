@@ -298,16 +298,12 @@ static int nmb_len(char *buf)
 	return ret;
 }
 
-int nmb_recv_len = 0;
-
 /****************************************************************************
 receive a name message
 ****************************************************************************/
 static BOOL receive_nmb(char *buffer, int timeout)
 {
 	int ret = read_max_udp(Client, buffer, BUFFER_SIZE, timeout);
-
-	nmb_recv_len = ret;
 
 	if (ret < 0) {
 		DEBUG(0, ("No bytes from client\n"));
