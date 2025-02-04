@@ -20,6 +20,20 @@
 
 #include "includes.h"
 
+/* this is the structure used for the local netbios name table */
+typedef struct {
+	time_t start_time;
+	int ttl;
+	struct in_addr ip;
+	struct in_addr master_ip;
+	BOOL found_master;
+	BOOL valid;
+	BOOL subnet;
+	char flags[10];
+	unsigned char nb_flags;
+	char name[100];
+} name_struct;
+
 extern pstring debugf;
 extern int DEBUGLEVEL;
 

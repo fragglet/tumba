@@ -55,20 +55,6 @@ functions SSVAL() and SIVAL(). */
 typedef char pstring[1024];
 typedef char fstring[128];
 
-/* this is the structure used for the local netbios name table */
-typedef struct {
-	time_t start_time;
-	int ttl;
-	struct in_addr ip;
-	struct in_addr master_ip;
-	BOOL found_master;
-	BOOL valid;
-	BOOL subnet;
-	char flags[10];
-	unsigned char nb_flags;
-	char name[100];
-} name_struct;
-
 /* access various service details */
 /* the basic packet size, assuming no words or bytes */
 #define smb_size 39
@@ -294,7 +280,6 @@ void closestr(char *s, int start, int n);
 BOOL set_filetime(char *fname, time_t mtime);
 BOOL get_myname(char *myname, struct in_addr *ip);
 BOOL ip_equal(struct in_addr *ip1, struct in_addr *ip2);
-BOOL register_name(name_struct *name, struct in_addr *destip, void (*)());
 char *smb_fn_name(int cnum);
 int open_socket_in(int type, int port);
 int open_socket_out(struct in_addr *addr, int port);
