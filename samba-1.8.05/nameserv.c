@@ -72,9 +72,6 @@ BOOL is_daemon = False;
 /* machine comment */
 fstring comment = "";
 
-/* die after this number of 10ths of seconds if no activity and not a daemon */
-int idle_timeout = 1200;
-
 void add_group_name(char *name);
 
 BOOL got_bcast = False;
@@ -432,7 +429,6 @@ void reply_reg_request(char *inbuf, char *outbuf)
 {
 	int rec_name_trn_id = SVAL(inbuf, 0);
 	char qname[100] = "";
-	int ttl;
 	char *p = inbuf;
 	struct in_addr ip;
 	int n = 0;
@@ -445,7 +441,6 @@ void reply_reg_request(char *inbuf, char *outbuf)
 	p += 4;
 	p += name_len(p);
 	p += 4;
-	ttl = IVAL(p, 0);
 	nb_flags = CVAL(p, 6);
 	p += 8;
 	memcpy((char *) &ip, p, 4);
