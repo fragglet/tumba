@@ -1,4 +1,3 @@
-#include "local.h"
 #include <stdio.h>
 #ifdef MIPS
 #include <posix/stdlib.h>

@@ -20,6 +20,10 @@
 
 #include "includes.h"
 
+/* we have two time standards - local and GMT. */
+#define LOCAL_TO_GMT 1
+#define GMT_TO_LOCAL -1
+
 pstring scope = "";
 
 int DEBUGLEVEL = 1;
@@ -430,7 +434,7 @@ int set_message(char *buf, int num_words, int num_bytes, BOOL zero)
 	if (zero)
 		memset(buf + smb_size, 0, num_words * 2 + num_bytes);
 	CVAL(buf, smb_wct) = num_words;
-	SSVAL(buf, smb_vwv + num_words * sizeof(WORD), num_bytes);
+	SSVAL(buf, smb_vwv + num_words * 2, num_bytes);
 	smb_setlen(buf, smb_size + num_words * 2 + num_bytes - 4);
 	return smb_size + num_words * 2 + num_bytes;
 }
