@@ -162,21 +162,6 @@ void check_names(void)
 }
 
 /****************************************************************************
-dump a copy of the name table
-****************************************************************************/
-void dump_names(void)
-{
-	int i;
-	DEBUG(3, ("Dump of local name table\n"));
-	for (i = 0; i < num_names; i++)
-		if (names[i].valid)
-			DEBUG(3, ("%s %s %s %d 0x%X %s\n", names[i].name,
-			          inet_ntoa(names[i].ip), names[i].flags,
-			          names[i].ttl, names[i].nb_flags,
-			          BOOLSTR(names[i].subnet)));
-}
-
-/****************************************************************************
 add a netbios group name
 ****************************************************************************/
 void add_group_name(char *name)
@@ -1005,10 +990,6 @@ int main(int argc, char *argv[])
 	check_names();
 
 	DEBUG(3, ("Checked names\n"));
-
-	dump_names();
-
-	DEBUG(3, ("Dumped names\n"));
 
 	if (is_daemon) {
 		DEBUG(2, ("%s becoming a daemon\n", timestring()));

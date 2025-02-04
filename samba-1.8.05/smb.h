@@ -41,7 +41,6 @@
 
 #define False             (0)
 #define True              (1)
-#define BOOLSTR(b)        ((b) ? "Yes" : "No")
 #define BITSETB(ptr, bit) ((((char *) ptr)[0] & (1 << (bit))) != 0)
 #define BITSETW(ptr, bit) ((SVAL(ptr, 0) & (1 << (bit))) != 0)
 #define PTR_DIFF(p1, p2)  ((ptrdiff_t) (((char *) (p1)) - (char *) (p2)))
