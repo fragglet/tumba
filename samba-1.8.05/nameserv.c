@@ -342,8 +342,9 @@ static BOOL send_nmb(char *buf, int len, struct in_addr *ip)
 /****************************************************************************
 do a netbios name query to find someones IP
 ****************************************************************************/
-static BOOL name_query(char *inbuf, char *outbuf, char *name, struct in_addr to_ip,
-                       struct in_addr *ip, int maxtime, void (*fn)())
+static BOOL name_query(char *inbuf, char *outbuf, char *name,
+                       struct in_addr to_ip, struct in_addr *ip, int maxtime,
+                       void (*fn)())
 {
 	static uint16 name_trn_id = 0x6242;
 	char *p;
