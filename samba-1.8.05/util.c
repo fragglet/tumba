@@ -36,10 +36,9 @@ struct in_addr lastip;
 /* the last port received from */
 int lastport = 0;
 
-/* my IP, the broadcast IP and the Netmask */
+/* my IP, the broadcast IP */
 struct in_addr myip;
 struct in_addr bcast_ip;
-struct in_addr Netmask;
 
 /* this is set to true on a big_endian machine (like a sun sparcstation)
 this means that all shorts and ints must be byte swapped before being

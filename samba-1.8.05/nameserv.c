@@ -35,7 +35,6 @@ extern struct in_addr lastip;
 extern int lastport;
 extern struct in_addr myip;
 extern struct in_addr bcast_ip;
-extern struct in_addr Netmask;
 pstring myname = "";
 pstring myhostname = "";
 int myttl = 0;
@@ -65,7 +64,6 @@ int idle_timeout = 1200;
 void add_group_name(char *name);
 
 BOOL got_bcast = False;
-BOOL got_nmask = False;
 
 /****************************************************************************
 add a netbios name
@@ -878,17 +876,14 @@ BOOL init_structs(void)
 	/* Read the broadcast address from the interface */
 	{
 		struct in_addr ip1, ip2;
-		if (!(got_bcast && got_nmask))
+		if (!got_bcast) {
 			get_broadcast(&myip, &ip1, &ip2);
+		}
 
 		if (!got_bcast)
 			bcast_ip = ip1;
 
-		if (!got_nmask)
-			Netmask = ip2;
-
 		DEBUG(1, ("Using broadcast %s  ", inet_ntoa(bcast_ip)));
-		DEBUG(1, ("netmask %s\n", inet_ntoa(Netmask)));
 	}
 
 	if (*myname == 0) {
@@ -933,8 +928,6 @@ void usage(char *pname)
 	printf("\t-n netbiosname.       the netbios name to advertise for this "
 	       "host\n");
 	printf("\t-B broadcast address  the address to use for broadcasts\n");
-	printf("\t-N netmask           the netmask to use for subnet "
-	       "determination\n");
 	printf("\t-G group name        add a group name to be part of\n");
 	printf("\n");
 }
@@ -951,7 +944,7 @@ int main(int argc, char *argv[])
 
 	sprintf(debugf, "%s.nmb.debug", DEBUGFILE);
 
-	while ((opt = getopt(argc, argv, "C:i:B:N:Rn:l:d:Dp:hSG:")) != EOF)
+	while ((opt = getopt(argc, argv, "C:i:B:Rn:l:d:Dp:hSG:")) != EOF)
 		switch (opt) {
 		case 'C':
 			strcpy(comment, optarg);
@@ -963,11 +956,6 @@ int main(int argc, char *argv[])
 			unsigned long a = interpret_addr(optarg);
 			memcpy((char *) &bcast_ip, (char *) &a, sizeof(a));
 			got_bcast = True;
-		} break;
-		case 'N': {
-			unsigned long a = interpret_addr(optarg);
-			memcpy((char *) &Netmask, (char *) &a, sizeof(a));
-			got_nmask = True;
 		} break;
 		case 'n':
 			strcpy(myname, optarg);
