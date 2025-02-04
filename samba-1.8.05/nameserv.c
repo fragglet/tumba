@@ -925,7 +925,6 @@ void usage(char *pname)
 	       pname);
 	printf("Version %s\n", VERSION);
 	printf("\t-D                    become a daemon\n");
-	printf("\t-P                    passive only. don't respond\n");
 	printf("\t-R                    only reply to queries, don't actively "
 	       "send claims\n");
 	printf("\t-p port               listen on the specified port\n");
@@ -952,7 +951,7 @@ int main(int argc, char *argv[])
 
 	sprintf(debugf, "%s.nmb.debug", DEBUGFILE);
 
-	while ((opt = getopt(argc, argv, "C:i:B:N:Rn:l:d:Dp:hPSG:")) != EOF)
+	while ((opt = getopt(argc, argv, "C:i:B:N:Rn:l:d:Dp:hSG:")) != EOF)
 		switch (opt) {
 		case 'C':
 			strcpy(comment, optarg);
@@ -973,10 +972,6 @@ int main(int argc, char *argv[])
 		case 'n':
 			strcpy(myname, optarg);
 			break;
-		case 'P': {
-			extern BOOL passive;
-			passive = True;
-		} break;
 		case 'R':
 			reply_only = True;
 			break;

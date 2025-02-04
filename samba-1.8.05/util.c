@@ -24,8 +24,6 @@ pstring scope = "";
 
 int DEBUGLEVEL = 1;
 
-BOOL passive = False;
-
 /* these are some file handles where debug info will be stored */
 FILE *dbf = NULL;
 
@@ -513,9 +511,6 @@ BOOL send_packet(char *buf, int len, struct in_addr *ip, int port, int type)
 	int out_fd;
 	struct sockaddr_in sock_out;
 	int one = 1;
-
-	if (passive)
-		return True;
 
 	/* create a socket to write to */
 	out_fd = socket(AF_INET, type, 0);
