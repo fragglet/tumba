@@ -735,7 +735,6 @@ BOOL ip_equal(struct in_addr *ip1, struct in_addr *ip2);
 void expand_mask(char *Mask, BOOL);
 BOOL sane_unix_date(time_t unixdate);
 time_t start_of_month(void);
-void log_out(char *buffer, int len);
 BOOL register_name(name_struct *name, struct in_addr *destip, void (*)());
 char *smb_fn_name(int cnum);
 int construct_datagram(char *, int, int, int, struct in_addr *, int, char *,
@@ -744,7 +743,6 @@ void get_machine_info(void);
 int open_socket_in(int type, int port);
 int open_socket_out(struct in_addr *addr, int port);
 int read_max_udp(int fd, char *buffer, int bufsize, int maxtime);
-void log_in(char *buffer, int len);
 int interpret_protocol(char *str, int def);
 int interpret_security(char *str, int def);
 int ChDir(char *path);

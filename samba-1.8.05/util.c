@@ -28,8 +28,6 @@ BOOL passive = False;
 
 /* these are some file handles where debug info will be stored */
 FILE *dbf = NULL;
-FILE *login = NULL;
-FILE *logout = NULL;
 
 /* the client file descriptor */
 int Client = 0;
@@ -44,8 +42,6 @@ int lastport = 0;
 struct in_addr myip;
 struct in_addr bcast_ip;
 struct in_addr Netmask;
-
-int trans_num = 0;
 
 /* this is set to true on a big_endian machine (like a sun sparcstation)
 this means that all shorts and ints must be byte swapped before being
@@ -473,34 +469,6 @@ char *skip_string(char *buf, int n)
 }
 
 /****************************************************************************
-log a packet to logout
-****************************************************************************/
-void log_out(char *buffer, int len)
-{
-	if (logout) {
-		fprintf(logout, "\n%s Transaction %d (%d)\n", timestring(),
-		        trans_num++, len);
-		fwrite(buffer, len, 1, logout);
-		fflush(logout);
-	}
-	DEBUG(7, ("logged %d bytes out\n", len));
-}
-
-/****************************************************************************
-log a packet to login
-****************************************************************************/
-void log_in(char *buffer, int len)
-{
-	if (login) {
-		fprintf(login, "\n%s Transaction %d (%d)\n", timestring(),
-		        trans_num++, len);
-		fwrite(buffer, len, 1, login);
-		fflush(login);
-	}
-	DEBUG(7, ("logged %d bytes in\n", len));
-}
-
-/****************************************************************************
 read from a socket
 ****************************************************************************/
 int read_udp_socket(int fd, char *buf, int len)
@@ -621,8 +589,6 @@ BOOL receive_nmb(char *buffer, int timeout)
 	if (ret <= 1)
 		return False;
 
-	log_in(buffer, ret);
-
 	DEBUG(3, ("received packet from (%s) nmb_len=%d len=%d\n",
 	          inet_ntoa(lastip), nmb_len(buffer), ret));
 
@@ -649,9 +615,6 @@ BOOL send_nmb(char *buf, int len, struct in_addr *ip)
 	memcpy((char *) &sock_out.sin_addr, (char *) ip, 4);
 	sock_out.sin_port = htons(137);
 	sock_out.sin_family = AF_INET;
-
-	/* log the packet */
-	log_out(buf, len);
 
 	if (DEBUGLEVEL > 0)
 		DEBUG(3, ("sending a packet of len %d to (%s) on port 137 of "
@@ -738,9 +701,6 @@ BOOL send_packet(char *buf, int len, struct in_addr *ip, int port, int type)
 	memcpy((char *) &sock_out.sin_addr, (char *) ip, 4);
 	sock_out.sin_port = htons(port);
 	sock_out.sin_family = AF_INET;
-
-	/* log the packet */
-	log_out(buf, len);
 
 	if (DEBUGLEVEL > 0)
 		DEBUG(3, ("sending a packet of len %d to (%s) on port %d of "

@@ -758,15 +758,6 @@ int main(int argc, char *argv[])
 	   seem to use the opposite byte order to smb packets */
 	NeedSwap = !big_endian();
 
-	if (DEBUGLEVEL > 10) {
-		extern FILE *login, *logout;
-		pstring fname = "";
-		sprintf(fname, "%s.in", debugf);
-		login = fopen(fname, "w");
-		sprintf(fname, "%s.out", debugf);
-		logout = fopen(fname, "w");
-	}
-
 	DEBUG(1, ("%s netbios nameserver version %s started\n", timestring(),
 	          VERSION));
 	DEBUG(1, ("Copyright Andrew Tridgell 1994\n"));
