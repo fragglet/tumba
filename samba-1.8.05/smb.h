@@ -733,7 +733,6 @@ BOOL register_name(name_struct *name, struct in_addr *destip, void (*)());
 char *smb_fn_name(int cnum);
 int construct_datagram(char *, int, int, int, struct in_addr *, int, char *,
                        char *);
-void get_machine_info(void);
 int open_socket_in(int type, int port);
 int open_socket_out(struct in_addr *addr, int port);
 int interpret_protocol(char *str, int def);

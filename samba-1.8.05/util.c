@@ -48,10 +48,6 @@ this means that all shorts and ints must be byte swapped before being
 put in the buffer */
 BOOL NeedSwap = False;
 
-/* this structure is used to hold information about the machine that
-   the program is running on */
-machine_struct machine_info;
-
 pstring debugf = DEBUGFILE;
 
 /*******************************************************************
@@ -830,27 +826,6 @@ BOOL ip_equal(struct in_addr *ip1, struct in_addr *ip2)
 		if (*p1++ != *p2++)
 			return False;
 	return True;
-}
-
-/****************************************************************************
-get info about the machine and OS
-****************************************************************************/
-void get_machine_info(void)
-{
-#if !HAVE_SYSCONF
-
-	/* assume it doesn't have saved uids and gids */
-	machine_info.have_saved_ids = False;
-
-#else
-
-	machine_info.have_saved_ids = (sysconf(_POSIX_SAVED_IDS) == 1);
-
-#endif
-
-	DEBUG(3, ("Sysconfig:\n"));
-	DEBUG(3, ("\tsaved_ids = %d\n", machine_info.have_saved_ids));
-	DEBUG(3, ("\n"));
 }
 
 /****************************************************************************

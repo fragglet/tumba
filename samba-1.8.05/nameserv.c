@@ -1016,8 +1016,6 @@ int main(int argc, char *argv[])
 	          VERSION));
 	DEBUG(1, ("Copyright Andrew Tridgell 1994\n"));
 
-	get_machine_info();
-
 	init_structs();
 
 	if (!*comment)
