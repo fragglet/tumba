@@ -20,24 +20,7 @@
 #ifndef _SMB_H
 #define _SMB_H
 
-#ifndef MAX_CONNECTIONS
-#define MAX_CONNECTIONS 127
-#endif
-
-#ifndef MAX_OPEN_FILES
-#define MAX_OPEN_FILES 50
-#endif
-
-#ifndef GUEST_ACCOUNT
-#define GUEST_ACCOUNT "pcuser"
-#endif
-
 #define BUFFER_SIZE   (0xFFFF)
-#define SAFETY_MARGIN 1024
-
-#ifndef EXTERN
-#define EXTERN extern
-#endif
 
 #define False             (0)
 #define True              (1)
@@ -52,14 +35,6 @@ typedef int int32;
 typedef unsigned short uint16;
 typedef unsigned int uint32;
 
-#ifndef DEF_CREATE_MASK
-#define DEF_CREATE_MASK (0755)
-#endif
-
-#ifndef DEFAULT_PIPE_TIMEOUT
-#define DEFAULT_PIPE_TIMEOUT 10000000 /* Ten seconds */
-#endif
-
 /* debugging code */
 #define DEBUG(level, body) ((DEBUGLEVEL >= (level)) ? (Debug1 body) : 0)
 
@@ -70,12 +45,6 @@ functions SSVAL() and SIVAL(). */
 #define IVAL(buf, pos)       ival((char *) (buf), pos)
 #define SVAL(buf, pos)       sval((char *) buf, pos)
 
-/* these are the signed versions */
-#define SIVALS(buf, pos, val) sival_s((char *) (buf), pos, val)
-#define SSVALS(buf, pos, val) ssval_s((char *) (buf), pos, val)
-#define IVALS(buf, pos)       ival_s((char *) (buf), pos)
-#define SVALS(buf, pos)       sval_s((char *) buf, pos)
-
 #define PVAL(buf, pos, type) (*((type *) (((char *) buf) + pos)))
 #define SCVAL(buf, pos, x)   PVAL(buf, pos, unsigned char) = (x)
 #define CVAL(buf, pos)       PVAL(buf, pos, unsigned char)
@@ -83,144 +52,8 @@ functions SSVAL() and SIVAL(). */
 #define BSWP(buf, len) object_byte_swap(buf, len)
 #define SWP(buf, len)  (NeedSwap ? BSWP(buf, len) : ((void *) buf))
 
-#define DIR_STRUCT_SIZE 43
-
-/* these define all the command types recognised by the server - there
-are lots of gaps so probably there are some rare commands that are not
-implemented */
-
-#define pSETDIR '\377'
-
-/* these define the attribute byte as seen by DOS */
-#define aRONLY  (1L << 0)
-#define aHIDDEN (1L << 1)
-#define aSYSTEM (1L << 2)
-#define aVOLID  (1L << 3)
-#define aDIR    (1L << 4)
-#define aARCH   (1L << 5)
-
-/* SMB X/Open error codes for the ERRdos error class */
-#define ERRbadfunc              1  /* Invalid function (or system call) */
-#define ERRbadfile              2  /* File not found (pathname error) */
-#define ERRbadpath              3  /* Directory not found */
-#define ERRnofids               4  /* Too many open files */
-#define ERRnoaccess             5  /* Access denied */
-#define ERRbadfid               6  /* Invalid fid */
-#define ERRnomem                8  /* Out of memory */
-#define ERRbadmem               9  /* Invalid memory block address */
-#define ERRbadenv               10 /* Invalid environment */
-#define ERRbadaccess            12 /* Invalid open mode */
-#define ERRbaddata              13 /* Invalid data (only from ioctl call) */
-#define ERRres                  14 /* reserved */
-#define ERRbaddrive             15 /* Invalid drive */
-#define ERRremcd                16 /* Attempt to delete current directory */
-#define ERRdiffdevice           17 /* rename/move across different filesystems */
-#define ERRnofiles              18 /* no more files found in file search */
-#define ERRbadshare             32 /* Share mode on file conflict with open mode */
-#define ERRlock                 33 /* Lock request conflicts with existing lock */
-#define ERRfilexists            80  /* File in operation already exists */
-#define ERRbadpipe              230 /* Named pipe invalid */
-#define ERRpipebusy             231 /* All instances of pipe are busy */
-#define ERRpipeclosing          232 /* named pipe close in progress */
-#define ERRnotconnected         233 /* No process on other end of named pipe */
-#define ERRmoredata             234 /* More data to be returned */
-#define ERROR_EAS_DIDNT_FIT     275 /* Extended attributes didn't fit */
-#define ERROR_EAS_NOT_SUPPORTED 282 /* Extended attributes not suppored */
-
-/* here's a special one from observing NT */
-#define ERRnoipc 66 /* don't support ipc */
-
-/* Error codes for the ERRSRV class */
-
-#define ERRerror       1   /* Non specific error code */
-#define ERRbadpw       2   /* Bad password */
-#define ERRbadtype     3   /* reserved */
-#define ERRaccess      4   /* No permissions to do the requested operation */
-#define ERRinvnid      5   /* tid invalid */
-#define ERRinvnetname  6   /* Invalid servername */
-#define ERRinvdevice   7   /* Invalid device */
-#define ERRqfull       49  /* Print queue full */
-#define ERRqtoobig     50  /* Queued item too big */
-#define ERRinvpfid     52  /* Invalid print file in smb_fid */
-#define ERRsmbcmd      64  /* Unrecognised command */
-#define ERRsrverror    65  /* smb server internal error */
-#define ERRfilespecs   67  /* fid and pathname invalid combination */
-#define ERRbadlink     68  /* reserved */
-#define ERRbadpermits  69  /* Access specified for a file is not valid */
-#define ERRbadpid      70  /* reserved */
-#define ERRsetattrmode 71  /* attribute mode invalid */
-#define ERRpaused      81  /* Message server paused */
-#define ERRmsgoff      82  /* Not receiving messages */
-#define ERRnoroom      83  /* No room for message */
-#define ERRrmuns       87  /* too many remote usernames */
-#define ERRtimeout     88  /* operation timed out */
-#define ERRnoresource  89  /* No resources currently available for request. */
-#define ERRtoomanyuids 90  /* too many userids */
-#define ERRbaduid      91  /* bad userid */
-#define ERRuseMPX      250 /* temporarily unable to use raw mode, use MPX mode */
-#define ERRuseSTD                                                              \
-	251 /* temporarily unable to use raw mode, use standard mode */
-#define ERRcontMPX   252 /* resume MPX mode */
-#define ERRbadPW         /* reserved */
-#define ERRnosupport 0xFFFF
-
-/* Error codes for the ERRHRD class */
-
-#define ERRnowrite     19 /* read only media */
-#define ERRbadunit     20 /* Unknown device */
-#define ERRnotready    21 /* Drive not ready */
-#define ERRbadcmd      22 /* Unknown command */
-#define ERRdata        23 /* Data (CRC) error */
-#define ERRbadreq      24 /* Bad request structure length */
-#define ERRseek        25
-#define ERRbadmedia    26
-#define ERRbadsector   27
-#define ERRnopaper     28
-#define ERRwrite       29 /* write fault */
-#define ERRread        30 /* read fault */
-#define ERRgeneral     31 /* General hardware failure */
-#define ERRwrongdisk   34
-#define ERRFCBunavail  35
-#define ERRsharebufexc 36 /* share buffer exceeded */
-#define ERRdiskfull    39
-
 typedef char pstring[1024];
 typedef char fstring[128];
-
-typedef struct {
-	int size;
-	int mode;
-	int uid;
-	int gid;
-	time_t mtime;
-	time_t atime;
-	time_t ctime;
-	pstring name;
-} file_info;
-
-/* Structure used when SMBwritebmpx is active */
-typedef struct {
-	int wr_total_written; /* So we know when to discard this */
-	int32 wr_timeout;
-	int32 wr_errclass;
-	int32 wr_error;  /* Cached errors */
-	BOOL wr_mode;    /* write through mode) */
-	BOOL wr_discard; /* discard all further data */
-} write_bmpx_struct;
-
-typedef struct {
-	int cnum;
-	int fd;
-	int pos;
-	char *mmap_ptr;
-	int mmap_size;
-	write_bmpx_struct *wbmpx_ptr;
-	BOOL open;
-	BOOL can_lock;
-	BOOL read_only;
-	BOOL print_file;
-	pstring name;
-} files_struct;
 
 /* this is the structure used for the local netbios name table */
 typedef struct {
@@ -236,93 +69,7 @@ typedef struct {
 	char name[100];
 } name_struct;
 
-typedef struct {
-	int service;
-	int connect_num;
-	int uid;
-	int gid;
-	void *dirptr;
-	BOOL open;
-	BOOL printer;
-	BOOL ipc;
-	BOOL read_only;
-	pstring dirpath;
-	pstring connectpath;
-	/* following groups stuff added by ih */
-	int ngroups;
-	gid_t *groups;
-	int *igroups; /* an integer version - some OSes are broken :-( */
-} connection_struct;
-
-typedef struct {
-	int uid;
-	char *name;
-	BOOL guest;
-} user_struct;
-
-typedef struct {
-	BOOL have_saved_ids;
-} machine_struct;
-
-enum {
-	LPQ_QUEUED,
-	LPQ_PAUSED,
-	LPQ_SPOOLING,
-	LPQ_PRINTING
-};
-
-typedef struct {
-	int job;
-	int size;
-	int status;
-	time_t time;
-	char user[30];
-	char file[100];
-} print_queue_struct;
-
-/* this is used for smbstatus */
-struct connect_record {
-	int magic;
-	int pid;
-	int cnum;
-	int uid;
-	int gid;
-	char name[24];
-	char addr[24];
-	char machine[128];
-	time_t start;
-};
-
-/* these are useful macros for checking validity of handles */
-#define VALID_FNUM(fnum) (((fnum) >= 0) && ((fnum) < MAX_OPEN_FILES))
-#define OPEN_FNUM(fnum)  (VALID_FNUM(fnum) && Files[fnum].open)
-#define VALID_CNUM(cnum) (((cnum) >= 0) && ((cnum) < MAX_CONNECTIONS))
-#define OPEN_CNUM(cnum)  (VALID_CNUM(cnum) && Connections[cnum].open)
-#define IS_IPC(cnum)     (VALID_CNUM(cnum) && Connections[cnum].ipc)
-
-/* translates a connection number into a service number */
-#define SNUM(cnum) (Connections[cnum].service)
-
 /* access various service details */
-#define GUEST              (lp_guestaccount())
-#define HOME(cnum)         (lp_pathname(SNUM(cnum)))
-#define PATH(snum)         (lp_pathname(snum))
-#define USER(snum)         (lp_username(snum))
-#define SERVICE(snum)      (lp_servicename(snum))
-#define PRINTCAP           (lp_printcapname())
-#define PRINTCOMMAND(snum) (lp_printcommand(snum))
-#define PRINTERNAME(snum)  (lp_printername(snum))
-#define CAN_WRITE(cnum)    (OPEN_CNUM(cnum) && !Connections[cnum].read_only)
-#define VALID_SNUM(snum)   (lp_snum_ok(snum))
-#define GUEST_OK(snum)     (VALID_SNUM(snum) && lp_guest_ok(snum))
-#define GUEST_ONLY(snum)   (VALID_SNUM(snum) && lp_guest_only(snum))
-#define CAN_SETDIR(snum)   (!lp_no_set_dir(snum))
-#define CAN_PRINT(cnum)    (OPEN_CNUM(cnum) && lp_print_ok(SNUM(cnum)))
-#define POSTSCRIPT(cnum)   (OPEN_CNUM(cnum) && lp_postscript(SNUM(cnum)))
-#define MAP_HIDDEN(cnum)   (OPEN_CNUM(cnum) && lp_map_hidden(SNUM(cnum)))
-#define MAP_SYSTEM(cnum)   (OPEN_CNUM(cnum) && lp_map_system(SNUM(cnum)))
-#define CREATE_MODE(cnum)  (lp_create_mode(SNUM(cnum)))
-
 /* the basic packet size, assuming no words or bytes */
 #define smb_size 39
 
@@ -441,22 +188,6 @@ struct connect_record {
 #define SMBfindnclose 0x35 /* Terminate a TRANSACT2_FINDNOTIFYFIRST */
 #define SMBulogoffX   0x74 /* user logoff */
 
-/* these are the TRANS2 sub commands */
-#define TRANSACT2_OPEN            0
-#define TRANSACT2_FINDFIRST       1
-#define TRANSACT2_FINDNEXT        2
-#define TRANSACT2_QFSINFO         3
-#define TRANSACT2_SETFSINFO       4
-#define TRANSACT2_QPATHINFO       5
-#define TRANSACT2_SETPATHINFO     6
-#define TRANSACT2_QFILEINFO       7
-#define TRANSACT2_SETFILEINFO     8
-#define TRANSACT2_FSCTL           9
-#define TRANSACT2_IOCTL           10
-#define TRANSACT2_FINDNOTIFYFIRST 11
-#define TRANSACT2_FINDNOTIFYNEXT  12
-#define TRANSACT2_MKDIR           13
-
 /* these are the trans2 sub fields for primary requests */
 #define smb_tpscnt  smb_vwv0
 #define smb_tdscnt  smb_vwv1
@@ -496,27 +227,6 @@ struct connect_record {
 
 /* where to find the base of the SMB packet proper */
 #define smb_base(buf) ((buf) + 4)
-
-#define SUCCESS 0    /* The request was successful. */
-#define ERRDOS  0x01 /*  Error is from the core DOS operating system set. */
-#define ERRSRV                                                                 \
-	0x02        /* Error is generated by the server network file           \
-	               manager.*/
-#define ERRHRD 0x03 /* Error is an hardware error. */
-#define ERRCMD 0xFF /* Command was not in the "SMB" format. */
-
-#ifdef USE_DIRECT
-#define DIRECT direct
-#else
-#define DIRECT dirent
-#endif
-
-/* structure used to hold the incoming hosts info */
-struct from_host {
-	char *name;              /* host name */
-	char *addr;              /* host address */
-	struct sockaddr_in *sin; /* their side of the link */
-};
 
 /* and a few prototypes */
 BOOL string_sub(char *s, char *pattern, char *insert);
@@ -609,102 +319,6 @@ unsigned long interpret_addr(char *str);
 #ifndef SELECT_CAST
 #define SELECT_CAST
 #endif
-
-/* Some POSIX definitions for those without */
-
-#ifndef S_IFDIR
-#define S_IFDIR 0x4000
-#endif
-#ifndef S_ISDIR
-#define S_ISDIR(mode) ((mode & 0xF000) == S_IFDIR)
-#endif
-#ifndef S_IRWXU
-#define S_IRWXU 00700 /* read, write, execute: owner */
-#endif
-#ifndef S_IRUSR
-#define S_IRUSR 00400 /* read permission: owner */
-#endif
-#ifndef S_IWUSR
-#define S_IWUSR 00200 /* write permission: owner */
-#endif
-#ifndef S_IXUSR
-#define S_IXUSR 00100 /* execute permission: owner */
-#endif
-#ifndef S_IRWXG
-#define S_IRWXG 00070 /* read, write, execute: group */
-#endif
-#ifndef S_IRGRP
-#define S_IRGRP 00040 /* read permission: group */
-#endif
-#ifndef S_IWGRP
-#define S_IWGRP 00020 /* write permission: group */
-#endif
-#ifndef S_IXGRP
-#define S_IXGRP 00010 /* execute permission: group */
-#endif
-#ifndef S_IRWXO
-#define S_IRWXO 00007 /* read, write, execute: other */
-#endif
-#ifndef S_IROTH
-#define S_IROTH 00004 /* read permission: other */
-#endif
-#ifndef S_IWOTH
-#define S_IWOTH 00002 /* write permission: other */
-#endif
-#ifndef S_IXOTH
-#define S_IXOTH 00001 /* execute permission: other */
-#endif
-
-/* protocol types. It assumes that higher protocols include lower protocols
-   as subsets */
-enum protocol_types {
-	PROTOCOL_NONE,
-	PROTOCOL_CORE,
-	PROTOCOL_COREPLUS,
-	PROTOCOL_LANMAN1,
-	PROTOCOL_LANMAN2,
-	PROTOCOL_NT1
-};
-
-/* security levels */
-enum security_types {
-	SEC_SHARE,
-	SEC_USER
-};
-
-/* case handling */
-enum case_handling {
-	CASE_LOWER,
-	CASE_UPPER
-};
-
-/* Macros to get at offsets within smb_lkrng and smb_unlkrng
-   structures. We cannot define these as actual structures
-   due to possible differences in structure packing
-   on different machines/compilers. */
-
-#define SMB_LPID_OFFSET(indx)  (10 * (indx))
-#define SMB_LKOFF_OFFSET(indx) (2 + (10 * (indx)))
-#define SMB_LKLEN_OFFSET(indx) (6 + (10 * (indx)))
-
-/* Macro to cache an error in a write_bmpx_struct */
-#define CACHE_ERROR(w, c, e)                                                   \
-	((w)->wr_errclass = (c), (w)->wr_error = (e), w->wr_discard = True, -1)
-/* Macro to test if an error has been cached for this fnum */
-#define HAS_CACHED_ERROR(fnum)                                                 \
-	(Files[(fnum)].open && Files[(fnum)].wbmpx_ptr &&                      \
-	 Files[(fnum)].wbmpx_ptr->wr_discard)
-/* Macro to turn the cached error into an error packet */
-#define CACHED_ERROR(fnum) cached_error_packet(inbuf, outbuf, fnum, __LINE__)
-
-/* these are the datagram types */
-#define DGRAM_DIRECT_UNIQUE 0x10
-
-#define ERROR(class, x) error_packet(inbuf, outbuf, class, x, __LINE__)
-
-/* this is how errors are generated */
-#define UNIXERROR(defclass, deferror)                                          \
-	unix_error_packet(inbuf, outbuf, defclass, deferror, __LINE__)
 
 #endif
 /* _SMB_H */
