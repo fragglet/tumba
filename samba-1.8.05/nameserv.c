@@ -34,6 +34,11 @@ typedef struct {
 	char name[100];
 } name_struct;
 
+struct network_address {
+	struct in_addr ip;
+	struct in_addr netmask;
+};
+
 extern pstring debugf;
 extern int DEBUGLEVEL;
 
@@ -70,6 +75,83 @@ fstring comment = "";
 
 BOOL got_bcast = False;
 
+static struct ifconf get_interfaces(int sock_fd)
+{
+	struct ifconf ifc;
+	int old_len;
+
+	memset(&ifc, 0, sizeof(ifc));
+	ifc.ifc_ifcu.ifcu_req = NULL;
+	ifc.ifc_len = 0;
+
+	for (;;) {
+		old_len = ifc.ifc_len;
+		if (ioctl(sock_fd, SIOCGIFCONF, &ifc) < 0) {
+			free(ifc.ifc_ifcu.ifcu_req);
+			ifc.ifc_ifcu.ifcu_req = NULL;
+			ifc.ifc_len = 0;
+			return ifc;
+		}
+
+		if (ifc.ifc_len < old_len) {
+			return ifc;
+		}
+
+		/* If the buffer was too small then the result is truncated,
+		   and this is not considered an error. The actual size is
+		   returned in ifc.ifc_len, so reallocate the buffer large
+		   enough to get the full result.
+
+		   Note that since we start with ifc_len = 0, this will always
+		   happen at least once. */
+
+		ifc.ifc_len *= 2;
+		ifc.ifc_ifcu.ifcu_req =
+		    realloc(ifc.ifc_ifcu.ifcu_req, ifc.ifc_len);
+	}
+}
+
+#define addr(s)    (((struct sockaddr_in *) (s))->sin_addr)
+#define addr_ip(s) (addr(s).s_addr)
+static struct network_address *get_addresses(int sock_fd, int *num_addrs)
+{
+	struct ifconf ifc = get_interfaces(sock_fd);
+	struct network_address *result;
+	struct ifreq *req;
+	int i;
+
+	if (ifc.ifc_len == 0) {
+		free(ifc.ifc_ifcu.ifcu_req);
+		return NULL;
+	}
+
+	result = calloc(ifc.ifc_len / sizeof(struct ifreq), sizeof(*result));
+
+	*num_addrs = 0;
+	for (i = 0; i * sizeof(struct ifreq) < ifc.ifc_len; ++i) {
+		req = &ifc.ifc_ifcu.ifcu_req[i];
+		if (req->ifr_addr.sa_family != AF_INET) {
+			continue;
+		}
+
+		result[*num_addrs].ip = addr(&req->ifr_addr);
+
+		/* In a strange API decision, most of struct ifreq's fields
+		   are contained in a union, so you can only "see" one field
+		   at a time, but you can switch between them using ioctls: */
+		if (ioctl(sock_fd, SIOCGIFNETMASK, req) < 0) {
+			DEBUG(0, ("Failed getting netmask for %s\n",
+			          req->ifr_name));
+			continue;
+		}
+		result[*num_addrs].netmask = addr(&req->ifr_netmask);
+
+		++*num_addrs;
+	}
+
+	free(ifc.ifc_ifcu.ifcu_req);
+	return result;
+}
 
 static void init_name(name_struct *n)
 {
@@ -418,6 +500,33 @@ void reply_reg_request(char *inbuf, char *outbuf)
 	return;
 }
 
+/* Choose which IP address to return to clients requesting our hostname. This
+   may be different, depending on the interface on which it is received. */
+static struct in_addr get_response_addr(struct in_addr *src)
+{
+	struct in_addr result = {INADDR_NONE};
+	int num_addrs;
+	struct network_address *addrs = get_addresses(Client, &num_addrs);
+	int i;
+
+	DEBUG(3, ("Finding response address for client %s: ", inet_ntoa(*src)));
+
+	for (i = 0; i < num_addrs; ++i) {
+		if ((addrs[i].ip.s_addr & addrs[i].netmask.s_addr) ==
+		    (src->s_addr & addrs[i].netmask.s_addr)) {
+			DEBUG(3, ("match for %s ", inet_ntoa(addrs[i].ip)));
+			DEBUG(3, ("netmask %s\n", inet_ntoa(addrs[i].netmask)));
+			result = addrs[i].ip;
+			free(addrs);
+			return result;
+		}
+	}
+	DEBUG(3, ("no appropriate address found.\n"));
+	free(addrs);
+
+	return result;
+}
+
 /****************************************************************************
 reply to a name query
 ****************************************************************************/
@@ -439,9 +548,7 @@ void reply_name_query(char *inbuf, char *outbuf)
 		return;
 	}
 
-	/* TODO: Choose appropriate IP address based on source
-	   address/interface the query came from */
-	retip = our_hostname.ip;
+	retip = get_response_addr(&lastip);
 	nb_flags = our_hostname.nb_flags;
 
 	/* Send a POSITIVE NAME QUERY RESPONSE */
