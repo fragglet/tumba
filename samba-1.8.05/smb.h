@@ -29,16 +29,6 @@
 /* debugging code */
 #define DEBUG(level, body) ((DEBUGLEVEL >= (level)) ? (Debug1 body) : 0)
 
-/* TODO: These macros are in the process of being replaced by the equivalent
-   macros found in byteorder.h */
-#define SIVAL_old(buf, pos, val) sival((char *) (buf), pos, val)
-#define SSVAL_old(buf, pos, val) ssval((char *) (buf), pos, val)
-#define IVAL_old(buf, pos)       ival((char *) (buf), pos)
-#define SVAL_old(buf, pos)       sval((char *) buf, pos)
-
-#define BSWP(buf, len) object_byte_swap(buf, len)
-#define SWP(buf, len)  (NeedSwap ? BSWP(buf, len) : ((void *) buf))
-
 typedef char pstring[1024];
 typedef char fstring[128];
 
@@ -217,11 +207,6 @@ void *Realloc(void *p, int size);
 void smb_setlen(char *buf, int len);
 int set_message(char *buf, int num_words, int num_bytes, bool zero);
 void name_interpret(char *in, char *out);
-void *object_byte_swap(void *obj, int size);
-void ssval(char *buf, int pos, uint16_t val);
-void sival(char *buf, int pos, uint32_t val);
-uint32_t ival(char *buf, int pos);
-uint16_t sval(char *, int);
 void strupper(char *s);
 bool file_exist(char *fname);
 int read_with_timeout(int fd, char *buf, int mincnt, int maxcnt, int32_t time_out,
@@ -234,7 +219,6 @@ bool read_data(int fd, char *buffer, int N);
 int smb_len(char *buf);
 bool receive_smb(char *buffer, int timeout);
 void show_msg(char *buf);
-bool big_endian(void);
 void become_daemon(void);
 void strlower(char *s);
 void strnorm(char *s);

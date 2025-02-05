@@ -45,7 +45,6 @@ extern int DEBUGLEVEL;
 char *InBuffer = NULL;
 char *OutBuffer = NULL;
 
-extern bool NeedSwap;
 extern pstring scope;
 
 bool reply_only = false;
@@ -942,10 +941,6 @@ int main(int argc, char *argv[])
 			usage(argv[0]);
 			exit(1);
 		}
-
-	/* NOTE: This is the opposite of the smbd as name packets
-	   seem to use the opposite byte order to smb packets */
-	NeedSwap = !big_endian();
 
 	DEBUG(1, ("%s netbios nameserver version %s started\n", timestring(),
 	          VERSION));

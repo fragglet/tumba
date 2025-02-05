@@ -44,11 +44,6 @@ int lastport = 0;
 struct in_addr myip;
 struct in_addr bcast_ip;
 
-/* this is set to true on a big_endian machine (like a sun sparcstation)
-this means that all shorts and ints must be byte swapped before being
-put in the buffer */
-bool NeedSwap = false;
-
 pstring debugf = DEBUGFILE;
 
 /*******************************************************************
@@ -363,46 +358,6 @@ void strupper(char *s)
 			*s = toupper(*s);
 		s++;
 	}
-}
-
-/****************************************************************************
-  set a value at buf[pos] to integer val
-****************************************************************************/
-void sival(char *buf, int pos, uint32_t val)
-{
-	SWP(&val, sizeof(val));
-	memcpy(buf + pos, (char *) &val, sizeof(val));
-}
-
-/****************************************************************************
-  set a value at buf[pos] to int16_t val
-****************************************************************************/
-void ssval(char *buf, int pos, uint16_t val)
-{
-	SWP(&val, sizeof(val));
-	memcpy(buf + pos, (char *) &val, sizeof(int16_t));
-}
-
-/****************************************************************************
-  get a 32 bit integer value
-****************************************************************************/
-uint32_t ival(char *buf, int pos)
-{
-	uint32_t val;
-	memcpy((char *) &val, buf + pos, sizeof(int));
-	SWP(&val, sizeof(val));
-	return val;
-}
-
-/****************************************************************************
-  get a int16_t value
-****************************************************************************/
-uint16_t sval(char *buf, int pos)
-{
-	uint16_t val;
-	memcpy((char *) &val, buf + pos, sizeof(uint16_t));
-	SWP(&val, sizeof(val));
-	return val;
 }
 
 /*******************************************************************
