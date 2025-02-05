@@ -24,8 +24,6 @@
 #define LOCAL_TO_GMT 1
 #define GMT_TO_LOCAL -1
 
-pstring scope = "";
-
 int DEBUGLEVEL = 1;
 
 /* these are some file handles where debug info will be stored */
@@ -257,7 +255,6 @@ int name_mangle(char *In, char *Out)
 {
 	char *in = (char *) In;
 	char *out = (char *) Out;
-	char *p, *label;
 	int len = 2 * strlen((char *) in);
 	int pad = 0;
 
@@ -278,16 +275,6 @@ int name_mangle(char *In, char *Out)
 		out += 2;
 	}
 
-	label = scope;
-	while (*label) {
-		p = strchr(label, '.');
-		if (p == 0)
-			p = label + strlen(label);
-		*out++ = p - label;
-		memcpy(out, label, p - label);
-		out += p - label;
-		label += p - label + (*p == '.');
-	}
 	*out = 0;
 	return name_len(Out);
 }

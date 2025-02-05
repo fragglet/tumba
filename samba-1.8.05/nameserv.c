@@ -42,8 +42,6 @@ extern int DEBUGLEVEL;
 char *InBuffer = NULL;
 char *OutBuffer = NULL;
 
-extern pstring scope;
-
 bool reply_only = false;
 
 extern struct in_addr lastip;
@@ -891,7 +889,7 @@ int main(int argc, char *argv[])
 
 	sprintf(debugf, "%s.nmb.debug", DEBUGFILE);
 
-	while ((opt = getopt(argc, argv, "C:i:B:Rn:l:d:Dp:hSG:")) != EOF)
+	while ((opt = getopt(argc, argv, "C:B:Rn:l:d:Dp:hSG:")) != EOF)
 		switch (opt) {
 		case 'C':
 			strcpy(comment, optarg);
@@ -912,9 +910,6 @@ int main(int argc, char *argv[])
 			break;
 		case 'l':
 			sprintf(debugf, "%s.nmb.debug", optarg);
-			break;
-		case 'i':
-			strcpy(scope, optarg);
 			break;
 		case 'D':
 			is_daemon = true;
