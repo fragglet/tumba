@@ -4,7 +4,7 @@
 ###########################################################################
 
 # Add any optimisation or debugging flags here
-FLAGS1 = -O
+FLAGS1 = -O -Wall
 LIBS1 = 
 
 # If you have the gcc compiler then use it, otherwise any ansi-C compiler
