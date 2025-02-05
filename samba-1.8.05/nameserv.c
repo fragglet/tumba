@@ -21,7 +21,7 @@
 #include "includes.h"
 
 /* this is the structure used for the local netbios name table */
-typedef struct {
+struct netbios_name {
 	time_t start_time;
 	int ttl;
 	struct in_addr ip;
@@ -32,7 +32,7 @@ typedef struct {
 	char flags[10];
 	unsigned char nb_flags;
 	char name[100];
-} name_struct;
+};
 
 struct network_address {
 	struct in_addr ip;
@@ -60,7 +60,7 @@ pstring mygroup = "WORKGROUP";
 int myttl = 0;
 
 int num_names = 0;
-static name_struct our_hostname, our_group;
+static struct netbios_name our_hostname, our_group;
 
 int Client_dgram = -1;
 extern int Client;
@@ -153,9 +153,9 @@ static struct network_address *get_addresses(int sock_fd, int *num_addrs)
 	return result;
 }
 
-static void init_name(name_struct *n)
+static void init_name(struct netbios_name *n)
 {
-	memset(n, 0, sizeof(name_struct));
+	memset(n, 0, sizeof(struct netbios_name));
 	n->valid = false;
 	n->found_master = false;
 	n->subnet = false;
@@ -166,7 +166,7 @@ static void init_name(name_struct *n)
 	n->nb_flags = 0;
 }
 
-static void init_group(name_struct *n, char *name)
+static void init_group(struct netbios_name *n, char *name)
 {
 	init_name(n);
 	strcpy(n->name, name);
