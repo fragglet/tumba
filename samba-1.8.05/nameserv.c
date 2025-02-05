@@ -177,10 +177,7 @@ static bool name_equal(char *s1, char *s2)
 		s1++;
 		s2++;
 	}
-	if ((*s1 == 0 || *s1 == ' ') && (*s2 == 0 || *s2 == ' '))
-		return true;
-	else
-		return false;
+	return (*s1 == 0 || *s1 == ' ') && (*s2 == 0 || *s2 == ' ');
 }
 
 static int read_udp_socket(int fd, char *buf, int len)
@@ -210,7 +207,6 @@ static int read_max_udp(int fd, char *buffer, int bufsize, int maxtime)
 {
 	fd_set fds;
 	int selrtn;
-	int nread;
 	struct timeval timeout;
 
 	FD_ZERO(&fds);
@@ -231,10 +227,7 @@ static int read_max_udp(int fd, char *buffer, int bufsize, int maxtime)
 	if (!FD_ISSET(fd, &fds))
 		return 0;
 
-	nread = read_udp_socket(fd, buffer, bufsize);
-
-	/* return the number got */
-	return nread;
+	return read_udp_socket(fd, buffer, bufsize);
 }
 
 static int nmb_len(char *buf)
