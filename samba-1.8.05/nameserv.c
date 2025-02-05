@@ -22,13 +22,10 @@
 
 /* this is the structure used for the local netbios name table */
 struct netbios_name {
-	time_t start_time;
-	int ttl;
 	struct in_addr ip;
 	struct in_addr master_ip;
 	bool found_master;
 	bool valid;
-	bool subnet;
 	char flags[10];
 	unsigned char nb_flags;
 	char name[100];
@@ -155,11 +152,8 @@ static void init_name(struct netbios_name *n)
 	memset(n, 0, sizeof(struct netbios_name));
 	n->valid = false;
 	n->found_master = false;
-	n->subnet = false;
 	strcpy(n->name, "");
 	strcpy(n->flags, "");
-	n->ttl = 0;
-	n->start_time = 0;
 	n->nb_flags = 0;
 }
 
@@ -466,7 +460,7 @@ static void reply_reg_request(char *inbuf, char *outbuf)
 	p += name_len(p);
 	RSSVAL(p, 0, 0x20);
 	RSSVAL(p, 2, 0x1);
-	RSIVAL(p, 4, our_hostname.ttl);
+	RSIVAL(p, 4, 0);
 	RSSVAL(p, 8, 6);
 	CVAL(p, 10) = nb_flags;
 	CVAL(p, 11) = 0;
