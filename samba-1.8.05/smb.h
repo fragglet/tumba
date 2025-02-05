@@ -22,13 +22,9 @@
 
 #define BUFFER_SIZE   (0xFFFF)
 
-#define False             (0)
-#define True              (1)
 #define BITSETB(ptr, bit) ((((char *) ptr)[0] & (1 << (bit))) != 0)
 #define BITSETW(ptr, bit) ((SVAL(ptr, 0) & (1 << (bit))) != 0)
 #define PTR_DIFF(p1, p2)  ((ptrdiff_t) (((char *) (p1)) - (char *) (p2)))
-
-typedef int BOOL;
 
 typedef short int16;
 typedef int int32;
@@ -215,20 +211,20 @@ typedef char fstring[128];
 #define smb_base(buf) ((buf) + 4)
 
 /* and a few prototypes */
-BOOL string_sub(char *s, char *pattern, char *insert);
+bool string_sub(char *s, char *pattern, char *insert);
 char *skip_string(char *buf, int n);
 int find_free_connection(void);
 void close_file(int fnum);
 char *ufc_crypt(char *key, char *salt);
-BOOL strhasupper(char *s);
-BOOL strhaslower(char *s);
-BOOL check_name(char *name, int cnum);
+bool strhasupper(char *s);
+bool strhaslower(char *s);
+bool check_name(char *name, int cnum);
 struct hostent *Get_Hostbyname(char *name);
 void Abort(void);
 void safe_memcpy(void *dest, void *src, int size);
 void *Realloc(void *p, int size);
 void smb_setlen(char *buf, int len);
-int set_message(char *buf, int num_words, int num_bytes, BOOL zero);
+int set_message(char *buf, int num_words, int num_bytes, bool zero);
 void name_interpret(char *in, char *out);
 void *object_byte_swap(void *obj, int size);
 void ssval(char *buf, int pos, uint16 val);
@@ -236,25 +232,25 @@ void sival(char *buf, int pos, uint32 val);
 uint32 ival(char *buf, int pos);
 uint16 sval(char *, int);
 void strupper(char *s);
-BOOL file_exist(char *fname);
+bool file_exist(char *fname);
 int read_with_timeout(int fd, char *buf, int mincnt, int maxcnt, long time_out,
-                      BOOL exact);
+                      bool exact);
 int write_socket(int fd, char *buf, int len);
 void close_sockets(void);
 int write_with_timeout(int fd, char *buf, int length, long time_out);
-BOOL send_smb(char *buffer);
-BOOL read_data(int fd, char *buffer, int N);
+bool send_smb(char *buffer);
+bool read_data(int fd, char *buffer, int N);
 int smb_len(char *buf);
-BOOL receive_smb(char *buffer, int timeout);
+bool receive_smb(char *buffer, int timeout);
 void show_msg(char *buf);
-BOOL big_endian(void);
+bool big_endian(void);
 void become_daemon(void);
 void strlower(char *s);
 void strnorm(char *s);
 char *smb_buf();
-BOOL strequal(char *, char *);
+bool strequal(char *, char *);
 char *timestring();
-BOOL send_packet(char *buf, int len, struct in_addr *ip, int port, int type);
+bool send_packet(char *buf, int len, struct in_addr *ip, int port, int type);
 int name_len(char *s);
 uint32 file_size(char *file_name);
 void dos_format(char *fname);
@@ -277,9 +273,9 @@ int TimeDiff(void);
 void replacestr(char *str1, char *str2, int start, int n);
 void openstr(char *s, int start, int n);
 void closestr(char *s, int start, int n);
-BOOL set_filetime(char *fname, time_t mtime);
-BOOL get_myname(char *myname, struct in_addr *ip);
-BOOL ip_equal(struct in_addr *ip1, struct in_addr *ip2);
+bool set_filetime(char *fname, time_t mtime);
+bool get_myname(char *myname, struct in_addr *ip);
+bool ip_equal(struct in_addr *ip1, struct in_addr *ip2);
 char *smb_fn_name(int cnum);
 int open_socket_in(int type, int port);
 int open_socket_out(struct in_addr *addr, int port);

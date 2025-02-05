@@ -26,9 +26,9 @@ typedef struct {
 	int ttl;
 	struct in_addr ip;
 	struct in_addr master_ip;
-	BOOL found_master;
-	BOOL valid;
-	BOOL subnet;
+	bool found_master;
+	bool valid;
+	bool subnet;
 	char flags[10];
 	unsigned char nb_flags;
 	char name[100];
@@ -45,10 +45,10 @@ extern int DEBUGLEVEL;
 char *InBuffer = NULL;
 char *OutBuffer = NULL;
 
-extern BOOL NeedSwap;
+extern bool NeedSwap;
 extern pstring scope;
 
-BOOL reply_only = False;
+bool reply_only = false;
 
 extern struct in_addr lastip;
 extern int lastport;
@@ -68,12 +68,12 @@ extern int Client;
 void construct_reply(char *, char *);
 
 /* are we running as a daemon ? */
-BOOL is_daemon = False;
+bool is_daemon = false;
 
 /* machine comment */
 fstring comment = "";
 
-BOOL got_bcast = False;
+bool got_bcast = false;
 
 static struct ifconf get_interfaces(int sock_fd)
 {
@@ -156,9 +156,9 @@ static struct network_address *get_addresses(int sock_fd, int *num_addrs)
 static void init_name(name_struct *n)
 {
 	memset(n, 0, sizeof(name_struct));
-	n->valid = False;
-	n->found_master = False;
-	n->subnet = False;
+	n->valid = false;
+	n->found_master = false;
+	n->subnet = false;
 	strcpy(n->name, "");
 	strcpy(n->flags, "");
 	n->ttl = 0;
@@ -173,27 +173,27 @@ static void init_group(name_struct *n, char *name)
 	strupper(n->name);
 	strcpy(n->flags, "G");
 	n->nb_flags |= 0x80;
-	n->valid = True;
+	n->valid = true;
 }
 
 /****************************************************************************
   true if two netbios names are equal
 ****************************************************************************/
-static BOOL name_equal(char *s1, char *s2)
+static bool name_equal(char *s1, char *s2)
 {
 	char *p1, *p2;
 	while (*s1 && *s2 && (*s1 != ' ') && (*s2 != ' ')) {
 		p1 = s1;
 		p2 = s2; /* toupper has side effects as a macro */
 		if (toupper(*p1) != toupper(*p2))
-			return False;
+			return false;
 		s1++;
 		s2++;
 	}
 	if ((*s1 == 0 || *s1 == ' ') && (*s2 == 0 || *s2 == ' '))
-		return True;
+		return true;
 	else
-		return False;
+		return false;
 }
 
 /****************************************************************************
@@ -300,7 +300,7 @@ static int nmb_len(char *buf)
 /****************************************************************************
 receive a name message
 ****************************************************************************/
-static BOOL receive_nmb(char *buffer, int timeout)
+static bool receive_nmb(char *buffer, int timeout)
 {
 	int ret = read_max_udp(Client, buffer, BUFFER_SIZE, timeout);
 
@@ -311,20 +311,20 @@ static BOOL receive_nmb(char *buffer, int timeout)
 	}
 
 	if (ret <= 1)
-		return False;
+		return false;
 
 	DEBUG(3, ("received packet from (%s) nmb_len=%d len=%d\n",
 	          inet_ntoa(lastip), nmb_len(buffer), ret));
 
-	return True;
+	return true;
 }
 
 /****************************************************************************
 send a name message
 ****************************************************************************/
-static BOOL send_nmb(char *buf, int len, struct in_addr *ip)
+static bool send_nmb(char *buf, int len, struct in_addr *ip)
 {
-	BOOL ret;
+	bool ret;
 	struct sockaddr_in sock_out;
 	int one = 1;
 
@@ -358,14 +358,14 @@ static BOOL send_nmb(char *buf, int len, struct in_addr *ip)
 /****************************************************************************
 do a netbios name query to find someones IP
 ****************************************************************************/
-static BOOL name_query(char *inbuf, char *outbuf, char *name,
+static bool name_query(char *inbuf, char *outbuf, char *name,
                        struct in_addr to_ip, struct in_addr *ip, int maxtime,
                        void (*fn)())
 {
 	static uint16 name_trn_id = 0x6242;
 	char *p;
-	BOOL saved_swap = NeedSwap;
-	BOOL found = False;
+	bool saved_swap = NeedSwap;
+	bool found = false;
 	time_t start_time = time(NULL);
 	time_t this_time = start_time;
 
@@ -394,7 +394,7 @@ static BOOL name_query(char *inbuf, char *outbuf, char *name,
 
 	if (!send_nmb(outbuf, nmb_len(outbuf), &to_ip)) {
 		NeedSwap = saved_swap;
-		return False;
+		return false;
 	}
 
 	while (!found && this_time - start_time <= maxtime) {
@@ -410,7 +410,7 @@ static BOOL name_query(char *inbuf, char *outbuf, char *name,
 			/* is it a positive response to our request? */
 			if ((rec_name_trn_id == name_trn_id) && opcode == 0 &&
 			    (nm_flags & ~0x28) == 0x50 && rcode == 0) {
-				found = True;
+				found = true;
 				DEBUG(2, ("Got a positive name query response "
 				          "from %s\n",
 				          inet_ntoa(lastip)));
@@ -615,9 +615,9 @@ construct a host announcement unicast
 Note that I don't know what half the numbers mean - I'm just using what I
 saw another PC use :-)
 ****************************************************************************/
-BOOL announce_host(char *outbuf, char *group, struct in_addr ip)
+bool announce_host(char *outbuf, char *group, struct in_addr ip)
 {
-	BOOL oldswap = NeedSwap;
+	bool oldswap = NeedSwap;
 	char *p, *p2;
 	char *gptr;
 
@@ -648,7 +648,7 @@ BOOL announce_host(char *outbuf, char *group, struct in_addr ip)
 
 	/* now setup the smb part */
 	p -= 4;
-	set_message(p, 17, 50 + strlen(comment) + 1, True);
+	set_message(p, 17, 50 + strlen(comment) + 1, true);
 	CVAL(p, smb_com) = SMBtrans;
 	SSVAL(p, smb_vwv1, 33 + strlen(comment) + 1);
 	SSVAL(p, smb_vwv11, 33 + strlen(comment) + 1);
@@ -694,7 +694,7 @@ BOOL announce_host(char *outbuf, char *group, struct in_addr ip)
 /****************************************************************************
 a hook for browsing handling - called every 60 secs
 ****************************************************************************/
-void do_browse_hook(char *inbuf, char *outbuf, BOOL force)
+void do_browse_hook(char *inbuf, char *outbuf, bool force)
 {
 	static int announce_interval = 3;
 	static int minute_counter = 3;
@@ -715,8 +715,8 @@ void do_browse_hook(char *inbuf, char *outbuf, BOOL force)
 	if (!force && master_count++ >= master_interval) {
 		master_count = 0;
 		DEBUG(2, ("%s Redoing browse master ips\n", timestring()));
-		our_hostname.found_master = False;
-		our_group.found_master = False;
+		our_hostname.found_master = false;
+		our_group.found_master = false;
 	}
 
 	/* find the subnet masters */
@@ -763,7 +763,7 @@ void construct_dgram_reply(char *inbuf, char *outbuf)
 	time_t t = time(NULL);
 	if (t - last_time > 20) {
 		DEBUG(3, ("Doing dgram reply to %s\n", inet_ntoa(lastip)));
-		do_browse_hook(inbuf, outbuf, True);
+		do_browse_hook(inbuf, outbuf, true);
 	}
 	last_time = t;
 }
@@ -781,14 +781,14 @@ void process(void)
 	if ((InBuffer == NULL) || (OutBuffer == NULL))
 		return;
 
-	while (True) {
+	while (true) {
 		fd_set fds;
 		int selrtn;
 		struct timeval timeout;
 		int nread;
 
 		if (!timer || (time(NULL) - timer) > 60) {
-			do_browse_hook(InBuffer, OutBuffer, False);
+			do_browse_hook(InBuffer, OutBuffer, false);
 			timer = time(NULL);
 		}
 
@@ -835,7 +835,7 @@ void process(void)
 /****************************************************************************
   open the socket communication
 ****************************************************************************/
-BOOL open_sockets(BOOL is_daemon, int port)
+bool open_sockets(bool is_daemon, int port)
 {
 	struct hostent *hp;
 	if (is_daemon) {
@@ -843,12 +843,12 @@ BOOL open_sockets(BOOL is_daemon, int port)
 		if ((hp = Get_Hostbyname(myhostname)) == 0) {
 			DEBUG(0, ("Get_Hostbyname: Unknown host. %s\n",
 			          myhostname));
-			return False;
+			return false;
 		}
 
 		Client = open_socket_in(SOCK_DGRAM, port);
 		if (Client == -1)
-			return False;
+			return false;
 
 	} else {
 		Client = 0;
@@ -859,16 +859,16 @@ BOOL open_sockets(BOOL is_daemon, int port)
 	/* We will abort gracefully when the client or remote system
 	   goes away */
 	signal(SIGPIPE, SIGNAL_CAST Abort);
-	return True;
+	return true;
 }
 
 /****************************************************************************
   initialise connect, service and file structs
 ****************************************************************************/
-BOOL init_structs(void)
+bool init_structs(void)
 {
 	if (!get_myname(myhostname, &myip))
-		return False;
+		return false;
 
 	strupper(myhostname);
 
@@ -895,7 +895,7 @@ BOOL init_structs(void)
 
 	init_group(&our_group, mygroup);
 
-	return True;
+	return true;
 }
 
 /****************************************************************************
@@ -945,13 +945,13 @@ int main(int argc, char *argv[])
 		case 'B': {
 			unsigned long a = interpret_addr(optarg);
 			memcpy((char *) &bcast_ip, (char *) &a, sizeof(a));
-			got_bcast = True;
+			got_bcast = true;
 		} break;
 		case 'n':
 			strcpy(myname, optarg);
 			break;
 		case 'R':
-			reply_only = True;
+			reply_only = true;
 			break;
 		case 'l':
 			sprintf(debugf, "%s.nmb.debug", optarg);
@@ -960,7 +960,7 @@ int main(int argc, char *argv[])
 			strcpy(scope, optarg);
 			break;
 		case 'D':
-			is_daemon = True;
+			is_daemon = true;
 			break;
 		case 'd':
 			DEBUGLEVEL = atoi(optarg);

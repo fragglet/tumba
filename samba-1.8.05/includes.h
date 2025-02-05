@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdbool.h>
 #ifdef MIPS
 #include <posix/stdlib.h>
 #else

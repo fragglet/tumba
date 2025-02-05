@@ -47,7 +47,7 @@ struct in_addr bcast_ip;
 /* this is set to true on a big_endian machine (like a sun sparcstation)
 this means that all shorts and ints must be byte swapped before being
 put in the buffer */
-BOOL NeedSwap = False;
+bool NeedSwap = false;
 
 pstring debugf = DEBUGFILE;
 
@@ -94,7 +94,7 @@ return the difference between local and GMT time
 ****************************************************************************/
 int TimeDiff(void)
 {
-	static BOOL initialised = False;
+	static bool initialised = false;
 	static int timediff = 0;
 
 	if (!initialised) {
@@ -122,7 +122,7 @@ int TimeDiff(void)
 #endif
 #endif
 		DEBUG(3, ("timediff=%d\n", timediff));
-		initialised = True;
+		initialised = true;
 	}
 
 	return timediff + (extra_time_offset * 60);
@@ -322,7 +322,7 @@ void *object_byte_swap(void *obj, int size)
 /*******************************************************************
   true if the machine is big endian
 ********************************************************************/
-BOOL big_endian(void)
+bool big_endian(void)
 {
 	int x = 2;
 	char *s;
@@ -333,10 +333,10 @@ BOOL big_endian(void)
 /*******************************************************************
   compare 2 strings
 ********************************************************************/
-BOOL strequal(char *s1, char *s2)
+bool strequal(char *s1, char *s2)
 {
 	if (!s1 || !s2)
-		return False;
+		return false;
 
 	return strcasecmp(s1, s2) == 0;
 }
@@ -429,7 +429,7 @@ void smb_setlen(char *buf, int len)
 /*******************************************************************
   setup the word count and byte count for a smb message
 ********************************************************************/
-int set_message(char *buf, int num_words, int num_bytes, BOOL zero)
+int set_message(char *buf, int num_words, int num_bytes, bool zero)
 {
 	if (zero)
 		memset(buf + smb_size, 0, num_words * 2 + num_bytes);
@@ -508,9 +508,9 @@ int name_len(char *s)
 /****************************************************************************
 send a single packet to a port on another machine
 ****************************************************************************/
-BOOL send_packet(char *buf, int len, struct in_addr *ip, int port, int type)
+bool send_packet(char *buf, int len, struct in_addr *ip, int port, int type)
 {
-	BOOL ret;
+	bool ret;
 	int out_fd;
 	struct sockaddr_in sock_out;
 	int one = 1;
@@ -519,7 +519,7 @@ BOOL send_packet(char *buf, int len, struct in_addr *ip, int port, int type)
 	out_fd = socket(AF_INET, type, 0);
 	if (out_fd == -1) {
 		DEBUG(0, ("socket failed"));
-		return False;
+		return false;
 	}
 #if 1
 	/* allow broadcasts on it */
@@ -557,21 +557,21 @@ enough room!
 This routine looks for pattern in s and replaces it with
 insert. It may do multiple replacements.
 
-return True if a substitution was done.
+return true if a substitution was done.
 ****************************************************************************/
-BOOL string_sub(char *s, char *pattern, char *insert)
+bool string_sub(char *s, char *pattern, char *insert)
 {
-	BOOL ret = False;
+	bool ret = false;
 	char *p;
 	int ls = strlen(s);
 	int lp = strlen(pattern);
 	int li = strlen(insert);
 
 	if (!*pattern)
-		return False;
+		return false;
 
 	while (lp <= ls && (p = strstr(s, pattern))) {
-		ret = True;
+		ret = true;
 		safe_memcpy(p + li, p + lp, ls + 1 - (PTR_DIFF(p, s) + lp));
 		memcpy(p, insert, li);
 		s = p + li;
@@ -780,7 +780,7 @@ void Abort(void)
 /****************************************************************************
 get my own name and IP
 ****************************************************************************/
-BOOL get_myname(char *myname, struct in_addr *ip)
+bool get_myname(char *myname, struct in_addr *ip)
 {
 	struct hostent *hp;
 	pstring myhostname = "";
@@ -788,13 +788,13 @@ BOOL get_myname(char *myname, struct in_addr *ip)
 	/* get my host name */
 	if (gethostname(myhostname, sizeof(myhostname)) == -1) {
 		DEBUG(0, ("gethostname failed\n"));
-		return False;
+		return false;
 	}
 
 	/* get host info */
 	if ((hp = Get_Hostbyname(myhostname)) == 0) {
 		DEBUG(0, ("Get_Hostbyname: Unknown host %s.\n", myhostname));
-		return False;
+		return false;
 	}
 
 	if (myname) {
@@ -809,21 +809,21 @@ BOOL get_myname(char *myname, struct in_addr *ip)
 	if (ip)
 		memcpy((char *) ip, (char *) hp->h_addr, 4);
 
-	return True;
+	return true;
 }
 
 /****************************************************************************
 true if two IP addresses are equal
 ****************************************************************************/
-BOOL ip_equal(struct in_addr *ip1, struct in_addr *ip2)
+bool ip_equal(struct in_addr *ip1, struct in_addr *ip2)
 {
 	char *p1 = (char *) ip1;
 	char *p2 = (char *) ip2;
 	int l = sizeof(*ip1);
 	while (l--)
 		if (*p1++ != *p2++)
-			return False;
-	return True;
+			return false;
+	return true;
 }
 
 /****************************************************************************
