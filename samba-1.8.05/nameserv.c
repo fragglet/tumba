@@ -56,7 +56,7 @@ int myttl = 0;
 int num_names = 0;
 static struct netbios_name our_hostname, our_group;
 
-static int Client = 0;
+static int server_sock = 0;
 int Client_dgram = -1;
 
 /* are we running as a daemon ? */
@@ -285,8 +285,8 @@ static int nmb_len(char *buf)
 ****************************************************************************/
 static void close_sockets(void)
 {
-	close(Client);
-	Client = 0;
+	close(server_sock);
+	server_sock = 0;
 }
 
 /****************************************************************************
@@ -294,7 +294,7 @@ receive a name message
 ****************************************************************************/
 static bool receive_nmb(char *buffer, int timeout)
 {
-	int ret = read_max_udp(Client, buffer, BUFFER_SIZE, timeout);
+	int ret = read_max_udp(server_sock, buffer, BUFFER_SIZE, timeout);
 
 	if (ret < 0) {
 		DEBUG(0, ("No bytes from client\n"));
@@ -322,7 +322,7 @@ static bool send_nmb(char *buf, int len, struct in_addr *ip)
 
 #if 1
 	/* allow broadcasts on it */
-	setsockopt(Client, SOL_SOCKET, SO_BROADCAST, (char *) &one,
+	setsockopt(server_sock, SOL_SOCKET, SO_BROADCAST, (char *) &one,
 	           sizeof(one));
 #endif
 
@@ -338,7 +338,7 @@ static bool send_nmb(char *buf, int len, struct in_addr *ip)
 		          len, inet_ntoa(*ip)));
 
 	/* send it */
-	ret = (sendto(Client, buf, len, 0, (struct sockaddr *) &sock_out,
+	ret = (sendto(server_sock, buf, len, 0, (struct sockaddr *) &sock_out,
 	              sizeof(sock_out)) >= 0);
 
 	if (!ret)
@@ -493,7 +493,7 @@ static struct in_addr get_response_addr(struct in_addr *src)
 {
 	struct in_addr result = {INADDR_NONE};
 	int num_addrs = 0;
-	struct network_address *addrs = get_addresses(Client, &num_addrs);
+	struct network_address *addrs = get_addresses(server_sock, &num_addrs);
 	int i;
 
 	DEBUG(3, ("Finding response address for client %s: ", inet_ntoa(*src)));
@@ -757,7 +757,7 @@ static void process(void)
 		}
 
 		FD_ZERO(&fds);
-		FD_SET(Client, &fds);
+		FD_SET(server_sock, &fds);
 		if (Client_dgram >= 0)
 			FD_SET(Client_dgram, &fds);
 
@@ -776,11 +776,11 @@ static void process(void)
 				construct_dgram_reply(InBuffer, OutBuffer);
 		}
 
-		if (!FD_ISSET(Client, &fds)) {
+		if (!FD_ISSET(server_sock, &fds)) {
 			continue;
 		}
 
-		nread = read_udp_socket(Client, InBuffer, BUFFER_SIZE);
+		nread = read_udp_socket(server_sock, InBuffer, BUFFER_SIZE);
 		if (nread <= 0) {
 			continue;
 		}
@@ -810,12 +810,12 @@ static bool open_sockets(bool is_daemon, int port)
 			return false;
 		}
 
-		Client = open_socket_in(SOCK_DGRAM, port);
-		if (Client == -1)
+		server_sock = open_socket_in(SOCK_DGRAM, port);
+		if (server_sock == -1)
 			return false;
 
 	} else {
-		Client = 0;
+		server_sock = 0;
 	}
 
 	Client_dgram = open_socket_in(SOCK_DGRAM, 138);
