@@ -201,10 +201,6 @@ read from a socket
 ****************************************************************************/
 static int read_udp_socket(int fd, char *buf, int len)
 {
-	/* #define NORECVFROM */
-#ifdef NORECVFROM
-	return read(fd, buf, len);
-#else
 	int ret;
 	struct sockaddr sock;
 	int socklen;
@@ -224,7 +220,6 @@ static int read_udp_socket(int fd, char *buf, int len)
 		DEBUG(3, ("read %d bytes\n", ret));
 
 	return ret;
-#endif
 }
 
 /****************************************************************************
