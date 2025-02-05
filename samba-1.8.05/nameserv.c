@@ -263,10 +263,10 @@ static int nmb_len(char *buf)
 	int i;
 	int ret = 12;
 	char *p = buf;
-	int qdcount = SVAL_old(buf, 4);
-	int ancount = SVAL_old(buf, 6);
-	int nscount = SVAL_old(buf, 8);
-	int arcount = SVAL_old(buf, 10);
+	int qdcount = RSVAL(buf, 4);
+	int ancount = RSVAL(buf, 6);
+	int nscount = RSVAL(buf, 8);
+	int arcount = RSVAL(buf, 10);
 
 	/* check for insane qdcount values? */
 	if (qdcount > 100 || qdcount < 0) {
@@ -284,7 +284,7 @@ static int nmb_len(char *buf)
 		p = buf + ret;
 		ret += name_len(p) + 8;
 		p = buf + ret;
-		rdlength = SVAL_old(p, 0);
+		rdlength = RSVAL(p, 0);
 		ret += rdlength + 2;
 	}
 
@@ -421,7 +421,7 @@ reply to a reg request
 ****************************************************************************/
 void reply_reg_request(char *inbuf, char *outbuf)
 {
-	int rec_name_trn_id = SVAL_old(inbuf, 0);
+	int rec_name_trn_id = RSVAL(inbuf, 0);
 	char qname[100] = "";
 	char *p = inbuf;
 	struct in_addr ip;
@@ -457,20 +457,20 @@ void reply_reg_request(char *inbuf, char *outbuf)
 	      ("Someones using my name (%s), sending negative reply\n", qname));
 
 	/* Send a NEGATIVE REGISTRATION RESPONSE to protect our name */
-	SSVAL_old(outbuf, 0, rec_name_trn_id);
+	RSSVAL(outbuf, 0, rec_name_trn_id);
 	CVAL(outbuf, 2) = (1 << 7) | (0x5 << 3) | 0x5;
 	CVAL(outbuf, 3) = (1 << 7) | 0x6;
-	SSVAL_old(outbuf, 4, 0);
-	SSVAL_old(outbuf, 6, 1);
-	SSVAL_old(outbuf, 8, 0);
-	SSVAL_old(outbuf, 10, 0);
+	RSSVAL(outbuf, 4, 0);
+	RSSVAL(outbuf, 6, 1);
+	RSSVAL(outbuf, 8, 0);
+	RSSVAL(outbuf, 10, 0);
 	p = outbuf + 12;
 	strcpy(p, inbuf + 12);
 	p += name_len(p);
-	SSVAL_old(p, 0, 0x20);
-	SSVAL_old(p, 2, 0x1);
-	SIVAL_old(p, 4, our_hostname.ttl);
-	SSVAL_old(p, 8, 6);
+	RSSVAL(p, 0, 0x20);
+	RSSVAL(p, 2, 0x1);
+	RSIVAL(p, 4, our_hostname.ttl);
+	RSSVAL(p, 8, 6);
 	CVAL(p, 10) = nb_flags;
 	CVAL(p, 11) = 0;
 	p += 12;
@@ -521,7 +521,7 @@ reply to a name query
 ****************************************************************************/
 void reply_name_query(char *inbuf, char *outbuf)
 {
-	int rec_name_trn_id = SVAL_old(inbuf, 0);
+	int rec_name_trn_id = RSVAL(inbuf, 0);
 	char qname[100] = "";
 	char *p = inbuf;
 	unsigned char nb_flags = 0;
@@ -541,20 +541,20 @@ void reply_name_query(char *inbuf, char *outbuf)
 	nb_flags = our_hostname.nb_flags;
 
 	/* Send a POSITIVE NAME QUERY RESPONSE */
-	SSVAL_old(outbuf, 0, rec_name_trn_id);
+	RSSVAL(outbuf, 0, rec_name_trn_id);
 	CVAL(outbuf, 2) = (1 << 7) | 0x5;
 	CVAL(outbuf, 3) = 0;
-	SSVAL_old(outbuf, 4, 0);
-	SSVAL_old(outbuf, 6, 1);
-	SSVAL_old(outbuf, 8, 0);
-	SSVAL_old(outbuf, 10, 0);
+	RSSVAL(outbuf, 4, 0);
+	RSSVAL(outbuf, 6, 1);
+	RSSVAL(outbuf, 8, 0);
+	RSSVAL(outbuf, 10, 0);
 	p = outbuf + 12;
 	strcpy(p, inbuf + 12);
 	p += name_len(p);
-	SSVAL_old(p, 0, 0x20);
-	SSVAL_old(p, 2, 0x1);
-	SIVAL_old(p, 4, myttl);
-	SSVAL_old(p, 8, 6);
+	RSSVAL(p, 0, 0x20);
+	RSSVAL(p, 2, 0x1);
+	RSIVAL(p, 4, myttl);
+	RSSVAL(p, 8, 6);
 	CVAL(p, 10) = nb_flags;
 	CVAL(p, 11) = 0;
 	p += 12;
