@@ -578,19 +578,6 @@ void reply_name_query(char *inbuf, char *outbuf)
 }
 
 /****************************************************************************
-reply to a name status query
-****************************************************************************/
-void reply_name_status(char *inbuf, char *outbuf)
-{
-	char qname[100] = "";
-
-	name_extract(inbuf, 12, qname);
-
-	DEBUG(2,
-	      ("(%s) status query on name (%s)\n", inet_ntoa(lastip), qname));
-}
-
-/****************************************************************************
   construct a reply to the incoming packet
 ****************************************************************************/
 void construct_reply(char *inbuf, char *outbuf)
@@ -604,9 +591,6 @@ void construct_reply(char *inbuf, char *outbuf)
 
 	if (opcode == 0 && (nm_flags & ~1) == 0x10 && rcode == 0)
 		reply_name_query(inbuf, outbuf);
-
-	if (opcode == 0 && (nm_flags & ~1) == 0x00 && rcode == 0)
-		reply_name_status(inbuf, outbuf);
 }
 
 /****************************************************************************
