@@ -499,7 +499,7 @@ void reply_reg_request(char *inbuf, char *outbuf)
 static struct in_addr get_response_addr(struct in_addr *src)
 {
 	struct in_addr result = {INADDR_NONE};
-	int num_addrs;
+	int num_addrs = 0;
 	struct network_address *addrs = get_addresses(Client, &num_addrs);
 	int i;
 
