@@ -165,9 +165,7 @@ static void init_group(struct netbios_name *n, char *name)
 	n->valid = true;
 }
 
-/****************************************************************************
-  true if two netbios names are equal
-****************************************************************************/
+/* true if two netbios names are equal */
 static bool name_equal(char *s1, char *s2)
 {
 	char *p1, *p2;
@@ -185,9 +183,6 @@ static bool name_equal(char *s1, char *s2)
 		return false;
 }
 
-/****************************************************************************
-read from a socket
-****************************************************************************/
 static int read_udp_socket(int fd, char *buf, int len)
 {
 	int ret;
@@ -210,9 +205,7 @@ static int read_udp_socket(int fd, char *buf, int len)
 	return ret;
 }
 
-/****************************************************************************
-read data from the client. Maxtime is in 10ths of a sec
-****************************************************************************/
+/* read data from the client. Maxtime is in 10ths of a sec */
 static int read_max_udp(int fd, char *buffer, int bufsize, int maxtime)
 {
 	fd_set fds;
@@ -244,9 +237,6 @@ static int read_max_udp(int fd, char *buffer, int bufsize, int maxtime)
 	return nread;
 }
 
-/****************************************************************************
-word out the length of a nmb message
-****************************************************************************/
 static int nmb_len(char *buf)
 {
 	int i;
@@ -280,18 +270,12 @@ static int nmb_len(char *buf)
 	return ret;
 }
 
-/****************************************************************************
-  close the socket communication
-****************************************************************************/
 static void close_sockets(void)
 {
 	close(server_sock);
 	server_sock = 0;
 }
 
-/****************************************************************************
-receive a name message
-****************************************************************************/
 static bool receive_nmb(char *buffer, int timeout)
 {
 	int ret = read_max_udp(server_sock, buffer, BUFFER_SIZE, timeout);
@@ -311,9 +295,6 @@ static bool receive_nmb(char *buffer, int timeout)
 	return true;
 }
 
-/****************************************************************************
-send a name message
-****************************************************************************/
 static bool send_nmb(char *buf, int len, struct in_addr *ip)
 {
 	bool ret;
@@ -347,9 +328,7 @@ static bool send_nmb(char *buf, int len, struct in_addr *ip)
 	return ret;
 }
 
-/****************************************************************************
-do a netbios name query to find someones IP
-****************************************************************************/
+/* do a netbios name query to find someones IP */
 static bool name_query(char *inbuf, char *outbuf, char *name,
                        struct in_addr to_ip, struct in_addr *ip, int maxtime,
                        void (*fn)())
@@ -414,9 +393,6 @@ static bool name_query(char *inbuf, char *outbuf, char *name,
 	return found;
 }
 
-/****************************************************************************
-reply to a reg request
-****************************************************************************/
 static void reply_reg_request(char *inbuf, char *outbuf)
 {
 	int rec_name_trn_id = RSVAL(inbuf, 0);
@@ -483,8 +459,6 @@ static void reply_reg_request(char *inbuf, char *outbuf)
 	}
 
 	send_packet(outbuf, nmb_len(outbuf), &ip, 137, SOCK_DGRAM);
-
-	return;
 }
 
 /* Choose which IP address to return to clients requesting our hostname. This
@@ -514,9 +488,6 @@ static struct in_addr get_response_addr(struct in_addr *src)
 	return result;
 }
 
-/****************************************************************************
-reply to a name query
-****************************************************************************/
 static void reply_name_query(char *inbuf, char *outbuf)
 {
 	int rec_name_trn_id = RSVAL(inbuf, 0);
@@ -564,9 +535,6 @@ static void reply_name_query(char *inbuf, char *outbuf)
 	            lastport > 0 ? lastport : 137, SOCK_DGRAM);
 }
 
-/****************************************************************************
-  construct a reply to the incoming packet
-****************************************************************************/
 static void construct_reply(char *inbuf, char *outbuf)
 {
 	int opcode = CVAL(inbuf, 2) >> 3;
@@ -580,12 +548,12 @@ static void construct_reply(char *inbuf, char *outbuf)
 		reply_name_query(inbuf, outbuf);
 }
 
-/****************************************************************************
+/*
 construct a host announcement unicast
 
 Note that I don't know what half the numbers mean - I'm just using what I
 saw another PC use :-)
-****************************************************************************/
+*/
 static bool announce_host(char *outbuf, char *group, struct in_addr ip)
 {
 	char *p, *p2;
@@ -655,9 +623,7 @@ static bool announce_host(char *outbuf, char *group, struct in_addr ip)
 	                   SOCK_DGRAM);
 }
 
-/****************************************************************************
-a hook for browsing handling - called every 60 secs
-****************************************************************************/
+/* a hook for browsing handling - called every 60 secs */
 static void do_browse_hook(char *inbuf, char *outbuf, bool force)
 {
 	static int announce_interval = 3;
@@ -718,9 +684,6 @@ static void do_browse_hook(char *inbuf, char *outbuf, bool force)
 	}
 }
 
-/****************************************************************************
-  construct a reply to the incoming dgram packet
-****************************************************************************/
 static void construct_dgram_reply(char *inbuf, char *outbuf)
 {
 	static time_t last_time = 0;
@@ -732,9 +695,6 @@ static void construct_dgram_reply(char *inbuf, char *outbuf)
 	last_time = t;
 }
 
-/****************************************************************************
-  process commands from the client
-****************************************************************************/
 static void process(void)
 {
 	static int trans_num = 0;
@@ -796,9 +756,6 @@ static void process(void)
 	}
 }
 
-/****************************************************************************
-  open the socket communication
-****************************************************************************/
 static bool open_sockets(bool is_daemon, int port)
 {
 	struct hostent *hp;
@@ -826,9 +783,6 @@ static bool open_sockets(bool is_daemon, int port)
 	return true;
 }
 
-/****************************************************************************
-  initialise connect, service and file structs
-****************************************************************************/
 static bool init_structs(void)
 {
 	if (!get_myname(myhostname, &myip))
@@ -862,9 +816,6 @@ static bool init_structs(void)
 	return true;
 }
 
-/****************************************************************************
-usage on the program
-****************************************************************************/
 static void usage(char *pname)
 {
 	DEBUG(0, ("Incorrect program usage - is the command line correct?\n"));
@@ -886,9 +837,6 @@ static void usage(char *pname)
 	printf("\n");
 }
 
-/****************************************************************************
-  main program
-****************************************************************************/
 int main(int argc, char *argv[])
 {
 	int port = 137;
