@@ -212,7 +212,6 @@ bool file_exist(char *fname);
 int read_with_timeout(int fd, char *buf, int mincnt, int maxcnt, int32_t time_out,
                       bool exact);
 int write_socket(int fd, char *buf, int len);
-void close_sockets(void);
 int write_with_timeout(int fd, char *buf, int length, int32_t time_out);
 bool send_smb(char *buffer);
 bool read_data(int fd, char *buffer, int N);

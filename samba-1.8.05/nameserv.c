@@ -56,8 +56,8 @@ int myttl = 0;
 int num_names = 0;
 static struct netbios_name our_hostname, our_group;
 
+static int Client = 0;
 int Client_dgram = -1;
-extern int Client;
 
 /* are we running as a daemon ? */
 bool is_daemon = false;
@@ -278,6 +278,15 @@ static int nmb_len(char *buf)
 	}
 
 	return ret;
+}
+
+/****************************************************************************
+  close the socket communication
+****************************************************************************/
+static void close_sockets(void)
+{
+	close(Client);
+	Client = 0;
 }
 
 /****************************************************************************

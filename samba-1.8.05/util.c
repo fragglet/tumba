@@ -29,9 +29,6 @@ int DEBUGLEVEL = 1;
 /* these are some file handles where debug info will be stored */
 FILE *dbf = NULL;
 
-/* the client file descriptor */
-int Client = 0;
-
 /* the last IP received from */
 struct in_addr lastip;
 
@@ -175,16 +172,6 @@ void safe_memcpy(void *dest, void *src, int size)
 			size -= difference;
 		}
 	}
-}
-
-/****************************************************************************
-  close the socket communication
-****************************************************************************/
-void close_sockets(void)
-{
-	extern int Client;
-	close(Client);
-	Client = 0;
 }
 
 /****************************************************************************
