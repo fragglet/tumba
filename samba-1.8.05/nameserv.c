@@ -263,10 +263,10 @@ static int nmb_len(char *buf)
 	int i;
 	int ret = 12;
 	char *p = buf;
-	int qdcount = SVAL(buf, 4);
-	int ancount = SVAL(buf, 6);
-	int nscount = SVAL(buf, 8);
-	int arcount = SVAL(buf, 10);
+	int qdcount = SVAL_old(buf, 4);
+	int ancount = SVAL_old(buf, 6);
+	int nscount = SVAL_old(buf, 8);
+	int arcount = SVAL_old(buf, 10);
 
 	/* check for insane qdcount values? */
 	if (qdcount > 100 || qdcount < 0) {
@@ -284,7 +284,7 @@ static int nmb_len(char *buf)
 		p = buf + ret;
 		ret += name_len(p) + 8;
 		p = buf + ret;
-		rdlength = SVAL(p, 0);
+		rdlength = SVAL_old(p, 0);
 		ret += rdlength + 2;
 	}
 
@@ -370,18 +370,18 @@ static bool name_query(char *inbuf, char *outbuf, char *name,
 	name_trn_id += getpid() % 100;
 	name_trn_id = (name_trn_id % 0x7FFF);
 
-	SSVAL(outbuf, 0, name_trn_id);
+	SSVAL_old(outbuf, 0, name_trn_id);
 	CVAL(outbuf, 2) = 0x1;
 	CVAL(outbuf, 3) = (1 << 4) | 0x0;
-	SSVAL(outbuf, 4, 1);
-	SSVAL(outbuf, 6, 0);
-	SSVAL(outbuf, 8, 0);
-	SSVAL(outbuf, 10, 0);
+	SSVAL_old(outbuf, 4, 1);
+	SSVAL_old(outbuf, 6, 0);
+	SSVAL_old(outbuf, 8, 0);
+	SSVAL_old(outbuf, 10, 0);
 	p = outbuf + 12;
 	name_mangle(name, p);
 	p += name_len(p);
-	SSVAL(p, 0, 0x20);
-	SSVAL(p, 2, 0x1);
+	SSVAL_old(p, 0, 0x20);
+	SSVAL_old(p, 2, 0x1);
 	p += 4;
 
 	DEBUG(2, ("Sending name query for %s\n", name));
@@ -395,7 +395,7 @@ static bool name_query(char *inbuf, char *outbuf, char *name,
 		this_time = time(NULL);
 
 		if (receive_nmb(inbuf, 1)) {
-			int rec_name_trn_id = SVAL(inbuf, 0);
+			int rec_name_trn_id = SVAL_old(inbuf, 0);
 			int opcode = (CVAL(inbuf, 2) >> 3) & 0xF;
 			int nm_flags = ((CVAL(inbuf, 2) & 0x7) << 4) +
 			               (CVAL(inbuf, 3) >> 4);
@@ -426,7 +426,7 @@ reply to a reg request
 ****************************************************************************/
 void reply_reg_request(char *inbuf, char *outbuf)
 {
-	int rec_name_trn_id = SVAL(inbuf, 0);
+	int rec_name_trn_id = SVAL_old(inbuf, 0);
 	char qname[100] = "";
 	char *p = inbuf;
 	struct in_addr ip;
@@ -462,20 +462,20 @@ void reply_reg_request(char *inbuf, char *outbuf)
 	      ("Someones using my name (%s), sending negative reply\n", qname));
 
 	/* Send a NEGATIVE REGISTRATION RESPONSE to protect our name */
-	SSVAL(outbuf, 0, rec_name_trn_id);
+	SSVAL_old(outbuf, 0, rec_name_trn_id);
 	CVAL(outbuf, 2) = (1 << 7) | (0x5 << 3) | 0x5;
 	CVAL(outbuf, 3) = (1 << 7) | 0x6;
-	SSVAL(outbuf, 4, 0);
-	SSVAL(outbuf, 6, 1);
-	SSVAL(outbuf, 8, 0);
-	SSVAL(outbuf, 10, 0);
+	SSVAL_old(outbuf, 4, 0);
+	SSVAL_old(outbuf, 6, 1);
+	SSVAL_old(outbuf, 8, 0);
+	SSVAL_old(outbuf, 10, 0);
 	p = outbuf + 12;
 	strcpy(p, inbuf + 12);
 	p += name_len(p);
-	SSVAL(p, 0, 0x20);
-	SSVAL(p, 2, 0x1);
-	SIVAL(p, 4, our_hostname.ttl);
-	SSVAL(p, 8, 6);
+	SSVAL_old(p, 0, 0x20);
+	SSVAL_old(p, 2, 0x1);
+	SIVAL_old(p, 4, our_hostname.ttl);
+	SSVAL_old(p, 8, 6);
 	CVAL(p, 10) = nb_flags;
 	CVAL(p, 11) = 0;
 	p += 12;
@@ -526,7 +526,7 @@ reply to a name query
 ****************************************************************************/
 void reply_name_query(char *inbuf, char *outbuf)
 {
-	int rec_name_trn_id = SVAL(inbuf, 0);
+	int rec_name_trn_id = SVAL_old(inbuf, 0);
 	char qname[100] = "";
 	char *p = inbuf;
 	unsigned char nb_flags = 0;
@@ -546,20 +546,20 @@ void reply_name_query(char *inbuf, char *outbuf)
 	nb_flags = our_hostname.nb_flags;
 
 	/* Send a POSITIVE NAME QUERY RESPONSE */
-	SSVAL(outbuf, 0, rec_name_trn_id);
+	SSVAL_old(outbuf, 0, rec_name_trn_id);
 	CVAL(outbuf, 2) = (1 << 7) | 0x5;
 	CVAL(outbuf, 3) = 0;
-	SSVAL(outbuf, 4, 0);
-	SSVAL(outbuf, 6, 1);
-	SSVAL(outbuf, 8, 0);
-	SSVAL(outbuf, 10, 0);
+	SSVAL_old(outbuf, 4, 0);
+	SSVAL_old(outbuf, 6, 1);
+	SSVAL_old(outbuf, 8, 0);
+	SSVAL_old(outbuf, 10, 0);
 	p = outbuf + 12;
 	strcpy(p, inbuf + 12);
 	p += name_len(p);
-	SSVAL(p, 0, 0x20);
-	SSVAL(p, 2, 0x1);
-	SIVAL(p, 4, myttl);
-	SSVAL(p, 8, 6);
+	SSVAL_old(p, 0, 0x20);
+	SSVAL_old(p, 2, 0x1);
+	SIVAL_old(p, 4, myttl);
+	SSVAL_old(p, 8, 6);
 	CVAL(p, 10) = nb_flags;
 	CVAL(p, 11) = 0;
 	p += 12;
@@ -608,11 +608,11 @@ bool announce_host(char *outbuf, char *group, struct in_addr ip)
 
 	CVAL(outbuf, 0) = 17;
 	CVAL(outbuf, 1) = 2;
-	SSVAL(outbuf, 2, time(NULL) % 10000 + 42);
+	SSVAL_old(outbuf, 2, time(NULL) % 10000 + 42);
 	memcpy(outbuf + 4, &myip, 4);
-	SSVAL(outbuf, 8, 138);
-	SSVAL(outbuf, 10, 186 + strlen(comment) + 1);
-	SSVAL(outbuf, 12, 0);
+	SSVAL_old(outbuf, 8, 138);
+	SSVAL_old(outbuf, 10, 186 + strlen(comment) + 1);
+	SSVAL_old(outbuf, 12, 0);
 
 	p = outbuf + 14;
 
@@ -628,14 +628,14 @@ bool announce_host(char *outbuf, char *group, struct in_addr ip)
 	p -= 4;
 	set_message(p, 17, 50 + strlen(comment) + 1, true);
 	CVAL(p, smb_com) = SMBtrans;
-	SSVAL(p, smb_vwv1, 33 + strlen(comment) + 1);
-	SSVAL(p, smb_vwv11, 33 + strlen(comment) + 1);
-	SSVAL(p, smb_vwv12, 86);
-	SSVAL(p, smb_vwv13, 3);
-	SSVAL(p, smb_vwv14, 1);
-	SSVAL(p, smb_vwv15, 1);
-	SSVAL(p, smb_vwv16, 2);
-	SSVAL(p, smb_vwv17, 1);
+	SSVAL_old(p, smb_vwv1, 33 + strlen(comment) + 1);
+	SSVAL_old(p, smb_vwv11, 33 + strlen(comment) + 1);
+	SSVAL_old(p, smb_vwv12, 86);
+	SSVAL_old(p, smb_vwv13, 3);
+	SSVAL_old(p, smb_vwv14, 1);
+	SSVAL_old(p, smb_vwv15, 1);
+	SSVAL_old(p, smb_vwv16, 2);
+	SSVAL_old(p, smb_vwv17, 1);
 	p2 = smb_buf(p);
 	strcpy(p2, "\\MAILSLOT\\BROWSE");
 	p2 = skip_string(p2, 1);
@@ -644,7 +644,7 @@ bool announce_host(char *outbuf, char *group, struct in_addr ip)
 	CVAL(p2, 1) = 5;   /* announcement interval?? */
 	CVAL(p2, 2) = 192; /* update count ?? */
 	CVAL(p2, 3) = 39;
-	SSVAL(p2, 4, 9);
+	SSVAL_old(p2, 4, 9);
 	p2 += 6;
 	strcpy(p2, myname);
 	p2 += 16;

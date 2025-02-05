@@ -410,7 +410,7 @@ uint16_t sval(char *buf, int pos)
 ********************************************************************/
 void smb_setlen(char *buf, int len)
 {
-	SSVAL(buf, 2, len);
+	SSVAL_old(buf, 2, len);
 	BSWP(buf + 2, 2);
 
 	/*
@@ -434,7 +434,7 @@ int set_message(char *buf, int num_words, int num_bytes, bool zero)
 	if (zero)
 		memset(buf + smb_size, 0, num_words * 2 + num_bytes);
 	CVAL(buf, smb_wct) = num_words;
-	SSVAL(buf, smb_vwv + num_words * 2, num_bytes);
+	SSVAL_old(buf, smb_vwv + num_words * 2, num_bytes);
 	smb_setlen(buf, smb_size + num_words * 2 + num_bytes - 4);
 	return smb_size + num_words * 2 + num_bytes;
 }
@@ -477,7 +477,7 @@ char *name_ptr(char *buf, int ofs)
 		char *p = (char *) &l;
 		memcpy((char *) &l, buf + ofs, 2);
 		p[0] &= ~0xC0;
-		l = SVAL(p, 0);
+		l = SVAL_old(p, 0);
 		DEBUG(5,
 		      ("name ptr to pos %d from %d is %s\n", l, ofs, buf + l));
 		return buf + l;

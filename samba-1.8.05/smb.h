@@ -20,25 +20,21 @@
 #ifndef _SMB_H
 #define _SMB_H
 
+#include "../src/byteorder.h"
+
 #define BUFFER_SIZE   (0xFFFF)
 
-#define BITSETB(ptr, bit) ((((char *) ptr)[0] & (1 << (bit))) != 0)
-#define BITSETW(ptr, bit) ((SVAL(ptr, 0) & (1 << (bit))) != 0)
 #define PTR_DIFF(p1, p2)  ((ptrdiff_t) (((char *) (p1)) - (char *) (p2)))
 
 /* debugging code */
 #define DEBUG(level, body) ((DEBUGLEVEL >= (level)) ? (Debug1 body) : 0)
 
-/* these macros make access to the packet buffers easier. See also the
-functions SSVAL() and SIVAL(). */
-#define SIVAL(buf, pos, val) sival((char *) (buf), pos, val)
-#define SSVAL(buf, pos, val) ssval((char *) (buf), pos, val)
-#define IVAL(buf, pos)       ival((char *) (buf), pos)
-#define SVAL(buf, pos)       sval((char *) buf, pos)
-
-#define PVAL(buf, pos, type) (*((type *) (((char *) buf) + pos)))
-#define SCVAL(buf, pos, x)   PVAL(buf, pos, unsigned char) = (x)
-#define CVAL(buf, pos)       PVAL(buf, pos, unsigned char)
+/* TODO: These macros are in the process of being replaced by the equivalent
+   macros found in byteorder.h */
+#define SIVAL_old(buf, pos, val) sival((char *) (buf), pos, val)
+#define SSVAL_old(buf, pos, val) ssval((char *) (buf), pos, val)
+#define IVAL_old(buf, pos)       ival((char *) (buf), pos)
+#define SVAL_old(buf, pos)       sval((char *) buf, pos)
 
 #define BSWP(buf, len) object_byte_swap(buf, len)
 #define SWP(buf, len)  (NeedSwap ? BSWP(buf, len) : ((void *) buf))
