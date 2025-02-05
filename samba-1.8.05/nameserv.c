@@ -690,7 +690,6 @@ static void construct_dgram_reply(char *inbuf, char *outbuf)
 
 static void process(void)
 {
-	static int trans_num = 0;
 	time_t timer = 0;
 
 	InBuffer = (char *) malloc(BUFFER_SIZE);
@@ -741,11 +740,7 @@ static void process(void)
 		if (nmb_len(InBuffer) <= 0)
 			continue;
 
-		DEBUG(2, ("%s Transaction %d\n", timestring(), trans_num));
-
 		construct_reply(InBuffer, OutBuffer);
-
-		trans_num++;
 	}
 }
 
