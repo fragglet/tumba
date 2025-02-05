@@ -358,36 +358,32 @@ static bool name_query(char *inbuf, char *outbuf, char *name,
 {
 	static uint16_t name_trn_id = 0x6242;
 	char *p;
-	bool saved_swap = NeedSwap;
 	bool found = false;
 	time_t start_time = time(NULL);
 	time_t this_time = start_time;
-
-	NeedSwap = !big_endian();
 
 	DEBUG(2, ("Querying name %s\n", name));
 
 	name_trn_id += getpid() % 100;
 	name_trn_id = (name_trn_id % 0x7FFF);
 
-	SSVAL_old(outbuf, 0, name_trn_id);
+	RSSVAL(outbuf, 0, name_trn_id);
 	CVAL(outbuf, 2) = 0x1;
 	CVAL(outbuf, 3) = (1 << 4) | 0x0;
-	SSVAL_old(outbuf, 4, 1);
-	SSVAL_old(outbuf, 6, 0);
-	SSVAL_old(outbuf, 8, 0);
-	SSVAL_old(outbuf, 10, 0);
+	RSSVAL(outbuf, 4, 1);
+	RSSVAL(outbuf, 6, 0);
+	RSSVAL(outbuf, 8, 0);
+	RSSVAL(outbuf, 10, 0);
 	p = outbuf + 12;
 	name_mangle(name, p);
 	p += name_len(p);
-	SSVAL_old(p, 0, 0x20);
-	SSVAL_old(p, 2, 0x1);
+	RSSVAL(p, 0, 0x20);
+	RSSVAL(p, 2, 0x1);
 	p += 4;
 
 	DEBUG(2, ("Sending name query for %s\n", name));
 
 	if (!send_nmb(outbuf, nmb_len(outbuf), &to_ip)) {
-		NeedSwap = saved_swap;
 		return false;
 	}
 
@@ -395,7 +391,7 @@ static bool name_query(char *inbuf, char *outbuf, char *name,
 		this_time = time(NULL);
 
 		if (receive_nmb(inbuf, 1)) {
-			int rec_name_trn_id = SVAL_old(inbuf, 0);
+			int rec_name_trn_id = RSVAL(inbuf, 0);
 			int opcode = (CVAL(inbuf, 2) >> 3) & 0xF;
 			int nm_flags = ((CVAL(inbuf, 2) & 0x7) << 4) +
 			               (CVAL(inbuf, 3) >> 4);
@@ -417,7 +413,6 @@ static bool name_query(char *inbuf, char *outbuf, char *name,
 			}
 		}
 	}
-	NeedSwap = saved_swap;
 	return found;
 }
 
@@ -595,7 +590,6 @@ saw another PC use :-)
 ****************************************************************************/
 bool announce_host(char *outbuf, char *group, struct in_addr ip)
 {
-	bool oldswap = NeedSwap;
 	char *p, *p2;
 	char *gptr;
 
@@ -604,15 +598,13 @@ bool announce_host(char *outbuf, char *group, struct in_addr ip)
 
 	memset(outbuf, 0, 256);
 
-	NeedSwap = !big_endian();
-
 	CVAL(outbuf, 0) = 17;
 	CVAL(outbuf, 1) = 2;
-	SSVAL_old(outbuf, 2, time(NULL) % 10000 + 42);
+	RSSVAL(outbuf, 2, time(NULL) % 10000 + 42);
 	memcpy(outbuf + 4, &myip, 4);
-	SSVAL_old(outbuf, 8, 138);
-	SSVAL_old(outbuf, 10, 186 + strlen(comment) + 1);
-	SSVAL_old(outbuf, 12, 0);
+	RSSVAL(outbuf, 8, 138);
+	RSSVAL(outbuf, 10, 186 + strlen(comment) + 1);
+	RSSVAL(outbuf, 12, 0);
 
 	p = outbuf + 14;
 
@@ -622,20 +614,18 @@ bool announce_host(char *outbuf, char *group, struct in_addr ip)
 	p += name_mangle(group, p);
 	strcpy(p - 3, "BO");
 
-	NeedSwap = big_endian();
-
 	/* now setup the smb part */
 	p -= 4;
 	set_message(p, 17, 50 + strlen(comment) + 1, true);
 	CVAL(p, smb_com) = SMBtrans;
-	SSVAL_old(p, smb_vwv1, 33 + strlen(comment) + 1);
-	SSVAL_old(p, smb_vwv11, 33 + strlen(comment) + 1);
-	SSVAL_old(p, smb_vwv12, 86);
-	SSVAL_old(p, smb_vwv13, 3);
-	SSVAL_old(p, smb_vwv14, 1);
-	SSVAL_old(p, smb_vwv15, 1);
-	SSVAL_old(p, smb_vwv16, 2);
-	SSVAL_old(p, smb_vwv17, 1);
+	SSVAL(p, smb_vwv1, 33 + strlen(comment) + 1);
+	SSVAL(p, smb_vwv11, 33 + strlen(comment) + 1);
+	SSVAL(p, smb_vwv12, 86);
+	SSVAL(p, smb_vwv13, 3);
+	SSVAL(p, smb_vwv14, 1);
+	SSVAL(p, smb_vwv15, 1);
+	SSVAL(p, smb_vwv16, 2);
+	SSVAL(p, smb_vwv17, 1);
 	p2 = smb_buf(p);
 	strcpy(p2, "\\MAILSLOT\\BROWSE");
 	p2 = skip_string(p2, 1);
@@ -644,7 +634,7 @@ bool announce_host(char *outbuf, char *group, struct in_addr ip)
 	CVAL(p2, 1) = 5;   /* announcement interval?? */
 	CVAL(p2, 2) = 192; /* update count ?? */
 	CVAL(p2, 3) = 39;
-	SSVAL_old(p2, 4, 9);
+	SSVAL(p2, 4, 9);
 	p2 += 6;
 	strcpy(p2, myname);
 	p2 += 16;
@@ -662,8 +652,6 @@ bool announce_host(char *outbuf, char *group, struct in_addr ip)
 
 	p2 = gptr + name_mangle(group, gptr);
 	strcpy(p2 - 3, "BO");
-
-	NeedSwap = oldswap;
 
 	return send_packet(outbuf, 200 + strlen(comment) + 1, &ip, 138,
 	                   SOCK_DGRAM);
