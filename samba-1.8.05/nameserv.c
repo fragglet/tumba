@@ -203,9 +203,8 @@ static int read_udp_socket(int fd, char *buf, int len)
 {
 	int ret;
 	struct sockaddr sock;
-	int socklen;
+	socklen_t socklen = sizeof(sock);
 
-	socklen = sizeof(sock);
 	memset((char *) &sock, 0, socklen);
 	memset((char *) &lastip, 0, sizeof(lastip));
 	ret = recvfrom(fd, buf, len, 0, &sock, &socklen);
