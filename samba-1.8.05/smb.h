@@ -26,11 +26,6 @@
 #define BITSETW(ptr, bit) ((SVAL(ptr, 0) & (1 << (bit))) != 0)
 #define PTR_DIFF(p1, p2)  ((ptrdiff_t) (((char *) (p1)) - (char *) (p2)))
 
-typedef short int16;
-typedef int int32;
-typedef unsigned short uint16;
-typedef unsigned int uint32;
-
 /* debugging code */
 #define DEBUG(level, body) ((DEBUGLEVEL >= (level)) ? (Debug1 body) : 0)
 
@@ -227,17 +222,17 @@ void smb_setlen(char *buf, int len);
 int set_message(char *buf, int num_words, int num_bytes, bool zero);
 void name_interpret(char *in, char *out);
 void *object_byte_swap(void *obj, int size);
-void ssval(char *buf, int pos, uint16 val);
-void sival(char *buf, int pos, uint32 val);
-uint32 ival(char *buf, int pos);
-uint16 sval(char *, int);
+void ssval(char *buf, int pos, uint16_t val);
+void sival(char *buf, int pos, uint32_t val);
+uint32_t ival(char *buf, int pos);
+uint16_t sval(char *, int);
 void strupper(char *s);
 bool file_exist(char *fname);
-int read_with_timeout(int fd, char *buf, int mincnt, int maxcnt, long time_out,
+int read_with_timeout(int fd, char *buf, int mincnt, int maxcnt, int32_t time_out,
                       bool exact);
 int write_socket(int fd, char *buf, int len);
 void close_sockets(void);
-int write_with_timeout(int fd, char *buf, int length, long time_out);
+int write_with_timeout(int fd, char *buf, int length, int32_t time_out);
 bool send_smb(char *buffer);
 bool read_data(int fd, char *buffer, int N);
 int smb_len(char *buf);
@@ -252,7 +247,7 @@ bool strequal(char *, char *);
 char *timestring();
 bool send_packet(char *buf, int len, struct in_addr *ip, int port, int type);
 int name_len(char *s);
-uint32 file_size(char *file_name);
+uint32_t file_size(char *file_name);
 void dos_format(char *fname);
 char *GetWd(char *s);
 int name_mangle(char *in, char *out);
@@ -279,7 +274,7 @@ bool ip_equal(struct in_addr *ip1, struct in_addr *ip2);
 char *smb_fn_name(int cnum);
 int open_socket_in(int type, int port);
 int open_socket_out(struct in_addr *addr, int port);
-unsigned long interpret_addr(char *str);
+uint32_t interpret_addr(char *str);
 
 
 #ifndef MIN

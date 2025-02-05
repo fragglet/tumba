@@ -368,39 +368,39 @@ void strupper(char *s)
 /****************************************************************************
   set a value at buf[pos] to integer val
 ****************************************************************************/
-void sival(char *buf, int pos, uint32 val)
+void sival(char *buf, int pos, uint32_t val)
 {
 	SWP(&val, sizeof(val));
 	memcpy(buf + pos, (char *) &val, sizeof(val));
 }
 
 /****************************************************************************
-  set a value at buf[pos] to int16 val
+  set a value at buf[pos] to int16_t val
 ****************************************************************************/
-void ssval(char *buf, int pos, uint16 val)
+void ssval(char *buf, int pos, uint16_t val)
 {
 	SWP(&val, sizeof(val));
-	memcpy(buf + pos, (char *) &val, sizeof(int16));
+	memcpy(buf + pos, (char *) &val, sizeof(int16_t));
 }
 
 /****************************************************************************
   get a 32 bit integer value
 ****************************************************************************/
-uint32 ival(char *buf, int pos)
+uint32_t ival(char *buf, int pos)
 {
-	uint32 val;
+	uint32_t val;
 	memcpy((char *) &val, buf + pos, sizeof(int));
 	SWP(&val, sizeof(val));
 	return val;
 }
 
 /****************************************************************************
-  get a int16 value
+  get a int16_t value
 ****************************************************************************/
-uint16 sval(char *buf, int pos)
+uint16_t sval(char *buf, int pos)
 {
-	uint16 val;
-	memcpy((char *) &val, buf + pos, sizeof(uint16));
+	uint16_t val;
+	memcpy((char *) &val, buf + pos, sizeof(uint16_t));
 	SWP(&val, sizeof(val));
 	return val;
 }
@@ -473,7 +473,7 @@ char *name_ptr(char *buf, int ofs)
 	unsigned char c = *(unsigned char *) (buf + ofs);
 
 	if ((c & 0xC0) == 0xC0) {
-		uint16 l;
+		uint16_t l;
 		char *p = (char *) &l;
 		memcpy((char *) &l, buf + ofs, 2);
 		p[0] &= ~0xC0;
@@ -613,8 +613,8 @@ calculate the default netmask for an address
 ****************************************************************************/
 static void default_netmask(struct in_addr *inm, struct in_addr *iad)
 {
-	unsigned long ad = ntohl(iad->s_addr);
-	unsigned long nm;
+	uint32_t ad = ntohl(iad->s_addr);
+	uint32_t nm;
 	/*
 	** Guess a netmask based on the class of the IP address given.
 	*/
@@ -657,8 +657,8 @@ void get_broadcast(struct in_addr *if_ipaddr, struct in_addr *if_bcast,
 	/* get a default netmask and broadcast */
 	default_netmask(if_nmask, if_ipaddr);
 	{
-		unsigned long ip = ntohl(if_ipaddr->s_addr);
-		unsigned long nm = ntohl(if_nmask->s_addr);
+		uint32_t ip = ntohl(if_ipaddr->s_addr);
+		uint32_t nm = ntohl(if_nmask->s_addr);
 		ip &= nm;                 /* mask down to our network number */
 		ip |= (0x00FFFFFF & ~nm); /* insert 1s in host field         */
 		if_bcast->s_addr = htonl(ip);
@@ -888,10 +888,10 @@ int open_socket_in(int type, int port)
 /****************************************************************************
 interpret an internet address or name into an IP address in 4 byte form
 ****************************************************************************/
-unsigned long interpret_addr(char *str)
+uint32_t interpret_addr(char *str)
 {
 	struct hostent *hp;
-	unsigned long res;
+	uint32_t res;
 
 	/* if it's in the form of an IP address then get the lib to interpret it
 	 */

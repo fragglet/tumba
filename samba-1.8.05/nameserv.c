@@ -362,7 +362,7 @@ static bool name_query(char *inbuf, char *outbuf, char *name,
                        struct in_addr to_ip, struct in_addr *ip, int maxtime,
                        void (*fn)())
 {
-	static uint16 name_trn_id = 0x6242;
+	static uint16_t name_trn_id = 0x6242;
 	char *p;
 	bool saved_swap = NeedSwap;
 	bool found = false;
@@ -943,7 +943,7 @@ int main(int argc, char *argv[])
 			strcpy(mygroup, optarg);
 			break;
 		case 'B': {
-			unsigned long a = interpret_addr(optarg);
+			uint32_t a = interpret_addr(optarg);
 			memcpy((char *) &bcast_ip, (char *) &a, sizeof(a));
 			got_bcast = true;
 		} break;
