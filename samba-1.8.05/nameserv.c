@@ -64,8 +64,6 @@ static struct netbios_name our_hostname, our_group;
 int Client_dgram = -1;
 extern int Client;
 
-void construct_reply(char *, char *);
-
 /* are we running as a daemon ? */
 bool is_daemon = false;
 
@@ -418,7 +416,7 @@ static bool name_query(char *inbuf, char *outbuf, char *name,
 /****************************************************************************
 reply to a reg request
 ****************************************************************************/
-void reply_reg_request(char *inbuf, char *outbuf)
+static void reply_reg_request(char *inbuf, char *outbuf)
 {
 	int rec_name_trn_id = RSVAL(inbuf, 0);
 	char qname[100] = "";
@@ -518,7 +516,7 @@ static struct in_addr get_response_addr(struct in_addr *src)
 /****************************************************************************
 reply to a name query
 ****************************************************************************/
-void reply_name_query(char *inbuf, char *outbuf)
+static void reply_name_query(char *inbuf, char *outbuf)
 {
 	int rec_name_trn_id = RSVAL(inbuf, 0);
 	char qname[100] = "";
@@ -568,7 +566,7 @@ void reply_name_query(char *inbuf, char *outbuf)
 /****************************************************************************
   construct a reply to the incoming packet
 ****************************************************************************/
-void construct_reply(char *inbuf, char *outbuf)
+static void construct_reply(char *inbuf, char *outbuf)
 {
 	int opcode = CVAL(inbuf, 2) >> 3;
 	int nm_flags = ((CVAL(inbuf, 2) & 0x7) << 4) + (CVAL(inbuf, 3) >> 4);
@@ -587,7 +585,7 @@ construct a host announcement unicast
 Note that I don't know what half the numbers mean - I'm just using what I
 saw another PC use :-)
 ****************************************************************************/
-bool announce_host(char *outbuf, char *group, struct in_addr ip)
+static bool announce_host(char *outbuf, char *group, struct in_addr ip)
 {
 	char *p, *p2;
 	char *gptr;
@@ -659,7 +657,7 @@ bool announce_host(char *outbuf, char *group, struct in_addr ip)
 /****************************************************************************
 a hook for browsing handling - called every 60 secs
 ****************************************************************************/
-void do_browse_hook(char *inbuf, char *outbuf, bool force)
+static void do_browse_hook(char *inbuf, char *outbuf, bool force)
 {
 	static int announce_interval = 3;
 	static int minute_counter = 3;
@@ -722,7 +720,7 @@ void do_browse_hook(char *inbuf, char *outbuf, bool force)
 /****************************************************************************
   construct a reply to the incoming dgram packet
 ****************************************************************************/
-void construct_dgram_reply(char *inbuf, char *outbuf)
+static void construct_dgram_reply(char *inbuf, char *outbuf)
 {
 	static time_t last_time = 0;
 	time_t t = time(NULL);
@@ -736,7 +734,7 @@ void construct_dgram_reply(char *inbuf, char *outbuf)
 /****************************************************************************
   process commands from the client
 ****************************************************************************/
-void process(void)
+static void process(void)
 {
 	static int trans_num = 0;
 	time_t timer = 0;
@@ -800,7 +798,7 @@ void process(void)
 /****************************************************************************
   open the socket communication
 ****************************************************************************/
-bool open_sockets(bool is_daemon, int port)
+static bool open_sockets(bool is_daemon, int port)
 {
 	struct hostent *hp;
 	if (is_daemon) {
@@ -830,7 +828,7 @@ bool open_sockets(bool is_daemon, int port)
 /****************************************************************************
   initialise connect, service and file structs
 ****************************************************************************/
-bool init_structs(void)
+static bool init_structs(void)
 {
 	if (!get_myname(myhostname, &myip))
 		return false;
@@ -866,7 +864,7 @@ bool init_structs(void)
 /****************************************************************************
 usage on the program
 ****************************************************************************/
-void usage(char *pname)
+static void usage(char *pname)
 {
 	DEBUG(0, ("Incorrect program usage - is the command line correct?\n"));
 
