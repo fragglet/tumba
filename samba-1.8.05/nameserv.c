@@ -34,6 +34,7 @@ struct netbios_name {
 struct network_address {
 	struct in_addr ip;
 	struct in_addr netmask;
+	struct in_addr bcast_ip;
 };
 
 extern pstring debugf;
@@ -46,8 +47,11 @@ bool reply_only = false;
 
 extern struct in_addr lastip;
 extern int lastport;
-extern struct in_addr myip;
-extern struct in_addr bcast_ip;
+
+/* TODO: Delete these variables. We can have multiple network interfaces,
+   which means multiple IP addresses and multiple broadcast addresses */
+static struct in_addr myip, bcast_ip;
+
 pstring myname = "";
 pstring myhostname = "";
 pstring mygroup = "WORKGROUP";
@@ -64,8 +68,6 @@ bool is_daemon = false;
 
 /* machine comment */
 fstring comment = "";
-
-bool got_bcast = false;
 
 static struct ifconf get_interfaces(int sock_fd)
 {
@@ -137,6 +139,13 @@ static struct network_address *get_addresses(int sock_fd, int *num_addrs)
 			continue;
 		}
 		result[*num_addrs].netmask = addr(&req->ifr_netmask);
+
+		if (ioctl(sock_fd, SIOCGIFBRDADDR, req) < 0) {
+			DEBUG(0, ("Failed getting broadcast address for %s\n",
+			          req->ifr_name));
+			continue;
+		}
+		result[*num_addrs].bcast_ip = addr(&req->ifr_broadaddr);
 
 		++*num_addrs;
 	}
@@ -746,6 +755,25 @@ static bool open_sockets(bool is_daemon, int port)
 	/* TODO: Allow dgram port number to also be changed, like -p arg? */
 	dgram_sock = open_socket_in(SOCK_DGRAM, 138);
 
+	/* TODO: Delete this block, it is a temporary hack */
+	{
+		int num_addrs = 0, i;
+		struct network_address *addrs = get_addresses(server_sock, &num_addrs);
+
+		for (i = 0; i < num_addrs; ++i) {
+			if ((addrs[i].ip.s_addr & addrs[i].netmask.s_addr) ==
+			    (htonl(INADDR_LOOPBACK) & addrs[i].netmask.s_addr)) {
+				continue;
+			}
+			myip = addrs[i].ip;
+			bcast_ip = addrs[i].bcast_ip;
+		}
+	}
+
+	DEBUG(1, ("myip=%s, ", inet_ntoa(myip)));
+	DEBUG(1, ("bcast_ip=%s\n", inet_ntoa(bcast_ip)));
+
+
 	/* We will abort gracefully when the client or remote system
 	   goes away */
 	signal(SIGPIPE, SIGNAL_CAST Abort);
@@ -758,19 +786,6 @@ static bool init_structs(void)
 		return false;
 
 	strupper(myhostname);
-
-	/* Read the broadcast address from the interface */
-	{
-		struct in_addr ip1, ip2;
-		if (!got_bcast) {
-			get_broadcast(&myip, &ip1, &ip2);
-		}
-
-		if (!got_bcast)
-			bcast_ip = ip1;
-
-		DEBUG(1, ("Using broadcast %s  ", inet_ntoa(bcast_ip)));
-	}
 
 	if (*myname == 0) {
 		strcpy(myname, myhostname);
@@ -826,7 +841,6 @@ int main(int argc, char *argv[])
 		case 'B': {
 			uint32_t a = interpret_addr(optarg);
 			memcpy((char *) &bcast_ip, (char *) &a, sizeof(a));
-			got_bcast = true;
 		} break;
 		case 'n':
 			strcpy(myname, optarg);

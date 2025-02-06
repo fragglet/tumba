@@ -234,8 +234,6 @@ int name_len(char *s);
 void show_nmb(char *inbuf);
 void create_mangled_stack(int size);
 void name_extract(char *buf, int ofs, char *name);
-void get_broadcast(struct in_addr *if_ipaddr, struct in_addr *if_bcast,
-                   struct in_addr *if_nmask);
 #ifdef __STDC__
 int Debug1(char *, ...);
 #else
