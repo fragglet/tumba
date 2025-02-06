@@ -57,7 +57,7 @@ int num_names = 0;
 static struct netbios_name our_hostname, our_group;
 
 static int server_sock = 0;
-int Client_dgram = -1;
+static int dgram_sock;
 
 /* are we running as a daemon ? */
 bool is_daemon = false;
@@ -703,8 +703,7 @@ static void process(void)
 
 		FD_ZERO(&fds);
 		FD_SET(server_sock, &fds);
-		if (Client_dgram >= 0)
-			FD_SET(Client_dgram, &fds);
+		FD_SET(dgram_sock, &fds);
 
 		timeout.tv_sec = 10;
 		timeout.tv_usec = 0;
@@ -714,26 +713,21 @@ static void process(void)
 			                &timeout);
 		} while (selrtn < 0 && errno == EINTR);
 
-		if (Client_dgram >= 0 && FD_ISSET(Client_dgram, &fds)) {
-			nread = read_udp_socket(Client_dgram, InBuffer,
-			                        BUFFER_SIZE);
-			if (nread > 0)
+		if (FD_ISSET(dgram_sock, &fds)) {
+			nread =
+			    read_udp_socket(dgram_sock, InBuffer, BUFFER_SIZE);
+			if (nread > 0) {
 				construct_dgram_reply(InBuffer, OutBuffer);
+			}
 		}
 
-		if (!FD_ISSET(server_sock, &fds)) {
-			continue;
+		if (FD_ISSET(server_sock, &fds)) {
+			nread =
+			    read_udp_socket(server_sock, InBuffer, BUFFER_SIZE);
+			if (nread > 0 && nmb_len(InBuffer) > 0) {
+				construct_reply(InBuffer, OutBuffer);
+			}
 		}
-
-		nread = read_udp_socket(server_sock, InBuffer, BUFFER_SIZE);
-		if (nread <= 0) {
-			continue;
-		}
-
-		if (nmb_len(InBuffer) <= 0)
-			continue;
-
-		construct_reply(InBuffer, OutBuffer);
 	}
 }
 
@@ -749,7 +743,8 @@ static bool open_sockets(bool is_daemon, int port)
 	setsockopt(server_sock, SOL_SOCKET, SO_BROADCAST, (char *) &one,
 	           sizeof(one));
 
-	Client_dgram = open_socket_in(SOCK_DGRAM, 138);
+	/* TODO: Allow dgram port number to also be changed, like -p arg? */
+	dgram_sock = open_socket_in(SOCK_DGRAM, 138);
 
 	/* We will abort gracefully when the client or remote system
 	   goes away */
