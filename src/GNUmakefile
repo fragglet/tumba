@@ -72,6 +72,16 @@ install: $(PUBLIC_SHARE) $(READONLY_SHARE) tumba_smbd
 	mkdir -m 755 -p $(DESTDIR)$(MANPATH)/man8
 	install tumba_smbd.8 $(DESTDIR)$(MANPATH)/man8/tumba_smbd.8
 
+uninstall:
+	rm -f $(DESTDIR)$(PREFIX)/bin/tumba_smbd
+	rm -f $(DESTDIR)$(PREFIX)/lib/systemd/system/tumba_smbd.service
+	rm -f $(DESTDIR)$(MANPATH)/man8/tumba_smbd.8
+	@echo
+	@echo "*** NOTE: The $(DESTDIR)$(DATADIR) directory that contains the"
+	@echo "*** default shares has not been deleted. You may want to delete"
+	@echo "*** that manually."
+	@echo
+
 fixincludes:
 	for d in $(patsubst %.o,%.c,$(OBJECTS)); do \
 		$(IWYU) $(IWYU_TRANSFORMED_FLAGS) 2>&1 $$d | fix_include; \
