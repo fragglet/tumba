@@ -544,7 +544,7 @@ void Abort(void)
 /****************************************************************************
 get my own name and IP
 ****************************************************************************/
-bool get_myname(char *myname, struct in_addr *ip)
+bool get_myname(char *myname)
 {
 	struct hostent *hp;
 	pstring myhostname = "";
@@ -569,9 +569,6 @@ bool get_myname(char *myname, struct in_addr *ip)
 
 		strcpy(myname, myhostname);
 	}
-
-	if (ip)
-		memcpy((char *) ip, (char *) hp->h_addr, 4);
 
 	return true;
 }

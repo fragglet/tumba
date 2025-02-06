@@ -782,8 +782,9 @@ static bool open_sockets(bool is_daemon, int port)
 
 static bool init_structs(void)
 {
-	if (!get_myname(myhostname, &myip))
+	if (!get_myname(myhostname)) {
 		return false;
+	}
 
 	strupper(myhostname);
 

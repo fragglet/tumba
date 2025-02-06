@@ -246,7 +246,7 @@ void replacestr(char *str1, char *str2, int start, int n);
 void openstr(char *s, int start, int n);
 void closestr(char *s, int start, int n);
 bool set_filetime(char *fname, time_t mtime);
-bool get_myname(char *myname, struct in_addr *ip);
+bool get_myname(char *myname);
 bool ip_equal(struct in_addr *ip1, struct in_addr *ip2);
 char *smb_fn_name(int cnum);
 int open_socket_in(int type, int port);
