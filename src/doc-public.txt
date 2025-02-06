@@ -5,4 +5,4 @@ other clients on the network.
 The share is made read/write by the write permissions on the directory.
 The following command will convert it to a readonly share:
 
-  chmod o-w /var/rumba/public
+  chmod o-w /var/tumba/public

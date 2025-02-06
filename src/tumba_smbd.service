@@ -1,13 +1,13 @@
-# systemd service file for Rumba
+# systemd service file for Tumba
 [Unit]
-Description=Rumba SMB server
+Description=Tumba SMB server
 
 [Service]
 User=nobody
 PrivateTmp=yes
 ProtectHome=yes
 ProtectSystem=full
-ExecStart=sh -c "exec rumba_smbd /var/rumba/*"
+ExecStart=sh -c "exec tumba_smbd /var/tumba/*"
 Restart=on-failure
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 SocketBindAllow=ipv4:tcp:139

@@ -2,12 +2,12 @@
 DESTDIR =
 PREFIX = /usr/local
 MANPATH = $(PREFIX)/share/man
-DATADIR = /var/rumba
+DATADIR = /var/tumba
 
 PUBLIC_SHARE = $(DESTDIR)$(DATADIR)/public
 READONLY_SHARE = $(DESTDIR)$(DATADIR)/readonly
 
-SMBLOGFILE = /var/log/rumba_smbd.log
+SMBLOGFILE = /var/log/tumba_smbd.log
 
 DEFINES = -DSMBLOGFILE=\"$(SMBLOGFILE)\" \
           -D_FORTIFY_SOURCE=1
@@ -42,16 +42,16 @@ OBJECTS = \
 
 DEPS = $(patsubst %.o,%.d,$(OBJECTS))
 
-all: rumba_smbd
+all: tumba_smbd
 
-rumba_smbd: $(OBJECTS)
+tumba_smbd: $(OBJECTS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJECTS) -o $@
 
 .c.o:
 	$(CC) $(CFLAGS) -c $<
 
 clean:
-	rm -f $(OBJECTS) rumba_smbd $(DEPS)
+	rm -f $(OBJECTS) tumba_smbd $(DEPS)
 
 format:
 	clang-format -i *.[ch]
@@ -64,13 +64,13 @@ $(READONLY_SHARE):
 	mkdir -m 755 -p $@
 	install -m 644 doc-readonly.txt $@/README.txt
 
-install: $(PUBLIC_SHARE) $(READONLY_SHARE) rumba_smbd
+install: $(PUBLIC_SHARE) $(READONLY_SHARE) tumba_smbd
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
-	install -m 755 rumba_smbd $(DESTDIR)$(PREFIX)/bin/rumba_smbd
+	install -m 755 tumba_smbd $(DESTDIR)$(PREFIX)/bin/tumba_smbd
 	mkdir -p $(DESTDIR)$(PREFIX)/lib/systemd/system
-	install -m 644 rumba_smbd.service $(DESTDIR)$(PREFIX)/lib/systemd/system/rumba_smbd.service
+	install -m 644 tumba_smbd.service $(DESTDIR)$(PREFIX)/lib/systemd/system/tumba_smbd.service
 	mkdir -m 755 -p $(DESTDIR)$(MANPATH)/man8
-	install rumba_smbd.8 $(DESTDIR)$(MANPATH)/man8/rumba_smbd.8
+	install tumba_smbd.8 $(DESTDIR)$(MANPATH)/man8/tumba_smbd.8
 
 fixincludes:
 	for d in $(patsubst %.o,%.c,$(OBJECTS)); do \

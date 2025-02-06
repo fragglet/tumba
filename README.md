@@ -1,4 +1,4 @@
-**Rumba** is a stripped-down fork of a very old version of
+**Tumba** is a stripped-down fork of a very old version of
 [Samba](https://en.wikipedia.org/wiki/Samba_software), for retro computing
 purposes.
 
@@ -41,14 +41,14 @@ purely for fun and personal use by hobbyists and retro enthusiasts. You should
 
 Check out some [screenshots](sshot/README.md).
 
-Rumba has been compiled/run successfully on:
+Tumba has been compiled/run successfully on:
 
 * Debian GNU/Linux
 * FreeBSD
 * NetBSD
 
 It has also been built on OpenBSD, Haiku and Tribblix (Illumos / OpenSolaris),
-but support is currently incomplete; Rumba uses extended filesystem attributes
+but support is currently incomplete; Tumba uses extended filesystem attributes
 to preserve DOS file attributes, and system-specific code to support these
 systems has not yet been written.
 
@@ -67,10 +67,10 @@ systems has not yet been written.
   serious use. There are undoubtedly people out there who want to continue
   using SMBv1 for Serious and Important Purposes and I do **not** want to
   either encourage this or support a full fork of Samba and its many, many
-  features. Rumba aims to do one thing and do it well, which is to allow
+  features. Tumba aims to do one thing and do it well, which is to allow
   hobbyists to share files with vintage machines.
 
-* **What about security vulnerabilities?** This is a very valid concern; Rumba
+* **What about security vulnerabilities?** This is a very valid concern; Tumba
   is based on a very old (and immature) version of the Samba codebase. I've
   gone through historical security reports from the era and patched any
   vulnerabilities that were later discovered. The fact that most superfluous
@@ -92,20 +92,20 @@ systems has not yet been written.
 
 * **Okay, how do I create a share?** A list of directories to share is given on
   the command line. The included systemd service file automatically shares all
-  directories found in `/var/rumba`, so you just need to create a subdirectory
+  directories found in `/var/tumba`, so you just need to create a subdirectory
   there and restart the server.
 
 * **I can't find the server, what's wrong?** You also need to run a NetBIOS
-  name server (`nmbd`). Rumba doesn't have one of its own yet, but you can use
+  name server (`nmbd`). Tumba doesn't have one of its own yet, but you can use
   the Samba one. Install the Samba suite and then disable its SMB server, eg.
   `sudo systemctl disable --now smbd` and the server should appear (it will be
   mistakenly labeled as a Samba server in the server description).
 
 * **My share is read-only, how do I make it read/write?** You can do this using
-  the `chmod` command, eg. `chmod o+w /var/rumba/myshare`
+  the `chmod` command, eg. `chmod o+w /var/tumba/myshare`
 
 * **Why can't I connect from a public IP address?** Since there is no support
-  for password authentication, Rumba by default only allows connections either
+  for password authentication, Tumba by default only allows connections either
   from localhost (127.0.0.1) or from IPs in
   [RFC 1918](https://datatracker.ietf.org/doc/html/rfc1918) private ranges.
   You can specify the `-a` command line argument to open connections from all
