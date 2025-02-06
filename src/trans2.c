@@ -42,7 +42,7 @@
 
 /* what type of filesystem do we want this to show up as in a NT file
    manager window? */
-#define FSTYPE_STRING "Rumba"
+#define FSTYPE_STRING "Tumba"
 
 #define DIR_ENTRY_SAFETY_MARGIN 4096
 

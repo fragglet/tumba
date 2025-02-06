@@ -3003,8 +3003,8 @@ static void usage(void)
 	ERROR("Incorrect program usage - are you sure the command line is "
 	      "correct?\n");
 
-	printf("Rumba version " VERSION "\n"
-	       "Usage: rumba_smbd [-a] [-W workgroup] [-p port] "
+	printf("Tumba version " VERSION "\n"
+	       "Usage: tumba_smbd [-a] [-W workgroup] [-p port] "
 	       "[-d debuglevel] [-l log basename]\n"
 	       "                  <path> [paths...]\n\n"
 	       "   -a                allow connections from all addresses\n"
@@ -3080,7 +3080,7 @@ int main(int argc, char *argv[])
 
 	add_ipc_service();
 
-	NOTICE("Rumba smbd version %s started\n", VERSION);
+	NOTICE("Tumba smbd version %s started\n", VERSION);
 
 	init_structs();
 

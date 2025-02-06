@@ -1,14 +1,14 @@
-.TH rumba_smbd 8
+.TH tumba_smbd 8
 .SH NAME
-rumba_smbd \- SMBv1 file server
+tumba_smbd \- SMBv1 file server
 .SH SYNOPSIS
-.B rumba_smbd
+.B tumba_smbd
 .RB [options]
 .I path [path...]
 .SH DESCRIPTION
 .PP
-.B Rumba
-(rumba_smbd) is a file server that implements version 1 of the Server Message
+.B Tumba
+(tumba_smbd) is a file server that implements version 1 of the Server Message
 Block (SMB) protocol, the native file sharing protocol used by the Microsoft
 Windows operating systems. Version 1 in particular is the version of the
 protocol that was used in the 1990s and used by the Windows 9x series.
@@ -16,7 +16,7 @@ protocol that was used in the 1990s and used by the Windows 9x series.
 .SH COMMAND SYNTAX
 The server must be supplied the path(s) to one or more directories to share to
 network users. The base directory name (ala \fBbasename\fR(3)) is used as the
-share name. For example, if \fB/var/rumba/pineapples\fR is given, network users
+share name. For example, if \fB/var/tumba/pineapples\fR is given, network users
 will be able to access it via the share named \fBPINEAPPLES\fR.
 .PP
 All shares are public and there is no option for password-protected shares. If
@@ -30,7 +30,7 @@ The following command line options are understood:
 Allow connections from all (public) IP addresses. By default the server
 immediately closes any incoming connections not from localhost (127.0.0.1) or
 RFC 1918 private ranges (192.168.0.0/16; 10.0.0.0/8; 172.16.0.0/20). Since
-\fBRumba\fR does not support any password protection for shares, you should
+\fBTumba\fR does not support any password protection for shares, you should
 make sure you are very certain that you understand the implications of this
 argument before using it.
 .TP
@@ -40,7 +40,7 @@ allowing incoming connections from any network interface, but this argument can
 be used to bind only to a specific interface.
 .TP
 \fB-p port\fR
-Listen on the given TCP port. By default, \fBRumba\fR listens on port 139, the
+Listen on the given TCP port. By default, \fBTumba\fR listens on port 139, the
 NetBIOS session service port.
 .TP
 \fB-d level\fR
@@ -57,17 +57,17 @@ Specify the workgroup to which this server belongs. By default this is
 .SH EXAMPLES
 Here are some examples for how to invoke the program:
 .TP
-rumba_smbd -W scooby /var/rumba/*
-Export all subdirectories of \fB/var/rumba\fR as shares. The server appears
+tumba_smbd -W scooby /var/tumba/*
+Export all subdirectories of \fB/var/tumba\fR as shares. The server appears
 under a workgroup named \fBSCOOBY\fR.
 .TP
-rumba_smbd -b 127.0.0.1 -p 9999 /tmp/myshare
+tumba_smbd -b 127.0.0.1 -p 9999 /tmp/myshare
 Listen only on the localhost interface, on the nonstandard TCP port 9999.
 .TP
-rumba_smbd -d 10 -l /tmp/rumba.log /tmp/debugshare
-Run the server with verbose logging, writing to the file \fB/tmp/rumba.log\fR.
+tumba_smbd -d 10 -l /tmp/tumba.log /tmp/debugshare
+Run the server with verbose logging, writing to the file \fB/tmp/tumba.log\fR.
 .SH LIMITATIONS
-\fBRumba\fR is an intentionally minimalist implementation of the SMB protocol,
+\fBTumba\fR is an intentionally minimalist implementation of the SMB protocol,
 and does not implement many of the features of the SMBv1 protocol. The
 following is a nonexhaustive list:
 .IP \(bu
@@ -81,7 +81,7 @@ protect them. One example might be to use a VPN; another option you should
 consider is to use a different protocol.
 .IP \(bu
 \fBPer-user home directory shares\fR. This is a feature found in \fBsmbd\fR(1)
-that allows users to access their Unix home directories. \fBRumba\fR only ever
+that allows users to access their Unix home directories. \fBTumba\fR only ever
 shares a static list of directories.
 .IP \(bu
 \fBPrinter sharing\fR. The project only aims to be a file server.
@@ -105,8 +105,8 @@ projects such as \fBdosemu2\fR and \fBdosbox-staging\fR also support the same
 attribute.
 .SH BUG REPORTS
 Bugs can be reported to the GitHub issue tracker:
-.UR https://github.com/fragglet/rumba
-https://github.com/fragglet/rumba
+.UR https://github.com/fragglet/tumba
+https://github.com/fragglet/tumba
 .UE
 .SH SEE ALSO
 \fBsamba\fR(7),
@@ -130,12 +130,12 @@ version 2 of the SMB protocol.
 At the time of writing in 2025, the SMBv1 protocol is now considered obsolete,
 and Samba along with other vendors including Microsoft and Apple have either
 dropped or are in the process of dropping support for it entirely. In late
-2024, Simon Howard created \fIRumba\fR as a fork of Samba v1.9.18p10
+2024, Simon Howard created \fITumba\fR as a fork of Samba v1.9.18p10
 (originally released 2007). The original code was pared down to the basics
 with most of Samba's more elaborate features deleted, the result being a
 much smaller codebase with less than 14,000 lines of code.
 .SH AUTHOR
-Rumba originated as a fork of Samba by Andrew Tridgell. It is developed and
+Tumba originated as a fork of Samba by Andrew Tridgell. It is developed and
 maintained by
 .MT fraggle@gmail.com
 Simon Howard

@@ -26,7 +26,7 @@ static inline char *lp_logfile(void)
 // manager and next to the IPC connection in "net view".
 static inline char *lp_serverstring(void)
 {
-	return "Rumba " VERSION;
+	return "Tumba " VERSION;
 }
 
 // This parameter controls whether or not the server will support raw reads
