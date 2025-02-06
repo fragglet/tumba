@@ -83,6 +83,14 @@ systems has not yet been written.
   enabled; the included systemd configuration file applies heavy sandboxing;
   and by default all connections from public IP addresses are blocked.
 
+* **Why the name?** Like Samba, Tumba is also the name of a genre of music.
+  Tumba is also [the Spanish word for tomb](https://en.wiktionary.org/wiki/tumba#Spanish),
+  which is arguably where the SMBv1 protocol belongs nowadays. The project was
+  previously known as Rumba, but was
+  [renamed](https://github.com/fragglet/tumba/commit/3bea347aef7582be7ca865bb4e040009b48a5aec)
+  to avoid confusion as multiple other SMB-related projects have already used
+  that name.
+
 ### Configuration
 
 * **How do I configure this? Is there an equivalent to `smb.conf`?** Since
