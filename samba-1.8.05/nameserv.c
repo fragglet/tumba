@@ -817,7 +817,6 @@ static void usage(char *pname)
 	printf("\t-l log basename.      Basename for log/debug files\n");
 	printf("\t-n netbiosname.       the netbios name to advertise for this "
 	       "host\n");
-	printf("\t-B broadcast address  the address to use for broadcasts\n");
 	printf("\t-G group name        add a group name to be part of\n");
 	printf("\n");
 }
@@ -831,7 +830,7 @@ int main(int argc, char *argv[])
 
 	sprintf(debugf, "%s.nmb.debug", DEBUGFILE);
 
-	while ((opt = getopt(argc, argv, "C:B:Rn:l:d:Dp:hSG:")) != EOF)
+	while ((opt = getopt(argc, argv, "C:Rn:l:d:Dp:hSG:")) != EOF)
 		switch (opt) {
 		case 'C':
 			strcpy(comment, optarg);
@@ -839,10 +838,6 @@ int main(int argc, char *argv[])
 		case 'G':
 			strcpy(mygroup, optarg);
 			break;
-		case 'B': {
-			uint32_t a = interpret_addr(optarg);
-			memcpy((char *) &bcast_ip, (char *) &a, sizeof(a));
-		} break;
 		case 'n':
 			strcpy(myname, optarg);
 			break;
