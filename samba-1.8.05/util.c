@@ -263,50 +263,6 @@ int name_mangle(char *In, char *Out)
 }
 
 /*******************************************************************
-  byte swap an object - the byte order of the object is reversed
-********************************************************************/
-void *object_byte_swap(void *obj, int size)
-{
-	int i;
-	char c;
-	char *p1 = (char *) obj;
-	char *p2 = p1 + size - 1;
-
-	size /= 2;
-
-	for (i = 0; i < size; i++) {
-		c = *p1;
-		*p1 = *p2;
-		*p2 = c;
-		p1++;
-		p2--;
-	}
-	return obj;
-}
-
-/*******************************************************************
-  true if the machine is big endian
-********************************************************************/
-bool big_endian(void)
-{
-	int x = 2;
-	char *s;
-	s = (char *) &x;
-	return s[0] == 0;
-}
-
-/*******************************************************************
-  compare 2 strings
-********************************************************************/
-bool strequal(char *s1, char *s2)
-{
-	if (!s1 || !s2)
-		return false;
-
-	return strcasecmp(s1, s2) == 0;
-}
-
-/*******************************************************************
   convert a string to lower case
 ********************************************************************/
 void strlower(char *s)
@@ -643,30 +599,6 @@ int open_socket_in(int type, int port)
 	}
 	DEBUG(1, ("bind succeeded on port %d\n", port));
 
-	return res;
-}
-
-/****************************************************************************
-interpret an internet address or name into an IP address in 4 byte form
-****************************************************************************/
-uint32_t interpret_addr(char *str)
-{
-	struct hostent *hp;
-	uint32_t res;
-
-	/* if it's in the form of an IP address then get the lib to interpret it
-	 */
-	if (isdigit(str[0]))
-		return inet_addr(str);
-
-	/* otherwise assume it's a network name of some sort and use
-	 * Get_Hostbyname */
-	if ((hp = Get_Hostbyname(str)) == 0) {
-		DEBUG(0, ("Get_Hostbyname: Unknown host. %s\n", str));
-		return 0;
-	}
-
-	memcpy((char *) &res, (char *) hp->h_addr, sizeof(res));
 	return res;
 }
 

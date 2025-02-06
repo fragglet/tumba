@@ -253,7 +253,6 @@ int open_socket_in(int type, int port);
 int open_socket_out(struct in_addr *addr, int port);
 uint32_t interpret_addr(char *str);
 
-
 #ifndef MIN
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #endif

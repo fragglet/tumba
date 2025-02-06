@@ -57,7 +57,6 @@ pstring myhostname = "";
 pstring mygroup = "WORKGROUP";
 int myttl = 0;
 
-int num_names = 0;
 static struct netbios_name our_hostname, our_group;
 
 static int server_sock = 0;
@@ -772,7 +771,6 @@ static bool open_sockets(bool is_daemon, int port)
 
 	DEBUG(1, ("myip=%s, ", inet_ntoa(myip)));
 	DEBUG(1, ("bcast_ip=%s\n", inet_ntoa(bcast_ip)));
-
 
 	/* We will abort gracefully when the client or remote system
 	   goes away */
