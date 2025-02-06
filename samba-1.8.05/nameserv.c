@@ -292,13 +292,6 @@ static bool send_nmb(char *buf, int len, struct in_addr *ip)
 {
 	bool ret;
 	struct sockaddr_in sock_out;
-	int one = 1;
-
-#if 1
-	/* allow broadcasts on it */
-	setsockopt(server_sock, SOL_SOCKET, SO_BROADCAST, (char *) &one,
-	           sizeof(one));
-#endif
 
 	/* set the address and port */
 	memset((char *) &sock_out, 0, sizeof(sock_out));
@@ -746,22 +739,15 @@ static void process(void)
 
 static bool open_sockets(bool is_daemon, int port)
 {
-	struct hostent *hp;
-	if (is_daemon) {
-		/* get host info */
-		if ((hp = Get_Hostbyname(myhostname)) == 0) {
-			DEBUG(0, ("Get_Hostbyname: Unknown host. %s\n",
-			          myhostname));
-			return false;
-		}
+	int one = 1;
 
-		server_sock = open_socket_in(SOCK_DGRAM, port);
-		if (server_sock == -1)
-			return false;
+	server_sock = open_socket_in(SOCK_DGRAM, port);
+	if (server_sock == -1)
+		return false;
 
-	} else {
-		server_sock = 0;
-	}
+	/* allow broadcasts on it */
+	setsockopt(server_sock, SOL_SOCKET, SO_BROADCAST, (char *) &one,
+	           sizeof(one));
 
 	Client_dgram = open_socket_in(SOCK_DGRAM, 138);
 
