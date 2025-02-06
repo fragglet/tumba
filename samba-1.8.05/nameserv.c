@@ -757,11 +757,13 @@ static bool open_sockets(bool is_daemon, int port)
 	/* TODO: Delete this block, it is a temporary hack */
 	{
 		int num_addrs = 0, i;
-		struct network_address *addrs = get_addresses(server_sock, &num_addrs);
+		struct network_address *addrs =
+		    get_addresses(server_sock, &num_addrs);
 
 		for (i = 0; i < num_addrs; ++i) {
 			if ((addrs[i].ip.s_addr & addrs[i].netmask.s_addr) ==
-			    (htonl(INADDR_LOOPBACK) & addrs[i].netmask.s_addr)) {
+			    (htonl(INADDR_LOOPBACK) &
+			     addrs[i].netmask.s_addr)) {
 				continue;
 			}
 			myip = addrs[i].ip;

@@ -22,9 +22,9 @@
 
 #include "../src/byteorder.h"
 
-#define BUFFER_SIZE   (0xFFFF)
+#define BUFFER_SIZE (0xFFFF)
 
-#define PTR_DIFF(p1, p2)  ((ptrdiff_t) (((char *) (p1)) - (char *) (p2)))
+#define PTR_DIFF(p1, p2) ((ptrdiff_t) (((char *) (p1)) - (char *) (p2)))
 
 /* debugging code */
 #define DEBUG(level, body) ((DEBUGLEVEL >= (level)) ? (Debug1 body) : 0)
@@ -209,8 +209,8 @@ int set_message(char *buf, int num_words, int num_bytes, bool zero);
 void name_interpret(char *in, char *out);
 void strupper(char *s);
 bool file_exist(char *fname);
-int read_with_timeout(int fd, char *buf, int mincnt, int maxcnt, int32_t time_out,
-                      bool exact);
+int read_with_timeout(int fd, char *buf, int mincnt, int maxcnt,
+                      int32_t time_out, bool exact);
 int write_socket(int fd, char *buf, int len);
 int write_with_timeout(int fd, char *buf, int length, int32_t time_out);
 bool send_smb(char *buffer);

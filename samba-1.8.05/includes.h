@@ -1,6 +1,6 @@
-#include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #ifdef MIPS
 #include <posix/stdlib.h>
 #else
