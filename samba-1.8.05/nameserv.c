@@ -60,7 +60,6 @@ int myttl = 0;
 static struct netbios_name our_hostname, our_group;
 
 static int server_sock = 0;
-static int dgram_sock;
 
 /* are we running as a daemon ? */
 bool is_daemon = false;
@@ -618,7 +617,7 @@ static bool announce_host(char *outbuf, char *group, struct in_addr ip)
 }
 
 /* a hook for browsing handling - called every 60 secs */
-static void do_browse_hook(char *inbuf, char *outbuf, bool force)
+static void do_browse_hook(char *inbuf, char *outbuf)
 {
 	static int announce_interval = 3;
 	static int minute_counter = 3;
@@ -626,17 +625,16 @@ static void do_browse_hook(char *inbuf, char *outbuf, bool force)
 	static int master_count = 0;
 	fstring name = "";
 
-	if (!force)
-		minute_counter++;
+	minute_counter++;
 
-	if (!force && minute_counter < announce_interval) {
+	if (minute_counter < announce_interval) {
 		return;
 	}
 
 	minute_counter = 0;
 
 	/* possibly reset our masters */
-	if (!force && master_count++ >= master_interval) {
+	if (master_count++ >= master_interval) {
 		master_count = 0;
 		DEBUG(2, ("%s Redoing browse master ips\n", timestring()));
 		our_hostname.found_master = false;
@@ -678,17 +676,6 @@ static void do_browse_hook(char *inbuf, char *outbuf, bool force)
 	}
 }
 
-static void construct_dgram_reply(char *inbuf, char *outbuf)
-{
-	static time_t last_time = 0;
-	time_t t = time(NULL);
-	if (t - last_time > 20) {
-		DEBUG(3, ("Doing dgram reply to %s\n", inet_ntoa(lastip)));
-		do_browse_hook(inbuf, outbuf, true);
-	}
-	last_time = t;
-}
-
 static void process(void)
 {
 	time_t timer = 0;
@@ -705,13 +692,12 @@ static void process(void)
 		int nread;
 
 		if (!timer || (time(NULL) - timer) > 60) {
-			do_browse_hook(InBuffer, OutBuffer, false);
+			do_browse_hook(InBuffer, OutBuffer);
 			timer = time(NULL);
 		}
 
 		FD_ZERO(&fds);
 		FD_SET(server_sock, &fds);
-		FD_SET(dgram_sock, &fds);
 
 		timeout.tv_sec = 10;
 		timeout.tv_usec = 0;
@@ -720,14 +706,6 @@ static void process(void)
 			selrtn = select(255, SELECT_CAST & fds, NULL, NULL,
 			                &timeout);
 		} while (selrtn < 0 && errno == EINTR);
-
-		if (FD_ISSET(dgram_sock, &fds)) {
-			nread =
-			    read_udp_socket(dgram_sock, InBuffer, BUFFER_SIZE);
-			if (nread > 0) {
-				construct_dgram_reply(InBuffer, OutBuffer);
-			}
-		}
 
 		if (FD_ISSET(server_sock, &fds)) {
 			nread =
@@ -750,9 +728,6 @@ static bool open_sockets(bool is_daemon, int port)
 	/* allow broadcasts on it */
 	setsockopt(server_sock, SOL_SOCKET, SO_BROADCAST, (char *) &one,
 	           sizeof(one));
-
-	/* TODO: Allow dgram port number to also be changed, like -p arg? */
-	dgram_sock = open_socket_in(SOCK_DGRAM, 138);
 
 	/* TODO: Delete this block, it is a temporary hack */
 	{
