@@ -48,10 +48,6 @@ bool reply_only = false;
 extern struct in_addr lastip;
 extern int lastport;
 
-/* TODO: Delete these variables. We can have multiple network interfaces,
-   which means multiple IP addresses and multiple broadcast addresses */
-static struct in_addr myip, bcast_ip;
-
 pstring myname = "";
 pstring myhostname = "";
 pstring mygroup = "WORKGROUP";
@@ -586,26 +582,6 @@ static bool open_sockets(bool is_daemon, int port)
 	/* allow broadcasts on it */
 	setsockopt(dgram_sock, SOL_SOCKET, SO_BROADCAST, (char *) &one,
 	           sizeof(one));
-
-	/* TODO: Delete this block, it is a temporary hack */
-	{
-		int num_addrs = 0, i;
-		struct network_address *addrs =
-		    get_addresses(server_sock, &num_addrs);
-
-		for (i = 0; i < num_addrs; ++i) {
-			if ((addrs[i].ip.s_addr & addrs[i].netmask.s_addr) ==
-			    (htonl(INADDR_LOOPBACK) &
-			     addrs[i].netmask.s_addr)) {
-				continue;
-			}
-			myip = addrs[i].ip;
-			bcast_ip = addrs[i].bcast_ip;
-		}
-	}
-
-	DEBUG(1, ("myip=%s, ", inet_ntoa(myip)));
-	DEBUG(1, ("bcast_ip=%s\n", inet_ntoa(bcast_ip)));
 
 	/* We will abort gracefully when the client or remote system
 	   goes away */
