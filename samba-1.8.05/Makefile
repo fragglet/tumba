@@ -26,6 +26,13 @@ LIBSM =
 CFLAGS = $(FLAGS1) $(FLAGS2) $(FLAGS3) $(FLAGS4) $(FLAGS5) $(FLAGS6) $(FLAGS7) $(FLAGSM) $(FLAGSS)
 LIBS = $(LIBS1) $(LIBSM)
 
+FIND_UNUSED_CODE = 1
+
+ifdef FIND_UNUSED_CODE
+CFLAGS += -ffunction-sections -fdata-sections
+LIBS += -Wl,--gc-sections -Wl,--print-gc-sections
+endif
+
 PROGS = nmbd
 
 all : $(PROGS)
