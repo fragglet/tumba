@@ -104,7 +104,7 @@ static struct ifconf get_interfaces(int sock_fd)
 	}
 }
 
-#define addr(s)    (((struct sockaddr_in *) (s))->sin_addr)
+#define addr(s) (((struct sockaddr_in *) (s))->sin_addr)
 /* TODO: We should have a caching version of this function; the list is only
    likely to change infrequently. */
 static struct network_address *get_addresses(int sock_fd, int *num_addrs)
@@ -260,8 +260,8 @@ static void send_reply(void *buf, size_t buf_len)
 	addr.sin_port = htons(137);
 	addr.sin_addr = lastip;
 
-	if (sendto(server_sock, buf, buf_len, 0,
-	           (struct sockaddr *) &addr, sizeof(addr)) < 0) {
+	if (sendto(server_sock, buf, buf_len, 0, (struct sockaddr *) &addr,
+	           sizeof(addr)) < 0) {
 		DEBUG(0, ("Error sending reply: %s\n", strerror(errno)));
 	}
 }
@@ -505,8 +505,7 @@ static bool announce_host(char *outbuf, char *group,
 static void do_browse_hook(char *inbuf, char *outbuf, bool force)
 {
 	int num_addrs = 0, i;
-	struct network_address *addrs =
-	    get_addresses(server_sock, &num_addrs);
+	struct network_address *addrs = get_addresses(server_sock, &num_addrs);
 
 	/* We send to all broadcast addresses (since there may be multiple
 	   interfaces we are listening on */
