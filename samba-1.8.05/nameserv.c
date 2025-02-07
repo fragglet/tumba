@@ -647,7 +647,7 @@ static void do_browse_hook(char *inbuf, char *outbuf)
 
 		sprintf(name, "%-15.15s%c", our_group.name, 0x1d);
 		our_group.found_master =
-		    name_query(inbuf, outbuf, name, our_group.ip, &new_master,
+		    name_query(inbuf, outbuf, name, bcast_ip, &new_master,
 		               3, construct_reply);
 		if (!our_group.found_master) {
 			DEBUG(1, ("Failed to find a master "
