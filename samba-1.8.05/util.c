@@ -29,12 +29,6 @@ int DEBUGLEVEL = 1;
 /* these are some file handles where debug info will be stored */
 FILE *dbf = NULL;
 
-/* the last IP received from */
-struct in_addr lastip;
-
-/* the last port received from */
-int lastport = 0;
-
 pstring debugf = DEBUGFILE;
 
 /*******************************************************************

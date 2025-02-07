@@ -45,8 +45,7 @@ char *OutBuffer = NULL;
 
 bool reply_only = false;
 
-extern struct in_addr lastip;
-extern int lastport;
+static struct sockaddr_in last_client;
 
 pstring myname = "";
 pstring myhostname = "";
@@ -188,21 +187,16 @@ static bool name_equal(char *s1, char *s2)
 static int read_udp_socket(int fd, char *buf, int len)
 {
 	int ret;
-	struct sockaddr sock;
-	socklen_t socklen = sizeof(sock);
+	socklen_t src_len = sizeof(last_client);
 
-	memset((char *) &sock, 0, socklen);
-	memset((char *) &lastip, 0, sizeof(lastip));
-	ret = recvfrom(fd, buf, len, 0, &sock, &socklen);
+	ret = recvfrom(fd, buf, len, 0, (struct sockaddr *) &last_client,
+	               &src_len);
 	if (ret <= 0) {
 		DEBUG(2, ("read socket failed. ERRNO=%d\n", errno));
 		return 0;
 	}
 
-	lastip = *(struct in_addr *) &sock.sa_data[2];
-	lastport = ntohs(((struct sockaddr_in *) &sock)->sin_port);
-	if (DEBUGLEVEL > 0)
-		DEBUG(3, ("read %d bytes\n", ret));
+	DEBUG(5, ("read %d bytes\n", ret));
 
 	return ret;
 }
@@ -249,15 +243,8 @@ static void close_sockets(void)
 /* Send a packet back to the client that sent the packet we are processing */
 static void send_reply(void *buf, size_t buf_len)
 {
-	struct sockaddr_in addr;
-
-	memset(&addr, 0, sizeof(addr));
-	addr.sin_family = AF_INET;
-	addr.sin_port = htons(137);
-	addr.sin_addr = lastip;
-
-	if (sendto(server_sock, buf, buf_len, 0, (struct sockaddr *) &addr,
-	           sizeof(addr)) < 0) {
+	if (sendto(server_sock, buf, buf_len, 0,
+	           (struct sockaddr *) &last_client, sizeof(last_client)) < 0) {
 		DEBUG(0, ("Error sending reply: %s\n", strerror(errno)));
 	}
 }
@@ -341,7 +328,8 @@ static void reply_name_query(char *inbuf, char *outbuf,
 
 	name_extract(inbuf, 12, qname);
 
-	DEBUG(2, ("(%s) querying name (%s)", inet_ntoa(lastip), qname));
+	DEBUG(2, ("(%s) querying name (%s)", inet_ntoa(last_client.sin_addr),
+	          qname));
 
 	if (!name_equal(qname, our_hostname.name)) {
 		DEBUG(2, ("\n"));
@@ -402,7 +390,7 @@ static void construct_reply(char *inbuf, char *outbuf)
 	int num_addrs = 0;
 	struct network_address *addrs = get_addresses(server_sock, &num_addrs);
 	struct network_address *src_iface =
-	    get_iface_addr(addrs, num_addrs, &lastip);
+	    get_iface_addr(addrs, num_addrs, &last_client.sin_addr);
 	int opcode = CVAL(inbuf, 2) >> 3;
 	int nm_flags = ((CVAL(inbuf, 2) & 0x7) << 4) + (CVAL(inbuf, 3) >> 4);
 	int rcode = CVAL(inbuf, 3) & 0xF;
