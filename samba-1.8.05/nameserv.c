@@ -424,21 +424,22 @@ construct and send a host announcement
 Note that I don't know what half the numbers mean - I'm just using what I
 saw another PC use :-)
 */
-static bool announce_host(char *outbuf, char *group, struct in_addr ip)
+static bool announce_host(char *outbuf, char *group,
+                          struct network_address *addr)
 {
-	struct sockaddr_in addr;
+	struct sockaddr_in send_addr;
 	char *p, *p2;
 	char *gptr;
 
 	DEBUG(2, ("Sending host announcement to %s for group %s\n",
-	          inet_ntoa(ip), group));
+	          inet_ntoa(addr->bcast_ip), group));
 
 	memset(outbuf, 0, 256);
 
 	CVAL(outbuf, 0) = 17;
 	CVAL(outbuf, 1) = 2;
 	RSSVAL(outbuf, 2, time(NULL) % 10000 + 42);
-	memcpy(outbuf + 4, &myip, 4);
+	memcpy(outbuf + 4, &addr->ip, 4);
 	RSSVAL(outbuf, 8, 138);
 	RSSVAL(outbuf, 10, 186 + strlen(comment) + 1);
 	RSSVAL(outbuf, 12, 0);
@@ -490,13 +491,13 @@ static bool announce_host(char *outbuf, char *group, struct in_addr ip)
 	p2 = gptr + name_mangle(group, gptr);
 	strcpy(p2 - 3, "BO");
 
-	memset(&addr, 0, sizeof(addr));
-	addr.sin_family = AF_INET;
-	addr.sin_port = htons(138);
-	addr.sin_addr = ip;
+	memset(&send_addr, 0, sizeof(send_addr));
+	send_addr.sin_family = AF_INET;
+	send_addr.sin_port = htons(138);
+	send_addr.sin_addr = addr->bcast_ip;
 
 	return sendto(dgram_sock, outbuf, 200 + strlen(comment) + 1, 0,
-	              (struct sockaddr *) &addr, sizeof(addr)) >= 0;
+	              (struct sockaddr *) &send_addr, sizeof(send_addr)) >= 0;
 }
 
 /* We send a periodic browser protocol announcement; this makes the server
@@ -510,7 +511,7 @@ static void do_browse_hook(char *inbuf, char *outbuf, bool force)
 	/* We send to all broadcast addresses (since there may be multiple
 	   interfaces we are listening on */
 	for (i = 0; i < num_addrs; ++i) {
-		announce_host(outbuf, our_group.name, addrs[i].bcast_ip);
+		announce_host(outbuf, our_group.name, &addrs[i]);
 	}
 
 	free(addrs);
