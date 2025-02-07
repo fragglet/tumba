@@ -121,49 +121,6 @@ struct tm *LocalTime(time_t *t, int timemul)
 	return gmtime(&t2);
 }
 
-/*******************************************************************
-safely copies memory, ensuring no overlap problems.
-********************************************************************/
-void safe_memcpy(void *dest, void *src, int size)
-{
-	/* do the copy in chunks of size difference. This relies on the
-	   capability of pointer comparison. */
-
-	int difference = ABS((char *) dest - (char *) src);
-
-	if (difference == 0 || size <= 0)
-		return;
-
-	if (difference >= size) /* no overlap problem */
-	{
-		memcpy(dest, src, size);
-		return;
-	}
-
-	if (dest > src) /* copy the last chunks first */
-	{
-		char *this_dest = dest;
-		char *this_src = src;
-		this_dest += size - difference;
-		this_src += size - difference;
-		while (size > 0) {
-			memcpy(this_dest, this_src, difference);
-			this_dest -= difference;
-			this_src -= difference;
-			size -= difference;
-		}
-	} else { /* copy from the front */
-		char *this_dest = dest;
-		char *this_src = src;
-		while (size > 0) {
-			memcpy(this_dest, this_src, difference);
-			this_dest += difference;
-			this_src += difference;
-			size -= difference;
-		}
-	}
-}
-
 /****************************************************************************
   return the date and time as a string
 ****************************************************************************/
@@ -401,7 +358,7 @@ bool string_sub(char *s, char *pattern, char *insert)
 
 	while (lp <= ls && (p = strstr(s, pattern))) {
 		ret = true;
-		safe_memcpy(p + li, p + lp, ls + 1 - (PTR_DIFF(p, s) + lp));
+		memmove(p + li, p + lp, ls + 1 - (PTR_DIFF(p, s) + lp));
 		memcpy(p, insert, li);
 		s = p + li;
 		ls = strlen(s);
