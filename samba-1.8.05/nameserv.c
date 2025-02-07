@@ -592,8 +592,8 @@ static bool announce_host(char *outbuf, char *group, struct in_addr ip)
 	p -= 4;
 	set_message(p, 17, 50 + strlen(comment) + 1, true);
 	CVAL(p, smb_com) = SMBtrans;
-	SSVAL(p, smb_vwv1, 33 + strlen(comment) + 1);
-	SSVAL(p, smb_vwv11, 33 + strlen(comment) + 1);
+	SSVAL(p, smb_vwv1, 32 + strlen(comment) + 1);
+	SSVAL(p, smb_vwv11, 32 + strlen(comment) + 1);
 	SSVAL(p, smb_vwv12, 86);
 	SSVAL(p, smb_vwv13, 3);
 	SSVAL(p, smb_vwv14, 1);
