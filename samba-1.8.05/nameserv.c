@@ -52,7 +52,7 @@ pstring myhostname = "";
 pstring mygroup = "WORKGROUP";
 int myttl = 0;
 
-static struct netbios_name our_hostname, our_group;
+static struct netbios_name our_hostname;
 
 static int server_sock = 0;
 static int dgram_sock;
@@ -157,16 +157,6 @@ static void init_name(struct netbios_name *n)
 	strcpy(n->name, "");
 	strcpy(n->flags, "");
 	n->nb_flags = 0;
-}
-
-static void init_group(struct netbios_name *n, char *name)
-{
-	init_name(n);
-	strcpy(n->name, name);
-	strupper(n->name);
-	strcpy(n->flags, "G");
-	n->nb_flags |= 0x80;
-	n->valid = true;
 }
 
 /* true if two netbios names are equal */
@@ -504,7 +494,7 @@ static void do_browse_hook(char *inbuf, char *outbuf, bool force)
 	/* We send to all broadcast addresses (since there may be multiple
 	   interfaces we are listening on */
 	for (i = 0; i < num_addrs; ++i) {
-		announce_host(outbuf, our_group.name, &addrs[i]);
+		announce_host(outbuf, mygroup, &addrs[i]);
 	}
 
 	free(addrs);
@@ -590,7 +580,7 @@ static bool init_structs(void)
 	init_name(&our_hostname);
 	strcpy(our_hostname.name, myname);
 
-	init_group(&our_group, mygroup);
+	strupper(mygroup);
 
 	return true;
 }
