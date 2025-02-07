@@ -267,7 +267,7 @@ static void reply_reg_request(char *inbuf, char *outbuf,
 	p += 4;
 	nb_flags = CVAL(p, 6);
 	p += 8;
-	memcpy((char *) &ip, p, 4);
+	memcpy(&ip, p, 4);
 
 	DEBUG(2, ("Name registration request for %s (%s) nb_flags=0x%x\n",
 	          qname, inet_ntoa(ip), nb_flags));
@@ -306,8 +306,7 @@ static void reply_reg_request(char *inbuf, char *outbuf,
 	CVAL(p, 11) = 0;
 	p += 12;
 
-	memcpy(p, (char *) &ip,
-	       4); /* IP address of the name's owner (that's us) */
+	memcpy(p, &ip, 4); /* IP address of the name's owner (that's us) */
 	p += 4;
 
 	if (ip_equal(&ip, &src_iface->bcast_ip)) {
@@ -356,7 +355,7 @@ static void reply_name_query(char *inbuf, char *outbuf,
 	CVAL(p, 10) = nb_flags;
 	CVAL(p, 11) = 0;
 	p += 12;
-	memcpy(p, (char *) &src_iface->ip, 4);
+	memcpy(p, &src_iface->ip, 4);
 	p += 4;
 
 	send_reply(outbuf, nmb_len(outbuf));
@@ -515,8 +514,8 @@ static void process(void)
 {
 	time_t timer = 0;
 
-	InBuffer = (char *) malloc(BUFFER_SIZE);
-	OutBuffer = (char *) malloc(BUFFER_SIZE);
+	InBuffer = malloc(BUFFER_SIZE);
+	OutBuffer = malloc(BUFFER_SIZE);
 	if ((InBuffer == NULL) || (OutBuffer == NULL))
 		return;
 
@@ -561,15 +560,13 @@ static bool open_sockets(bool is_daemon, int port)
 		return false;
 
 	/* allow broadcasts on it */
-	setsockopt(server_sock, SOL_SOCKET, SO_BROADCAST, (char *) &one,
-	           sizeof(one));
+	setsockopt(server_sock, SOL_SOCKET, SO_BROADCAST, &one, sizeof(one));
 
 	/* TODO: Allow dgram port number to also be changed, like -p arg? */
 	dgram_sock = open_socket_in(SOCK_DGRAM, 138);
 
 	/* allow broadcasts on it */
-	setsockopt(dgram_sock, SOL_SOCKET, SO_BROADCAST, (char *) &one,
-	           sizeof(one));
+	setsockopt(dgram_sock, SOL_SOCKET, SO_BROADCAST, &one, sizeof(one));
 
 	/* We will abort gracefully when the client or remote system
 	   goes away */
@@ -669,7 +666,7 @@ int main(int argc, char *argv[])
 	init_structs();
 
 	if (!*comment)
-		strcpy(comment, "Samba %v");
+		strcpy(comment, "%h (Tumba %v)");
 	string_sub(comment, "%v", VERSION);
 	string_sub(comment, "%h", myhostname);
 

@@ -230,15 +230,15 @@ mangle a name into netbios format
 ****************************************************************************/
 int name_mangle(char *In, char *Out)
 {
-	char *in = (char *) In;
-	char *out = (char *) Out;
-	int len = 2 * strlen((char *) in);
+	char *in = In;
+	char *out = Out;
+	int len = 2 * strlen(in);
 	int pad = 0;
 
 	if (len / 2 < 16)
 		pad = 16 - (len / 2);
 
-	*out++ = 2 * (strlen((char *) in) + pad);
+	*out++ = 2 * (strlen(in) + pad);
 	while (*in) {
 		out[0] = (in[0] >> 4) + 'A';
 		out[1] = (in[0] & 0xF) + 'A';
@@ -349,7 +349,7 @@ char *name_ptr(char *buf, int ofs)
 	if ((c & 0xC0) == 0xC0) {
 		uint16_t l;
 		char *p = (char *) &l;
-		memcpy((char *) &l, buf + ofs, 2);
+		memcpy(&l, buf + ofs, 2);
 		p[0] &= ~0xC0;
 		l = RSVAL(p, 0);
 		DEBUG(5,
@@ -429,7 +429,7 @@ void become_daemon(void)
 	{
 		int i = open("/dev/tty", O_RDWR);
 		if (i >= 0) {
-			ioctl(i, (int) TIOCNOTTY, (char *) 0);
+			ioctl(i, (int) TIOCNOTTY, 0);
 			close(i);
 		}
 	}
@@ -514,8 +514,8 @@ int open_socket_in(int type, int port)
 		return -1;
 	}
 
-	memset((char *) &sock, 0, sizeof(sock));
-	memcpy((char *) &sock.sin_addr, (char *) hp->h_addr, hp->h_length);
+	memset(&sock, 0, sizeof(sock));
+	memcpy(&sock.sin_addr, hp->h_addr, hp->h_length);
 	sock.sin_port = htons(port);
 	sock.sin_family = hp->h_addrtype;
 	sock.sin_addr.s_addr = INADDR_ANY;
@@ -528,7 +528,7 @@ int open_socket_in(int type, int port)
 #ifdef SO_REUSEADDR
 	{
 		int one = 1;
-		if (setsockopt(res, SOL_SOCKET, SO_REUSEADDR, (char *) &one,
+		if (setsockopt(res, SOL_SOCKET, SO_REUSEADDR, &one,
 		               sizeof(one)) == -1) {
 			DEBUG(3, ("setsockopt(REUSEADDR) failed - ignored\n"));
 		}
