@@ -105,7 +105,8 @@ static struct ifconf get_interfaces(int sock_fd)
 }
 
 #define addr(s)    (((struct sockaddr_in *) (s))->sin_addr)
-#define addr_ip(s) (addr(s).s_addr)
+/* TODO: We should have a caching version of this function; the list is only
+   likely to change infrequently. */
 static struct network_address *get_addresses(int sock_fd, int *num_addrs)
 {
 	struct ifconf ifc = get_interfaces(sock_fd);
@@ -556,7 +557,7 @@ static void construct_reply(char *inbuf, char *outbuf)
 }
 
 /*
-construct a host announcement unicast
+construct and send a host announcement
 
 Note that I don't know what half the numbers mean - I'm just using what I
 saw another PC use :-)
@@ -636,76 +637,21 @@ static bool announce_host(char *outbuf, char *group, struct in_addr ip)
 	              (struct sockaddr *) &addr, sizeof(addr)) >= 0;
 }
 
-/* a hook for browsing handling - called every 60 secs */
+/* We send a periodic browser protocol announcement; this makes the server
+   show up in "Network Neighborhood" and equivalents. */
 static void do_browse_hook(char *inbuf, char *outbuf, bool force)
 {
-	static int announce_interval = 3;
-	static int minute_counter = 3;
-	static int master_interval = 4;
-	static int master_count = 0;
-	fstring name = "";
+	int num_addrs = 0, i;
+	struct network_address *addrs =
+	    get_addresses(server_sock, &num_addrs);
 
-	if (!force)
-		minute_counter++;
-
-	if (!force && minute_counter < announce_interval) {
-		return;
+	/* We send to all broadcast addresses (since there may be multiple
+	   interfaces we are listening on */
+	for (i = 0; i < num_addrs; ++i) {
+		announce_host(outbuf, our_group.name, addrs[i].bcast_ip);
 	}
 
-	minute_counter = 0;
-
-	/* possibly reset our masters */
-	if (!force && master_count++ >= master_interval) {
-		master_count = 0;
-		DEBUG(2, ("%s Redoing browse master ips\n", timestring()));
-		our_hostname.found_master = false;
-		our_group.found_master = false;
-	}
-
-	/* find the subnet masters */
-	if (our_group.valid && !our_group.found_master) {
-		struct in_addr new_master;
-
-		sprintf(name, "%-15.15s%c", our_group.name, 0x1d);
-		our_group.found_master =
-		    name_query(inbuf, outbuf, name, bcast_ip, &new_master,
-		               3, construct_reply);
-		if (!our_group.found_master) {
-			DEBUG(1, ("Failed to find a master "
-			          "browser for %s using %s\n",
-			          our_group.name, inet_ntoa(our_group.ip)));
-			memset(&our_group.master_ip, 0, 4);
-		} else {
-			if (memcmp(&new_master, &our_group.master_ip, 4) == 0)
-				DEBUG(2,
-				      ("Found master browser "
-				       "for %s at %s\n",
-				       our_group.name, inet_ntoa(new_master)));
-			else
-				DEBUG(1,
-				      ("New master browser for "
-				       "%s at %s\n",
-				       our_group.name, inet_ntoa(new_master)));
-			our_group.master_ip = new_master;
-		}
-	}
-
-	/* do our host announcements */
-	if (our_hostname.valid && our_hostname.found_master) {
-		our_hostname.found_master = announce_host(
-		    outbuf, our_hostname.name, our_hostname.master_ip);
-	}
-}
-
-static void construct_dgram_reply(char *inbuf, char *outbuf)
-{
-	static time_t last_time = 0;
-	time_t t = time(NULL);
-	if (t - last_time > 20) {
-		DEBUG(3, ("Doing dgram reply to %s\n", inet_ntoa(lastip)));
-		do_browse_hook(inbuf, outbuf, true);
-	}
-	last_time = t;
+	free(addrs);
 }
 
 static void process(void)
@@ -730,7 +676,6 @@ static void process(void)
 
 		FD_ZERO(&fds);
 		FD_SET(server_sock, &fds);
-		FD_SET(dgram_sock, &fds);
 
 		timeout.tv_sec = 10;
 		timeout.tv_usec = 0;
@@ -739,14 +684,6 @@ static void process(void)
 			selrtn = select(255, SELECT_CAST & fds, NULL, NULL,
 			                &timeout);
 		} while (selrtn < 0 && errno == EINTR);
-
-		if (FD_ISSET(dgram_sock, &fds)) {
-			nread =
-			    read_udp_socket(dgram_sock, InBuffer, BUFFER_SIZE);
-			if (nread > 0) {
-				construct_dgram_reply(InBuffer, OutBuffer);
-			}
-		}
 
 		if (FD_ISSET(server_sock, &fds)) {
 			nread =
@@ -772,6 +709,10 @@ static bool open_sockets(bool is_daemon, int port)
 
 	/* TODO: Allow dgram port number to also be changed, like -p arg? */
 	dgram_sock = open_socket_in(SOCK_DGRAM, 138);
+
+	/* allow broadcasts on it */
+	setsockopt(dgram_sock, SOL_SOCKET, SO_BROADCAST, (char *) &one,
+	           sizeof(one));
 
 	/* TODO: Delete this block, it is a temporary hack */
 	{
