@@ -224,7 +224,6 @@ void strnorm(char *s);
 char *smb_buf();
 bool strequal(char *, char *);
 char *timestring();
-bool send_packet(char *buf, int len, struct in_addr *ip, int port, int type);
 int name_len(char *s);
 uint32_t file_size(char *file_name);
 void dos_format(char *fname);

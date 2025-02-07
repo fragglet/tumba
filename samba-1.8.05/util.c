@@ -386,51 +386,6 @@ int name_len(char *s)
 }
 
 /****************************************************************************
-send a single packet to a port on another machine
-****************************************************************************/
-bool send_packet(char *buf, int len, struct in_addr *ip, int port, int type)
-{
-	bool ret;
-	int out_fd;
-	struct sockaddr_in sock_out;
-	int one = 1;
-
-	/* create a socket to write to */
-	out_fd = socket(AF_INET, type, 0);
-	if (out_fd == -1) {
-		DEBUG(0, ("socket failed"));
-		return false;
-	}
-#if 1
-	/* allow broadcasts on it */
-	setsockopt(out_fd, SOL_SOCKET, SO_BROADCAST, (char *) &one,
-	           sizeof(one));
-#endif
-
-	/* set the address and port */
-	memset((char *) &sock_out, 0, sizeof(sock_out));
-	memcpy((char *) &sock_out.sin_addr, (char *) ip, 4);
-	sock_out.sin_port = htons(port);
-	sock_out.sin_family = AF_INET;
-
-	if (DEBUGLEVEL > 0)
-		DEBUG(3, ("sending a packet of len %d to (%s) on port %d of "
-		          "type %s\n",
-		          len, inet_ntoa(*ip), port,
-		          type == SOCK_DGRAM ? "DGRAM" : "STREAM"));
-
-	/* send it */
-	ret = (sendto(out_fd, buf, len, 0, (struct sockaddr *) &sock_out,
-	              sizeof(sock_out)) >= 0);
-
-	if (!ret)
-		DEBUG(0, ("Send packet failed. ERRNO=%d\n", errno));
-
-	close(out_fd);
-	return ret;
-}
-
-/****************************************************************************
 substitute a string for a pattern in another string. Make sure there is
 enough room!
 

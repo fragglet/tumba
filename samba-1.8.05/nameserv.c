@@ -387,6 +387,22 @@ static bool name_query(char *inbuf, char *outbuf, char *name,
 	return found;
 }
 
+/* Send a packet back to the client that sent the packet we are processing */
+static void send_reply(void *buf, size_t buf_len)
+{
+	struct sockaddr_in addr;
+
+	memset(&addr, 0, sizeof(addr));
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(137);
+	addr.sin_addr = lastip;
+
+	if (sendto(server_sock, buf, buf_len, 0,
+	           (struct sockaddr *) &addr, sizeof(addr)) < 0) {
+		DEBUG(0, ("Error sending reply: %s\n", strerror(errno)));
+	}
+}
+
 static void reply_reg_request(char *inbuf, char *outbuf)
 {
 	int rec_name_trn_id = RSVAL(inbuf, 0);
@@ -452,7 +468,7 @@ static void reply_reg_request(char *inbuf, char *outbuf)
 		return;
 	}
 
-	send_packet(outbuf, nmb_len(outbuf), &ip, 137, SOCK_DGRAM);
+	send_reply(outbuf, nmb_len(outbuf));
 }
 
 /* Choose which IP address to return to clients requesting our hostname. This
@@ -488,7 +504,6 @@ static void reply_name_query(char *inbuf, char *outbuf)
 	char qname[100] = "";
 	char *p = inbuf;
 	unsigned char nb_flags = 0;
-	struct in_addr tmpip;
 	struct in_addr retip;
 
 	name_extract(inbuf, 12, qname);
@@ -524,9 +539,7 @@ static void reply_name_query(char *inbuf, char *outbuf)
 	memcpy(p, (char *) &retip, 4);
 	p += 4;
 
-	tmpip = lastip;
-	send_packet(outbuf, nmb_len(outbuf), &tmpip,
-	            lastport > 0 ? lastport : 137, SOCK_DGRAM);
+	send_reply(outbuf, nmb_len(outbuf));
 }
 
 static void construct_reply(char *inbuf, char *outbuf)
@@ -550,6 +563,7 @@ saw another PC use :-)
 */
 static bool announce_host(char *outbuf, char *group, struct in_addr ip)
 {
+	struct sockaddr_in addr;
 	char *p, *p2;
 	char *gptr;
 
@@ -613,8 +627,13 @@ static bool announce_host(char *outbuf, char *group, struct in_addr ip)
 	p2 = gptr + name_mangle(group, gptr);
 	strcpy(p2 - 3, "BO");
 
-	return send_packet(outbuf, 200 + strlen(comment) + 1, &ip, 138,
-	                   SOCK_DGRAM);
+	memset(&addr, 0, sizeof(addr));
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(138);
+	addr.sin_addr = ip;
+
+	return sendto(dgram_sock, outbuf, 200 + strlen(comment) + 1, 0,
+	              (struct sockaddr *) &addr, sizeof(addr)) >= 0;
 }
 
 /* a hook for browsing handling - called every 60 secs */
