@@ -266,7 +266,8 @@ static void send_reply(void *buf, size_t buf_len)
 	}
 }
 
-static void reply_reg_request(char *inbuf, char *outbuf)
+static void reply_reg_request(char *inbuf, char *outbuf,
+                              struct network_address *src_iface)
 {
 	int rec_name_trn_id = RSVAL(inbuf, 0);
 	char qname[100] = "";
@@ -295,7 +296,7 @@ static void reply_reg_request(char *inbuf, char *outbuf)
 	}
 
 	/* if it's my name and it's also my IP then don't worry about it */
-	if (ip_equal(&ip, &myip)) {
+	if (ip_equal(&ip, &src_iface->ip)) {
 		DEBUG(3, ("Is my IP\n"));
 		return;
 	}
@@ -326,7 +327,7 @@ static void reply_reg_request(char *inbuf, char *outbuf)
 	       4); /* IP address of the name's owner (that's us) */
 	p += 4;
 
-	if (ip_equal(&ip, &bcast_ip)) {
+	if (ip_equal(&ip, &src_iface->bcast_ip)) {
 		DEBUG(0, ("Not replying to broadcast address\n"));
 		return;
 	}
@@ -334,40 +335,13 @@ static void reply_reg_request(char *inbuf, char *outbuf)
 	send_reply(outbuf, nmb_len(outbuf));
 }
 
-/* Choose which IP address to return to clients requesting our hostname. This
-   may be different, depending on the interface on which it is received. */
-static struct in_addr get_response_addr(struct in_addr *src)
-{
-	struct in_addr result = {INADDR_NONE};
-	int num_addrs = 0;
-	struct network_address *addrs = get_addresses(server_sock, &num_addrs);
-	int i;
-
-	DEBUG(3, ("Finding response address for client %s: ", inet_ntoa(*src)));
-
-	for (i = 0; i < num_addrs; ++i) {
-		if ((addrs[i].ip.s_addr & addrs[i].netmask.s_addr) ==
-		    (src->s_addr & addrs[i].netmask.s_addr)) {
-			DEBUG(3, ("match for %s ", inet_ntoa(addrs[i].ip)));
-			DEBUG(3, ("netmask %s\n", inet_ntoa(addrs[i].netmask)));
-			result = addrs[i].ip;
-			free(addrs);
-			return result;
-		}
-	}
-	DEBUG(3, ("no appropriate address found.\n"));
-	free(addrs);
-
-	return result;
-}
-
-static void reply_name_query(char *inbuf, char *outbuf)
+static void reply_name_query(char *inbuf, char *outbuf,
+                             struct network_address *src_iface)
 {
 	int rec_name_trn_id = RSVAL(inbuf, 0);
 	char qname[100] = "";
 	char *p = inbuf;
 	unsigned char nb_flags = 0;
-	struct in_addr retip;
 
 	name_extract(inbuf, 12, qname);
 
@@ -378,7 +352,6 @@ static void reply_name_query(char *inbuf, char *outbuf)
 		return;
 	}
 
-	retip = get_response_addr(&lastip);
 	nb_flags = our_hostname.nb_flags;
 
 	/* Send a POSITIVE NAME QUERY RESPONSE */
@@ -399,23 +372,61 @@ static void reply_name_query(char *inbuf, char *outbuf)
 	CVAL(p, 10) = nb_flags;
 	CVAL(p, 11) = 0;
 	p += 12;
-	memcpy(p, (char *) &retip, 4);
+	memcpy(p, (char *) &src_iface->ip, 4);
 	p += 4;
 
 	send_reply(outbuf, nmb_len(outbuf));
 }
 
+/* Choose which IP address to return to clients requesting our hostname. This
+   may be different, depending on the interface on which it is received. */
+static struct network_address *get_iface_addr(struct network_address *addrs,
+                                              int num_addrs,
+                                              struct in_addr *src)
+{
+	int i;
+
+	DEBUG(3, ("Finding matching interface for src=%s: ", inet_ntoa(*src)));
+
+	for (i = 0; i < num_addrs; ++i) {
+		if ((addrs[i].ip.s_addr & addrs[i].netmask.s_addr) ==
+		    (src->s_addr & addrs[i].netmask.s_addr)) {
+			DEBUG(3, ("match for %s ", inet_ntoa(addrs[i].ip)));
+			DEBUG(3, ("netmask %s\n", inet_ntoa(addrs[i].netmask)));
+			return &addrs[i];
+		}
+	}
+	DEBUG(3, ("none found.\n"));
+
+	return NULL;
+}
+
 static void construct_reply(char *inbuf, char *outbuf)
 {
+	int num_addrs = 0;
+	struct network_address *addrs = get_addresses(server_sock, &num_addrs);
+	struct network_address *src_iface =
+	    get_iface_addr(addrs, num_addrs, &lastip);
 	int opcode = CVAL(inbuf, 2) >> 3;
 	int nm_flags = ((CVAL(inbuf, 2) & 0x7) << 4) + (CVAL(inbuf, 3) >> 4);
 	int rcode = CVAL(inbuf, 3) & 0xF;
 
+	/* We don't process packets unless we can match them to a local
+	   interface. Note that this does mean we only ever respond to packets
+	   from our local network segment, but this is good enough and probably
+	   excludes a bunch of potential security issues anyway. */
+	if (src_iface == NULL) {
+		free(addrs);
+		return;
+	}
+
 	if (opcode == 0x5 && (nm_flags & ~1) == 0x10 && rcode == 0)
-		reply_reg_request(inbuf, outbuf);
+		reply_reg_request(inbuf, outbuf, src_iface);
 
 	if (opcode == 0 && (nm_flags & ~1) == 0x10 && rcode == 0)
-		reply_name_query(inbuf, outbuf);
+		reply_name_query(inbuf, outbuf, src_iface);
+
+	free(addrs);
 }
 
 /*
