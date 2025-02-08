@@ -43,8 +43,6 @@ extern int DEBUGLEVEL;
 char *InBuffer = NULL;
 char *OutBuffer = NULL;
 
-bool reply_only = false;
-
 static struct sockaddr_in last_client;
 
 pstring myname = "";
@@ -594,8 +592,6 @@ static void usage(char *pname)
 	       pname);
 	printf("Version %s\n", VERSION);
 	printf("\t-D                    become a daemon\n");
-	printf("\t-R                    only reply to queries, don't actively "
-	       "send claims\n");
 	printf("\t-p port               listen on the specified port\n");
 	printf("\t-d debuglevel         set the debuglevel\n");
 	printf("\t-l log basename.      Basename for log/debug files\n");
@@ -614,7 +610,7 @@ int main(int argc, char *argv[])
 
 	sprintf(debugf, "%s.nmb.debug", DEBUGFILE);
 
-	while ((opt = getopt(argc, argv, "C:Rn:l:d:Dp:hSG:")) != EOF)
+	while ((opt = getopt(argc, argv, "C:n:l:d:Dp:hSG:")) != EOF)
 		switch (opt) {
 		case 'C':
 			strcpy(comment, optarg);
@@ -624,9 +620,6 @@ int main(int argc, char *argv[])
 			break;
 		case 'n':
 			strcpy(myname, optarg);
-			break;
-		case 'R':
-			reply_only = true;
 			break;
 		case 'l':
 			sprintf(debugf, "%s.nmb.debug", optarg);
