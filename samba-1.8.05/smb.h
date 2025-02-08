@@ -220,7 +220,7 @@ void show_msg(char *buf);
 void become_daemon(void);
 void strlower(char *s);
 void strnorm(char *s);
-char *smb_buf();
+char *smb_buf(char *buf);
 bool strequal(char *, char *);
 char *timestring();
 int name_len(char *s);
