@@ -18,7 +18,27 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <arpa/inet.h>
+#include <ctype.h>
+#include <errno.h>
+#include <net/if.h>
+#include <netinet/in.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <time.h>
+#include <unistd.h>
+
+#include "../src/byteorder.h"
 #include "includes.h"
+#include "version.h"
 
 #define UPDATE_INTERVAL 60
 

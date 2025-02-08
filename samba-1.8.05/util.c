@@ -18,6 +18,24 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <arpa/inet.h>
+#include <ctype.h>
+#include <fcntl.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <time.h>
+#include <unistd.h>
+
+#include "../src/byteorder.h"
 #include "includes.h"
 
 /* we have two time standards - local and GMT. */
