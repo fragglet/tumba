@@ -232,11 +232,7 @@ int name_len(char *s);
 void show_nmb(char *inbuf);
 void create_mangled_stack(int size);
 void name_extract(char *buf, int ofs, char *name);
-#ifdef __STDC__
 int Debug1(char *, ...);
-#else
-int Debug1();
-#endif
 struct tm *LocalTime(time_t *t, int);
 time_t TimeLocal(struct tm *tm, int);
 int TimeDiff(void);

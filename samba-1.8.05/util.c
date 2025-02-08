@@ -34,14 +34,8 @@ pstring debugf = DEBUGFILE;
 /*******************************************************************
 write an debug message on the debugfile. The first arg is the debuglevel.
 ********************************************************************/
-#ifdef __STDC__
 int Debug1(char *format_str, ...)
 {
-#else
-int Debug1(va_alist) va_dcl
-{
-	char *format_str;
-#endif
 	va_list ap;
 
 	if (!dbf) {
@@ -52,12 +46,7 @@ int Debug1(va_alist) va_dcl
 			return 0;
 	}
 
-#ifdef __STDC__
 	va_start(ap, format_str);
-#else
-	va_start(ap);
-	format_str = va_arg(ap, char *);
-#endif
 
 	vfprintf(dbf, format_str, ap);
 
@@ -129,20 +118,7 @@ char *timestring(void)
 	static char TimeBuf[100];
 	time_t t;
 	t = time(NULL);
-#ifdef NO_STRFTIME
-	strcpy(TimeBuf, asctime(LocalTime(&t, GMT_TO_LOCAL)));
-#else
-#ifdef CLIX
-	strftime(TimeBuf, 100, "%m/%d/%y %I:%M:%S %p",
-	         LocalTime(&t, GMT_TO_LOCAL));
-#else
-#ifdef AMPM
-	strftime(TimeBuf, 100, "%D %r", LocalTime(&t, GMT_TO_LOCAL));
-#else
 	strftime(TimeBuf, 100, "%D %T", LocalTime(&t, GMT_TO_LOCAL));
-#endif
-#endif /* CLIX */
-#endif
 	return TimeBuf;
 }
 
@@ -376,9 +352,7 @@ void become_daemon(void)
 		exit(0);
 
 	/* detach from the terminal */
-#ifdef LINUX
 	setpgrp();
-#endif
 
 #ifdef USE_SETSID
 	setsid();
