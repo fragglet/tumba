@@ -55,7 +55,6 @@ int myttl = 0;
 static struct netbios_name our_hostname;
 
 static int server_sock = 0;
-static int dgram_sock;
 
 /* are we running as a daemon ? */
 bool is_daemon = false;
@@ -478,7 +477,7 @@ static bool announce_host(char *outbuf, char *group,
 	send_addr.sin_port = htons(138);
 	send_addr.sin_addr = addr->bcast_ip;
 
-	return sendto(dgram_sock, outbuf, 200 + strlen(comment) + 1, 0,
+	return sendto(server_sock, outbuf, 200 + strlen(comment) + 1, 0,
 	              (struct sockaddr *) &send_addr, sizeof(send_addr)) >= 0;
 }
 
@@ -549,12 +548,6 @@ static bool open_sockets(bool is_daemon, int port)
 
 	/* allow broadcasts on it */
 	setsockopt(server_sock, SOL_SOCKET, SO_BROADCAST, &one, sizeof(one));
-
-	/* TODO: Allow dgram port number to also be changed, like -p arg? */
-	dgram_sock = open_socket_in(SOCK_DGRAM, 138);
-
-	/* allow broadcasts on it */
-	setsockopt(dgram_sock, SOL_SOCKET, SO_BROADCAST, &one, sizeof(one));
 
 	/* We will abort gracefully when the client or remote system
 	   goes away */
