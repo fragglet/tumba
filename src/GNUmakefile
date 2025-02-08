@@ -69,6 +69,7 @@ install: $(PUBLIC_SHARE) $(READONLY_SHARE) tumba_smbd
 	install -m 755 tumba_smbd $(DESTDIR)$(PREFIX)/bin/tumba_smbd
 	mkdir -p $(DESTDIR)$(PREFIX)/lib/systemd/system
 	install -m 644 tumba_smbd.service $(DESTDIR)$(PREFIX)/lib/systemd/system/tumba_smbd.service
+	install -m 644 tumba_nmbd.service $(DESTDIR)$(PREFIX)/lib/systemd/system/tumba_nmbd.service
 	mkdir -m 755 -p $(DESTDIR)$(MANPATH)/man8
 	install tumba_smbd.8 $(DESTDIR)$(MANPATH)/man8/tumba_smbd.8
 	install tumba_nmbd.8 $(DESTDIR)$(MANPATH)/man8/tumba_nmbd.8
