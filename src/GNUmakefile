@@ -71,6 +71,7 @@ install: $(PUBLIC_SHARE) $(READONLY_SHARE) tumba_smbd
 	install -m 644 tumba_smbd.service $(DESTDIR)$(PREFIX)/lib/systemd/system/tumba_smbd.service
 	mkdir -m 755 -p $(DESTDIR)$(MANPATH)/man8
 	install tumba_smbd.8 $(DESTDIR)$(MANPATH)/man8/tumba_smbd.8
+	install tumba_nmbd.8 $(DESTDIR)$(MANPATH)/man8/tumba_nmbd.8
 
 fixincludes:
 	for d in $(patsubst %.o,%.c,$(OBJECTS)); do \

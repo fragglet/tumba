@@ -1,0 +1,127 @@
+.TH tumba_nmbd 8
+.SH NAME
+tumba_nmbd \- Minimalist NetBIOS name server
+.SH SYNOPSIS
+.B tumba_nmbd
+.RB [options]
+.SH DESCRIPTION
+.PP
+.B tumba_nmbd
+is a minimalist implementation of the NetBIOS name service (NBNS) as described
+in RFC 1001.
+.PP
+.SH OPTIONS
+The following command line options are understood:
+.TP
+\fB-b addr\fR
+Bind to given IP address. By default the server binds to \fB0.0.0.0\fR, serving
+requests from any network interface, but this argument can be used to bind only
+to a specific interface.
+.TP
+\fB-C comment\fR
+Include the given description of the server in browse announcements. This is
+shown in "Network Neighborhood" on Windows machines if the "Details" view is
+selected. If not specified, the default comment will include the system
+hostname and the server version.
+.TP
+\fB-d level\fR
+Change the logging level. Values here are: 0 (error); 1 (warning); 2 (notice);
+3 (info); 4 (debugging messages). By default errors and warnings are logged.
+.TP
+\fB-n name\fR
+Specify the hostname to announce. If not specified, the system hostname (ie.
+the output of the \fBhostname\fR(1) command) is used.
+.TP
+\fB-l logfile\fR
+Specify path to a log file to write log messages.
+.TP
+\fB-p port\fR
+Listen on the given UDP port. By default, \fBTumba\fR listens on port 137, the
+NetBIOS name service port.
+.TP
+\fB-W workgroup\fR
+Specify the workgroup to which this server belongs. By default this is
+\fBWORKGROUP\fR, the default used in Windows.
+.PP
+.SH EXAMPLES
+Here are some examples for how to invoke the program:
+.TP
+tumba_nmbd -W IBMPEERS -b 192.168.30.1
+Runs with the workgroup name set to IBMPEERS, the default used by OS/2 Warp.
+The server will bind to the \fB192.168.30.1\fR address, only serving requests
+on that network interface.
+.TP
+tumba_nmbd -n DEEPTHOUGHT -C "Lunkwill's workstation"
+Manually sets the hostname and server comment
+.SH LIMITATIONS
+\fBtumba_nmbd\fR is a companion to the \fBtumba_smbd\fR, which is a minimalist
+implementation of the SMBv1 file sharing protocol. It intentionally omits many
+features of the NBNS protocol that are not needed for that purpose. For
+example, compared to Samba's \fBnmbd\fR(1) it does not implement:
+.IP \(bu
+NetBIOS to DNS mapping
+.IP \(bu
+Being a master browser server; \fBtumba_nmbd\fR will broadcast hostname
+announcements but does not track announcements from other hosts or respond to
+queries for names other than its own hostname.
+.IP \(bu
+LMHOSTS files
+.PP
+If these features are needed, the Samba \fBnmbd\fR server can be used instead,
+even if \fBtumba_smbd\fR is being used as an SMB server (the SMB/NMB servers
+from the Samba and Tumba projects can be arbitrarily mixed and matched)
+.SH BUG REPORTS
+Bugs can be reported to the GitHub issue tracker:
+.UR https://github.com/fragglet/tumba
+https://github.com/fragglet/tumba
+.UE
+.SH SEE ALSO
+\fBtumba_smbd\fR(8),
+\fBnmblookup\fR(1),
+\fBsamba\fR(7),
+\fBnmbd\fR(8)
+.SH HISTORY
+NetBIOS originated with \fBThe IBM PC Network\fR, IBM's first PC LAN system.
+NetBIOS itself is an API and can be used with multiple different protocols; in
+the 1980s and early 1990s the most common were NetBIOS frames (NBF; sometimes
+inaccurately called NetBEUI) and Novell's IPX suite. In 1987, RFC 1001 was
+published, which defined \fBNetBIOS over TCP/IP\fR (NBT); this allows NetBIOS
+applications to run over the TCP/IP protocol suite.
+.PP
+NetBIOS as an API refers to network hosts by name, and the NetBIOS Name
+Service (NBNS) provides the means by which these names are resolved to IP
+addresses. Unlike DNS, where names are resolved through requests to
+authoritative servers, NBNS works in a peer-to-peer fashion with hosts issuing
+broadcasts to local network segments (this reflects NetBIOS's origins as a
+protocol to be used in LANs rather than the global Internet). Because of the
+extensive use of broadcasts, it gained a reputation as a "chatty" protocol.
+.PP
+Around 1991-1992, Andrew Tridgell released the first versions of \fISamba\fR,
+a free software implementation of the SMB protocol for Unix systems. Since SMB
+is based on NetBIOS, Samba also included \fBnmbd\fR, an implementation of the
+NetBIOS name service.
+.PP
+In late 2024, Simon Howard created \fITumba\fR, a Samba fork that continues
+support for the SMBv1 protocol. The initial versions only included the SMB
+server (\fBtumba_smbd\fR(1)), but \fBtumba_nmbd\fR was subsequently added to
+make it a complete standalone suite. It is based on the version of \fBnmbd\fR
+that shipped with the Samba v1.8.05 release.
+.SH AUTHOR
+Tumba originated as a fork of Samba by Andrew Tridgell.  It is developed and
+maintained by
+.MT fraggle@gmail.com
+Simon Howard
+.ME .
+.SH COPYRIGHT
+Copyright (C) Andrew Tridgell 1992-1998
+.br
+Copyright (C) Simon Howard 2024-2025
+
+This program is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation; either version 2 of the License, or (at your option) any later
+version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.  See the GNU General Public License for more details.
