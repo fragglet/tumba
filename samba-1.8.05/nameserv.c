@@ -591,7 +591,7 @@ static void usage(char *pname)
 	printf("\t-l log basename.      Basename for log/debug files\n");
 	printf("\t-n netbiosname.       the netbios name to advertise for this "
 	       "host\n");
-	printf("\t-G group name        add a group name to be part of\n");
+	printf("\t-W workgroup          specify workgroup name\n");
 	printf("\n");
 }
 
@@ -604,12 +604,12 @@ int main(int argc, char *argv[])
 
 	sprintf(debugf, "%s.nmb.debug", DEBUGFILE);
 
-	while ((opt = getopt(argc, argv, "C:n:l:d:Dp:hSG:")) != EOF)
+	while ((opt = getopt(argc, argv, "C:n:l:d:Dp:hSW:")) != EOF)
 		switch (opt) {
 		case 'C':
 			strcpy(comment, optarg);
 			break;
-		case 'G':
+		case 'W':
 			strcpy(mygroup, optarg);
 			break;
 		case 'n':
