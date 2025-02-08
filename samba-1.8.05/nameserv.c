@@ -459,9 +459,10 @@ static bool announce_host(char *outbuf, char *group,
 	p2 += 16;
 	CVAL(p2, 0) = 0;  /* major version (was 1) */
 	CVAL(p2, 1) = 0;  /* minor version (was 51) */
-	CVAL(p2, 2) = 3;  /* server and w'station */
-	CVAL(p2, 3) = 11; /* unix + printq + domain member*/
-	CVAL(p2, 4) = 0;
+
+	/* Server type. */
+	SIVAL(p2, 2, SV_TYPE_SERVER|SV_TYPE_SERVER_UNIX|SV_TYPE_TIME_SOURCE);
+
 	CVAL(p2, 6) = 11;
 	CVAL(p2, 7) = 3;
 	CVAL(p2, 8) = 85;
