@@ -295,6 +295,5 @@ uint32_t interpret_addr(char *str);
 #define SV_TYPE_DOMAIN_ENUM       0x80000000
 #define SV_TYPE_ALL               0xFFFFFFFF
 
-
 #endif
 /* _SMB_H */

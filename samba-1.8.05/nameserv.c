@@ -471,17 +471,18 @@ static bool announce_host(char *outbuf, char *group,
 	strcpy(p2, "\\MAILSLOT\\BROWSE");
 	p2 = skip_string(p2, 1);
 
-	CVAL(p2, 0) = 1;   /* host announce */
-	CVAL(p2, 1) = 5;   /* update count */
-	SIVAL(p2, 2, UPDATE_INTERVAL * 1000);  /* update interval, in MS */
+	CVAL(p2, 0) = 1;                      /* host announce */
+	CVAL(p2, 1) = 5;                      /* update count */
+	SIVAL(p2, 2, UPDATE_INTERVAL * 1000); /* update interval, in MS */
 	p2 += 6;
 	strcpy(p2, myname);
 	p2 += 16;
-	CVAL(p2, 0) = 0;  /* major version (was 1) */
-	CVAL(p2, 1) = 0;  /* minor version (was 51) */
+	CVAL(p2, 0) = 0; /* major version (was 1) */
+	CVAL(p2, 1) = 0; /* minor version (was 51) */
 
 	/* Server type. */
-	SIVAL(p2, 2, SV_TYPE_SERVER|SV_TYPE_SERVER_UNIX|SV_TYPE_TIME_SOURCE);
+	SIVAL(p2, 2,
+	      SV_TYPE_SERVER | SV_TYPE_SERVER_UNIX | SV_TYPE_TIME_SOURCE);
 
 	CVAL(p2, 6) = 11;
 	CVAL(p2, 7) = 3;
