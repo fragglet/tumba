@@ -84,16 +84,16 @@ https://github.com/fragglet/tumba
 NetBIOS originated with \fBThe IBM PC Network\fR, IBM's first PC LAN system.
 NetBIOS itself is an API and can be used with multiple different protocols; in
 the 1980s and early 1990s the most common were NetBIOS frames (NBF; sometimes
-inaccurately called NetBEUI) and Novell's IPX suite. In 1987, RFC 1001 was
-published, which defined \fBNetBIOS over TCP/IP\fR (NBT); this allows NetBIOS
-applications to run over the TCP/IP protocol suite.
+inaccurately called NetBEUI) and NBIPX (for Novell's IPX/SPX protocols). In
+1987, RFC 1001 was published, which defined \fBNetBIOS over TCP/IP\fR (NBT);
+this allows NetBIOS applications to run over the TCP/IP protocol suite.
 .PP
 NetBIOS as an API refers to network hosts by name, and the NetBIOS Name
 Service (NBNS) provides the means by which these names are resolved to IP
 addresses. Unlike DNS, where names are resolved through requests to
 authoritative servers, NBNS works in a peer-to-peer fashion with hosts issuing
-broadcasts to local network segments (this reflects NetBIOS's origins as a
-protocol to be used in LANs rather than the global Internet). Because of the
+broadcasts to local network segments. This reflects NetBIOS's origins as a
+protocol to be used in LANs rather than the global Internet; because of the
 extensive use of broadcasts, it gained a reputation as a "chatty" protocol.
 .PP
 Around 1991-1992, Andrew Tridgell released the first versions of \fISamba\fR,
