@@ -20,6 +20,8 @@
 
 #include "includes.h"
 
+#define UPDATE_INTERVAL 60
+
 /* this is the structure used for the local netbios name table */
 struct netbios_name {
 	struct in_addr ip;
@@ -451,10 +453,8 @@ static bool announce_host(char *outbuf, char *group,
 	p2 = skip_string(p2, 1);
 
 	CVAL(p2, 0) = 1;   /* host announce */
-	CVAL(p2, 1) = 5;   /* announcement interval?? */
-	CVAL(p2, 2) = 192; /* update count ?? */
-	CVAL(p2, 3) = 39;
-	SSVAL(p2, 4, 9);
+	CVAL(p2, 1) = 5;   /* update count */
+	SIVAL(p2, 2, UPDATE_INTERVAL * 1000);  /* update interval, in MS */
 	p2 += 6;
 	strcpy(p2, myname);
 	p2 += 16;
@@ -513,7 +513,7 @@ static void process(void)
 		struct timeval timeout;
 		int nread;
 
-		if (!timer || (time(NULL) - timer) > 60) {
+		if (!timer || (time(NULL) - timer) > UPDATE_INTERVAL) {
 			do_browse_hook(InBuffer, OutBuffer, false);
 			timer = time(NULL);
 		}
