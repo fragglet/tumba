@@ -330,15 +330,6 @@ bool string_sub(char *s, char *pattern, char *insert)
 }
 
 /****************************************************************************
-  Signal handler for SIGPIPE (write on a disconnected socket)
-****************************************************************************/
-void Abort(void)
-{
-	DEBUG(0, ("Abort called. Probably got SIGPIPE\n"));
-	exit(1);
-}
-
-/****************************************************************************
 get my own name and IP
 ****************************************************************************/
 bool get_myname(char *myname)

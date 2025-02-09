@@ -201,7 +201,6 @@ bool strhasupper(char *s);
 bool strhaslower(char *s);
 bool check_name(char *name, int cnum);
 struct hostent *Get_Hostbyname(char *name);
-void Abort(void);
 void *Realloc(void *p, int size);
 void smb_setlen(char *buf, int len);
 int set_message(char *buf, int num_words, int num_bytes, bool zero);

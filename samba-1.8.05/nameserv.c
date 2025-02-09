@@ -612,9 +612,6 @@ static bool open_server_sock(struct in_addr bind_addr, int port)
 	DEBUG(1,
 	      ("bind successful for %s port %d\n", inet_ntoa(bind_addr), port));
 
-	/* We will abort gracefully when the client or remote system
-	   goes away */
-	signal(SIGPIPE, SIGNAL_CAST Abort);
 	return true;
 }
 
