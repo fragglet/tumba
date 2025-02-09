@@ -37,9 +37,10 @@
 #include <unistd.h>
 
 #include "../src/byteorder.h"
-#include "includes.h"
+#include "smb.h"
 #include "version.h"
 
+#define SIGNAL_CAST   (void (*)(int))
 #define UPDATE_INTERVAL 60
 
 /* this is the structure used for the local netbios name table */

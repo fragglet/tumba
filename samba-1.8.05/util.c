@@ -36,7 +36,7 @@
 #include <unistd.h>
 
 #include "../src/byteorder.h"
-#include "includes.h"
+#include "smb.h"
 
 /* we have two time standards - local and GMT. */
 #define LOCAL_TO_GMT 1

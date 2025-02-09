@@ -258,10 +258,6 @@ uint32_t interpret_addr(char *str);
 #define ABS(a) ((a) > 0 ? (a) : (-(a)))
 #endif
 
-#ifndef SIGNAL_CAST
-#define SIGNAL_CAST
-#endif
-
 #ifndef SELECT_CAST
 #define SELECT_CAST
 #endif
