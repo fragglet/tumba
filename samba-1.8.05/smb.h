@@ -227,7 +227,6 @@ int name_len(char *s);
 uint32_t file_size(char *file_name);
 void dos_format(char *fname);
 char *GetWd(char *s);
-int name_mangle(char *in, char *out);
 int name_len(char *s);
 void show_nmb(char *inbuf);
 void create_mangled_stack(int size);

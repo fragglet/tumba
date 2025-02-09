@@ -413,6 +413,34 @@ static void construct_reply(char *inbuf, char *outbuf)
 	free(addrs);
 }
 
+/* mangle a name into netbios format */
+static int name_mangle(char *in, char *Out)
+{
+	char *out = Out;
+	int len = 2 * strlen(in);
+	int pad = 0;
+
+	if (len / 2 < 16)
+		pad = 16 - (len / 2);
+
+	*out++ = 2 * (strlen(in) + pad);
+	while (*in) {
+		out[0] = (in[0] >> 4) + 'A';
+		out[1] = (in[0] & 0xF) + 'A';
+		in++;
+		out += 2;
+	}
+
+	while (pad--) {
+		out[0] = 'C';
+		out[1] = 'A';
+		out += 2;
+	}
+
+	*out = 0;
+	return name_len(Out);
+}
+
 /*
 construct and send a host announcement
 
