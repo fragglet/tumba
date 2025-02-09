@@ -330,32 +330,6 @@ bool string_sub(char *s, char *pattern, char *insert)
 }
 
 /****************************************************************************
-become a daemon, discarding the controlling terminal
-****************************************************************************/
-void become_daemon(void)
-{
-#ifndef NO_FORK_DEBUG
-	if (fork())
-		exit(0);
-
-	/* detach from the terminal */
-	setpgrp();
-
-#ifdef USE_SETSID
-	setsid();
-#else
-	{
-		int i = open("/dev/tty", O_RDWR);
-		if (i >= 0) {
-			ioctl(i, (int) TIOCNOTTY, 0);
-			close(i);
-		}
-	}
-#endif
-#endif
-}
-
-/****************************************************************************
   Signal handler for SIGPIPE (write on a disconnected socket)
 ****************************************************************************/
 void Abort(void)

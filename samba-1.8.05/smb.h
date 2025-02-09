@@ -217,7 +217,6 @@ bool read_data(int fd, char *buffer, int N);
 int smb_len(char *buf);
 bool receive_smb(char *buffer, int timeout);
 void show_msg(char *buf);
-void become_daemon(void);
 void strlower(char *s);
 void strnorm(char *s);
 char *smb_buf(char *buf);

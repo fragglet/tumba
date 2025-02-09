@@ -68,9 +68,6 @@ static struct netbios_name our_hostname;
 
 static int server_sock = 0;
 
-/* are we running as a daemon ? */
-bool is_daemon = false;
-
 /* machine comment */
 fstring comment = "";
 
@@ -646,13 +643,12 @@ static void usage(char *pname)
 {
 	DEBUG(0, ("Incorrect program usage - is the command line correct?\n"));
 
-	printf("Usage: %s [-n name] [-b address] [-D] [-p port] [-d "
+	printf("Usage: %s [-n name] [-b address] [-p port] [-d "
 	       "debuglevel] [-l log basename]\n",
 	       pname);
 	printf("Version %s\n", VERSION);
 	printf("\t-b addr               address to bind socket "
 	       "(default 0.0.0.0)\n");
-	printf("\t-D                    become a daemon\n");
 	printf("\t-p port               listen on the specified port\n");
 	printf("\t-d debuglevel         set the debuglevel\n");
 	printf("\t-l log basename.      Basename for log/debug files\n");
@@ -672,7 +668,7 @@ int main(int argc, char *argv[])
 
 	sprintf(debugf, "%s.nmb.debug", DEBUGFILE);
 
-	while ((opt = getopt(argc, argv, "b:C:n:l:d:Dp:hSW:")) != EOF)
+	while ((opt = getopt(argc, argv, "b:C:n:l:d:p:hSW:")) != EOF)
 		switch (opt) {
 		case 'b':
 			if (!inet_aton(optarg, &bind_addr)) {
@@ -694,9 +690,6 @@ int main(int argc, char *argv[])
 			break;
 		case 'l':
 			sprintf(debugf, "%s.nmb.debug", optarg);
-			break;
-		case 'D':
-			is_daemon = true;
 			break;
 		case 'd':
 			DEBUGLEVEL = atoi(optarg);
@@ -723,11 +716,6 @@ int main(int argc, char *argv[])
 		strcpy(comment, "%h (Tumba %v)");
 	string_sub(comment, "%v", VERSION);
 	string_sub(comment, "%h", myhostname);
-
-	if (is_daemon) {
-		DEBUG(2, ("%s becoming a daemon\n", timestring()));
-		become_daemon();
-	}
 
 	if (open_server_sock(bind_addr, port)) {
 		process();
