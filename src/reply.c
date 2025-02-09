@@ -86,9 +86,15 @@ int reply_special(char *inbuf, char *outbuf)
 		trim_string(local_machine, " ", " ");
 		strlower(local_machine);
 
-		if (name_type == 'R') {
-			/* We are being asked for a pathworks session ---
-			   no thanks! */
+		/* The original code here had a check that would reject the DEC
+		 * Pathworks service (0x52) but this has been tightened to be
+		 * more restrictive. We only support server service (=SMB) and
+		 * not any other service types. In particular there was a
+		 * problem with Windows 2000 attempting to open DCERPC sessions
+		 * (0x87) when browsing the server shares, which would cause
+		 * Windows Explorer to freeze up for two minutes until the
+		 * session would time out. */
+		if (name_type != 0x20) {
 			CVAL(outbuf, 0) = 0x83;
 			break;
 		}
