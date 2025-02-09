@@ -289,7 +289,7 @@ static void reply_reg_request(char *inbuf, char *outbuf,
 	}
 
 	/* if it's my name and it's also my IP then don't worry about it */
-	if (ip_equal(&ip, &src_iface->ip)) {
+	if (ip.s_addr == src_iface->ip.s_addr) {
 		DEBUG(3, ("Is my IP\n"));
 		return;
 	}
@@ -319,7 +319,7 @@ static void reply_reg_request(char *inbuf, char *outbuf,
 	memcpy(p, &ip, 4); /* IP address of the name's owner (that's us) */
 	p += 4;
 
-	if (ip_equal(&ip, &src_iface->bcast_ip)) {
+	if (ip.s_addr == src_iface->bcast_ip.s_addr) {
 		DEBUG(0, ("Not replying to broadcast address\n"));
 		return;
 	}

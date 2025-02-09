@@ -428,20 +428,6 @@ bool get_myname(char *myname)
 }
 
 /****************************************************************************
-true if two IP addresses are equal
-****************************************************************************/
-bool ip_equal(struct in_addr *ip1, struct in_addr *ip2)
-{
-	char *p1 = (char *) ip1;
-	char *p2 = (char *) ip2;
-	int l = sizeof(*ip1);
-	while (l--)
-		if (*p1++ != *p2++)
-			return false;
-	return true;
-}
-
-/****************************************************************************
 open a socket of the specified type, port and address for incoming data
 ****************************************************************************/
 int open_socket_in(int type, int port)
