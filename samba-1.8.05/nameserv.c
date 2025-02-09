@@ -54,8 +54,7 @@ struct network_address {
 extern pstring debugf;
 extern int DEBUGLEVEL;
 
-uint8_t *InBuffer = NULL;
-uint8_t *OutBuffer = NULL;
+static uint8_t in_buffer[BUFFER_SIZE];
 
 static struct sockaddr_in last_client;
 
@@ -247,9 +246,9 @@ static void send_reply(void *buf, size_t buf_len)
 	}
 }
 
-static void reply_reg_request(uint8_t *inbuf, uint8_t *outbuf,
-                              struct network_address *src_iface)
+static void reply_reg_request(uint8_t *inbuf, struct network_address *src_iface)
 {
+	uint8_t outbuf[BUFFER_SIZE];
 	int rec_name_trn_id = RSVAL(inbuf, 0);
 	char qname[100] = "";
 	uint8_t *p = inbuf;
@@ -315,9 +314,9 @@ static void reply_reg_request(uint8_t *inbuf, uint8_t *outbuf,
 	send_reply(outbuf, nmb_len(outbuf));
 }
 
-static void reply_name_query(uint8_t *inbuf, uint8_t *outbuf,
-                             struct network_address *src_iface)
+static void reply_name_query(uint8_t *inbuf, struct network_address *src_iface)
 {
+	uint8_t outbuf[BUFFER_SIZE];
 	int rec_name_trn_id = RSVAL(inbuf, 0);
 	char qname[100] = "";
 	uint8_t *p = inbuf;
@@ -382,7 +381,7 @@ static struct network_address *get_iface_addr(struct network_address *addrs,
 	return NULL;
 }
 
-static void construct_reply(uint8_t *inbuf, uint8_t *outbuf)
+static void construct_reply(uint8_t *inbuf)
 {
 	int num_addrs = 0;
 	struct network_address *addrs = get_addresses(server_sock, &num_addrs);
@@ -402,10 +401,10 @@ static void construct_reply(uint8_t *inbuf, uint8_t *outbuf)
 	}
 
 	if (opcode == 0x5 && (nm_flags & ~1) == 0x10 && rcode == 0)
-		reply_reg_request(inbuf, outbuf, src_iface);
+		reply_reg_request(inbuf, src_iface);
 
 	if (opcode == 0 && (nm_flags & ~1) == 0x10 && rcode == 0)
-		reply_name_query(inbuf, outbuf, src_iface);
+		reply_name_query(inbuf, src_iface);
 
 	free(addrs);
 }
@@ -444,9 +443,9 @@ construct and send a host announcement
 Note that I don't know what half the numbers mean - I'm just using what I
 saw another PC use :-)
 */
-static bool announce_host(uint8_t *outbuf, char *group,
-                          struct network_address *addr)
+static bool announce_host(char *group, struct network_address *addr)
 {
+	uint8_t outbuf[BUFFER_SIZE];
 	struct sockaddr_in send_addr;
 	uint8_t *p, *p2;
 	uint8_t *gptr;
@@ -522,7 +521,7 @@ static bool announce_host(uint8_t *outbuf, char *group,
 
 /* We send a periodic browser protocol announcement; this makes the server
    show up in "Network Neighborhood" and equivalents. */
-static void do_browse_hook(uint8_t *inbuf, uint8_t *outbuf, bool force)
+static void do_browse_hook(void)
 {
 	int num_addrs = 0, i;
 	struct network_address *addrs = get_addresses(server_sock, &num_addrs);
@@ -530,7 +529,7 @@ static void do_browse_hook(uint8_t *inbuf, uint8_t *outbuf, bool force)
 	/* We send to all broadcast addresses (since there may be multiple
 	   interfaces we are listening on */
 	for (i = 0; i < num_addrs; ++i) {
-		announce_host(outbuf, mygroup, &addrs[i]);
+		announce_host(mygroup, &addrs[i]);
 	}
 
 	free(addrs);
@@ -540,11 +539,6 @@ static void process(void)
 {
 	time_t timer = 0;
 
-	InBuffer = malloc(BUFFER_SIZE);
-	OutBuffer = malloc(BUFFER_SIZE);
-	if ((InBuffer == NULL) || (OutBuffer == NULL))
-		return;
-
 	while (true) {
 		fd_set fds;
 		int selrtn;
@@ -552,7 +546,7 @@ static void process(void)
 		int nread;
 
 		if (!timer || (time(NULL) - timer) > UPDATE_INTERVAL) {
-			do_browse_hook(InBuffer, OutBuffer, false);
+			do_browse_hook();
 			timer = time(NULL);
 		}
 
@@ -568,10 +562,10 @@ static void process(void)
 		} while (selrtn < 0 && errno == EINTR);
 
 		if (FD_ISSET(server_sock, &fds)) {
-			nread =
-			    read_udp_socket(server_sock, InBuffer, BUFFER_SIZE);
-			if (nread > 0 && nmb_len(InBuffer) > 0) {
-				construct_reply(InBuffer, OutBuffer);
+			nread = read_udp_socket(server_sock, in_buffer,
+			                        BUFFER_SIZE);
+			if (nread > 0 && nmb_len(in_buffer) > 0) {
+				construct_reply(in_buffer);
 			}
 		}
 	}
