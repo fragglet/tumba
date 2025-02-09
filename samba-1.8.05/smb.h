@@ -242,8 +242,6 @@ void closestr(char *s, int start, int n);
 bool set_filetime(char *fname, time_t mtime);
 bool get_myname(char *myname);
 char *smb_fn_name(int cnum);
-int open_socket_in(int type, int port);
-int open_socket_out(struct in_addr *addr, int port);
 uint32_t interpret_addr(char *str);
 
 #ifndef MIN

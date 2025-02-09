@@ -561,16 +561,40 @@ static void process(void)
 	}
 }
 
-static bool open_sockets(bool is_daemon, int port)
+static bool open_server_sock(struct in_addr bind_addr, int port)
 {
 	int one = 1;
+	struct sockaddr_in bind_addr_in;
 
-	server_sock = open_socket_in(SOCK_DGRAM, port);
-	if (server_sock == -1)
+	server_sock = socket(AF_INET, SOCK_DGRAM, 0);
+	if (server_sock == -1) {
+		DEBUG(0, ("socket failed\n"));
 		return false;
+	}
 
-	/* allow broadcasts on it */
-	setsockopt(server_sock, SOL_SOCKET, SO_BROADCAST, &one, sizeof(one));
+	if (setsockopt(server_sock, SOL_SOCKET, SO_REUSEADDR, &one,
+	               sizeof(one)) == -1) {
+		DEBUG(3, ("setsockopt(REUSEADDR) failed - ignored\n"));
+	}
+
+	if (setsockopt(server_sock, SOL_SOCKET, SO_BROADCAST, &one,
+	               sizeof(one)) == -1) {
+		DEBUG(3, ("setsockopt(BROADCAST) failed - ignored\n"));
+	}
+
+	bind_addr_in.sin_family = AF_INET;
+	bind_addr_in.sin_port = htons(port);
+	bind_addr_in.sin_addr = bind_addr;
+
+	if (bind(server_sock, (struct sockaddr *) &bind_addr_in,
+	         sizeof(bind_addr_in)) < 0) {
+		DEBUG(0, ("bind failed on port %d\n", port));
+		close(server_sock);
+		return false;
+	}
+
+	DEBUG(1,
+	      ("bind successful for %s port %d\n", inet_ntoa(bind_addr), port));
 
 	/* We will abort gracefully when the client or remote system
 	   goes away */
@@ -603,10 +627,12 @@ static void usage(char *pname)
 {
 	DEBUG(0, ("Incorrect program usage - is the command line correct?\n"));
 
-	printf("Usage: %s [-n name] [-B bcast address] [-D] [-p port] [-d "
+	printf("Usage: %s [-n name] [-b address] [-D] [-p port] [-d "
 	       "debuglevel] [-l log basename]\n",
 	       pname);
 	printf("Version %s\n", VERSION);
+	printf("\t-b addr               address to bind socket "
+	       "(default 0.0.0.0)\n");
 	printf("\t-D                    become a daemon\n");
 	printf("\t-p port               listen on the specified port\n");
 	printf("\t-d debuglevel         set the debuglevel\n");
@@ -619,6 +645,7 @@ static void usage(char *pname)
 
 int main(int argc, char *argv[])
 {
+	struct in_addr bind_addr = {INADDR_ANY};
 	int port = 137;
 	int opt;
 	extern FILE *dbf;
@@ -626,8 +653,17 @@ int main(int argc, char *argv[])
 
 	sprintf(debugf, "%s.nmb.debug", DEBUGFILE);
 
-	while ((opt = getopt(argc, argv, "C:n:l:d:Dp:hSW:")) != EOF)
+	while ((opt = getopt(argc, argv, "b:C:n:l:d:Dp:hSW:")) != EOF)
 		switch (opt) {
+		case 'b':
+			if (!inet_aton(optarg, &bind_addr)) {
+				fprintf(stderr,
+				        "Failed to parse bind address "
+				        "'%s'\n",
+				        optarg);
+				exit(1);
+			}
+			break;
 		case 'C':
 			strcpy(comment, optarg);
 			break;
@@ -674,7 +710,7 @@ int main(int argc, char *argv[])
 		become_daemon();
 	}
 
-	if (open_sockets(is_daemon, port)) {
+	if (open_server_sock(bind_addr, port)) {
 		process();
 		close_sockets();
 	}
