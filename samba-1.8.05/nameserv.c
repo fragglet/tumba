@@ -54,8 +54,8 @@ struct network_address {
 extern pstring debugf;
 extern int DEBUGLEVEL;
 
-char *InBuffer = NULL;
-char *OutBuffer = NULL;
+uint8_t *InBuffer = NULL;
+uint8_t *OutBuffer = NULL;
 
 static struct sockaddr_in last_client;
 
@@ -182,7 +182,7 @@ static bool name_equal(char *s1, char *s2)
 	return (*s1 == 0 || *s1 == ' ') && (*s2 == 0 || *s2 == ' ');
 }
 
-static int read_udp_socket(int fd, char *buf, int len)
+static int read_udp_socket(int fd, uint8_t *buf, int len)
 {
 	int ret;
 	socklen_t src_len = sizeof(last_client);
@@ -199,11 +199,11 @@ static int read_udp_socket(int fd, char *buf, int len)
 	return ret;
 }
 
-static int nmb_len(char *buf)
+static int nmb_len(uint8_t *buf)
 {
 	int i;
 	int ret = 12;
-	char *p = buf;
+	uint8_t *p = buf;
 	int qdcount = RSVAL(buf, 4);
 	int ancount = RSVAL(buf, 6);
 	int nscount = RSVAL(buf, 8);
@@ -217,13 +217,13 @@ static int nmb_len(char *buf)
 
 	for (i = 0; i < qdcount; i++) {
 		p = buf + ret;
-		ret += name_len(p) + 4;
+		ret += name_len((char *) p) + 4;
 	}
 
 	for (i = 0; i < (ancount + nscount + arcount); i++) {
 		int rdlength;
 		p = buf + ret;
-		ret += name_len(p) + 8;
+		ret += name_len((char *) p) + 8;
 		p = buf + ret;
 		rdlength = RSVAL(p, 0);
 		ret += rdlength + 2;
@@ -247,21 +247,21 @@ static void send_reply(void *buf, size_t buf_len)
 	}
 }
 
-static void reply_reg_request(char *inbuf, char *outbuf,
+static void reply_reg_request(uint8_t *inbuf, uint8_t *outbuf,
                               struct network_address *src_iface)
 {
 	int rec_name_trn_id = RSVAL(inbuf, 0);
 	char qname[100] = "";
-	char *p = inbuf;
+	uint8_t *p = inbuf;
 	struct in_addr ip;
 	unsigned char nb_flags;
 
-	name_extract(inbuf, 12, qname);
+	name_extract((char *) inbuf, 12, qname);
 
 	p += 12;
-	p += name_len(p);
+	p += name_len((char *) p);
 	p += 4;
-	p += name_len(p);
+	p += name_len((char *) p);
 	p += 4;
 	nb_flags = CVAL(p, 6);
 	p += 8;
@@ -294,8 +294,8 @@ static void reply_reg_request(char *inbuf, char *outbuf,
 	RSSVAL(outbuf, 8, 0);
 	RSSVAL(outbuf, 10, 0);
 	p = outbuf + 12;
-	strcpy(p, inbuf + 12);
-	p += name_len(p);
+	strcpy((char *) p, (char *) inbuf + 12);
+	p += name_len((char *) p);
 	RSSVAL(p, 0, 0x20);
 	RSSVAL(p, 2, 0x1);
 	RSIVAL(p, 4, 0);
@@ -315,15 +315,15 @@ static void reply_reg_request(char *inbuf, char *outbuf,
 	send_reply(outbuf, nmb_len(outbuf));
 }
 
-static void reply_name_query(char *inbuf, char *outbuf,
+static void reply_name_query(uint8_t *inbuf, uint8_t *outbuf,
                              struct network_address *src_iface)
 {
 	int rec_name_trn_id = RSVAL(inbuf, 0);
 	char qname[100] = "";
-	char *p = inbuf;
+	uint8_t *p = inbuf;
 	unsigned char nb_flags = 0;
 
-	name_extract(inbuf, 12, qname);
+	name_extract((char *) inbuf, 12, qname);
 
 	DEBUG(2, ("(%s) querying name (%s)", inet_ntoa(last_client.sin_addr),
 	          qname));
@@ -344,8 +344,8 @@ static void reply_name_query(char *inbuf, char *outbuf,
 	RSSVAL(outbuf, 8, 0);
 	RSSVAL(outbuf, 10, 0);
 	p = outbuf + 12;
-	strcpy(p, inbuf + 12);
-	p += name_len(p);
+	strcpy((char *) p, (char *) inbuf + 12);
+	p += name_len((char *) p);
 	RSSVAL(p, 0, 0x20);
 	RSSVAL(p, 2, 0x1);
 	RSIVAL(p, 4, myttl);
@@ -382,7 +382,7 @@ static struct network_address *get_iface_addr(struct network_address *addrs,
 	return NULL;
 }
 
-static void construct_reply(char *inbuf, char *outbuf)
+static void construct_reply(uint8_t *inbuf, uint8_t *outbuf)
 {
 	int num_addrs = 0;
 	struct network_address *addrs = get_addresses(server_sock, &num_addrs);
@@ -444,12 +444,12 @@ construct and send a host announcement
 Note that I don't know what half the numbers mean - I'm just using what I
 saw another PC use :-)
 */
-static bool announce_host(char *outbuf, char *group,
+static bool announce_host(uint8_t *outbuf, char *group,
                           struct network_address *addr)
 {
 	struct sockaddr_in send_addr;
-	char *p, *p2;
-	char *gptr;
+	uint8_t *p, *p2;
+	uint8_t *gptr;
 
 	DEBUG(2, ("Sending host announcement to %s for group %s\n",
 	          inet_ntoa(addr->bcast_ip), group));
@@ -466,15 +466,15 @@ static bool announce_host(char *outbuf, char *group,
 
 	p = outbuf + 14;
 
-	p += name_mangle(myname, p);
-	strcpy(p - 3, "AA");
+	p += name_mangle(myname, (char *) p);
+	strcpy((char *) p - 3, "AA");
 	gptr = p;
-	p += name_mangle(group, p);
-	strcpy(p - 3, "BO");
+	p += name_mangle(group, (char *) p);
+	strcpy((char *) p - 3, "BO");
 
 	/* now setup the smb part */
 	p -= 4;
-	set_message(p, 17, 50 + strlen(comment) + 1, true);
+	set_message((char *) p, 17, 50 + strlen(comment) + 1, true);
 	CVAL(p, smb_com) = SMBtrans;
 	SSVAL(p, smb_vwv1, 32 + strlen(comment) + 1);
 	SSVAL(p, smb_vwv11, 32 + strlen(comment) + 1);
@@ -484,15 +484,15 @@ static bool announce_host(char *outbuf, char *group,
 	SSVAL(p, smb_vwv15, 1);
 	SSVAL(p, smb_vwv16, 2);
 	SSVAL(p, smb_vwv17, 1);
-	p2 = smb_buf(p);
-	strcpy(p2, "\\MAILSLOT\\BROWSE");
-	p2 = skip_string(p2, 1);
+	p2 = (uint8_t *) smb_buf((char *) p);
+	strcpy((char *) p2, "\\MAILSLOT\\BROWSE");
+	p2 = (uint8_t *) skip_string((char *) p2, 1);
 
 	CVAL(p2, 0) = 1;                      /* host announce */
 	CVAL(p2, 1) = 5;                      /* update count */
 	SIVAL(p2, 2, UPDATE_INTERVAL * 1000); /* update interval, in MS */
 	p2 += 6;
-	strcpy(p2, myname);
+	strcpy((char *) p2, myname);
 	p2 += 16;
 	CVAL(p2, 0) = 0; /* major version (was 1) */
 	CVAL(p2, 1) = 0; /* minor version (was 51) */
@@ -506,10 +506,10 @@ static bool announce_host(char *outbuf, char *group,
 	CVAL(p2, 8) = 85;
 	CVAL(p2, 9) = 170;
 	p2 += 10;
-	strcpy(p2, comment);
+	strcpy((char *) p2, comment);
 
-	p2 = gptr + name_mangle(group, gptr);
-	strcpy(p2 - 3, "BO");
+	p2 = gptr + name_mangle(group, (char *) gptr);
+	strcpy((char *) p2 - 3, "BO");
 
 	memset(&send_addr, 0, sizeof(send_addr));
 	send_addr.sin_family = AF_INET;
@@ -522,7 +522,7 @@ static bool announce_host(char *outbuf, char *group,
 
 /* We send a periodic browser protocol announcement; this makes the server
    show up in "Network Neighborhood" and equivalents. */
-static void do_browse_hook(char *inbuf, char *outbuf, bool force)
+static void do_browse_hook(uint8_t *inbuf, uint8_t *outbuf, bool force)
 {
 	int num_addrs = 0, i;
 	struct network_address *addrs = get_addresses(server_sock, &num_addrs);
