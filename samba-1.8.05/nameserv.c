@@ -18,6 +18,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
@@ -34,17 +35,6 @@
 #define SIGNAL_CAST     (void (*)(int))
 #define UPDATE_INTERVAL 60
 
-/* this is the structure used for the local netbios name table */
-struct netbios_name {
-	struct in_addr ip;
-	struct in_addr master_ip;
-	bool found_master;
-	bool valid;
-	char flags[10];
-	unsigned char nb_flags;
-	char name[100];
-};
-
 struct network_address {
 	struct in_addr ip;
 	struct in_addr netmask;
@@ -59,11 +49,8 @@ static uint8_t in_buffer[BUFFER_SIZE];
 static struct sockaddr_in last_client;
 
 pstring myname = "";
-pstring myhostname = "";
 pstring mygroup = "WORKGROUP";
 int myttl = 0;
-
-static struct netbios_name our_hostname;
 
 static int server_sock = 0;
 
@@ -154,16 +141,6 @@ static struct network_address *get_addresses(int sock_fd, int *num_addrs)
 
 	free(ifc.ifc_ifcu.ifcu_req);
 	return result;
-}
-
-static void init_name(struct netbios_name *n)
-{
-	memset(n, 0, sizeof(struct netbios_name));
-	n->valid = false;
-	n->found_master = false;
-	strcpy(n->name, "");
-	strcpy(n->flags, "");
-	n->nb_flags = 0;
 }
 
 /* true if two netbios names are equal */
@@ -270,7 +247,7 @@ static void reply_reg_request(uint8_t *inbuf, struct network_address *src_iface)
 	          qname, inet_ntoa(ip), nb_flags));
 
 	/* if it's not my name then don't worry about it */
-	if (!name_equal(our_hostname.name, qname)) {
+	if (!name_equal(myname, qname)) {
 		DEBUG(3, ("Not my name\n"));
 		return;
 	}
@@ -320,19 +297,16 @@ static void reply_name_query(uint8_t *inbuf, struct network_address *src_iface)
 	int rec_name_trn_id = RSVAL(inbuf, 0);
 	char qname[100] = "";
 	uint8_t *p = inbuf;
-	unsigned char nb_flags = 0;
 
 	name_extract((char *) inbuf, 12, qname);
 
 	DEBUG(2, ("(%s) querying name (%s)", inet_ntoa(last_client.sin_addr),
 	          qname));
 
-	if (!name_equal(qname, our_hostname.name)) {
+	if (!name_equal(qname, myname)) {
 		DEBUG(2, ("\n"));
 		return;
 	}
-
-	nb_flags = our_hostname.nb_flags;
 
 	/* Send a POSITIVE NAME QUERY RESPONSE */
 	RSSVAL(outbuf, 0, rec_name_trn_id);
@@ -349,7 +323,7 @@ static void reply_name_query(uint8_t *inbuf, struct network_address *src_iface)
 	RSSVAL(p, 2, 0x1);
 	RSIVAL(p, 4, myttl);
 	RSSVAL(p, 8, 6);
-	CVAL(p, 10) = nb_flags;
+	CVAL(p, 10) = 0;  /* flags */
 	CVAL(p, 11) = 0;
 	p += 12;
 	memcpy(p, &src_iface->ip, 4);
@@ -609,25 +583,41 @@ static bool open_server_sock(struct in_addr bind_addr, int port)
 	return true;
 }
 
-static bool init_structs(void)
+static void init_names(void)
 {
-	if (!get_myname(myhostname)) {
-		return false;
+	char hostname[HOST_NAME_MAX + 1];
+	char *p;
+	bool got_hostname;
+
+	got_hostname = gethostname(hostname, sizeof(hostname)) == 0;
+
+	if (strlen(myname) != 0) {
+		/* User specified the hostname */
+	} else if (!got_hostname) {
+		perror("gethostname");
+		fprintf(stderr, "Failed to get system hostname; you can "
+			"specify it manually with -n hostname\n");
+		exit(1);
+	} else {
+		strlcpy(myname, hostname, sizeof(myname));
+		p = strchr(myname, '.');
+		if (p != NULL) {
+			*p = '\0';
+		}
 	}
 
-	strupper(myhostname);
-
-	if (*myname == 0) {
-		strcpy(myname, myhostname);
-		strupper(myname);
+	if (strlen(comment) == 0) {
+		if (got_hostname) {
+			strlcpy(comment, hostname, sizeof(comment));
+			strlcat(comment, " ", sizeof(comment));
+		}
+		strlcat(comment, "(Tumba " VERSION ")", sizeof(comment));
 	}
 
-	init_name(&our_hostname);
-	strcpy(our_hostname.name, myname);
-
+	strupper(myname);
 	strupper(mygroup);
 
-	return true;
+	DEBUG(2, ("Hostname: %s; Workgroup: %s\n", myname, mygroup));
 }
 
 static void usage(char *pname)
@@ -701,12 +691,7 @@ int main(int argc, char *argv[])
 	          VERSION));
 	DEBUG(1, ("Copyright Andrew Tridgell 1994\n"));
 
-	init_structs();
-
-	if (!*comment)
-		strcpy(comment, "%h (Tumba %v)");
-	string_sub(comment, "%v", VERSION);
-	string_sub(comment, "%h", myhostname);
+	init_names();
 
 	if (open_server_sock(bind_addr, port)) {
 		process();
