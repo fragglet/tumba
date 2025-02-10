@@ -1061,8 +1061,9 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
 		          (str_checksum(local_machine) << 16));
 		SCVAL(pdata, l2_vol_cch, volname_len);
 		strlcpy(pdata + l2_vol_szVolLabel, vname, volname_len + 1);
-		DEBUG("time = %x, namelen = %d, name = %s\n", st.st_ctime,
-		      volname_len, pdata + l2_vol_szVolLabel);
+		DEBUG("time = %lx, namelen = %d, name = %s\n",
+		      (long) st.st_ctime, volname_len,
+		      pdata + l2_vol_szVolLabel);
 		break;
 	case SMB_QUERY_FS_ATTRIBUTE_INFO:
 		data_len = 12 + 2 * strlen(FSTYPE_STRING);
