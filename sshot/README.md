@@ -1,8 +1,6 @@
 ## Windows for Workgroups
 
-<img src="wfw311.png" width="640">
-
-(Server description is because the Samba nmbd server is being used) 
+<img src="wfw311.png" width="800">
 
 ## Windows 95
 
