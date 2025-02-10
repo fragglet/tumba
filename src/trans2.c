@@ -1044,9 +1044,9 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
 		SIVAL(pdata, l1_cUnit, dsize);
 		SIVAL(pdata, l1_cUnitAvail, dfree);
 		SSVAL(pdata, l1_cbSector, 512);
-		DEBUG("bsize=%d, id=%x, cSectorUnit=%d, "
+		DEBUG("bsize=%d, id=%lx, cSectorUnit=%d, "
 		      "cUnit=%d, cUnitAvail=%d, cbSector=%d\n",
-		      bsize, st.st_dev, bsize / 512, dsize, dfree, 512);
+		      bsize, (long) st.st_dev, bsize / 512, dsize, dfree, 512);
 		break;
 	case 2:
 		/* Return volume name */
