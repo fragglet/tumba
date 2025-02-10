@@ -361,7 +361,7 @@ bool dptr_fill(char *buf1, unsigned int key)
 		return false;
 	}
 	offset = tell_dir(p);
-	DEBUG("fill on key %d dirptr 0x%x now at %d\n", key, p, offset);
+	DEBUG("fill on key %d dirptr %p now at %d\n", key, p, offset);
 	buf[0] = key;
 	SIVAL(buf, 1, offset | DPTR_MASK);
 	return true;
@@ -452,7 +452,7 @@ bool get_dir_entry(int cnum, char *mask, int dirtype, char *fname, int *size,
 	while (!found) {
 		dname = read_dir_name(Connections[cnum].dirptr);
 
-		DEBUG("readdir on dirptr 0x%x now at offset %d\n",
+		DEBUG("readdir on dirptr %p now at offset %d\n",
 		      Connections[cnum].dirptr,
 		      tell_dir(Connections[cnum].dirptr));
 

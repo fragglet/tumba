@@ -1596,12 +1596,12 @@ int reply_writebraw(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	CVAL(outbuf, smb_com) = SMBwritec;
 
 	if (seek_file(fnum, startpos) != startpos)
-		ERROR("couldn't seek to %d in writebraw\n", startpos);
+		ERROR("couldn't seek to %ld in writebraw\n", startpos);
 
 	if (numtowrite > 0)
 		nwritten = write_file(fnum, data, numtowrite);
 
-	DEBUG("fnum=%d cnum=%d start=%d num=%d wrote=%d sync=%d\n", fnum, cnum,
+	DEBUG("fnum=%d cnum=%d start=%ld num=%d wrote=%d sync=%d\n", fnum, cnum,
 	      startpos, numtowrite, nwritten, write_through);
 
 	if (nwritten < numtowrite)
@@ -1645,7 +1645,7 @@ int reply_writebraw(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		SSVAL(outbuf, smb_err, ERRdiskfull);
 	}
 
-	DEBUG("fnum=%d cnum=%d start=%d num=%d wrote=%d\n", fnum, cnum,
+	DEBUG("fnum=%d cnum=%d start=%ld num=%d wrote=%d\n", fnum, cnum,
 	      startpos, numtowrite, total_written);
 
 	/* we won't return a status if write through is not selected - this
@@ -2954,7 +2954,7 @@ int reply_setattrE(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		/* Ignore request */
 		DEBUG("fnum=%d cnum=%d ignoring zero request - "
 		      "not setting timestamps of 0\n",
-		      fnum, cnum, unix_times.actime, unix_times.modtime);
+		      fnum, cnum);
 		return outsize;
 	} else if ((unix_times.actime != 0) && (unix_times.modtime == 0)) {
 		/* set modify time = to access time if modify time was 0 */
@@ -2965,8 +2965,8 @@ int reply_setattrE(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	if (sys_utime(Files[fnum].name, &unix_times) != 0)
 		return ERROR_CODE(ERRDOS, ERRnoaccess);
 
-	DEBUG("fnum=%d cnum=%d actime=%d modtime=%d\n", fnum, cnum,
-	      unix_times.actime, unix_times.modtime);
+	DEBUG("fnum=%d cnum=%d actime=%ld modtime=%ld\n", fnum, cnum,
+	      (long) unix_times.actime, (long) unix_times.modtime);
 
 	return outsize;
 }

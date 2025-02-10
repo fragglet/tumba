@@ -8,4 +8,4 @@
  * FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#define VERSION "0.1"
+#define VERSION "0.2"

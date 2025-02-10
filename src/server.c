@@ -738,7 +738,7 @@ bool check_name(char *name, int cnum)
 		return true;
 	}
 	if (getcwd(old_wd, sizeof(old_wd)) == NULL) {
-		DEBUG("denied: getcwd() errno=%d\n", top, errno);
+		DEBUG("denied: getcwd() errno=%d\n", errno);
 		return false;
 	}
 	if (chdir(top) != 0) {

@@ -15,6 +15,12 @@
 
 #include "strfunc.h"
 
+#ifdef __GNUC__
+#define PRINTF_ATTRIBUTE(x, y) __attribute__((format(printf, x, y)))
+#else
+#define PRINTF_ATTRIBUTE(x, y)
+#endif
+
 /* logging interface */
 #define LOG(funcname, linenum, level, ...)                                     \
 	do {                                                                   \
@@ -48,7 +54,7 @@ extern char client_addr[32];
 
 void setup_logging(char *pname);
 int log_output(const char *funcname, int linenum, int level, char *format_str,
-               ...);
+               ...) PRINTF_ATTRIBUTE(4, 5);
 bool file_exist(char *fname, struct stat *sbuf);
 bool directory_exist(char *dname, struct stat *st);
 uint32_t file_size(char *file_name);
