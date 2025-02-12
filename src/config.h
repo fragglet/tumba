@@ -22,13 +22,6 @@ static inline char *lp_logfile(void)
 	return "";
 }
 
-// This controls what string will show up in the printer comment box in print
-// manager and next to the IPC connection in "net view".
-static inline char *lp_serverstring(void)
-{
-	return "Tumba " VERSION;
-}
-
 // This parameter controls whether or not the server will support raw reads
 // when transferring data to clients.
 static inline bool lp_readraw(void)

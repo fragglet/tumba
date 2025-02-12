@@ -561,7 +561,11 @@ static bool api_RNetServerGetInfo(int cnum, char *param, char *data, int mdrcnt,
 			SIVAL(p, 6, 0);
 		} else {
 			pstring comment;
-			pstrcpy(comment, lp_serverstring());
+			/* We send back an empty srver string rather than
+			   anything more elaborate; otherwise, OS/2 Warp uses
+			   this instead of the server name, which can frankly
+			   be confusing. */
+			pstrcpy(comment, "");
 			SIVAL(p, 6, PTR_DIFF(p2, *rdata));
 			strlcpy(p2, comment, MAX(mdrcnt - struct_len, 0) + 1);
 			p2 = skip_string(p2, 1);
