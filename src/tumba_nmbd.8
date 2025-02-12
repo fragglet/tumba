@@ -57,15 +57,18 @@ Manually sets the hostname and server comment
 \fBtumba_nmbd\fR is a companion to the \fBtumba_smbd\fR, which is a minimalist
 implementation of the SMBv1 file sharing protocol. It intentionally omits many
 features of the NBNS protocol that are not needed for that purpose. For
-example, compared to Samba's \fBnmbd\fR(1) it does not implement:
+example, compared to Samba's \fBnmbd\fR(1):
 .IP \(bu
-NetBIOS to DNS mapping
+It does not act as a master browser server. \fBtumba_nmbd\fR will broadcast
+hostname announcements but does not track announcements from other hosts or
+respond to queries for names other than its own hostname. The practical upshot
+of this is that if your server is in a workgroup/domain on its own, that
+workgroup will not appear in the "Entire Network" folder in Windows's "Network
+Neighborhood".
 .IP \(bu
-Being a master browser server; \fBtumba_nmbd\fR will broadcast hostname
-announcements but does not track announcements from other hosts or respond to
-queries for names other than its own hostname.
+There is no support for NetBIOS to DNS mapping
 .IP \(bu
-LMHOSTS files
+There is no support for LMHOSTS files
 .PP
 If these features are needed, the Samba \fBnmbd\fR server can be used instead,
 even if \fBtumba_smbd\fR is being used as an SMB server (the SMB/NMB servers
