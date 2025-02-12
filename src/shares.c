@@ -23,8 +23,6 @@
 #include "strfunc.h"
 #include "util.h"
 
-#define IPC_NAME "IPC$"
-
 static struct share *shares;
 static int num_shares;
 const struct share *ipc_service;
@@ -116,10 +114,10 @@ void add_ipc_service(void)
 {
 	struct share *ipc;
 
-	assert(lookup_share(IPC_NAME) == NULL);
+	assert(lookup_share(IPC_SHARE_NAME) == NULL);
 
 	ipc = _add_share();
-	ipc->name = IPC_NAME;
+	ipc->name = IPC_SHARE_NAME;
 	ipc->description = "IPC service";
 
 	ipc_service = ipc;

@@ -8,6 +8,8 @@
  * FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+#define IPC_SHARE_NAME "IPC$"
+
 struct share {
 	char *name;
 	char *path;

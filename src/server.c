@@ -1926,7 +1926,7 @@ int make_connection(char *service, char *dev)
 
 	share = lookup_share(service);
 	if (share == NULL) {
-		if (strequal(service, "IPC$")) {
+		if (strequal(service, IPC_SHARE_NAME)) {
 			DEBUG("refusing IPC connection\n");
 			return -3;
 		}
