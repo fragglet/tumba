@@ -3064,7 +3064,7 @@ static void usage(void)
 	      "correct?\n");
 
 	printf("Tumba version " VERSION "\n"
-	       "Usage: tumba_smbd [-a] [-W workgroup] [-p port] "
+	       "Usage: tumba_smbd [-a] [-p port] "
 	       "[-d debuglevel] [-l log basename]\n"
 	       "                  <path> [paths...]\n\n"
 	       "   -a                allow connections from all addresses\n"
@@ -3072,7 +3072,6 @@ static void usage(void)
 	       "   -p port           listen on the specified port\n"
 	       "   -d level          set the logging level\n"
 	       "   -l filename       write log messages to the given file\n"
-	       "   -W workgroup      override workgroup name\n"
 	       "\n");
 }
 
@@ -3122,6 +3121,8 @@ int main(int argc, char *argv[])
 			exit(0);
 			break;
 		case 'W':
+			/* This is a hidden/undocumented argument; it should
+			   not be necessary to ever change it. */
 			workgroup = optarg;
 			break;
 		default:
