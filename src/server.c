@@ -83,6 +83,8 @@
 
 #define MAX_MUX 50
 
+static char **original_argv;
+static int original_argc;
 static bool allow_public_connections = false;
 
 static char *InBuffer = NULL;
@@ -1647,6 +1649,47 @@ static const char *get_peer_addr(int fd)
 	return inet_ntoa(sockin.sin_addr);
 }
 
+static void set_descriptive_argv(void)
+{
+#if defined(linux) /* and other systems? */
+#define ARGV_BUF_LEN  128 /* is this defined somewhere? */
+	char *p = original_argv[original_argc - 1];
+	bool appended_services = false;
+	size_t buf_len;
+	int i;
+
+	if (original_argc < 2) {
+		return;
+	}
+	/* Clear all old args and replace with our own descriptive data about
+	   the client that this subprocess is serving. Note that we assume
+	   there was at least one command line argument, which because of our
+	   command syntax, is always the case. */
+	p += strlen(p);
+	memset(original_argv[1], 0, p - original_argv[1]);
+	buf_len = ARGV_BUF_LEN - strlen(original_argv[0]) - 1;
+	snprintf(original_argv[1], buf_len, "[%s]", client_addr);
+	original_argc = 2;
+
+	for (i = 0; i < MAX_CONNECTIONS; ++i) {
+		if (!Connections[i].open
+		 || strequal(Connections[i].share->name, IPC_SHARE_NAME)) {
+			continue;
+		}
+		if (appended_services) {
+			strlcat(original_argv[1], ", ", buf_len);
+		} else {
+			strlcat(original_argv[1], " (using shares: ", buf_len);
+			appended_services = true;
+		}
+		strlcat(original_argv[1], Connections[i].share->name, buf_len);
+	}
+	if (appended_services) {
+		strlcat(original_argv[1], ")", buf_len);
+	}
+#endif
+}
+
 /****************************************************************************
   open the socket communication
 ****************************************************************************/
@@ -1738,6 +1781,8 @@ static bool open_sockets(int port)
 			/* save a copy of the client's address to include log
 			 * messages */
 			strlcpy(client_addr, peer_addr, sizeof(client_addr));
+
+			set_descriptive_argv();
 
 			/* only the parent catches SIGCHLD */
 			signal(SIGPIPE, SIGNAL_CAST sig_pipe);
@@ -1999,6 +2044,7 @@ int make_connection(char *service, char *dev)
 
 	WARNING("connect to service %s (pid %d)\n", CONN_SHARE(cnum)->name,
 	        (int) getpid());
+	set_descriptive_argv();
 
 	return cnum;
 }
@@ -2377,6 +2423,7 @@ void close_cnum(int cnum)
 
 	string_set(&Connections[cnum].dirpath, "");
 	string_set(&Connections[cnum].connectpath, "");
+	set_descriptive_argv();
 }
 
 /****************************************************************************
@@ -3038,6 +3085,8 @@ int main(int argc, char *argv[])
 
 	signal(SIGTERM, SIGNAL_CAST dflt_sig);
 
+	original_argv = argv;
+	original_argc = argc;
 	while ((opt = getopt(argc, argv, "b:l:d:p:haW:")) != EOF) {
 		switch (opt) {
 		case 'a':
