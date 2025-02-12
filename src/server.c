@@ -1489,6 +1489,9 @@ this prevents zombie child processes
 static int sigchld_handler(void)
 {
 	static int depth = 0;
+	int status;
+	pid_t pid;
+
 	if (depth != 0) {
 		ERROR("ERROR: Recursion in sigchld_handler?");
 		depth = 0;
@@ -1499,7 +1502,17 @@ static int sigchld_handler(void)
 	block_signals(true, SIGCHLD);
 	DEBUG("got SIGCHLD\n");
 
-	while (waitpid((pid_t) -1, (int *) NULL, WNOHANG) > 0) {
+	while ((pid = waitpid((pid_t) -1, &status, WNOHANG)) > 0) {
+		/* If a serving subprocess crashes, we want to log it */
+		if (status != 0) {
+			WARNING("serving subprocess (pid %ld) terminated "
+			        "abnormally, status=%d\n",
+			        (long) pid, status);
+		} else {
+			DEBUG("serving subprocess (pid %ld) terminated "
+			      "normally, status=0\n",
+			      (long) pid);
+		}
 	}
 
 	/* Stop zombies */
