@@ -624,19 +624,23 @@ static void usage(char *pname)
 {
 	DEBUG(0, ("Incorrect program usage - is the command line correct?\n"));
 
-	printf("Usage: %s [-n name] [-b address] [-p port] [-d "
-	       "debuglevel] [-l log basename]\n",
+	printf("Tumba version " VERSION "\n"
+	       "Usage: %s"
+	       " [-b address]"
+	       " [-d level]"
+	       " [-l filename]"
+	       " [-n name]"
+	       " [-p port]"
+	       " [-W workgroup]"
+	       "\n\n"
+	       "  -b address     address to bind socket (default 0.0.0.0)\n"
+	       "  -d level       set the logging level\n"
+	       "  -l filename    path to debug log file\n"
+	       "  -n name        the netbios name to advertise for this host\n"
+	       "  -p port        listen on the specified port\n"
+	       "  -W workgroup   specify workgroup name (default WORKGROUP)\n"
+	       "\n",
 	       pname);
-	printf("Version %s\n", VERSION);
-	printf("\t-b addr               address to bind socket "
-	       "(default 0.0.0.0)\n");
-	printf("\t-p port               listen on the specified port\n");
-	printf("\t-d debuglevel         set the debuglevel\n");
-	printf("\t-l log basename.      Basename for log/debug files\n");
-	printf("\t-n netbiosname.       the netbios name to advertise for this "
-	       "host\n");
-	printf("\t-W workgroup          specify workgroup name\n");
-	printf("\n");
 }
 
 int main(int argc, char *argv[])
