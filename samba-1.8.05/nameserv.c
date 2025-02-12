@@ -12,13 +12,13 @@
 #include <arpa/inet.h>
 #include <ctype.h>
 #include <errno.h>
+#include <limits.h>
 #include <net/if.h>
 #include <netinet/in.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
-#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
@@ -323,7 +323,7 @@ static void reply_name_query(uint8_t *inbuf, struct network_address *src_iface)
 	RSSVAL(p, 2, 0x1);
 	RSIVAL(p, 4, myttl);
 	RSSVAL(p, 8, 6);
-	CVAL(p, 10) = 0;  /* flags */
+	CVAL(p, 10) = 0; /* flags */
 	CVAL(p, 11) = 0;
 	p += 12;
 	memcpy(p, &src_iface->ip, 4);
@@ -596,7 +596,7 @@ static void init_names(void)
 	} else if (!got_hostname) {
 		perror("gethostname");
 		fprintf(stderr, "Failed to get system hostname; you can "
-			"specify it manually with -n hostname\n");
+		                "specify it manually with -n hostname\n");
 		exit(1);
 	} else {
 		strlcpy(myname, hostname, sizeof(myname));
