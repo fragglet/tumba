@@ -1664,8 +1664,8 @@ static const char *get_peer_addr(int fd)
 
 static void set_descriptive_argv(void)
 {
-#if defined(linux) /* and other systems? */
-#define ARGV_BUF_LEN  128 /* is this defined somewhere? */
+#if defined(linux)       /* and other systems? */
+#define ARGV_BUF_LEN 128 /* is this defined somewhere? */
 	char *p = original_argv[original_argc - 1];
 	bool appended_services = false;
 	size_t buf_len;
@@ -1685,8 +1685,8 @@ static void set_descriptive_argv(void)
 	original_argc = 2;
 
 	for (i = 0; i < MAX_CONNECTIONS; ++i) {
-		if (!Connections[i].open
-		 || strequal(Connections[i].share->name, IPC_SHARE_NAME)) {
+		if (!Connections[i].open ||
+		    strequal(Connections[i].share->name, IPC_SHARE_NAME)) {
 			continue;
 		}
 		if (appended_services) {
