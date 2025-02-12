@@ -3064,14 +3064,19 @@ static void usage(void)
 	      "correct?\n");
 
 	printf("Tumba version " VERSION "\n"
-	       "Usage: tumba_smbd [-a] [-p port] "
-	       "[-d debuglevel] [-l log basename]\n"
+	       "Usage: tumba_smbd"
+	       " [-a]"
+	       " [-b address]"
+	       " [-d level]"
+	       " [-l filename]"
+	       " [-p port]"
+	       "\n"
 	       "                  <path> [paths...]\n\n"
-	       "   -a                allow connections from all addresses\n"
-	       "   -b addr           bind to given address\n"
-	       "   -p port           listen on the specified port\n"
-	       "   -d level          set the logging level\n"
-	       "   -l filename       write log messages to the given file\n"
+	       "  -a            allow connections from any address\n"
+	       "  -b address    address to bind socket (default 0.0.0.0)\n"
+	       "  -d level      set the logging level\n"
+	       "  -l filename   path to debug log file\n"
+	       "  -p port       listen on the specified port\n"
 	       "\n");
 }
 
