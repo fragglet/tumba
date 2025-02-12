@@ -623,12 +623,12 @@ static bool api_NetWkstaGetInfo(int cnum, char *param, char *data, int mdrcnt,
 	p2 = skip_string(p2, 1);
 	p += 4;
 
-	SIVAL(p, 0, PTR_DIFF(p2, *rdata));
-	pstrcpy(p2, "user");
+	SIVAL(p, 0, PTR_DIFF(p2, *rdata)); /* logged in user (none) */
+	pstrcpy(p2, "");
 	p2 = skip_string(p2, 1);
 	p += 4;
 
-	SIVAL(p, 0, PTR_DIFF(p2, *rdata)); /* login domain */
+	SIVAL(p, 0, PTR_DIFF(p2, *rdata)); /* workgroup/domain we belong to*/
 	pstrcpy(p2, workgroup);
 	strupper(p2);
 	p2 = skip_string(p2, 1);
@@ -639,11 +639,11 @@ static bool api_NetWkstaGetInfo(int cnum, char *param, char *data, int mdrcnt,
 	p += 2;
 
 	SIVAL(p, 0, PTR_DIFF(p2, *rdata));
-	pstrcpy(p2, workgroup); /* don't know.  login domain?? */
+	pstrcpy(p2, ""); /* login domain; we're not logged on */
 	p2 = skip_string(p2, 1);
 	p += 4;
 
-	SIVAL(p, 0, PTR_DIFF(p2, *rdata)); /* don't know */
+	SIVAL(p, 0, PTR_DIFF(p2, *rdata)); /* other domains (none) */
 	pstrcpy(p2, "");
 	p2 = skip_string(p2, 1);
 
