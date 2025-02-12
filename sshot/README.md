@@ -24,7 +24,7 @@
 
 ## OS/2 Warp 4.52
 
-<img src="os2warp4.png" width="640">
+<img src="os2warp4.png" width="1024">
 
 ## Microsoft Network Client 3.0 (DOS)
 

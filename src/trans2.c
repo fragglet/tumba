@@ -1179,6 +1179,12 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
 		info_level = SVAL(params, 0);
 		fname = &fname1[0];
 		pstrcpy(fname, &params[6]);
+		/* An empty string is interpreted as a request for the
+		   top-level directory. This fixes browsing with the IBM
+		   Peer on OS/2 Warp */
+		if (strequal(fname, "")) {
+			pstrcpy(fname, ".");
+		}
 		unix_convert(fname, cnum, 0, &bad_path);
 		if (!check_name(fname, cnum) || stat(fname, &sbuf)) {
 			DEBUG("fileinfo of %s failed (%s)\n", fname,
