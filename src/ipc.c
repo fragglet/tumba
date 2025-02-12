@@ -25,7 +25,6 @@
 #include <time.h>
 
 #include "byteorder.h"
-#include "config.h"
 #include "guards.h" /* IWYU pragma: keep */
 #include "server.h"
 #include "shares.h"
