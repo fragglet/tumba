@@ -717,8 +717,7 @@ static void process(void)
 		timeout.tv_usec = 0;
 
 		do {
-			selrtn = select(255, SELECT_CAST & fds, NULL, NULL,
-			                &timeout);
+			selrtn = select(255, &fds, NULL, NULL, &timeout);
 		} while (selrtn < 0 && errno == EINTR);
 
 		if (FD_ISSET(server_sock, &fds)) {

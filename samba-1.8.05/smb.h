@@ -260,10 +260,6 @@ uint32_t interpret_addr(char *str);
 #define ABS(a) ((a) > 0 ? (a) : (-(a)))
 #endif
 
-#ifndef SELECT_CAST
-#define SELECT_CAST
-#endif
-
 /* these are used in NetServerEnum to choose what to receive */
 #define SV_TYPE_WORKSTATION       0x00000001
 #define SV_TYPE_SERVER            0x00000002
