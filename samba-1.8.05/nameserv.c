@@ -170,7 +170,9 @@ static int read_udp_socket(int fd, uint8_t *buf, int len)
 		return 0;
 	}
 
-	DEBUG(5, ("read %d bytes\n", ret));
+	DEBUG(5,
+	      ("received %d byte packet from %s:%d\n", ret,
+	       inet_ntoa(last_client.sin_addr), ntohs(last_client.sin_port)));
 
 	return ret;
 }
@@ -243,23 +245,25 @@ static void reply_reg_request(uint8_t *inbuf, struct network_address *src_iface)
 	p += 8;
 	memcpy(&ip, p, 4);
 
-	DEBUG(2, ("Name registration request for %s (%s) nb_flags=0x%x\n",
+	DEBUG(2, ("Name registration request for %s (%s) nb_flags=0x%x: ",
 	          qname, inet_ntoa(ip), nb_flags));
 
 	/* if it's not my name then don't worry about it */
 	if (!name_equal(myname, qname)) {
-		DEBUG(3, ("Not my name\n"));
+		DEBUG(2, ("not my name\n"));
 		return;
 	}
 
 	/* if it's my name and it's also my IP then don't worry about it */
 	if (ip.s_addr == src_iface->ip.s_addr) {
-		DEBUG(3, ("Is my IP\n"));
+		DEBUG(2, ("is my IP\n"));
 		return;
 	}
 
-	DEBUG(0,
-	      ("Someones using my name (%s), sending negative reply\n", qname));
+	DEBUG(2, ("\n"));
+
+	DEBUG(0, ("Someone is using my name (%s), sending negative reply\n",
+	          qname));
 
 	/* Send a NEGATIVE REGISTRATION RESPONSE to protect our name */
 	RSSVAL(outbuf, 0, rec_name_trn_id);
@@ -300,13 +304,14 @@ static void reply_name_query(uint8_t *inbuf, struct network_address *src_iface)
 
 	name_extract((char *) inbuf, 12, qname);
 
-	DEBUG(2, ("(%s) querying name (%s)", inet_ntoa(last_client.sin_addr),
-	          qname));
+	DEBUG(2, ("Query for name (%s)", qname));
 
 	if (!name_equal(qname, myname)) {
-		DEBUG(2, ("\n"));
+		DEBUG(2, (" not our hostname\n"));
 		return;
 	}
+
+	DEBUG(2, ("\n"));
 
 	/* Send a POSITIVE NAME QUERY RESPONSE */
 	RSSVAL(outbuf, 0, rec_name_trn_id);
