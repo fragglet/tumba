@@ -36,9 +36,12 @@
 #define UPDATE_INTERVAL 60
 
 /* How long we wait for a registration response */
-#define BCAST_REQ_RETRY_TIMEOUT 5
+#define BCAST_REQ_RETRY_TIMEOUT       5
 /* How many registration requests we send before declaring victory */
-#define BCAST_REQ_RETRY_COUNT   3
+#define BCAST_REQ_RETRY_COUNT         3
+/* How long do we wait after receiving a negative registration request before
+   we try again? */
+#define REGISTRATION_FAIL_RETRY_DELAY (5 * 60)
 
 static const char *rcode_descriptions[] = {
     "Success",
@@ -66,6 +69,7 @@ static struct sockaddr_in last_client;
 static bool registered_name = false;
 static int num_registration_attempts = 0;
 static uint16_t last_reg_trn_id;
+static time_t next_register_time = 0;
 
 pstring myname = "";
 pstring mygroup = "WORKGROUP";
@@ -384,10 +388,13 @@ static void registration_response(uint8_t *inbuf)
 
 	if (name_trn_id == last_reg_trn_id && rcode != 0) {
 		DEBUG(1,
-		      ("Failed to register name: %s returned rcode=%d (%s)\n",
+		      ("Failed to register name: %s returned rcode=%d (%s). ",
 		       inet_ntoa(last_client.sin_addr), rcode,
 		       rcode_description(rcode)));
+		DEBUG(1, ("Will try again in %d seconds\n",
+		          REGISTRATION_FAIL_RETRY_DELAY));
 		num_registration_attempts = 0;
+		next_register_time = time(NULL) + REGISTRATION_FAIL_RETRY_DELAY;
 	}
 }
 
@@ -548,10 +555,9 @@ static void send_all_registrations(bool demand, uint16_t trn_id)
 
 static void try_name_registration(void)
 {
-	static time_t last_register_time = 0;
 	time_t now = time(NULL);
 
-	if ((now - last_register_time) < BCAST_REQ_RETRY_TIMEOUT) {
+	if (now < next_register_time) {
 		return;
 	}
 
@@ -570,7 +576,7 @@ static void try_name_registration(void)
 	/* time to send another registration attempt */
 	send_all_registrations(false, last_reg_trn_id);
 	++num_registration_attempts;
-	last_register_time = now;
+	next_register_time = now + BCAST_REQ_RETRY_TIMEOUT;
 }
 
 /*
