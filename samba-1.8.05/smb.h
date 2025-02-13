@@ -43,6 +43,11 @@
 typedef char pstring[1024];
 typedef char fstring[128];
 
+#define pstrcpy(d, s) strlcpy((d), (s), sizeof(pstring))
+#define pstrcat(d, s) strlcpy((d), (s), sizeof(pstring))
+#define fstrcpy(d, s) strlcpy((d), (s), sizeof(fstring))
+#define fstrcat(d, s) strlcpy((d), (s), sizeof(fstring))
+
 /* access various service details */
 /* the basic packet size, assuming no words or bytes */
 #define smb_size 39

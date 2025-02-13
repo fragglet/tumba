@@ -73,8 +73,8 @@ static int num_registration_attempts = 0;
 static uint16_t last_reg_trn_id;
 static time_t next_register_time = 0;
 
-pstring myname = "";
-pstring mygroup = "WORKGROUP";
+fstring myname = "";
+fstring mygroup = "WORKGROUP";
 int myttl = 0;
 
 static int server_sock = 0;
@@ -854,16 +854,16 @@ int main(int argc, char *argv[])
 			}
 			break;
 		case 'C':
-			strcpy(comment, optarg);
+			fstrcpy(comment, optarg);
 			break;
 		case 'W':
-			strcpy(mygroup, optarg);
+			fstrcpy(mygroup, optarg);
 			break;
 		case 'n':
-			strcpy(myname, optarg);
+			fstrcpy(myname, optarg);
 			break;
 		case 'l':
-			sprintf(debugf, "%s.nmb.debug", optarg);
+			pstrcpy(debugf, optarg);
 			break;
 		case 'd':
 			LOGLEVEL = atoi(optarg);
