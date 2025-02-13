@@ -146,25 +146,24 @@ static struct network_address *get_addresses(int sock_fd, int *num_addrs)
 		   are contained in a union, so you can only "see" one field
 		   at a time, but you can switch between them using ioctls: */
 		if (ioctl(sock_fd, SIOCGIFNETMASK, req) < 0) {
-			DEBUG(0, ("Failed getting netmask for %s\n",
-			          req->ifr_name));
+			DEBUG(0, "Failed getting netmask for %s\n",
+			      req->ifr_name);
 			continue;
 		}
 		result[*num_addrs].netmask = addr(&req->ifr_netmask);
 
 		if (ioctl(sock_fd, SIOCGIFBRDADDR, req) < 0) {
-			DEBUG(0, ("Failed getting broadcast address for %s\n",
-			          req->ifr_name));
+			DEBUG(0, "Failed getting broadcast address for %s\n",
+			      req->ifr_name);
 			continue;
 		}
 		result[*num_addrs].bcast_ip = addr(&req->ifr_broadaddr);
 
-		DEBUG(5, ("interface %s: ip=%s, ", req->ifr_name,
-		          inet_ntoa(result[*num_addrs].ip)));
-		DEBUG(5,
-		      ("netmask=%s, ", inet_ntoa(result[*num_addrs].netmask)));
-		DEBUG(5, ("bcast_ip=%s\n",
-		          inet_ntoa(result[*num_addrs].bcast_ip)));
+		DEBUG(5, "interface %s: ip=%s, ", req->ifr_name,
+		      inet_ntoa(result[*num_addrs].ip));
+		DEBUG(5, "netmask=%s, ", inet_ntoa(result[*num_addrs].netmask));
+		DEBUG(5, "bcast_ip=%s\n",
+		      inet_ntoa(result[*num_addrs].bcast_ip));
 
 		++*num_addrs;
 	}
@@ -214,13 +213,12 @@ static int read_udp_socket(int fd, uint8_t *buf, int len)
 	ret = recvfrom(fd, buf, len, 0, (struct sockaddr *) &last_client,
 	               &src_len);
 	if (ret <= 0) {
-		DEBUG(2, ("read socket failed. ERRNO=%d\n", errno));
+		DEBUG(2, "read socket failed. ERRNO=%d\n", errno);
 		return 0;
 	}
 
-	DEBUG(5,
-	      ("received %d byte packet from %s:%d\n", ret,
-	       inet_ntoa(last_client.sin_addr), ntohs(last_client.sin_port)));
+	DEBUG(5, "received %d byte packet from %s:%d\n", ret,
+	      inet_ntoa(last_client.sin_addr), ntohs(last_client.sin_port));
 
 	return ret;
 }
@@ -237,7 +235,7 @@ static int nmb_len(uint8_t *buf)
 
 	/* check for insane qdcount values? */
 	if (qdcount > 100 || qdcount < 0) {
-		DEBUG(6, ("Invalid qdcount? qdcount=%d\n", qdcount));
+		DEBUG(6, "Invalid qdcount? qdcount=%d\n", qdcount);
 		return 0;
 	}
 
@@ -269,7 +267,7 @@ static void send_reply(void *buf, size_t buf_len)
 {
 	if (sendto(server_sock, buf, buf_len, 0,
 	           (struct sockaddr *) &last_client, sizeof(last_client)) < 0) {
-		DEBUG(0, ("Error sending reply: %s\n", strerror(errno)));
+		DEBUG(0, "Error sending reply: %s\n", strerror(errno));
 	}
 }
 
@@ -293,25 +291,25 @@ static void reply_reg_request(uint8_t *inbuf, struct network_address *src_iface)
 	p += 8;
 	memcpy(&ip, p, 4);
 
-	DEBUG(2, ("Name registration request for %s (%s) nb_flags=0x%x: ",
-	          qname, inet_ntoa(ip), nb_flags));
+	DEBUG(2, "Name registration request for %s (%s) nb_flags=0x%x: ", qname,
+	      inet_ntoa(ip), nb_flags);
 
 	/* if it's not my name then don't worry about it */
 	if (!name_equal(myname, qname)) {
-		DEBUG(2, ("not my name\n"));
+		DEBUG(2, "not my name\n");
 		return;
 	}
 
 	/* if it's my name and it's also my IP then don't worry about it */
 	if (ip.s_addr == src_iface->ip.s_addr) {
-		DEBUG(2, ("is my IP\n"));
+		DEBUG(2, "is my IP\n");
 		return;
 	}
 
-	DEBUG(2, ("\n"));
+	DEBUG(2, "\n");
 
-	DEBUG(0, ("Someone is using my name (%s), sending negative reply\n",
-	          qname));
+	DEBUG(0, "Someone is using my name (%s), sending negative reply\n",
+	      qname);
 
 	/* Send a NEGATIVE REGISTRATION RESPONSE to protect our name */
 	RSSVAL(outbuf, 0, rec_name_trn_id);
@@ -336,7 +334,7 @@ static void reply_reg_request(uint8_t *inbuf, struct network_address *src_iface)
 	p += 4;
 
 	if (ip.s_addr == src_iface->bcast_ip.s_addr) {
-		DEBUG(0, ("Not replying to broadcast address\n"));
+		DEBUG(0, "Not replying to broadcast address\n");
 		return;
 	}
 
@@ -352,14 +350,14 @@ static void reply_name_query(uint8_t *inbuf, struct network_address *src_iface)
 
 	name_extract((char *) inbuf, 12, qname);
 
-	DEBUG(2, ("Query for name (%s)", qname));
+	DEBUG(2, "Query for name (%s)", qname);
 
 	if (!name_equal(qname, myname)) {
-		DEBUG(2, (" not our hostname\n"));
+		DEBUG(2, " not our hostname\n");
 		return;
 	}
 
-	DEBUG(2, ("\n"));
+	DEBUG(2, "\n");
 
 	/* Send a POSITIVE NAME QUERY RESPONSE */
 	RSSVAL(outbuf, 0, rec_name_trn_id);
@@ -400,17 +398,17 @@ static void registration_response(uint8_t *inbuf)
 	int name_trn_id = RSVAL(inbuf, 0);
 	int rcode = CVAL(inbuf, 3) & 0xF;
 
-	DEBUG(4, ("Received name registration response: "
-	          "name_trn_id=%d, rcode=%d\n",
-	          name_trn_id, rcode));
+	DEBUG(4,
+	      "Received name registration response: "
+	      "name_trn_id=%d, rcode=%d\n",
+	      name_trn_id, rcode);
 
 	if (name_trn_id == last_reg_trn_id && rcode != 0) {
-		DEBUG(1,
-		      ("Failed to register name: %s returned rcode=%d (%s). ",
-		       inet_ntoa(last_client.sin_addr), rcode,
-		       rcode_description(rcode)));
-		DEBUG(1, ("Will try again in %d seconds\n",
-		          REGISTRATION_FAIL_RETRY_DELAY));
+		DEBUG(1, "Failed to register name: %s returned rcode=%d (%s). ",
+		      inet_ntoa(last_client.sin_addr), rcode,
+		      rcode_description(rcode));
+		DEBUG(1, "Will try again in %d seconds\n",
+		      REGISTRATION_FAIL_RETRY_DELAY);
 		num_registration_attempts = 0;
 		next_register_time = time(NULL) + REGISTRATION_FAIL_RETRY_DELAY;
 	}
@@ -424,17 +422,17 @@ static struct network_address *get_iface_addr(struct network_address *addrs,
 {
 	int i;
 
-	DEBUG(3, ("Finding matching interface for src=%s: ", inet_ntoa(*src)));
+	DEBUG(3, "Finding matching interface for src=%s: ", inet_ntoa(*src));
 
 	for (i = 0; i < num_addrs; ++i) {
 		if ((addrs[i].ip.s_addr & addrs[i].netmask.s_addr) ==
 		    (src->s_addr & addrs[i].netmask.s_addr)) {
-			DEBUG(3, ("match for %s ", inet_ntoa(addrs[i].ip)));
-			DEBUG(3, ("netmask %s\n", inet_ntoa(addrs[i].netmask)));
+			DEBUG(3, "match for %s ", inet_ntoa(addrs[i].ip));
+			DEBUG(3, "netmask %s\n", inet_ntoa(addrs[i].netmask));
 			return &addrs[i];
 		}
 	}
-	DEBUG(3, ("none found.\n"));
+	DEBUG(3, "none found.\n");
 
 	return NULL;
 }
@@ -459,8 +457,8 @@ static void construct_reply(uint8_t *inbuf)
 		return;
 	}
 
-	DEBUG(4, ("opcode=0x%x, nm_flags=0x%x, rcode=0x%x\n", opcode, nm_flags,
-	          rcode));
+	DEBUG(4, "opcode=0x%x, nm_flags=0x%x, rcode=0x%x\n", opcode, nm_flags,
+	      rcode);
 
 	if (opcode == 0x5) {
 		if (is_response) {
@@ -517,8 +515,8 @@ static void send_registration(struct network_address *addr, bool demand,
 		return;
 	}
 
-	DEBUG(1, ("Broadcasting registration %s to %s\n",
-	          demand ? "demand" : "request", inet_ntoa(addr->bcast_ip)));
+	DEBUG(1, "Broadcasting registration %s to %s\n",
+	      demand ? "demand" : "request", inet_ntoa(addr->bcast_ip));
 
 	RSSVAL(outbuf, 0, trn_id);
 	CVAL(outbuf, 2) = (0x5 << 3) | (demand ? 0 : 1);
@@ -553,7 +551,7 @@ static void send_registration(struct network_address *addr, bool demand,
 
 	if (sendto(server_sock, outbuf, nmb_len(outbuf), 0,
 	           (struct sockaddr *) &send_addr, sizeof(send_addr)) < 0) {
-		DEBUG(0, ("Error sending packet: %s\n", strerror(errno)));
+		DEBUG(0, "Error sending packet: %s\n", strerror(errno));
 	}
 }
 
@@ -581,8 +579,8 @@ static void try_name_registration(void)
 	if (num_registration_attempts >= BCAST_REQ_RETRY_COUNT) {
 		/* success; nobody has objected */
 		registered_name = true;
-		DEBUG(2, ("Successfully registered netbios hostname %s\n",
-		          myname));
+		DEBUG(2, "Successfully registered netbios hostname %s\n",
+		      myname);
 		/* send a name overwrite demand this time */
 		send_all_registrations(true, last_reg_trn_id);
 		return;
@@ -612,8 +610,8 @@ static bool announce_host(char *group, struct network_address *addr)
 		return true;
 	}
 
-	DEBUG(2, ("Sending host announcement to %s for group %s\n",
-	          inet_ntoa(addr->bcast_ip), group));
+	DEBUG(2, "Sending host announcement to %s for group %s\n",
+	      inet_ntoa(addr->bcast_ip), group);
 
 	memset(outbuf, 0, 256);
 
@@ -743,18 +741,18 @@ static bool open_server_sock(struct in_addr bind_addr, int port)
 
 	server_sock = socket(AF_INET, SOCK_DGRAM, 0);
 	if (server_sock == -1) {
-		DEBUG(0, ("socket failed\n"));
+		DEBUG(0, "socket failed\n");
 		return false;
 	}
 
 	if (setsockopt(server_sock, SOL_SOCKET, SO_REUSEADDR, &one,
 	               sizeof(one)) == -1) {
-		DEBUG(3, ("setsockopt(REUSEADDR) failed - ignored\n"));
+		DEBUG(3, "setsockopt(REUSEADDR) failed - ignored\n");
 	}
 
 	if (setsockopt(server_sock, SOL_SOCKET, SO_BROADCAST, &one,
 	               sizeof(one)) == -1) {
-		DEBUG(3, ("setsockopt(BROADCAST) failed - ignored\n"));
+		DEBUG(3, "setsockopt(BROADCAST) failed - ignored\n");
 	}
 
 	bind_addr_in.sin_family = AF_INET;
@@ -763,13 +761,13 @@ static bool open_server_sock(struct in_addr bind_addr, int port)
 
 	if (bind(server_sock, (struct sockaddr *) &bind_addr_in,
 	         sizeof(bind_addr_in)) < 0) {
-		DEBUG(0, ("bind failed on port %d\n", port));
+		DEBUG(0, "bind failed on port %d\n", port);
 		close(server_sock);
 		return false;
 	}
 
-	DEBUG(1,
-	      ("bind successful for %s port %d\n", inet_ntoa(bind_addr), port));
+	DEBUG(1, "bind successful for %s port %d\n", inet_ntoa(bind_addr),
+	      port);
 
 	return true;
 }
@@ -808,7 +806,7 @@ static void init_names(void)
 	strupper(myname);
 	strupper(mygroup);
 
-	DEBUG(2, ("Hostname: %s; Workgroup: %s\n", myname, mygroup));
+	DEBUG(2, "Hostname: %s; Workgroup: %s\n", myname, mygroup);
 
 	/* Something pseudo-random for the registration transaction IDs */
 	last_reg_trn_id = getpid();
@@ -816,7 +814,7 @@ static void init_names(void)
 
 static void usage(char *pname)
 {
-	DEBUG(0, ("Incorrect program usage - is the command line correct?\n"));
+	DEBUG(0, "Incorrect program usage - is the command line correct?\n");
 
 	printf("Tumba version " VERSION "\n"
 	       "Usage: %s"
@@ -887,9 +885,9 @@ int main(int argc, char *argv[])
 			exit(1);
 		}
 
-	DEBUG(1, ("%s netbios nameserver version %s started\n", timestring(),
-	          VERSION));
-	DEBUG(1, ("Copyright Andrew Tridgell 1994\n"));
+	DEBUG(1, "%s netbios nameserver version %s started\n", timestring(),
+	      VERSION);
+	DEBUG(1, "Copyright Andrew Tridgell 1994\n");
 
 	init_names();
 
