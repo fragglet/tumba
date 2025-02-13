@@ -35,6 +35,21 @@
 #define SIGNAL_CAST     (void (*)(int))
 #define UPDATE_INTERVAL 60
 
+/* How long we wait for a registration response */
+#define BCAST_REQ_RETRY_TIMEOUT 5
+/* How many registration requests we send before declaring victory */
+#define BCAST_REQ_RETRY_COUNT   3
+
+static const char *rcode_descriptions[] = {
+    "Success",
+    "Format Error",        /* FMT_ERR */
+    "Server failure",      /* SRV_ERR */
+    "Unsupported request", /* IMP_ERR */
+    "Refused",             /* RFS_ERR */
+    "Active",              /* ACT_ERR */
+    "Name in conflict",    /* CFT_ERR */
+};
+
 struct network_address {
 	struct in_addr ip;
 	struct in_addr netmask;
@@ -47,6 +62,10 @@ extern int DEBUGLEVEL;
 static uint8_t in_buffer[BUFFER_SIZE];
 
 static struct sockaddr_in last_client;
+
+static bool registered_name = false;
+static int num_registration_attempts = 0;
+static uint16_t last_reg_trn_id;
 
 pstring myname = "";
 pstring mygroup = "WORKGROUP";
@@ -337,6 +356,34 @@ static void reply_name_query(uint8_t *inbuf, struct network_address *src_iface)
 	send_reply(outbuf, nmb_len(outbuf));
 }
 
+static const char *rcode_description(int rcode)
+{
+	if (rcode <
+	    (sizeof(rcode_descriptions) / sizeof(*rcode_descriptions))) {
+		return rcode_descriptions[rcode];
+	} else {
+		return "Unknown";
+	}
+}
+
+static void registration_response(uint8_t *inbuf)
+{
+	int name_trn_id = RSVAL(inbuf, 0);
+	int rcode = CVAL(inbuf, 3) & 0xF;
+
+	DEBUG(4, ("Received name registration response: "
+	          "name_trn_id=%d, rcode=%d\n",
+	          name_trn_id, rcode));
+
+	if (name_trn_id == last_reg_trn_id && rcode != 0) {
+		DEBUG(1,
+		      ("Failed to register name: %s returned rcode=%d (%s)\n",
+		       inet_ntoa(last_client.sin_addr), rcode,
+		       rcode_description(rcode)));
+		num_registration_attempts = 0;
+	}
+}
+
 /* Choose which IP address to return to clients requesting our hostname. This
    may be different, depending on the interface on which it is received. */
 static struct network_address *get_iface_addr(struct network_address *addrs,
@@ -366,7 +413,8 @@ static void construct_reply(uint8_t *inbuf)
 	struct network_address *addrs = get_addresses(server_sock, &num_addrs);
 	struct network_address *src_iface =
 	    get_iface_addr(addrs, num_addrs, &last_client.sin_addr);
-	int opcode = CVAL(inbuf, 2) >> 3;
+	int opcode = (CVAL(inbuf, 2) & 0x78) >> 3;
+	bool is_response = (CVAL(inbuf, 2) & 0x80) != 0;
 	int nm_flags = ((CVAL(inbuf, 2) & 0x7) << 4) + (CVAL(inbuf, 3) >> 4);
 	int rcode = CVAL(inbuf, 3) & 0xF;
 
@@ -379,11 +427,22 @@ static void construct_reply(uint8_t *inbuf)
 		return;
 	}
 
-	if (opcode == 0x5 && (nm_flags & ~1) == 0x10 && rcode == 0)
-		reply_reg_request(inbuf, src_iface);
+	DEBUG(4, ("opcode=0x%x, nm_flags=0x%x, rcode=0x%x\n", opcode, nm_flags,
+	          rcode));
 
-	if (opcode == 0 && (nm_flags & ~1) == 0x10 && rcode == 0)
+	if (opcode == 0x5) {
+		if (is_response) {
+			registration_response(inbuf);
+		} else if ((nm_flags & ~1) == 0x10 && rcode == 0) {
+			reply_reg_request(inbuf, src_iface);
+		}
+	}
+
+	/* Only respond to name queries once confident we own the name */
+	if (registered_name && opcode == 0 && (nm_flags & ~1) == 0x10 &&
+	    rcode == 0) {
 		reply_name_query(inbuf, src_iface);
+	}
 
 	free(addrs);
 }
@@ -414,6 +473,92 @@ static int name_mangle(char *in, char *Out)
 
 	*out = 0;
 	return name_len(Out);
+}
+
+static void send_registration(struct network_address *addr, bool demand,
+                              uint16_t trn_id)
+{
+	uint8_t outbuf[BUFFER_SIZE];
+	struct sockaddr_in send_addr;
+	uint8_t *p;
+
+	DEBUG(1, ("Broadcasting registration %s to %s\n",
+	          demand ? "demand" : "request", inet_ntoa(addr->bcast_ip)));
+
+	RSSVAL(outbuf, 0, trn_id);
+	CVAL(outbuf, 2) = (0x5 << 3) | (demand ? 0 : 1);
+	CVAL(outbuf, 3) = (1 << 4) | 0x0;
+	RSSVAL(outbuf, 4, 1);
+	RSSVAL(outbuf, 6, 0);
+	RSSVAL(outbuf, 8, 0);
+	RSSVAL(outbuf, 10, 1);
+	p = outbuf + 12;
+	name_mangle(myname, (char *) p);
+	p += name_len((char *) p);
+	RSSVAL(p, 0, 0x20);
+	RSSVAL(p, 2, 0x1);
+	p += 4;
+	CVAL(p, 0) = 0xC0;
+	CVAL(p, 1) = 12;
+	p += 2;
+	RSSVAL(p, 0, 0x20);
+	RSSVAL(p, 2, 0x1);
+	RSIVAL(p, 4, 0); /* my own ttl */
+	RSSVAL(p, 8, 6);
+	CVAL(p, 10) = 0; /* nb_flags */
+	CVAL(p, 11) = 0;
+	p += 12;
+	memcpy(p, &addr->ip, 4);
+	p += 4;
+
+	memset(&send_addr, 0, sizeof(send_addr));
+	send_addr.sin_family = AF_INET;
+	send_addr.sin_port = htons(137);
+	send_addr.sin_addr = addr->bcast_ip;
+
+	if (sendto(server_sock, outbuf, nmb_len(outbuf), 0,
+	           (struct sockaddr *) &send_addr, sizeof(send_addr)) < 0) {
+		DEBUG(0, ("Error sending packet: %s\n", strerror(errno)));
+	}
+}
+
+static void send_all_registrations(bool demand, uint16_t trn_id)
+{
+	int num_addrs = 0, i;
+	struct network_address *addrs = get_addresses(server_sock, &num_addrs);
+
+	for (i = 0; i < num_addrs; ++i) {
+		send_registration(&addrs[i], false, trn_id);
+	}
+
+	free(addrs);
+}
+
+static void try_name_registration(void)
+{
+	static time_t last_register_time = 0;
+	time_t now = time(NULL);
+
+	if ((now - last_register_time) < BCAST_REQ_RETRY_TIMEOUT) {
+		return;
+	}
+
+	++last_reg_trn_id;
+
+	if (num_registration_attempts >= BCAST_REQ_RETRY_COUNT) {
+		/* success; nobody has objected */
+		registered_name = true;
+		DEBUG(2, ("Successfully registered netbios hostname %s\n",
+		          myname));
+		/* send a name overwrite demand this time */
+		send_all_registrations(true, last_reg_trn_id);
+		return;
+	}
+
+	/* time to send another registration attempt */
+	send_all_registrations(false, last_reg_trn_id);
+	++num_registration_attempts;
+	last_register_time = now;
 }
 
 /*
@@ -524,7 +669,11 @@ static void process(void)
 		struct timeval timeout;
 		int nread;
 
-		if (!timer || (time(NULL) - timer) > UPDATE_INTERVAL) {
+		if (!registered_name) {
+			try_name_registration();
+		}
+		if (registered_name &&
+		    (timer == 0 || (time(NULL) - timer) > UPDATE_INTERVAL)) {
 			do_browse_hook();
 			timer = time(NULL);
 		}
@@ -623,6 +772,9 @@ static void init_names(void)
 	strupper(mygroup);
 
 	DEBUG(2, ("Hostname: %s; Workgroup: %s\n", myname, mygroup));
+
+	/* Something pseudo-random for the registration transaction IDs */
+	last_reg_trn_id = getpid();
 }
 
 static void usage(char *pname)
