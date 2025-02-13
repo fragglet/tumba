@@ -879,8 +879,7 @@ int main(int argc, char *argv[])
 			exit(1);
 		}
 
-	NOTICE("%s netbios nameserver version %s started\n", timestring(),
-	       VERSION);
+	NOTICE("Tumba nameserver version %s started\n", VERSION);
 
 	init_names();
 
