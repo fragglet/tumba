@@ -16,7 +16,9 @@ The following command line options are understood:
 \fB-b addr\fR
 Bind to given IP address. By default the server binds to \fB0.0.0.0\fR, serving
 requests from any network interface, but this argument can be used to bind only
-to a specific interface.
+to a specific interface. Bear in mind, however, that the server will only ever
+respond to requests from machines on a local network segment (see LIMITATIONS
+below).
 .TP
 \fB-C comment\fR
 Include the given description of the server in browse announcements. This is
@@ -54,10 +56,14 @@ on that network interface.
 tumba_nmbd -n DEEPTHOUGHT -C "Lunkwill's workstation"
 Manually sets the hostname and server comment
 .SH LIMITATIONS
-\fBtumba_nmbd\fR is a companion to the \fBtumba_smbd\fR, which is a minimalist
+\fBtumba_nmbd\fR is a companion to \fBtumba_smbd\fR(8), which is a minimalist
 implementation of the SMBv1 file sharing protocol. It intentionally omits many
 features of the NBNS protocol that are not needed for that purpose. For
-example, compared to Samba's \fBnmbd\fR(1):
+example, compared to Samba's \fBnmbd\fR(8):
+.IP \(bu
+It only responds to requests from local network segments. The aim is only to
+make the server visible to other machines on the same LAN, and not for it to be
+used across the Internet.
 .IP \(bu
 It does not act as a master browser server. \fBtumba_nmbd\fR will broadcast
 hostname announcements but does not track announcements from other hosts or
