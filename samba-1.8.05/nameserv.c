@@ -42,6 +42,8 @@
 /* How long do we wait after receiving a negative registration request before
    we try again? */
 #define REGISTRATION_FAIL_RETRY_DELAY (5 * 60)
+/* How long do we cache information about system network interfaces? */
+#define INTERFACE_CACHE_TIME          30
 
 static const char *rcode_descriptions[] = {
     "Success",
@@ -117,8 +119,6 @@ static struct ifconf get_interfaces(int sock_fd)
 }
 
 #define addr(s) (((struct sockaddr_in *) (s))->sin_addr)
-/* TODO: We should have a caching version of this function; the list is only
-   likely to change infrequently. */
 static struct network_address *get_addresses(int sock_fd, int *num_addrs)
 {
 	struct ifconf ifc = get_interfaces(sock_fd);
@@ -171,6 +171,24 @@ static struct network_address *get_addresses(int sock_fd, int *num_addrs)
 
 	free(ifc.ifc_ifcu.ifcu_req);
 	return result;
+}
+
+static struct network_address *caching_get_addresses(int sock_fd,
+                                                     int *num_addrs)
+{
+	static struct network_address *cached_addrs = NULL;
+	static int cached_num_addrs;
+	static time_t cache_expiry_time = 0;
+	time_t now = time(NULL);
+
+	if (now > cache_expiry_time) {
+		free(cached_addrs);
+		cached_addrs = get_addresses(sock_fd, &cached_num_addrs);
+		cache_expiry_time = now + INTERFACE_CACHE_TIME;
+	}
+
+	*num_addrs = cached_num_addrs;
+	return cached_addrs;
 }
 
 /* true if two netbios names are equal */
@@ -424,7 +442,8 @@ static struct network_address *get_iface_addr(struct network_address *addrs,
 static void construct_reply(uint8_t *inbuf)
 {
 	int num_addrs = 0;
-	struct network_address *addrs = get_addresses(server_sock, &num_addrs);
+	struct network_address *addrs =
+	    caching_get_addresses(server_sock, &num_addrs);
 	struct network_address *src_iface =
 	    get_iface_addr(addrs, num_addrs, &last_client.sin_addr);
 	int opcode = (CVAL(inbuf, 2) & 0x78) >> 3;
@@ -437,7 +456,6 @@ static void construct_reply(uint8_t *inbuf)
 	   from our local network segment, but this is good enough and probably
 	   excludes a bunch of potential security issues anyway. */
 	if (src_iface == NULL) {
-		free(addrs);
 		return;
 	}
 
@@ -457,8 +475,6 @@ static void construct_reply(uint8_t *inbuf)
 	    rcode == 0) {
 		reply_name_query(inbuf, src_iface);
 	}
-
-	free(addrs);
 }
 
 /* mangle a name into netbios format */
@@ -544,13 +560,12 @@ static void send_registration(struct network_address *addr, bool demand,
 static void send_all_registrations(bool demand, uint16_t trn_id)
 {
 	int num_addrs = 0, i;
-	struct network_address *addrs = get_addresses(server_sock, &num_addrs);
+	struct network_address *addrs =
+	    caching_get_addresses(server_sock, &num_addrs);
 
 	for (i = 0; i < num_addrs; ++i) {
 		send_registration(&addrs[i], false, trn_id);
 	}
-
-	free(addrs);
 }
 
 static void try_name_registration(void)
@@ -671,15 +686,14 @@ static bool announce_host(char *group, struct network_address *addr)
 static void do_browse_hook(void)
 {
 	int num_addrs = 0, i;
-	struct network_address *addrs = get_addresses(server_sock, &num_addrs);
+	struct network_address *addrs =
+	    caching_get_addresses(server_sock, &num_addrs);
 
 	/* We send to all broadcast addresses (since there may be multiple
 	   interfaces we are listening on */
 	for (i = 0; i < num_addrs; ++i) {
 		announce_host(mygroup, &addrs[i]);
 	}
-
-	free(addrs);
 }
 
 static void process(void)
