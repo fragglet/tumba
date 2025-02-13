@@ -108,7 +108,7 @@ int TimeDiff(void)
 #endif
 #endif
 #endif
-		LOG(3, "timediff=%d\n", timediff);
+		DEBUG("timediff=%d\n", timediff);
 		initialised = true;
 	}
 
@@ -260,7 +260,7 @@ char *name_ptr(char *buf, int ofs)
 		memcpy(&l, buf + ofs, 2);
 		p[0] &= ~0xC0;
 		l = RSVAL(p, 0);
-		LOG(5, "name ptr to pos %d from %d is %s\n", l, ofs, buf + l);
+		DEBUG("name ptr to pos %d from %d is %s\n", l, ofs, buf + l);
 		return buf + l;
 	} else
 		return buf + ofs;

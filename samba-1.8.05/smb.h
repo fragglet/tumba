@@ -38,6 +38,7 @@
 #define WARNING(...) LOG(1, __VA_ARGS__)
 #define NOTICE(...)  LOG(2, __VA_ARGS__)
 #define INFO(...)    LOG(3, __VA_ARGS__)
+#define DEBUG(...)   LOG(4, __VA_ARGS__)
 
 typedef char pstring[1024];
 typedef char fstring[128];

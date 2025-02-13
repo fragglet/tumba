@@ -158,10 +158,10 @@ static struct network_address *get_addresses(int sock_fd, int *num_addrs)
 		}
 		result[*num_addrs].bcast_ip = addr(&req->ifr_broadaddr);
 
-		LOG(5, "interface %s: ip=%s, ", req->ifr_name,
-		    inet_ntoa(result[*num_addrs].ip));
-		LOG(5, "netmask=%s, ", inet_ntoa(result[*num_addrs].netmask));
-		LOG(5, "bcast_ip=%s\n", inet_ntoa(result[*num_addrs].bcast_ip));
+		DEBUG("interface %s: ip=%s, ", req->ifr_name,
+		      inet_ntoa(result[*num_addrs].ip));
+		DEBUG("netmask=%s, ", inet_ntoa(result[*num_addrs].netmask));
+		DEBUG("bcast_ip=%s\n", inet_ntoa(result[*num_addrs].bcast_ip));
 
 		++*num_addrs;
 	}
@@ -215,8 +215,8 @@ static int read_udp_socket(int fd, uint8_t *buf, int len)
 		return 0;
 	}
 
-	LOG(5, "received %d byte packet from %s:%d\n", ret,
-	    inet_ntoa(last_client.sin_addr), ntohs(last_client.sin_port));
+	DEBUG("received %d byte packet from %s:%d\n", ret,
+	      inet_ntoa(last_client.sin_addr), ntohs(last_client.sin_port));
 
 	return ret;
 }
@@ -233,7 +233,7 @@ static int nmb_len(uint8_t *buf)
 
 	/* check for insane qdcount values? */
 	if (qdcount > 100 || qdcount < 0) {
-		LOG(6, "Invalid qdcount? qdcount=%d\n", qdcount);
+		DEBUG("Invalid qdcount? qdcount=%d\n", qdcount);
 		return 0;
 	}
 
@@ -289,22 +289,22 @@ static void reply_reg_request(uint8_t *inbuf, struct network_address *src_iface)
 	p += 8;
 	memcpy(&ip, p, 4);
 
-	LOG(2, "Name registration request for %s (%s) nb_flags=0x%x: ", qname,
-	    inet_ntoa(ip), nb_flags);
+	DEBUG("Name registration request for %s (%s) nb_flags=0x%x: ", qname,
+	      inet_ntoa(ip), nb_flags);
 
 	/* if it's not my name then don't worry about it */
 	if (!name_equal(myname, qname)) {
-		LOG(2, "not my name\n");
+		DEBUG("not my name\n");
 		return;
 	}
 
 	/* if it's my name and it's also my IP then don't worry about it */
 	if (ip.s_addr == src_iface->ip.s_addr) {
-		LOG(2, "is my IP\n");
+		DEBUG("is my IP\n");
 		return;
 	}
 
-	LOG(2, "\n");
+	DEBUG("\n");
 
 	ERROR("Someone is using my name (%s), sending negative reply\n", qname);
 
@@ -331,7 +331,7 @@ static void reply_reg_request(uint8_t *inbuf, struct network_address *src_iface)
 	p += 4;
 
 	if (ip.s_addr == src_iface->bcast_ip.s_addr) {
-		LOG(0, "Not replying to broadcast address\n");
+		DEBUG("Not replying to broadcast address\n");
 		return;
 	}
 
@@ -347,14 +347,14 @@ static void reply_name_query(uint8_t *inbuf, struct network_address *src_iface)
 
 	name_extract((char *) inbuf, 12, qname);
 
-	LOG(2, "Query for name (%s)", qname);
+	DEBUG("Query for name (%s)", qname);
 
 	if (!name_equal(qname, myname)) {
-		LOG(2, " not our hostname\n");
+		DEBUG(" not our hostname\n");
 		return;
 	}
 
-	LOG(2, "\n");
+	DEBUG("\n");
 
 	/* Send a POSITIVE NAME QUERY RESPONSE */
 	RSSVAL(outbuf, 0, rec_name_trn_id);
@@ -395,10 +395,9 @@ static void registration_response(uint8_t *inbuf)
 	int name_trn_id = RSVAL(inbuf, 0);
 	int rcode = CVAL(inbuf, 3) & 0xF;
 
-	LOG(4,
-	    "Received name registration response: "
-	    "name_trn_id=%d, rcode=%d\n",
-	    name_trn_id, rcode);
+	DEBUG("Received name registration response: "
+	      "name_trn_id=%d, rcode=%d\n",
+	      name_trn_id, rcode);
 
 	if (name_trn_id == last_reg_trn_id && rcode != 0) {
 		ERROR("Failed to register name: %s returned rcode=%d (%s). ",
@@ -419,17 +418,17 @@ static struct network_address *get_iface_addr(struct network_address *addrs,
 {
 	int i;
 
-	LOG(3, "Finding matching interface for src=%s: ", inet_ntoa(*src));
+	DEBUG("Finding matching interface for src=%s: ", inet_ntoa(*src));
 
 	for (i = 0; i < num_addrs; ++i) {
 		if ((addrs[i].ip.s_addr & addrs[i].netmask.s_addr) ==
 		    (src->s_addr & addrs[i].netmask.s_addr)) {
-			LOG(3, "match for %s ", inet_ntoa(addrs[i].ip));
-			LOG(3, "netmask %s\n", inet_ntoa(addrs[i].netmask));
+			DEBUG("match for %s ", inet_ntoa(addrs[i].ip));
+			DEBUG("netmask %s\n", inet_ntoa(addrs[i].netmask));
 			return &addrs[i];
 		}
 	}
-	LOG(3, "none found.\n");
+	DEBUG("none found.\n");
 
 	return NULL;
 }
@@ -454,8 +453,8 @@ static void construct_reply(uint8_t *inbuf)
 		return;
 	}
 
-	LOG(4, "opcode=0x%x, nm_flags=0x%x, rcode=0x%x\n", opcode, nm_flags,
-	    rcode);
+	DEBUG("opcode=0x%x, nm_flags=0x%x, rcode=0x%x\n", opcode, nm_flags,
+	      rcode);
 
 	if (opcode == 0x5) {
 		if (is_response) {
@@ -512,8 +511,8 @@ static void send_registration(struct network_address *addr, bool demand,
 		return;
 	}
 
-	LOG(1, "Broadcasting registration %s to %s\n",
-	    demand ? "demand" : "request", inet_ntoa(addr->bcast_ip));
+	DEBUG("Broadcasting registration %s to %s\n",
+	      demand ? "demand" : "request", inet_ntoa(addr->bcast_ip));
 
 	RSSVAL(outbuf, 0, trn_id);
 	CVAL(outbuf, 2) = (0x5 << 3) | (demand ? 0 : 1);
@@ -606,8 +605,8 @@ static bool announce_host(char *group, struct network_address *addr)
 		return true;
 	}
 
-	LOG(2, "Sending host announcement to %s for group %s\n",
-	    inet_ntoa(addr->bcast_ip), group);
+	DEBUG("Sending host announcement to %s for group %s\n",
+	      inet_ntoa(addr->bcast_ip), group);
 
 	memset(outbuf, 0, 256);
 
