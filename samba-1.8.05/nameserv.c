@@ -10,6 +10,7 @@
  */
 
 #include <arpa/inet.h>
+#include <assert.h>
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
@@ -260,6 +261,15 @@ static void close_sockets(void)
 	server_sock = 0;
 }
 
+/* Safe version of `strcpy()` that ensures written string is entirely inside
+   the given buffer. */
+static void strcpy_into(uint8_t *buf, size_t buf_len, void *to, void *from)
+{
+	assert((uint8_t *) to >= buf && (uint8_t *) to <= (buf + buf_len));
+	buf_len -= ((uint8_t *) to) - buf;
+	strlcpy(to, from, buf_len);
+}
+
 /* Send a packet back to the client that sent the packet we are processing */
 static void send_reply(void *buf, size_t buf_len)
 {
@@ -319,7 +329,7 @@ static void reply_reg_request(uint8_t *inbuf, struct network_address *src_iface)
 	RSSVAL(outbuf, 8, 0);
 	RSSVAL(outbuf, 10, 0);
 	p = outbuf + 12;
-	strcpy((char *) p, (char *) inbuf + 12);
+	strcpy_into(outbuf, sizeof(outbuf), p, inbuf + 12);
 	p += name_len((char *) p);
 	RSSVAL(p, 0, 0x20);
 	RSSVAL(p, 2, 0x1);
@@ -367,7 +377,7 @@ static void reply_name_query(uint8_t *inbuf, struct network_address *src_iface)
 	RSSVAL(outbuf, 8, 0);
 	RSSVAL(outbuf, 10, 0);
 	p = outbuf + 12;
-	strcpy((char *) p, (char *) inbuf + 12);
+	strcpy_into(outbuf, sizeof(outbuf), p, inbuf + 12);
 	p += name_len((char *) p);
 	RSSVAL(p, 0, 0x20);
 	RSSVAL(p, 2, 0x1);
@@ -623,10 +633,10 @@ static bool announce_host(char *group, struct network_address *addr)
 	p = outbuf + 14;
 
 	p += name_mangle(myname, (char *) p);
-	strcpy((char *) p - 3, "AA");
+	strcpy_into(outbuf, sizeof(outbuf), p - 3, "AA");
 	gptr = p;
 	p += name_mangle(group, (char *) p);
-	strcpy((char *) p - 3, "BO");
+	strcpy_into(outbuf, sizeof(outbuf), p - 3, "BO");
 
 	/* now setup the smb part */
 	p -= 4;
@@ -641,14 +651,14 @@ static bool announce_host(char *group, struct network_address *addr)
 	SSVAL(p, smb_vwv16, 2);
 	SSVAL(p, smb_vwv17, 1);
 	p2 = (uint8_t *) smb_buf((char *) p);
-	strcpy((char *) p2, "\\MAILSLOT\\BROWSE");
+	strcpy_into(outbuf, sizeof(outbuf), p2, "\\MAILSLOT\\BROWSE");
 	p2 = (uint8_t *) skip_string((char *) p2, 1);
 
 	CVAL(p2, 0) = 1;                      /* host announce */
 	CVAL(p2, 1) = 5;                      /* update count */
 	SIVAL(p2, 2, UPDATE_INTERVAL * 1000); /* update interval, in MS */
 	p2 += 6;
-	strcpy((char *) p2, myname);
+	strcpy_into(outbuf, sizeof(outbuf), p2, myname);
 	p2 += 16;
 	CVAL(p2, 0) = 0; /* major version (was 1) */
 	CVAL(p2, 1) = 0; /* minor version (was 51) */
@@ -662,10 +672,10 @@ static bool announce_host(char *group, struct network_address *addr)
 	CVAL(p2, 8) = 85;
 	CVAL(p2, 9) = 170;
 	p2 += 10;
-	strcpy((char *) p2, comment);
+	strcpy_into(outbuf, sizeof(outbuf), p2, comment);
 
 	p2 = gptr + name_mangle(group, (char *) gptr);
-	strcpy((char *) p2 - 3, "BO");
+	strcpy_into(outbuf, sizeof(outbuf), p2 - 3, "BO");
 
 	memset(&send_addr, 0, sizeof(send_addr));
 	send_addr.sin_family = AF_INET;
