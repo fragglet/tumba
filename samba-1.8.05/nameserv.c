@@ -146,15 +146,14 @@ static struct network_address *get_addresses(int sock_fd, int *num_addrs)
 		   are contained in a union, so you can only "see" one field
 		   at a time, but you can switch between them using ioctls: */
 		if (ioctl(sock_fd, SIOCGIFNETMASK, req) < 0) {
-			LOG(0, "Failed getting netmask for %s\n",
-			    req->ifr_name);
+			ERROR("Failed getting netmask for %s\n", req->ifr_name);
 			continue;
 		}
 		result[*num_addrs].netmask = addr(&req->ifr_netmask);
 
 		if (ioctl(sock_fd, SIOCGIFBRDADDR, req) < 0) {
-			LOG(0, "Failed getting broadcast address for %s\n",
-			    req->ifr_name);
+			ERROR("Failed getting broadcast address for %s\n",
+			      req->ifr_name);
 			continue;
 		}
 		result[*num_addrs].bcast_ip = addr(&req->ifr_broadaddr);
@@ -212,7 +211,7 @@ static int read_udp_socket(int fd, uint8_t *buf, int len)
 	ret = recvfrom(fd, buf, len, 0, (struct sockaddr *) &last_client,
 	               &src_len);
 	if (ret <= 0) {
-		LOG(2, "read socket failed. ERRNO=%d\n", errno);
+		ERROR("read socket failed. ERRNO=%d\n", errno);
 		return 0;
 	}
 
@@ -266,7 +265,7 @@ static void send_reply(void *buf, size_t buf_len)
 {
 	if (sendto(server_sock, buf, buf_len, 0,
 	           (struct sockaddr *) &last_client, sizeof(last_client)) < 0) {
-		LOG(0, "Error sending reply: %s\n", strerror(errno));
+		ERROR("Error sending reply: %s\n", strerror(errno));
 	}
 }
 
@@ -307,8 +306,7 @@ static void reply_reg_request(uint8_t *inbuf, struct network_address *src_iface)
 
 	LOG(2, "\n");
 
-	LOG(0, "Someone is using my name (%s), sending negative reply\n",
-	    qname);
+	ERROR("Someone is using my name (%s), sending negative reply\n", qname);
 
 	/* Send a NEGATIVE REGISTRATION RESPONSE to protect our name */
 	RSSVAL(outbuf, 0, rec_name_trn_id);
@@ -403,11 +401,11 @@ static void registration_response(uint8_t *inbuf)
 	    name_trn_id, rcode);
 
 	if (name_trn_id == last_reg_trn_id && rcode != 0) {
-		LOG(1, "Failed to register name: %s returned rcode=%d (%s). ",
-		    inet_ntoa(last_client.sin_addr), rcode,
-		    rcode_description(rcode));
-		LOG(1, "Will try again in %d seconds\n",
-		    REGISTRATION_FAIL_RETRY_DELAY);
+		ERROR("Failed to register name: %s returned rcode=%d (%s). ",
+		      inet_ntoa(last_client.sin_addr), rcode,
+		      rcode_description(rcode));
+		ERROR("Will try again in %d seconds\n",
+		      REGISTRATION_FAIL_RETRY_DELAY);
 		num_registration_attempts = 0;
 		next_register_time = time(NULL) + REGISTRATION_FAIL_RETRY_DELAY;
 	}
@@ -550,7 +548,7 @@ static void send_registration(struct network_address *addr, bool demand,
 
 	if (sendto(server_sock, outbuf, nmb_len(outbuf), 0,
 	           (struct sockaddr *) &send_addr, sizeof(send_addr)) < 0) {
-		LOG(0, "Error sending packet: %s\n", strerror(errno));
+		ERROR("Error sending packet: %s\n", strerror(errno));
 	}
 }
 
@@ -578,7 +576,7 @@ static void try_name_registration(void)
 	if (num_registration_attempts >= BCAST_REQ_RETRY_COUNT) {
 		/* success; nobody has objected */
 		registered_name = true;
-		LOG(2, "Successfully registered netbios hostname %s\n", myname);
+		NOTICE("Successfully registered netbios hostname %s\n", myname);
 		/* send a name overwrite demand this time */
 		send_all_registrations(true, last_reg_trn_id);
 		return;
@@ -739,18 +737,18 @@ static bool open_server_sock(struct in_addr bind_addr, int port)
 
 	server_sock = socket(AF_INET, SOCK_DGRAM, 0);
 	if (server_sock == -1) {
-		LOG(0, "socket failed\n");
+		ERROR("socket failed\n");
 		return false;
 	}
 
 	if (setsockopt(server_sock, SOL_SOCKET, SO_REUSEADDR, &one,
 	               sizeof(one)) == -1) {
-		LOG(3, "setsockopt(REUSEADDR) failed - ignored\n");
+		WARNING("setsockopt(REUSEADDR) failed - ignored\n");
 	}
 
 	if (setsockopt(server_sock, SOL_SOCKET, SO_BROADCAST, &one,
 	               sizeof(one)) == -1) {
-		LOG(3, "setsockopt(BROADCAST) failed - ignored\n");
+		WARNING("setsockopt(BROADCAST) failed - ignored\n");
 	}
 
 	bind_addr_in.sin_family = AF_INET;
@@ -759,12 +757,12 @@ static bool open_server_sock(struct in_addr bind_addr, int port)
 
 	if (bind(server_sock, (struct sockaddr *) &bind_addr_in,
 	         sizeof(bind_addr_in)) < 0) {
-		LOG(0, "bind failed on port %d\n", port);
+		ERROR("bind failed on port %d\n", port);
 		close(server_sock);
 		return false;
 	}
 
-	LOG(1, "bind successful for %s port %d\n", inet_ntoa(bind_addr), port);
+	NOTICE("bind successful for %s port %d\n", inet_ntoa(bind_addr), port);
 
 	return true;
 }
@@ -803,7 +801,7 @@ static void init_names(void)
 	strupper(myname);
 	strupper(mygroup);
 
-	LOG(2, "Hostname: %s; Workgroup: %s\n", myname, mygroup);
+	NOTICE("Hostname: %s; Workgroup: %s\n", myname, mygroup);
 
 	/* Something pseudo-random for the registration transaction IDs */
 	last_reg_trn_id = getpid();
@@ -811,7 +809,7 @@ static void init_names(void)
 
 static void usage(char *pname)
 {
-	LOG(0, "Incorrect program usage - is the command line correct?\n");
+	ERROR("Incorrect program usage - is the command line correct?\n");
 
 	printf("Tumba version " VERSION "\n"
 	       "Usage: %s"
@@ -882,9 +880,8 @@ int main(int argc, char *argv[])
 			exit(1);
 		}
 
-	LOG(1, "%s netbios nameserver version %s started\n", timestring(),
-	    VERSION);
-	LOG(1, "Copyright Andrew Tridgell 1994\n");
+	NOTICE("%s netbios nameserver version %s started\n", timestring(),
+	       VERSION);
 
 	init_names();
 
