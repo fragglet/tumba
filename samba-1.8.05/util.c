@@ -42,7 +42,7 @@
 #define LOCAL_TO_GMT 1
 #define GMT_TO_LOCAL -1
 
-int DEBUGLEVEL = 1;
+int LOGLEVEL = 1;
 
 /* these are some file handles where debug info will be stored */
 FILE *dbf = NULL;
@@ -108,7 +108,7 @@ int TimeDiff(void)
 #endif
 #endif
 #endif
-		DEBUG(3, "timediff=%d\n", timediff);
+		LOG(3, "timediff=%d\n", timediff);
 		initialised = true;
 	}
 
@@ -260,7 +260,7 @@ char *name_ptr(char *buf, int ofs)
 		memcpy(&l, buf + ofs, 2);
 		p[0] &= ~0xC0;
 		l = RSVAL(p, 0);
-		DEBUG(5, "name ptr to pos %d from %d is %s\n", l, ofs, buf + l);
+		LOG(5, "name ptr to pos %d from %d is %s\n", l, ofs, buf + l);
 		return buf + l;
 	} else
 		return buf + ofs;

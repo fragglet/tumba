@@ -27,7 +27,12 @@
 #define PTR_DIFF(p1, p2) ((ptrdiff_t) (((char *) (p1)) - (char *) (p2)))
 
 /* debugging code */
-#define DEBUG(level, ...) ((DEBUGLEVEL >= (level)) ? (Debug1(__VA_ARGS__)) : 0)
+#define LOG(level, ...)                                                        \
+	do {                                                                   \
+		if (LOGLEVEL >= (level)) {                                     \
+			Debug1(__VA_ARGS__);                                   \
+		}                                                              \
+	} while (0)
 
 typedef char pstring[1024];
 typedef char fstring[128];
