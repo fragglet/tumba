@@ -54,7 +54,7 @@ The server will bind to the \fB192.168.30.1\fR address, only serving requests
 on that network interface.
 .TP
 tumba_nmbd -n DEEPTHOUGHT -C "Lunkwill's workstation"
-Manually sets the hostname and server comment
+Manually sets the hostname and server comment.
 .SH LIMITATIONS
 \fBtumba_nmbd\fR is a companion to \fBtumba_smbd\fR(8), which is a minimalist
 implementation of the SMBv1 file sharing protocol. It intentionally omits many
@@ -72,9 +72,9 @@ of this is that if your server is in a workgroup/domain on its own, that
 workgroup will not appear in the "Entire Network" folder in Windows's "Network
 Neighborhood".
 .IP \(bu
-There is no support for NetBIOS to DNS mapping
+There is no support for NetBIOS to DNS mapping.
 .IP \(bu
-There is no support for LMHOSTS files
+There is no support for LMHOSTS files.
 .PP
 If these features are needed, the Samba \fBnmbd\fR server can be used instead,
 even if \fBtumba_smbd\fR is being used as an SMB server (the SMB/NMB servers
