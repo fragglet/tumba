@@ -306,7 +306,9 @@ static void reply_reg_request(uint8_t *inbuf, struct network_address *src_iface)
 
 	DEBUG("\n");
 
-	ERROR("Someone is using my name (%s), sending negative reply\n", qname);
+	ERROR("[%s:%d] requested our name (%s), sending negative reply\n",
+	      inet_ntoa(last_client.sin_addr), ntohs(last_client.sin_port),
+	      qname);
 
 	/* Send a NEGATIVE REGISTRATION RESPONSE to protect our name */
 	RSSVAL(outbuf, 0, rec_name_trn_id);
