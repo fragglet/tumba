@@ -16,10 +16,6 @@ CC = gcc
 # or in smb.conf (see smb.conf(5))
 FLAGS2 = -DDEBUGFILE=\"/usr/local/samba/log\"
 
-# Use this for Linux without shadow passwords
-FLAGSM = -DLINUX
-LIBSM = 
-
 ######################################################################
 # DON'T EDIT BELOW THIS LINE
 ######################################################################
