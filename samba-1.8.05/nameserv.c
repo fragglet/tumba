@@ -155,6 +155,13 @@ static struct network_address *get_addresses(int sock_fd, int *num_addrs)
 		}
 		result[*num_addrs].bcast_ip = addr(&req->ifr_broadaddr);
 
+		DEBUG(5, ("interface %s: ip=%s, ", req->ifr_name,
+		          inet_ntoa(result[*num_addrs].ip)));
+		DEBUG(5,
+		      ("netmask=%s, ", inet_ntoa(result[*num_addrs].netmask)));
+		DEBUG(5, ("bcast_ip=%s\n",
+		          inet_ntoa(result[*num_addrs].bcast_ip)));
+
 		++*num_addrs;
 	}
 
@@ -482,6 +489,11 @@ static void send_registration(struct network_address *addr, bool demand,
 	struct sockaddr_in send_addr;
 	uint8_t *p;
 
+	if (addr->bcast_ip.s_addr == 0) {
+		/* Don't broadcast to 0.0.0.0 */
+		return;
+	}
+
 	DEBUG(1, ("Broadcasting registration %s to %s\n",
 	          demand ? "demand" : "request", inet_ntoa(addr->bcast_ip)));
 
@@ -573,6 +585,11 @@ static bool announce_host(char *group, struct network_address *addr)
 	struct sockaddr_in send_addr;
 	uint8_t *p, *p2;
 	uint8_t *gptr;
+
+	if (addr->bcast_ip.s_addr == 0) {
+		/* Don't broadcast to 0.0.0.0 */
+		return true;
+	}
 
 	DEBUG(2, ("Sending host announcement to %s for group %s\n",
 	          inet_ntoa(addr->bcast_ip), group));
