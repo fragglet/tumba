@@ -98,6 +98,10 @@ the use of filesystem extended attributes (xattrs). The same
 although only the original version is understood. Some other free software
 projects such as \fBdosemu2\fR and \fBdosbox-staging\fR also support the same
 attribute.
+.PP
+There is not yet any support for reading and writing the real attributes from
+files on FAT or NTFS volumes, even though the system APIs for doing this exist
+on Linux (\fBdosattr\fR(1)) and FreeBSD (\fBchflags\fR(1)).
 .SH BUG REPORTS
 Bugs can be reported to the GitHub issue tracker:
 .UR https://github.com/fragglet/tumba
