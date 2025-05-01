@@ -1089,8 +1089,8 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
 		          (str_checksum(local_machine) << 16));
 		SIVAL(pdata, 12, 2 * strlen(vname));
 		put_unicode(pdata + 18, vname);
-		DEBUG("SMB_QUERY_FS_VOLUME_INFO namelen = %ld, vol = %s\n",
-		      strlen(vname), vname);
+		DEBUG("SMB_QUERY_FS_VOLUME_INFO namelen = %d, vol = %s\n",
+		      (int) strlen(vname), vname);
 		break;
 	case SMB_QUERY_FS_SIZE_INFO:
 		data_len = 24;
