@@ -743,7 +743,7 @@ char *safe_strcpy(char *dest, const char *src, int dest_size)
 
 	len = strlcpy(dest, src, dest_size);
 	if (len > dest_size - 1) {
-		ERROR("ERROR: string overflow by %d in safe_strcpy [%.50s]\n",
+		ERROR("ERROR: string overflow by %ld in safe_strcpy [%.50s]\n",
 		      len - dest_size + 1, src);
 	}
 
@@ -764,7 +764,7 @@ char *safe_strcat(char *dest, const char *src, int dest_size)
 
 	len = strlcat(dest, src, dest_size);
 	if (len > dest_size - 1) {
-		ERROR("ERROR: string overflow by %d in safe_strcat [%.50s]\n",
+		ERROR("ERROR: string overflow by %ld in safe_strcat [%.50s]\n",
 		      len - dest_size + 1, src);
 	}
 
