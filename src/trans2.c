@@ -1295,8 +1295,7 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
 		if (!is_8_3(short_name, true)) {
 			name_map_mangle(short_name, true, CONN_SHARE(cnum));
 		}
-		strncpy(pdata + 4, short_name, 12);
-		(pdata + 4)[12] = 0;
+		strlcpy(pdata + 4, short_name, 8 + 1 + 3 + 1);
 		strupper(pdata + 4);
 		l = strlen(pdata + 4);
 		data_size = 4 + l;
