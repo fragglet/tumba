@@ -78,7 +78,15 @@ Disable access to the DOCS share entirely.
 The \fBsmbclient\fR(1) command-line client that ships with \fBsamba\fR(7) can
 be used to connect used to connect to SMB servers including Tumba. However,
 recent versions of Samba will not use the SMB1 protocol unless explicitly
-configured. To do so, you will need to override the "client min protocol"
+configured. If you try to connect, you'll see an error that looks like this:
+.IP
+.EX
+$ smbclient -L example
+Protocol negotiation to server example (for a protocol between SMB2_02 and
+SMB3) failed: NT_STATUS_CONNECTION_DISCONNECTED
+.EE
+.PP
+To enable SMBv1 support, you will need to override the "client min protocol"
 option. For example, to list shares:
 .IP
 smbclient --option="client min protocol=NT1" -L localhost
