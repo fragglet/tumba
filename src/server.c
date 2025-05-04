@@ -2509,7 +2509,7 @@ struct smb_message_struct {
 
     {SMBnegprot, "SMBnegprot", reply_negprot, 0},
     {SMBtcon, "SMBtcon", reply_tcon, 0},
-    {SMBtdis, "SMBtdis", reply_tdis, 0},
+    {SMBtdis, "SMBtdis", reply_tdis, ALLOWED_IN_IPC},
     {SMBexit, "SMBexit", reply_exit, 0},
     {SMBioctl, "SMBioctl", reply_ioctl, 0},
     {SMBecho, "SMBecho", reply_echo, 0},
