@@ -909,8 +909,8 @@ static int fd_attempt_close(struct open_fd *fd_ptr)
 {
 	DEBUG("open_fd %d, fd = %d, dev = %x, "
 	      "inode = %x, open_flags = %d, ref_count = %d.\n",
-	      fd_ptr - &FileFd[0], fd_ptr->fd, fd_ptr->dev, fd_ptr->inode,
-	      fd_ptr->real_open_flags, fd_ptr->ref_count);
+	      (int) (fd_ptr - &FileFd[0]), fd_ptr->fd, fd_ptr->dev,
+	      fd_ptr->inode, fd_ptr->real_open_flags, fd_ptr->ref_count);
 	if (fd_ptr->ref_count > 0) {
 		fd_ptr->ref_count--;
 		if (fd_ptr->ref_count == 0) {
