@@ -63,6 +63,17 @@ Listen only on the localhost interface, on the nonstandard TCP port 9999.
 .TP
 tumba_smbd -d 10 -l /tmp/tumba.log /tmp/debugshare
 Run the server with verbose logging, writing to the file \fB/tmp/tumba.log\fR.
+.PP
+Managing shares:
+.TP
+chmod o+w /var/tumba/docs
+Change the DOCS share to a read-write share.
+.TP
+chmod o-w /var/tumba/docs
+Change the DOCS share to a read-only share.
+.TP
+chmod o-x /var/tumba/docs
+Disable access to the DOCS share entirely.
 .SH SMBCLIENT COMPATIBILITY
 The \fBsmbclient\fR(1) command-line client that ships with \fBsamba\fR(7) can
 be used to connect used to connect to SMB servers including Tumba. However,
