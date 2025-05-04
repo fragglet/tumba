@@ -850,7 +850,7 @@ int main(int argc, char *argv[])
 	extern FILE *dbf;
 	extern char *optarg;
 
-	sprintf(debugf, "%s.nmb.debug", DEBUGFILE);
+	snprintf(debugf, sizeof(debugf), "%s.nmb.debug", DEBUGFILE);
 
 	while ((opt = getopt(argc, argv, "b:C:n:l:d:p:hSW:")) != EOF)
 		switch (opt) {
