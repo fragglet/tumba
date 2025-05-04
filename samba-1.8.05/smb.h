@@ -204,55 +204,13 @@ typedef char fstring[128];
 #define smb_droff  smb_vwv7
 #define smb_drdisp smb_vwv8
 
-/* where to find the base of the SMB packet proper */
-#define smb_base(buf) ((buf) + 4)
-
-/* and a few prototypes */
-bool string_sub(char *s, char *pattern, char *insert);
 char *skip_string(char *buf, int n);
-int find_free_connection(void);
-void close_file(int fnum);
-char *ufc_crypt(char *key, char *salt);
-bool strhasupper(char *s);
-bool strhaslower(char *s);
-bool check_name(char *name, int cnum);
-struct hostent *Get_Hostbyname(char *name);
-void *Realloc(void *p, int size);
-void smb_setlen(char *buf, int len);
 int set_message(char *buf, int num_words, int num_bytes, bool zero);
-void name_interpret(char *in, char *out);
 void strupper(char *s);
-bool file_exist(char *fname);
-int read_with_timeout(int fd, char *buf, int mincnt, int maxcnt,
-                      int32_t time_out, bool exact);
-int write_socket(int fd, char *buf, int len);
-int write_with_timeout(int fd, char *buf, int length, int32_t time_out);
-bool send_smb(char *buffer);
-bool read_data(int fd, char *buffer, int N);
-int smb_len(char *buf);
-bool receive_smb(char *buffer, int timeout);
-void show_msg(char *buf);
-void strlower(char *s);
-void strnorm(char *s);
 char *smb_buf(char *buf);
-bool strequal(char *, char *);
 int name_len(char *s);
-uint32_t file_size(char *file_name);
-void dos_format(char *fname);
-char *GetWd(char *s);
-int name_len(char *s);
-void show_nmb(char *inbuf);
-void create_mangled_stack(int size);
 void name_extract(char *buf, int ofs, char *name);
 int Debug1(char *, ...);
-time_t TimeLocal(struct tm *tm, int);
-void replacestr(char *str1, char *str2, int start, int n);
-void openstr(char *s, int start, int n);
-void closestr(char *s, int start, int n);
-bool set_filetime(char *fname, time_t mtime);
-bool get_myname(char *myname);
-char *smb_fn_name(int cnum);
-uint32_t interpret_addr(char *str);
 
 #ifndef MIN
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
