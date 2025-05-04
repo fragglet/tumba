@@ -63,6 +63,24 @@ Listen only on the localhost interface, on the nonstandard TCP port 9999.
 .TP
 tumba_smbd -d 10 -l /tmp/tumba.log /tmp/debugshare
 Run the server with verbose logging, writing to the file \fB/tmp/tumba.log\fR.
+.SH SMBCLIENT COMPATIBILITY
+The \fBsmbclient\fR(1) command-line client that ships with \fBsamba\fR(7) can
+be used to connect used to connect to SMB servers including Tumba. However,
+recent versions of Samba will not use the SMB1 protocol unless explicitly
+configured. To do so, you will need to override the "client min protocol"
+option. For example, to list shares:
+.IP
+smbclient --option="client min protocol=NT1" -L localhost
+.PP
+The override can be made permanent by editing \fBsmb.conf\fR(5). For example:
+.IP
+.EX
+[global]
+client min protocol = NT1
+.EE
+.PP
+Note that since the Samba project is in the process of removing SMB1 support,
+there's a good chance that this workaround might stop working in the future.
 .SH PRIVILEGES
 \fBTumba\fR is intended to be run as an unprivileged user, \fInot\fR as root.
 If run as root, it will use the \fBsetuid\fR(2) system call to change itself to
