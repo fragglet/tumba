@@ -22,7 +22,8 @@ will be able to access it via the share named \fBPINEAPPLES\fR.
 .PP
 All shares are public and there is no option for password-protected shares. If
 the \fBo+w\fR permission is set on the directory, it will be a read/write
-share; otherwise, it will be read-only.
+share; otherwise, it will be read-only. See \fBPRIVILEGES\fR below for more
+information.
 .PP
 .SH OPTIONS
 The following command line options are understood:
@@ -62,6 +63,56 @@ Listen only on the localhost interface, on the nonstandard TCP port 9999.
 .TP
 tumba_smbd -d 10 -l /tmp/tumba.log /tmp/debugshare
 Run the server with verbose logging, writing to the file \fB/tmp/tumba.log\fR.
+.PP
+Managing shares:
+.TP
+chmod o+w /var/tumba/docs
+Change the DOCS share to a read-write share.
+.TP
+chmod o-w /var/tumba/docs
+Change the DOCS share to a read-only share.
+.TP
+chmod o-x /var/tumba/docs
+Disable access to the DOCS share entirely.
+.SH SMBCLIENT COMPATIBILITY
+The \fBsmbclient\fR(1) command-line client that ships with \fBsamba\fR(7) can
+be used to connect used to connect to SMB servers including Tumba. However,
+recent versions of Samba will not use the SMB1 protocol unless explicitly
+configured. If you try to connect, you'll see an error that looks like this:
+.IP
+.EX
+$ smbclient -L example
+Protocol negotiation to server example (for a protocol between SMB2_02 and
+SMB3) failed: NT_STATUS_CONNECTION_DISCONNECTED
+.EE
+.PP
+To enable SMBv1 support, you will need to override the "client min protocol"
+option. For example, to list shares:
+.IP
+smbclient --option="client min protocol=NT1" -L localhost
+.PP
+The override can be made permanent by editing \fBsmb.conf\fR(5). For example:
+.IP
+.EX
+[global]
+client min protocol = NT1
+.EE
+.PP
+Note that since the Samba project is in the process of removing SMB1 support,
+there's a good chance that this workaround might stop working in the future.
+.SH PRIVILEGES
+\fBTumba\fR is intended to be run as an unprivileged user, \fInot\fR as root.
+If run as root, it will use the \fBsetuid\fR(2) system call to change itself to
+the \fBnobody\fR user. This allows the server to bind to the (privileged) TCP
+port 139 on startup before dropping privileges. However, Tumba also ships with
+a \fBsystemd\fR(1) service configuration file that will grant it permission to
+that port without ever needing to run as root.
+.PP
+The \fBo+w\fR permission on a shared directory controls whether that share will
+be read-only or not However, because the server runs as an unprivileged user,
+the files it accesses must also have their individual permissions set to
+world-readable (and world-writable for non-readonly shares). Since the files
+will be world-accessible via the network anyway, this is not a security issue.
 .SH LIMITATIONS
 \fBTumba\fR is an intentionally minimalist implementation of the SMB protocol,
 and does not implement many of the features of the SMBv1 protocol. The

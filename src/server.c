@@ -67,6 +67,9 @@
 #define BOOLSTR(b)    ((b) ? "Yes" : "No")
 #define SAFETY_MARGIN 1024
 
+static const uint8_t smb1_protocol_id[4] = {0xff, 'S', 'M', 'B'};
+static const uint8_t smb2_protocol_id[4] = {0xfe, 'S', 'M', 'B'};
+
 /* the following control timings of various actions. Don't change
    them unless you know what you are doing. These are all in seconds */
 #define DEFAULT_SMBD_TIMEOUT (60 * 60 * 24 * 7)
@@ -2506,7 +2509,7 @@ struct smb_message_struct {
 
     {SMBnegprot, "SMBnegprot", reply_negprot, 0},
     {SMBtcon, "SMBtcon", reply_tcon, 0},
-    {SMBtdis, "SMBtdis", reply_tdis, 0},
+    {SMBtdis, "SMBtdis", reply_tdis, ALLOWED_IN_IPC},
     {SMBexit, "SMBexit", reply_exit, 0},
     {SMBioctl, "SMBioctl", reply_ioctl, 0},
     {SMBecho, "SMBecho", reply_echo, 0},
@@ -2624,6 +2627,7 @@ do a switch on the message type, and return the response size
 static int switch_message(int type, char *inbuf, char *outbuf, int size,
                           int bufsize)
 {
+	const char *hdr;
 	static int pid = -1;
 	int outsize = 0;
 	static int num_smb_messages =
@@ -2645,9 +2649,17 @@ static int switch_message(int type, char *inbuf, char *outbuf, int size,
 	last_message = type;
 
 	/* make sure this is an SMB packet */
-	if (strncmp(smb_base(inbuf), "\377SMB", 4) != 0) {
-		NOTICE("Non-SMB packet of length %d\n", smb_len(inbuf));
-		return -1;
+	hdr = smb_base(inbuf);
+	if (memcmp(hdr, smb2_protocol_id, 4) == 0) {
+		ERROR("Received an SMBv2 message. If the client is Samba, "
+		      "you might need to enable SMBv1 support by setting "
+		      "'client min protocol = NT1' in smb.conf.\n");
+		exit(1);
+	} else if (memcmp(hdr, smb1_protocol_id, 4) != 0) {
+		ERROR("Non-SMB packet of length %d, protocol ID "
+		      "%02x%02x%02x%02x. Aborting.\n",
+		      smb_len(inbuf), hdr[0], hdr[1], hdr[2], hdr[3]);
+		exit(1);
 	}
 
 	for (match = 0; match < num_smb_messages; match++)
@@ -3064,14 +3076,19 @@ static void usage(void)
 	      "correct?\n");
 
 	printf("Tumba version " VERSION "\n"
-	       "Usage: tumba_smbd [-a] [-p port] "
-	       "[-d debuglevel] [-l log basename]\n"
+	       "Usage: tumba_smbd"
+	       " [-a]"
+	       " [-b address]"
+	       " [-d level]"
+	       " [-l filename]"
+	       " [-p port]"
+	       "\n"
 	       "                  <path> [paths...]\n\n"
-	       "   -a                allow connections from all addresses\n"
-	       "   -b addr           bind to given address\n"
-	       "   -p port           listen on the specified port\n"
-	       "   -d level          set the logging level\n"
-	       "   -l filename       write log messages to the given file\n"
+	       "  -a            allow connections from any address\n"
+	       "  -b address    address to bind socket (default 0.0.0.0)\n"
+	       "  -d level      set the logging level\n"
+	       "  -l filename   path to debug log file\n"
+	       "  -p port       listen on the specified port\n"
 	       "\n");
 }
 
