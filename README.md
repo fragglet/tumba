@@ -120,3 +120,9 @@ systems has not yet been written.
   You can specify the `-a` command line argument to open connections from all
   public IP addresses, but you should understand the implications of doing this
   and consider if it is really what you want.
+
+* **Why can't I connect to the server using smbclient / Gnome / etc.?**
+  These clients are based on Samba, and recent versions of Samba will not use
+  the SMB1 protocol unless explicitly configured to do so (for the record, I
+  believe this is a good thing). The workaround is to set
+  `client min protocol = NT1` in `/etc/samba/smb.conf`.
