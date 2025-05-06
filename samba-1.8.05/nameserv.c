@@ -477,8 +477,7 @@ static void construct_reply(uint8_t *inbuf)
 	}
 
 	/* Only respond to name queries once confident we own the name */
-	if (registered_name && opcode == 0 && (nm_flags & ~1) == 0x10 &&
-	    rcode == 0) {
+	if (registered_name && opcode == 0 && rcode == 0) {
 		reply_name_query(inbuf, src_iface);
 	}
 }
