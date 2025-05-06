@@ -171,8 +171,8 @@ static struct network_address *get_addresses(int sock_fd, int *num_addrs)
 	return result;
 }
 
-static struct network_address *caching_get_addresses(int sock_fd,
-                                                     int *num_addrs)
+static const struct network_address *caching_get_addresses(int sock_fd,
+                                                           int *num_addrs)
 {
 	static struct network_address *cached_addrs = NULL;
 	static int cached_num_addrs;
@@ -190,9 +190,9 @@ static struct network_address *caching_get_addresses(int sock_fd,
 }
 
 /* true if two netbios names are equal */
-static bool name_equal(char *s1, char *s2)
+static bool name_equal(const char *s1, const char *s2)
 {
-	char *p1, *p2;
+	const char *p1, *p2;
 	while (*s1 && *s2 && (*s1 != ' ') && (*s2 != ' ')) {
 		p1 = s1;
 		p2 = s2; /* toupper has side effects as a macro */
@@ -222,11 +222,11 @@ static int read_udp_socket(int fd, uint8_t *buf, int len)
 	return ret;
 }
 
-static int nmb_len(uint8_t *buf)
+static int nmb_len(const uint8_t *buf)
 {
 	int i;
 	int ret = 12;
-	uint8_t *p = buf;
+	const uint8_t *p = buf;
 	int qdcount = RSVAL(buf, 4);
 	int ancount = RSVAL(buf, 6);
 	int nscount = RSVAL(buf, 8);
@@ -263,7 +263,8 @@ static void close_sockets(void)
 
 /* Safe version of `strcpy()` that ensures written string is entirely inside
    the given buffer. */
-static void strcpy_into(uint8_t *buf, size_t buf_len, void *to, void *from)
+static void strcpy_into(uint8_t *buf, size_t buf_len, void *to,
+                        const void *from)
 {
 	assert((uint8_t *) to >= buf && (uint8_t *) to <= (buf + buf_len));
 	buf_len -= ((uint8_t *) to) - buf;
@@ -279,25 +280,27 @@ static void send_reply(void *buf, size_t buf_len)
 	}
 }
 
-static void reply_reg_request(uint8_t *inbuf, struct network_address *src_iface)
+static void reply_reg_request(const uint8_t *inbuf,
+                              const struct network_address *src_iface)
 {
 	uint8_t outbuf[BUFFER_SIZE];
 	int rec_name_trn_id = RSVAL(inbuf, 0);
 	char qname[100] = "";
-	uint8_t *p = inbuf;
+	const uint8_t *cp = inbuf;
+	uint8_t *p;
 	struct in_addr ip;
 	unsigned char nb_flags;
 
 	name_extract((char *) inbuf, 12, qname);
 
-	p += 12;
-	p += name_len((char *) p);
-	p += 4;
-	p += name_len((char *) p);
-	p += 4;
-	nb_flags = CVAL(p, 6);
-	p += 8;
-	memcpy(&ip, p, 4);
+	cp += 12;
+	cp += name_len((char *) cp);
+	cp += 4;
+	cp += name_len((char *) cp);
+	cp += 4;
+	nb_flags = CVAL(cp, 6);
+	cp += 8;
+	memcpy(&ip, cp, 4);
 
 	DEBUG("Name registration request for %s (%s) nb_flags=0x%x: ", qname,
 	      inet_ntoa(ip), nb_flags);
@@ -350,12 +353,13 @@ static void reply_reg_request(uint8_t *inbuf, struct network_address *src_iface)
 	send_reply(outbuf, nmb_len(outbuf));
 }
 
-static void reply_name_query(uint8_t *inbuf, struct network_address *src_iface)
+static void reply_name_query(const uint8_t *inbuf,
+                             const struct network_address *src_iface)
 {
 	uint8_t outbuf[BUFFER_SIZE];
 	int rec_name_trn_id = RSVAL(inbuf, 0);
 	char qname[100] = "";
-	uint8_t *p = inbuf;
+	uint8_t *p;
 
 	name_extract((char *) inbuf, 12, qname);
 
@@ -402,7 +406,7 @@ static const char *rcode_description(int rcode)
 	}
 }
 
-static void registration_response(uint8_t *inbuf)
+static void registration_response(const uint8_t *inbuf)
 {
 	int name_trn_id = RSVAL(inbuf, 0);
 	int rcode = CVAL(inbuf, 3) & 0xF;
@@ -424,9 +428,9 @@ static void registration_response(uint8_t *inbuf)
 
 /* Choose which IP address to return to clients requesting our hostname. This
    may be different, depending on the interface on which it is received. */
-static struct network_address *get_iface_addr(struct network_address *addrs,
-                                              int num_addrs,
-                                              struct in_addr *src)
+static const struct network_address *
+get_iface_addr(const struct network_address *addrs, int num_addrs,
+               const struct in_addr *src)
 {
 	int i;
 
@@ -445,12 +449,12 @@ static struct network_address *get_iface_addr(struct network_address *addrs,
 	return NULL;
 }
 
-static void construct_reply(uint8_t *inbuf)
+static void construct_reply(const uint8_t *inbuf)
 {
 	int num_addrs = 0;
-	struct network_address *addrs =
+	const struct network_address *addrs =
 	    caching_get_addresses(server_sock, &num_addrs);
-	struct network_address *src_iface =
+	const struct network_address *src_iface =
 	    get_iface_addr(addrs, num_addrs, &last_client.sin_addr);
 	int opcode = (CVAL(inbuf, 2) & 0x78) >> 3;
 	bool is_response = (CVAL(inbuf, 2) & 0x80) != 0;
@@ -483,7 +487,7 @@ static void construct_reply(uint8_t *inbuf)
 }
 
 /* mangle a name into netbios format */
-static int name_mangle(char *in, char *Out)
+static int name_mangle(const char *in, char *Out)
 {
 	char *out = Out;
 	int len = 2 * strlen(in);
@@ -510,7 +514,7 @@ static int name_mangle(char *in, char *Out)
 	return name_len(Out);
 }
 
-static void send_registration(struct network_address *addr, bool demand,
+static void send_registration(const struct network_address *addr, bool demand,
                               uint16_t trn_id)
 {
 	uint8_t outbuf[BUFFER_SIZE];
@@ -565,7 +569,7 @@ static void send_registration(struct network_address *addr, bool demand,
 static void send_all_registrations(bool demand, uint16_t trn_id)
 {
 	int num_addrs = 0, i;
-	struct network_address *addrs =
+	const struct network_address *addrs =
 	    caching_get_addresses(server_sock, &num_addrs);
 
 	for (i = 0; i < num_addrs; ++i) {
@@ -604,7 +608,7 @@ construct and send a host announcement
 Note that I don't know what half the numbers mean - I'm just using what I
 saw another PC use :-)
 */
-static bool announce_host(char *group, struct network_address *addr)
+static bool announce_host(const char *group, const struct network_address *addr)
 {
 	uint8_t outbuf[BUFFER_SIZE];
 	struct sockaddr_in send_addr;
@@ -690,7 +694,7 @@ static bool announce_host(char *group, struct network_address *addr)
 static void do_browse_hook(void)
 {
 	int num_addrs = 0, i;
-	struct network_address *addrs =
+	const struct network_address *addrs =
 	    caching_get_addresses(server_sock, &num_addrs);
 
 	/* We send to all broadcast addresses (since there may be multiple
@@ -816,7 +820,7 @@ static void init_names(void)
 	last_reg_trn_id = getpid();
 }
 
-static void usage(char *pname)
+static void usage(const char *pname)
 {
 	ERROR("Incorrect program usage - is the command line correct?\n");
 
