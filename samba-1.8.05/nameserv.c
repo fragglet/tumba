@@ -280,7 +280,7 @@ static void send_reply(void *buf, size_t buf_len)
 	}
 }
 
-static void reply_reg_request(const uint8_t *inbuf,
+static void reply_reg_request(const uint8_t *inbuf, size_t inbuf_len,
                               const struct network_address *src_iface)
 {
 	uint8_t outbuf[BUFFER_SIZE];
@@ -290,6 +290,8 @@ static void reply_reg_request(const uint8_t *inbuf,
 	uint8_t *p;
 	struct in_addr ip;
 	unsigned char nb_flags;
+
+	// TODO: Sanity check inbuf_len
 
 	name_extract((char *) inbuf, 12, qname);
 
@@ -353,13 +355,15 @@ static void reply_reg_request(const uint8_t *inbuf,
 	send_reply(outbuf, nmb_len(outbuf));
 }
 
-static void reply_name_query(const uint8_t *inbuf,
+static void reply_name_query(const uint8_t *inbuf, size_t inbuf_len,
                              const struct network_address *src_iface)
 {
 	uint8_t outbuf[BUFFER_SIZE];
 	int rec_name_trn_id = RSVAL(inbuf, 0);
 	char qname[100] = "";
 	uint8_t *p;
+
+	// TODO: Sanity check inbuf_len
 
 	name_extract((char *) inbuf, 12, qname);
 
@@ -406,10 +410,12 @@ static const char *rcode_description(int rcode)
 	}
 }
 
-static void registration_response(const uint8_t *inbuf)
+static void registration_response(const uint8_t *inbuf, size_t inbuf_len)
 {
 	int name_trn_id = RSVAL(inbuf, 0);
 	int rcode = CVAL(inbuf, 3) & 0xF;
+
+	// TODO: Sanity check inbuf_len
 
 	DEBUG("Received name registration response: "
 	      "name_trn_id=%d, rcode=%d\n",
@@ -449,17 +455,15 @@ get_iface_addr(const struct network_address *addrs, int num_addrs,
 	return NULL;
 }
 
-static void construct_reply(const uint8_t *inbuf)
+static void construct_reply(const uint8_t *inbuf, size_t inbuf_len)
 {
 	int num_addrs = 0;
 	const struct network_address *addrs =
 	    caching_get_addresses(server_sock, &num_addrs);
 	const struct network_address *src_iface =
 	    get_iface_addr(addrs, num_addrs, &last_client.sin_addr);
-	int opcode = (CVAL(inbuf, 2) & 0x78) >> 3;
-	bool is_response = (CVAL(inbuf, 2) & 0x80) != 0;
-	int nm_flags = ((CVAL(inbuf, 2) & 0x7) << 4) + (CVAL(inbuf, 3) >> 4);
-	int rcode = CVAL(inbuf, 3) & 0xF;
+	int opcode, nm_flags, rcode;
+	bool is_response;
 
 	/* We don't process packets unless we can match them to a local
 	   interface. Note that this does mean we only ever respond to packets
@@ -469,20 +473,29 @@ static void construct_reply(const uint8_t *inbuf)
 		return;
 	}
 
+	if (inbuf_len < 4 || nmb_len(inbuf) <= 0) {
+		return;
+	}
+
+	opcode = (CVAL(inbuf, 2) & 0x78) >> 3;
+	is_response = (CVAL(inbuf, 2) & 0x80) != 0;
+	nm_flags = ((CVAL(inbuf, 2) & 0x7) << 4) + (CVAL(inbuf, 3) >> 4);
+	rcode = CVAL(inbuf, 3) & 0xF;
+
 	DEBUG("opcode=0x%x, nm_flags=0x%x, rcode=0x%x\n", opcode, nm_flags,
 	      rcode);
 
 	if (opcode == 0x5) {
 		if (is_response) {
-			registration_response(inbuf);
+			registration_response(inbuf, inbuf_len);
 		} else if ((nm_flags & ~1) == 0x10 && rcode == 0) {
-			reply_reg_request(inbuf, src_iface);
+			reply_reg_request(inbuf, inbuf_len, src_iface);
 		}
 	}
 
 	/* Only respond to name queries once confident we own the name */
 	if (registered_name && opcode == 0 && rcode == 0) {
-		reply_name_query(inbuf, src_iface);
+		reply_name_query(inbuf, inbuf_len, src_iface);
 	}
 }
 
@@ -736,8 +749,8 @@ static void process(void)
 		if (FD_ISSET(server_sock, &fds)) {
 			nread = read_udp_socket(server_sock, in_buffer,
 			                        BUFFER_SIZE);
-			if (nread > 0 && nmb_len(in_buffer) > 0) {
-				construct_reply(in_buffer);
+			if (nread > 0) {
+				construct_reply(in_buffer, nread);
 			}
 		}
 	}
