@@ -73,6 +73,8 @@ int reply_special(char *inbuf, char *outbuf)
 			ERROR("Invalid name length in session request\n");
 			return 0;
 		}
+		// TODO: Replace with the rewritten decode_name() function from
+		// nameserv.c; this has no bounds checks.
 		name_extract(inbuf, 4, name1);
 		name_extract(inbuf, 4 + name_len(inbuf + 4), name2);
 		DEBUG("netbios connect: name1=%s name2=%s\n", name1, name2);

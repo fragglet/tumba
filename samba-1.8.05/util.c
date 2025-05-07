@@ -86,30 +86,6 @@ char *StrnCpy(char *dest, char *src, int n)
 	return dest;
 }
 
-/****************************************************************************
-interpret the weird netbios "name"
-****************************************************************************/
-void name_interpret(char *in, char *out)
-{
-
-	int len = (*in++) / 2;
-	while (len--) {
-		*out = ((in[0] - 'A') << 4) + (in[1] - 'A');
-		in += 2;
-		out++;
-	}
-	*out = 0;
-	/* Handle any scope names */
-	while (*in) {
-		*out++ = '.'; /* Scope names are separated by periods */
-		len = *(unsigned char *) in++;
-		StrnCpy(out, in, len);
-		out += len;
-		*out = 0;
-		in += len;
-	}
-}
-
 /*******************************************************************
   convert a string to upper case
 ********************************************************************/
@@ -179,34 +155,6 @@ char *skip_string(char *buf, int n)
 	while (n--)
 		buf += strlen(buf) + 1;
 	return buf;
-}
-
-/****************************************************************************
-find a pointer to a netbios name
-****************************************************************************/
-char *name_ptr(char *buf, int ofs)
-{
-	unsigned char c = *(unsigned char *) (buf + ofs);
-
-	if ((c & 0xC0) == 0xC0) {
-		uint16_t l;
-		char *p = (char *) &l;
-		memcpy(&l, buf + ofs, 2);
-		p[0] &= ~0xC0;
-		l = RSVAL(p, 0);
-		DEBUG("name ptr to pos %d from %d is %s\n", l, ofs, buf + l);
-		return buf + l;
-	} else
-		return buf + ofs;
-}
-
-/****************************************************************************
-extract a netbios name from a buf
-****************************************************************************/
-void name_extract(char *buf, int ofs, char *name)
-{
-	strcpy(name, "");
-	name_interpret(name_ptr(buf, ofs), name);
 }
 
 /****************************************************************************

@@ -209,7 +209,6 @@ int set_message(char *buf, int num_words, int num_bytes, bool zero);
 void strupper(char *s);
 char *smb_buf(char *buf);
 int name_len(char *s);
-void name_extract(char *buf, int ofs, char *name);
 int Debug1(char *, ...);
 
 #ifndef MIN
