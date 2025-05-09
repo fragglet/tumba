@@ -222,6 +222,21 @@ static int read_udp_socket(int fd, uint8_t *buf, int len)
 	return ret;
 }
 
+static bool extract_name_len(const uint8_t *buf, size_t buf_len, size_t *result)
+{
+	if (buf_len < 1) {
+		return false;
+	} else if ((buf[0] & 0xc0) == 0xc0) {
+		*result = 2;
+		return true;
+	} else if ((buf[0] & 0xc0) == 0) {
+		*result = buf[0] + 2;
+		return true;
+	} else {
+		return false;
+	}
+}
+
 static int nmb_len(const uint8_t *buf)
 {
 	int i;
@@ -322,26 +337,66 @@ static void reply_reg_request(const uint8_t *inbuf, size_t inbuf_len,
 {
 	uint8_t outbuf[BUFFER_SIZE];
 	int rec_name_trn_id = RSVAL(inbuf, 0);
-	char qname[100] = "";
-	const uint8_t *cp = inbuf;
+	char qname[64];
 	uint8_t *p;
 	struct in_addr ip;
+	size_t nmlen, datalen;
 	unsigned char nb_flags;
+	int offs;
 
-	if (!decode_name(inbuf + 12, inbuf_len - 12, qname, sizeof(qname))) {
+	if (inbuf_len < 12) {
+		DEBUG("Registration request packet too short (%d < 12)\n",
+		      inbuf_len);
 		return;
 	}
 
-	// TODO: Sanity check inbuf_len
+	/* We expect one question, one additional record,
+	   as per RFC 1002 4.2.2: */
+	if (RSVAL(inbuf, 4) != 1 || RSVAL(inbuf, 10) != 1) {
+		DEBUG("Expected one question, one addl record, got %d, %d\n",
+		      RSVAL(inbuf, 4), RSVAL(inbuf, 10));
+		return;
+	}
 
-	cp += 12;
-	cp += name_len((char *) cp);
-	cp += 4;
-	cp += name_len((char *) cp);
-	cp += 4;
-	nb_flags = CVAL(cp, 6);
-	cp += 8;
-	memcpy(&ip, cp, 4);
+	/* Questions section */
+	offs = 12;
+
+	if (!extract_name_len(inbuf + offs, inbuf_len - offs, &nmlen) ||
+	    !decode_name(inbuf + offs, inbuf_len - offs, qname,
+	                 sizeof(qname))) {
+		DEBUG("Registration request too short; failed to decode "
+		      "question\n");
+		return;
+	}
+	offs += nmlen + 4;
+
+	/* Additional records section */
+	if (!extract_name_len(inbuf + offs, inbuf_len - offs, &nmlen)) {
+		DEBUG("Registration request too short; failed to decode "
+		      "IN record name\n");
+		return;
+	}
+
+	offs += nmlen;
+	if (inbuf_len - offs < 16) {
+		DEBUG("Registration request too short; failed to decode "
+		      "IN record (%d + 16 >= %d)\n",
+		      offs, inbuf_len);
+		return;
+	}
+
+	datalen = RSVAL(inbuf + offs, 8);
+	nb_flags = RSVAL(inbuf + offs, 10);
+
+	/* Must be IN record type: */
+	if (RSVAL(inbuf + offs, 2) != 1 || datalen != 6) {
+		DEBUG("Registration request wrong record type/len; got "
+		      "type=%d, datalen=%d\n",
+		      RSVAL(inbuf + offs, 2), datalen);
+		return;
+	}
+
+	memcpy(&ip, inbuf + offs + 12, 4);
 
 	DEBUG("Name registration request for %s (%s) nb_flags=0x%x: ", qname,
 	      inet_ntoa(ip), nb_flags);
