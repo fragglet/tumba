@@ -1,3 +1,8 @@
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/fragglet/tumba/ci.yml)
+![GitHub License](https://img.shields.io/github/license/fragglet/tumba)
+![GitHub repo size](https://img.shields.io/github/repo-size/fragglet/tumba)
+[![GitHub Repo stars](https://img.shields.io/github/stars/fragglet/tumba)](https://github.com/fragglet/tumba/stargazers)
+
 **Tumba** is a stripped-down fork of a very old version of
 [Samba](https://en.wikipedia.org/wiki/Samba_software), for retro computing
 purposes.
