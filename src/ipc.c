@@ -604,8 +604,8 @@ static bool api_NetWkstaGetInfo(int cnum, char *param, char *data, int mdrcnt,
 	*rparam = REALLOC(*rparam, *rparam_len);
 
 	/* check it's a supported varient */
-	if (!(level == 10 && strcsequal(str1, "WrLh") &&
-	      strcsequal(str2, "zzzBBzz")))
+	if (level != 10 || !strcsequal(str1, "WrLh") ||
+	    !strcsequal(str2, "zzzBBzz"))
 		return false;
 
 	*rdata_len = mdrcnt + 1024;
@@ -845,7 +845,7 @@ int reply_trans(char *inbuf, char *outbuf, int size, int bufsize)
 		ret = receive_next_smb(Client, inbuf, bufsize,
 		                       SMB_SECONDARY_WAIT);
 
-		if ((ret && CVAL(inbuf, smb_com) != SMBtrans) || !ret) {
+		if (!ret || CVAL(inbuf, smb_com) != SMBtrans) {
 			if (ret)
 				ERROR("reply_trans: Invalid secondary "
 				      "trans packet\n");

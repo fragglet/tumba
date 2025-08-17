@@ -156,7 +156,7 @@ time_t interpret_long_date(char *p)
 	/* now adjust by 369 years to make the secs since 1970 */
 	d -= TIME_FIXUP_CONSTANT;
 
-	if (!(l_time_min <= d && d <= l_time_max))
+	if (d < l_time_min || d > l_time_max)
 		return 0;
 
 	ret = (time_t) (d + 0.5);

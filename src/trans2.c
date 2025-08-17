@@ -1758,8 +1758,7 @@ int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize)
 			ret = receive_next_smb(Client, inbuf, bufsize,
 			                       SMB_SECONDARY_WAIT);
 
-			if ((ret && (CVAL(inbuf, smb_com) != SMBtranss2)) ||
-			    !ret) {
+			if (!ret || CVAL(inbuf, smb_com) != SMBtranss2) {
 				outsize = set_message(outbuf, 0, 0, true);
 				if (ret)
 					ERROR("reply_trans2: Invalid "

@@ -172,9 +172,8 @@ bool trim_string(char *s, char *front, char *back)
 			p++;
 		}
 	}
-	while (
-	    back && *back && strlen(s) >= strlen(back) &&
-	    (strncmp(s + strlen(s) - strlen(back), back, strlen(back)) == 0)) {
+	while (back && *back && strlen(s) >= strlen(back) &&
+	       strncmp(s + strlen(s) - strlen(back), back, strlen(back)) == 0) {
 		ret = true;
 		s[strlen(s) - strlen(back)] = 0;
 	}
@@ -312,7 +311,7 @@ int name_len(char *s)
 		return 2;
 
 	/* Add up the length bytes. */
-	for (len = 1; (*s); s += (*s) + 1) {
+	for (len = 1; *s; s += (*s) + 1) {
 		len += *s + 1;
 	}
 
@@ -473,7 +472,7 @@ static bool do_match(char *str, char *regexp)
 		return !*p;
 	}
 
-	if (!*str && (*p == '*' && p[1] == '\0')) {
+	if (!*str && *p == '*' && p[1] == '\0') {
 		return true;
 	}
 
