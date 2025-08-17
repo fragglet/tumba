@@ -135,7 +135,7 @@ bool is_8_3(char *fname, bool check_case)
 	}
 
 	/* extension must be between 1 and 3 */
-	if ((len - l < 2) || (len - l > 4))
+	if (len - l < 2 || len - l > 4)
 		return false;
 
 	/* extension can't have a dot */
@@ -193,7 +193,7 @@ void mangle_name_83(char *s, int s_len)
 	base[0] = 0;
 
 	p = strrchr(s, '.');
-	if (p && (strlen(p + 1) < (size_t) 4)) {
+	if (p && strlen(p + 1) < (size_t) 4) {
 		bool all_normal = (strisnormal(p + 1)); /* XXXXXXXXX */
 
 		if (all_normal && p[1] != 0) {

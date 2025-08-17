@@ -403,7 +403,7 @@ int reply_getatr(char *inbuf, char *outbuf, int in_size, int buffsize)
 
 	/* dos smetimes asks for a stat of "" - it returns a "hidden directory"
 	   under WfWg - weird! */
-	if (!(*fname)) {
+	if (!*fname) {
 		mode = aHIDDEN | aDIR;
 		if (!CAN_WRITE(cnum))
 			mode |= aRONLY;
@@ -424,7 +424,7 @@ int reply_getatr(char *inbuf, char *outbuf, int in_size, int buffsize)
 	}
 
 	if (!ok) {
-		if ((errno == ENOENT) && bad_path) {
+		if (errno == ENOENT && bad_path) {
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
@@ -478,7 +478,7 @@ int reply_setatr(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		ok = set_filetime(cnum, fname, mtime);
 
 	if (!ok) {
-		if ((errno == ENOENT) && bad_path) {
+		if (errno == ENOENT && bad_path) {
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
@@ -680,7 +680,7 @@ int reply_search(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 			                       SVAL(inbuf, smb_pid));
 			if (dptr_num < 0) {
 				if (dptr_num == -2) {
-					if ((errno == ENOENT) && bad_path) {
+					if (errno == ENOENT && bad_path) {
 						unix_ERR_class = ERRDOS;
 						unix_ERR_code = ERRbadpath;
 					}
@@ -706,7 +706,7 @@ int reply_search(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 					numentries = 0;
 			} else {
 				for (i = numentries;
-				     (i < maxentries) && !finished; i++) {
+				     i < maxentries && !finished; i++) {
 					/* check to make sure we have room in
 					 * the buffer */
 					if ((PTR_DIFF(p, outbuf) +
@@ -766,7 +766,7 @@ search_empty:
 	outsize += DIR_STRUCT_SIZE * numentries;
 	smb_setlen(outbuf, outsize - 4);
 
-	if ((!*directory) && dptr_path(dptr_num))
+	if (!*directory && dptr_path(dptr_num))
 		snprintf(directory, sizeof(directory), "(%s)",
 		         dptr_path(dptr_num));
 
@@ -842,7 +842,7 @@ int reply_open(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		return ERROR_CODE(ERRSRV, ERRnofids);
 
 	if (!check_name(fname, cnum)) {
-		if ((errno == ENOENT) && bad_path) {
+		if (errno == ENOENT && bad_path) {
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
@@ -855,7 +855,7 @@ int reply_open(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	fsp = &Files[fnum];
 
 	if (!fsp->open) {
-		if ((errno == ENOENT) && bad_path) {
+		if (errno == ENOENT && bad_path) {
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
@@ -925,7 +925,7 @@ int reply_open_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 		return ERROR_CODE(ERRSRV, ERRnofids);
 
 	if (!check_name(fname, cnum)) {
-		if ((errno == ENOENT) && bad_path) {
+		if (errno == ENOENT && bad_path) {
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
@@ -939,7 +939,7 @@ int reply_open_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	fsp = &Files[fnum];
 
 	if (!fsp->open) {
-		if ((errno == ENOENT) && bad_path) {
+		if (errno == ENOENT && bad_path) {
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
@@ -1031,7 +1031,7 @@ int reply_mknew(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		return ERROR_CODE(ERRSRV, ERRnofids);
 
 	if (!check_name(fname, cnum)) {
-		if ((errno == ENOENT) && bad_path) {
+		if (errno == ENOENT && bad_path) {
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
@@ -1055,7 +1055,7 @@ int reply_mknew(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	fsp = &Files[fnum];
 
 	if (!fsp->open) {
-		if ((errno == ENOENT) && bad_path) {
+		if (errno == ENOENT && bad_path) {
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
@@ -1099,7 +1099,7 @@ int reply_ctemp(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		return ERROR_CODE(ERRSRV, ERRnofids);
 
 	if (!check_name(fname, cnum)) {
-		if ((errno == ENOENT) && bad_path) {
+		if (errno == ENOENT && bad_path) {
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
@@ -1117,7 +1117,7 @@ int reply_ctemp(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	fsp = &Files[fnum];
 
 	if (!fsp->open) {
-		if ((errno == ENOENT) && bad_path) {
+		if (errno == ENOENT && bad_path) {
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
@@ -1251,7 +1251,7 @@ int reply_unlink(char *inbuf, char *outbuf, int dum_size, int dum_bufsize)
 		if (exists)
 			return ERROR_CODE(ERRDOS, error);
 		else {
-			if ((errno == ENOENT) && bad_path) {
+			if (errno == ENOENT && bad_path) {
 				unix_ERR_class = ERRDOS;
 				unix_ERR_code = ERRbadpath;
 			}
@@ -1396,7 +1396,7 @@ int reply_readbraw(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		int predict = 0;
 		_smb_setlen(header, nread);
 
-		if ((nread - predict) > 0)
+		if (nread - predict > 0)
 			seek_file(fnum, startpos + predict);
 
 		ret = transfer_file(fd, Client, nread - predict, header,
@@ -1684,7 +1684,7 @@ int reply_writeunlock(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	else
 		nwritten = write_file(fnum, data, numtowrite);
 
-	if (((nwritten == 0) && (numtowrite != 0)) || (nwritten < 0))
+	if ((nwritten == 0 && numtowrite != 0) || nwritten < 0)
 		return UNIX_ERROR_CODE(ERRDOS, ERRnoaccess);
 
 	if (!do_unlock(fnum, cnum, numtowrite, startpos, &eclass, &ecode))
@@ -1733,7 +1733,7 @@ int reply_write(char *inbuf, char *outbuf, int dum1, int dum2)
 		nwritten = ftruncate(Files[fnum].fd_ptr->fd, startpos);
 	}
 
-	if (((nwritten == 0) && (numtowrite != 0)) || (nwritten < 0))
+	if ((nwritten == 0 && numtowrite != 0) || nwritten < 0)
 		return UNIX_ERROR_CODE(ERRDOS, ERRnoaccess);
 
 	outsize = set_message(outbuf, 1, 0, true);
@@ -1783,7 +1783,7 @@ int reply_write_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	else
 		nwritten = write_file(fnum, data, smb_dsize);
 
-	if (((nwritten == 0) && (smb_dsize != 0)) || (nwritten < 0))
+	if ((nwritten == 0 && smb_dsize != 0) || nwritten < 0)
 		return UNIX_ERROR_CODE(ERRDOS, ERRnoaccess);
 
 	set_message(outbuf, 6, 0, true);
@@ -2135,7 +2135,7 @@ int reply_mkdir(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		ret = mkdir(directory, unix_mode(cnum, aDIR));
 
 	if (ret < 0) {
-		if ((errno == ENOENT) && bad_path) {
+		if (errno == ENOENT && bad_path) {
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
@@ -2174,7 +2174,7 @@ int reply_rmdir(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	}
 
 	if (!ok) {
-		if ((errno == ENOENT) && bad_path) {
+		if (errno == ENOENT && bad_path) {
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
@@ -2447,7 +2447,7 @@ int reply_mv(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		if (exists)
 			return ERROR_CODE(ERRDOS, error);
 		else {
-			if ((errno == ENOENT) && (bad_path1 || bad_path2)) {
+			if (errno == ENOENT && (bad_path1 || bad_path2)) {
 				unix_ERR_class = ERRDOS;
 				unix_ERR_code = ERRbadpath;
 			}
@@ -2647,7 +2647,7 @@ int reply_copy(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		if (exists)
 			return ERROR_CODE(ERRDOS, error);
 		else {
-			if ((errno == ENOENT) && (bad_path1 || bad_path2)) {
+			if (errno == ENOENT && (bad_path1 || bad_path2)) {
 				unix_ERR_class = ERRDOS;
 				unix_ERR_code = ERRbadpath;
 			}
@@ -2944,13 +2944,13 @@ int reply_setattrE(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	 * Sometimes times are sent as zero - ignore them.
 	 */
 
-	if ((unix_times.actime == 0) && (unix_times.modtime == 0)) {
+	if (unix_times.actime == 0 && unix_times.modtime == 0) {
 		/* Ignore request */
 		DEBUG("fnum=%d cnum=%d ignoring zero request - "
 		      "not setting timestamps of 0\n",
 		      fnum, cnum);
 		return outsize;
-	} else if ((unix_times.actime != 0) && (unix_times.modtime == 0)) {
+	} else if (unix_times.actime != 0 && unix_times.modtime == 0) {
 		/* set modify time = to access time if modify time was 0 */
 		unix_times.modtime = unix_times.actime;
 	}

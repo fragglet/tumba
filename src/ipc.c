@@ -56,7 +56,7 @@ static bool api_TooSmall(int cnum, char *param, char *data, int mdrcnt,
 static int copy_and_advance(char **dst, char *src, int *n)
 {
 	int l;
-	if (!src || !dst || !n || !(*dst))
+	if (!src || !dst || !n || !*dst)
 		return 0;
 	strlcpy(*dst, src, *n + 1);
 	l = strlen(*dst) + 1;
@@ -845,7 +845,7 @@ int reply_trans(char *inbuf, char *outbuf, int size, int bufsize)
 		ret = receive_next_smb(Client, inbuf, bufsize,
 		                       SMB_SECONDARY_WAIT);
 
-		if ((ret && (CVAL(inbuf, smb_com) != SMBtrans)) || !ret) {
+		if ((ret && CVAL(inbuf, smb_com) != SMBtrans) || !ret) {
 			if (ret)
 				ERROR("reply_trans: Invalid secondary "
 				      "trans packet\n");

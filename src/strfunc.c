@@ -352,7 +352,7 @@ free a string value
 ****************************************************************************/
 void string_free(char **s)
 {
-	if (!s || !(*s))
+	if (!s || !*s)
 		return;
 	if (*s == null_string)
 		*s = NULL;

@@ -779,12 +779,12 @@ static int fd_attempt_open(char *fname, int flags, int mode)
 	int fd = open(fname, flags, mode);
 
 	/* Fix for files ending in '.' */
-	if ((fd == -1) && (errno == ENOENT) && (strchr(fname, '.') == NULL)) {
+	if (fd == -1 && errno == ENOENT && strchr(fname, '.') == NULL) {
 		pstrcat(fname, ".");
 		fd = open(fname, flags, mode);
 	}
 
-	if ((fd == -1) && (errno == ENAMETOOLONG)) {
+	if (fd == -1 && errno == ENAMETOOLONG) {
 		int max_len;
 		char *p = strrchr(fname, '/');
 
@@ -792,7 +792,7 @@ static int fd_attempt_open(char *fname, int flags, int mode)
 		{
 			max_len = pathconf("/", _PC_NAME_MAX);
 			p++;
-		} else if ((p == NULL) || (p == fname)) {
+		} else if (p == NULL || p == fname) {
 			p = fname;
 			max_len = pathconf(".", _PC_NAME_MAX);
 		} else {
@@ -1064,10 +1064,9 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 		 * filesystems sets errno to EROFS.
 		 */
 #ifdef EROFS
-		if ((fd_ptr->fd == -1) &&
-		    ((errno == EACCES) || (errno == EROFS))) {
+		if ((fd_ptr->fd == -1) && (errno == EACCES || errno == EROFS)) {
 #else  /* No EROFS */
-		if ((fd_ptr->fd == -1) && (errno == EACCES)) {
+		if (fd_ptr->fd == -1 && errno == EACCES) {
 #endif /* EROFS */
 			if (accmode != O_RDWR) {
 				fd_ptr->fd = fd_attempt_open(
