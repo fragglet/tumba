@@ -198,17 +198,6 @@ bool directory_exist(char *dname, struct stat *st)
 	return ret;
 }
 
-/*******************************************************************
-returns the size in bytes of the named file
-********************************************************************/
-uint32_t file_size(char *file_name)
-{
-	struct stat buf;
-	buf.st_size = 0;
-	stat(file_name, &buf);
-	return buf.st_size;
-}
-
 static void print_asc(unsigned char *buf, int len)
 {
 	int i;

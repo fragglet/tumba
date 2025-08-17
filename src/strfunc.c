@@ -770,11 +770,3 @@ char *safe_strcat(char *dest, const char *src, int dest_size)
 
 	return dest;
 }
-
-char *tab_depth(int depth)
-{
-	static pstring spaces;
-	memset(spaces, ' ', depth * 4);
-	spaces[depth * 4] = 0;
-	return spaces;
-}

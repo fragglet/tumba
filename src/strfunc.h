@@ -43,7 +43,6 @@ bool mask_match(char *str, char *regexp, bool trans2);
 int put_unicode(char *dst, char *src);
 char *safe_strcpy(char *dest, const char *src, int dest_size);
 char *safe_strcat(char *dest, const char *src, int dest_size);
-char *tab_depth(int depth);
 
 /* TODO: Remove these once their addition to glibc is less recent */
 size_t strlcat(char *, const char *, size_t);

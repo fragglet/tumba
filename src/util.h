@@ -57,7 +57,6 @@ int log_output(const char *funcname, int linenum, int level, char *format_str,
                ...) PRINTF_ATTRIBUTE(4, 5);
 bool file_exist(char *fname, struct stat *sbuf);
 bool directory_exist(char *dname, struct stat *st);
-uint32_t file_size(char *file_name);
 void show_msg(char *buf);
 int smb_len(char *buf);
 void _smb_setlen(char *buf, int len);
