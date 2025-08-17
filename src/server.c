@@ -824,9 +824,9 @@ static struct open_fd *fd_get_already_open(struct stat *sbuf)
 
 	for (i = 0; i <= max_file_fd_used; i++) {
 		fd_ptr = &FileFd[i];
-		if ((fd_ptr->ref_count > 0) &&
-		    (((uint32_t) sbuf->st_dev) == fd_ptr->dev) &&
-		    (((uint32_t) sbuf->st_ino) == fd_ptr->inode)) {
+		if (fd_ptr->ref_count > 0 &&
+		    (uint32_t) sbuf->st_dev == fd_ptr->dev &&
+		    (uint32_t) sbuf->st_ino == fd_ptr->inode) {
 			fd_ptr->ref_count++;
 			DEBUG("Re-used struct open_fd %d, dev = %x, inode "
 			      "= %x, ref_count = %d\n",
@@ -1062,7 +1062,7 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 		 * filesystems sets errno to EROFS.
 		 */
 #ifdef EROFS
-		if ((fd_ptr->fd == -1) && (errno == EACCES || errno == EROFS)) {
+		if (fd_ptr->fd == -1 && (errno == EACCES || errno == EROFS)) {
 #else  /* No EROFS */
 		if (fd_ptr->fd == -1 && errno == EACCES) {
 #endif /* EROFS */
@@ -1918,7 +1918,7 @@ bool receive_next_smb(int smbfd, char *inbuf, int bufsize, int timeout)
 		ret = receive_message_or_smb(smbfd, inbuf, bufsize, timeout,
 		                             &got_smb);
 
-		if (ret && (CVAL(inbuf, 0) == 0x85)) {
+		if (ret && CVAL(inbuf, 0) == 0x85) {
 			/* Keepalive packet. */
 			got_smb = false;
 		}
@@ -2104,7 +2104,7 @@ static int find_free_connection(int hash)
 {
 	int i;
 	bool used = false;
-	hash = (hash % (MAX_CONNECTIONS - 2)) + 1;
+	hash = hash % (MAX_CONNECTIONS - 2) + 1;
 
 again:
 
@@ -2346,7 +2346,7 @@ static int reply_negprot(char *inbuf, char *outbuf, int size, int bufsize)
 	int bcc = SVAL(smb_buf(inbuf), -2);
 
 	p = smb_buf(inbuf) + 1;
-	while (p < (smb_buf(inbuf) + bcc)) {
+	while (p < smb_buf(inbuf) + bcc) {
 		Index++;
 		DEBUG("Requested protocol [%s]\n", p);
 		p += strlen(p) + 2;
@@ -2357,7 +2357,7 @@ static int reply_negprot(char *inbuf, char *outbuf, int size, int bufsize)
 	     protocol++) {
 		p = smb_buf(inbuf) + 1;
 		Index = 0;
-		while (p < (smb_buf(inbuf) + bcc)) {
+		while (p < smb_buf(inbuf) + bcc) {
 			if (strequal(p,
 			             supported_protocols[protocol].proto_name))
 				choice = Index;
@@ -2908,8 +2908,8 @@ static bool send_one_packet(char *buf, int len, struct in_addr ip, int port,
 		      type == SOCK_DGRAM ? "DGRAM" : "STREAM");
 
 	/* send it */
-	ret = (sendto(out_fd, buf, len, 0, (struct sockaddr *) &sock_out,
-	              sizeof(sock_out)) >= 0);
+	ret = sendto(out_fd, buf, len, 0, (struct sockaddr *) &sock_out,
+	             sizeof(sock_out)) >= 0;
 
 	if (!ret)
 		ERROR("Packet send to %s(%d) failed ERRNO=%s\n", inet_ntoa(ip),
@@ -2992,7 +2992,7 @@ static void process(void)
 						dptr_idlecnum(i);
 
 					if (Connections[i].num_files_open > 0 ||
-					    (t - Connections[i].lastused) <
+					    t - Connections[i].lastused <
 					        DEFAULT_SMBD_TIMEOUT)
 						allidle = false;
 				}
