@@ -147,8 +147,6 @@ static int find_free_connection(int hash);
 #define IS_DOS_READONLY(test_mode) (((test_mode) & aRONLY) != 0)
 #define IS_DOS_DIR(test_mode)      (((test_mode) & aDIR) != 0)
 #define IS_DOS_ARCHIVE(test_mode)  (((test_mode) & aARCH) != 0)
-#define IS_DOS_SYSTEM(test_mode)   (((test_mode) & aSYSTEM) != 0)
-#define IS_DOS_HIDDEN(test_mode)   (((test_mode) & aHIDDEN) != 0)
 
 /****************************************************************************
   when exiting, take the whole family
@@ -2315,14 +2313,6 @@ protocol [LANMAN2.1]
   *
   *  tim@fsg.com 09/29/95
   */
-
-#define ARCH_WFWG  0x3 /* This is a fudge because WfWg is like Win95 */
-#define ARCH_WIN95 0x2
-#define ARCH_OS2   0xC /* Again OS/2 is like NT */
-#define ARCH_WINNT 0x8
-#define ARCH_SAMBA 0x10
-
-#define ARCH_ALL 0x1F
 
 /* List of supported protocols, most desired first */
 struct {

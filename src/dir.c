@@ -33,8 +33,6 @@
    file handle per directory, but large numbers do use more memory */
 #define MAXDIR 64
 
-#define DIRCACHESIZE 20
-
 static uint32_t dircounter = 0;
 
 #define NUMDIRPTRS 256
