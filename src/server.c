@@ -429,7 +429,7 @@ scan a directory to find a filename, matching without case sensitivity
 
 If the name looks like a mangled name then try via the mangling functions
 ****************************************************************************/
-static bool scan_directory(char *path, char *name, int cnum, bool docache)
+static bool scan_directory(char *path, char *name, int cnum)
 {
 	void *cur_dir;
 	char *dname;
@@ -441,12 +441,6 @@ static bool scan_directory(char *path, char *name, int cnum, bool docache)
 	/* handle null paths */
 	if (*path == 0)
 		path = ".";
-
-	if (docache &&
-	    (dname = dir_cache_check(path, name, CONN_SHARE(cnum)))) {
-		pstrcpy(name, dname);
-		return true;
-	}
 
 	/*
 	 * The incoming name can be mangled, and if we de-mangle it
@@ -473,10 +467,6 @@ static bool scan_directory(char *path, char *name, int cnum, bool docache)
 
 		if ((mangled && mangled_equal(name, name2)) ||
 		    fname_equal(name, name2)) {
-			/* we've found the file, change it's name and return */
-			if (docache)
-				dir_cache_add(path, name, dname,
-				              CONN_SHARE(cnum));
 			pstrcpy(name, dname);
 			close_dir(cur_dir);
 			return true;
@@ -592,8 +582,7 @@ bool unix_convert(char *name, int cnum, pstring saved_last_component,
 
 			/* try to find this part of the path in the directory */
 			if (strchr(start, '?') || strchr(start, '*') ||
-			    !scan_directory(dirpath, start, cnum,
-			                    end ? true : false)) {
+			    !scan_directory(dirpath, start, cnum)) {
 				if (end) {
 					/* an intermediate part of the name
 					 * can't be found */
@@ -2422,8 +2411,6 @@ close a cnum
 ****************************************************************************/
 void close_cnum(int cnum)
 {
-	dir_cache_flush(CONN_SHARE(cnum));
-
 	if (!OPEN_CNUM(cnum)) {
 		ERROR("Can't close cnum %d\n", cnum);
 		return;
