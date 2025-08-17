@@ -110,7 +110,7 @@ bool is_8_3(char *fname, bool check_case)
 	dot_pos = 0;
 	for (p = fname; *p != '\0'; ++p) {
 		if (*p == '.' && !dot_pos)
-			dot_pos = (char *) p;
+			dot_pos = p;
 		if (!isdoschar(*p))
 			return false;
 	}
@@ -255,7 +255,7 @@ static bool illegal_name(char *name)
 		char *ill = "*\\/?<>|\":";
 		initialised = true;
 
-		bzero((char *) illegal, 256);
+		bzero(illegal, 256);
 		for (s = (unsigned char *) ill; *s; s++)
 			illegal[*s] = true;
 	}

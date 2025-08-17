@@ -2906,7 +2906,7 @@ int reply_writebs(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 			send_response = true;
 		}
 
-		free((char *) wbms);
+		free(wbms);
 		Files[fnum].wbmpx_ptr = NULL;
 	}
 

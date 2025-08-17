@@ -548,7 +548,7 @@ bool unix_convert(char *name, int cnum, pstring saved_last_component,
 
 	/* now match each part of the path name separately, trying the names
 	   as is first, then trying to scan the directory for matching names */
-	for (; start; start = (end ? end + 1 : (char *) NULL)) {
+	for (; start; start = (end ? end + 1 : NULL)) {
 		/* pinpoint the end of this section of the filename */
 		end = strchr(start, '/');
 
@@ -1393,7 +1393,7 @@ int cached_error_packet(char *inbuf, char *outbuf, int fnum, int line)
 	int32_t err = wbmpx->wr_error;
 
 	/* We can now delete the auxiliary struct */
-	free((char *) wbmpx);
+	free(wbmpx);
 	Files[fnum].wbmpx_ptr = NULL;
 	return error_packet(inbuf, outbuf, eclass, err, line);
 }
@@ -2005,7 +2005,7 @@ int make_connection(char *service, char *dev)
 	}
 
 	pcon = &Connections[cnum];
-	bzero((char *) pcon, sizeof(*pcon));
+	bzero(pcon, sizeof(*pcon));
 
 	pcon->read_only =
 	    share == ipc_service || !dir_world_writeable(share->path);
@@ -2906,7 +2906,7 @@ static bool send_one_packet(char *buf, int len, struct in_addr ip, int port,
 	}
 
 	/* set the address and port */
-	bzero((char *) &sock_out, sizeof(sock_out));
+	bzero(&sock_out, sizeof(sock_out));
 	sock_out.sin_family = AF_INET;
 	sock_out.sin_addr = ip;
 	sock_out.sin_port = htons(port);
