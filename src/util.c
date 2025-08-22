@@ -39,8 +39,6 @@
 /* To which file do our syslog messages go? */
 #define SYSLOG_FACILITY LOG_DAEMON
 
-#define USE_SIGPROCMASK
-
 char client_addr[32] = "";
 
 int LOGLEVEL = 1;
@@ -663,17 +661,8 @@ block sigs
 ********************************************************************/
 void block_signals(bool block, int signum)
 {
-#ifdef USE_SIGBLOCK
-	int block_mask = sigmask(signum);
-	static int oldmask = 0;
-	if (block)
-		oldmask = sigblock(block_mask);
-	else
-		sigsetmask(oldmask);
-#elif defined(USE_SIGPROCMASK)
 	sigset_t set;
 	sigemptyset(&set);
 	sigaddset(&set, signum);
 	sigprocmask(block ? SIG_BLOCK : SIG_UNBLOCK, &set, NULL);
-#endif
 }
