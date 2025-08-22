@@ -156,7 +156,7 @@ time_t interpret_long_date(char *p)
 	/* now adjust by 369 years to make the secs since 1970 */
 	d -= TIME_FIXUP_CONSTANT;
 
-	if (!(l_time_min <= d && d <= l_time_max))
+	if (d < l_time_min || d > l_time_max)
 		return 0;
 
 	ret = (time_t) (d + 0.5);
@@ -343,7 +343,7 @@ time_t make_unix_date2(void *date_ptr)
 	x2 = ((x & 0xFFFF) << 16) | ((x & 0xFFFF0000) >> 16);
 	SIVAL(&x, 0, x2);
 
-	return make_unix_date((void *) &x);
+	return make_unix_date(&x);
 }
 
 /*******************************************************************

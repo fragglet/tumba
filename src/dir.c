@@ -33,8 +33,6 @@
    file handle per directory, but large numbers do use more memory */
 #define MAXDIR 64
 
-#define DIRCACHESIZE 20
-
 static uint32_t dircounter = 0;
 
 #define NUMDIRPTRS 256
@@ -545,7 +543,7 @@ void *open_dir(int cnum, char *name)
 	}
 
 	closedir(d);
-	return (void *) dirp;
+	return dirp;
 }
 
 /*******************************************************************
@@ -611,113 +609,3 @@ int tell_dir(void *p)
 
 	return dirp->pos;
 }
-
-/* -------------------------------------------------------------------------- **
- * This section manages a global directory cache.
- * (It should probably be split into a separate module.  crh)
- * -------------------------------------------------------------------------- **
- */
-
-typedef struct {
-	char *path;
-	char *name;
-	char *dname;
-	const struct share *share;
-} dir_cache_entry;
-
-static dir_cache_entry *dir_cache[DIRCACHESIZE];
-static int dir_cache_head = 0, dir_cache_tail = 0;
-
-/* ------------------------------------------------------------------------ **
- * Add an entry to the directory cache.
- * ------------------------------------------------------------------------ **/
-void dir_cache_add(char *path, char *name, char *dname,
-                   const struct share *share)
-{
-	int pathlen, namelen, new_head;
-	dir_cache_entry *entry;
-
-	/* Allocate the structure & string space in one go so that it can be
-	 * freed in one call to free().
-	 */
-	pathlen =
-	    strlen(path) + 1; /* Bytes required to store path (with nul). */
-	namelen =
-	    strlen(name) + 1; /* Bytes required to store name (with nul). */
-	entry = checked_malloc(sizeof(dir_cache_entry) + pathlen + namelen +
-	                       strlen(dname) + 1);
-
-	/* Set pointers correctly and load values. */
-	entry->path = pstrcpy((char *) &entry[1], path);
-	entry->name = pstrcpy(&(entry->path[pathlen]), name);
-	entry->dname = pstrcpy(&(entry->name[namelen]), dname);
-	entry->share = share;
-
-	/* Add the new entry to the cache. Free up an entry if needed. */
-	new_head = (dir_cache_head + 1) % DIRCACHESIZE;
-	if (new_head == dir_cache_tail) {
-		free(dir_cache[dir_cache_tail]);
-		dir_cache_tail = (dir_cache_tail + 1) % DIRCACHESIZE;
-	}
-	dir_cache[new_head] = entry;
-	dir_cache_head = new_head;
-	DEBUG("Added dir cache entry %s %s -> %s\n", path, name, dname);
-}
-
-/* ------------------------------------------------------------------------ **
- * Search for an entry to the directory cache.
- *
- *  Output: The dname string of the located entry, or NULL if the entry was
- *          not found.
- *
- *  Notes:  This uses a linear search, which is is okay because of
- *          the small size of the cache.
- * ------------------------------------------------------------------------ **
- */
-char *dir_cache_check(char *path, char *name, const struct share *share)
-{
-	dir_cache_entry *entry;
-	int idx;
-
-	for (idx = dir_cache_head; idx != dir_cache_tail;
-	     idx = (idx + DIRCACHESIZE - 1) % DIRCACHESIZE) {
-		entry = dir_cache[idx];
-		if (entry->share == share && 0 == strcmp(name, entry->name) &&
-		    0 == strcmp(path, entry->path)) {
-			DEBUG("Got dir cache hit on %s %s -> %s\n", path, name,
-			      entry->dname);
-			return entry->dname;
-		}
-	}
-
-	return NULL;
-}
-
-/* ------------------------------------------------------------------------ **
- * Remove all cache entries which have a share that matches the input.
- * ------------------------------------------------------------------------ **/
-void dir_cache_flush(const struct share *share)
-{
-	dir_cache_entry *entry;
-	int idx, new_tail = dir_cache_head;
-
-	for (idx = dir_cache_head; idx != dir_cache_tail;
-	     idx = (idx + DIRCACHESIZE - 1) % DIRCACHESIZE) {
-		entry = dir_cache[idx];
-		dir_cache[idx] = NULL;
-
-		if (entry->share == share) {
-			free(entry);
-		} else {
-			dir_cache[new_tail] = entry;
-			new_tail = (new_tail + DIRCACHESIZE - 1) % DIRCACHESIZE;
-		}
-	}
-
-	dir_cache_tail = new_tail;
-}
-
-/* -------------------------------------------------------------------------- **
- * End of the section that manages the global directory cache.
- * -------------------------------------------------------------------------- **
- */

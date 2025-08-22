@@ -56,12 +56,12 @@ static bool api_TooSmall(int cnum, char *param, char *data, int mdrcnt,
 static int copy_and_advance(char **dst, char *src, int *n)
 {
 	int l;
-	if (!src || !dst || !n || !(*dst))
+	if (!src || !dst || !n || !*dst)
 		return 0;
 	strlcpy(*dst, src, *n + 1);
 	l = strlen(*dst) + 1;
-	(*dst) += l;
-	(*n) -= l;
+	*dst += l;
+	*n -= l;
 	return l;
 }
 
@@ -89,12 +89,7 @@ static void send_trans_reply(char *outbuf, char *data, char *param,
 	this_ldata = MIN(
 	    ldata, max_send - (500 + lsetup * sizeof(uint16_t) + this_lparam));
 
-#ifdef CONFUSE_NETMONITOR_MSRPC_DECODING
-	/* if you don't want Net Monitor to decode your packets, do this!!! */
-	align = ((this_lparam + 1) % 4);
-#else
-	align = (this_lparam % 4);
-#endif
+	align = this_lparam % 4;
 
 	set_message(outbuf, 10 + lsetup, align + this_ldata + this_lparam,
 	            true);
@@ -128,7 +123,7 @@ static void send_trans_reply(char *outbuf, char *data, char *param,
 		this_ldata =
 		    MIN(ldata - tot_data, max_send - (500 + this_lparam));
 
-		align = (this_lparam % 4);
+		align = this_lparam % 4;
 
 		set_message(outbuf, 10, this_ldata + this_lparam + align,
 		            false);
@@ -276,7 +271,7 @@ static int fill_share_info(int cnum, const struct share *share, int uLevel,
 
 	len = struct_len;
 	p = *buf;
-	if ((*buflen) < struct_len)
+	if (*buflen < struct_len)
 		return -1;
 	if (stringbuf) {
 		p2 = *stringbuf;
@@ -325,13 +320,13 @@ static int fill_share_info(int cnum, const struct share *share, int uLevel,
 	}
 
 	if (stringbuf) {
-		(*buf) = p + struct_len;
-		(*buflen) -= struct_len;
-		(*stringbuf) = p2;
-		(*stringspace) = l2;
+		*buf = p + struct_len;
+		*buflen -= struct_len;
+		*stringbuf = p2;
+		*stringspace = l2;
 	} else {
-		(*buf) = p2;
-		(*buflen) -= len;
+		*buf = p2;
+		*buflen -= len;
 	}
 	return len;
 }
@@ -604,8 +599,8 @@ static bool api_NetWkstaGetInfo(int cnum, char *param, char *data, int mdrcnt,
 	*rparam = REALLOC(*rparam, *rparam_len);
 
 	/* check it's a supported varient */
-	if (!(level == 10 && strcsequal(str1, "WrLh") &&
-	      strcsequal(str2, "zzzBBzz")))
+	if (level != 10 || !strcsequal(str1, "WrLh") ||
+	    !strcsequal(str2, "zzzBBzz"))
 		return false;
 
 	*rdata_len = mdrcnt + 1024;
@@ -797,8 +792,8 @@ int reply_trans(char *inbuf, char *outbuf, int size, int bufsize)
 	int mprcnt = SVAL(inbuf, smb_vwv2);
 	int mdrcnt = SVAL(inbuf, smb_vwv3);
 	int msrcnt = CVAL(inbuf, smb_vwv4);
-	bool close_on_completion = BITSETW(inbuf + smb_vwv5, 0);
-	bool one_way = BITSETW(inbuf + smb_vwv5, 1);
+	bool close_on_completion = (SVAL(inbuf, smb_vwv5) & 1) != 0;
+	bool one_way = (SVAL(inbuf, smb_vwv5) & 2) != 0;
 	int pscnt = SVAL(inbuf, smb_vwv9);
 	int psoff = SVAL(inbuf, smb_vwv10);
 	int dscnt = SVAL(inbuf, smb_vwv11);
@@ -845,7 +840,7 @@ int reply_trans(char *inbuf, char *outbuf, int size, int bufsize)
 		ret = receive_next_smb(Client, inbuf, bufsize,
 		                       SMB_SECONDARY_WAIT);
 
-		if ((ret && (CVAL(inbuf, smb_com) != SMBtrans)) || !ret) {
+		if (!ret || CVAL(inbuf, smb_com) != SMBtrans) {
 			if (ret)
 				ERROR("reply_trans: Invalid secondary "
 				      "trans packet\n");

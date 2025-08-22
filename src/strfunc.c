@@ -172,9 +172,8 @@ bool trim_string(char *s, char *front, char *back)
 			p++;
 		}
 	}
-	while (
-	    back && *back && strlen(s) >= strlen(back) &&
-	    (strncmp(s + strlen(s) - strlen(back), back, strlen(back)) == 0)) {
+	while (back && *back && strlen(s) >= strlen(back) &&
+	       strncmp(s + strlen(s) - strlen(back), back, strlen(back)) == 0) {
 		ret = true;
 		s[strlen(s) - strlen(back)] = 0;
 	}
@@ -254,17 +253,6 @@ static int name_interpret(char *in, char *out)
 	*out = 0;
 	ret = out[-1];
 
-#ifdef NETBIOS_SCOPE
-	/* Handle any scope names */
-	while (*in) {
-		*out++ = '.'; /* Scope names are separated by periods */
-		len = *(unsigned char *) in++;
-		strlcpy(out, in, len + 1);
-		out += len;
-		*out = 0;
-		in += len;
-	}
-#endif
 	return ret;
 }
 
@@ -312,7 +300,7 @@ int name_len(char *s)
 		return 2;
 
 	/* Add up the length bytes. */
-	for (len = 1; (*s); s += (*s) + 1) {
+	for (len = 1; *s; s += (*s) + 1) {
 		len += *s + 1;
 	}
 
@@ -352,7 +340,7 @@ free a string value
 ****************************************************************************/
 void string_free(char **s)
 {
-	if (!s || !(*s))
+	if (!s || !*s)
 		return;
 	if (*s == null_string)
 		*s = NULL;
@@ -473,7 +461,7 @@ static bool do_match(char *str, char *regexp)
 		return !*p;
 	}
 
-	if (!*str && (*p == '*' && p[1] == '\0')) {
+	if (!*str && *p == '*' && p[1] == '\0') {
 		return true;
 	}
 
@@ -569,7 +557,7 @@ bool mask_match(char *str, char *regexp, bool trans2)
 				cp2 = fp ? fp + 1 : "";
 
 				if (last_wcard_was_star ||
-				    ((cp1 != NULL) && (*cp1 == '*'))) {
+				    (cp1 != NULL && *cp1 == '*')) {
 					/* Eat the extra path components. */
 					int i;
 
@@ -581,7 +569,7 @@ bool mask_match(char *str, char *regexp, bool trans2)
 						if (fp)
 							*fp = '\0';
 
-						if ((cp1 != NULL) &&
+						if (cp1 != NULL &&
 						    do_match(cp2, cp1)) {
 							cp2 = fp ? fp + 1 : "";
 							break;
@@ -592,7 +580,7 @@ bool mask_match(char *str, char *regexp, bool trans2)
 				}
 			}
 			if (cp1 == NULL &&
-			    ((*cp2 == '\0') || last_wcard_was_star))
+			    (*cp2 == '\0' || last_wcard_was_star))
 				matched = true;
 		}
 	} else {
@@ -650,7 +638,7 @@ bool mask_match(char *str, char *regexp, bool trans2)
 			}
 
 			p = strrchr(t_filename, '.');
-			if (p && (p[1] == 0)) {
+			if (p && p[1] == 0) {
 				/*
 				 * Filename has an extension of '.' only.
 				 */
@@ -769,12 +757,4 @@ char *safe_strcat(char *dest, const char *src, int dest_size)
 	}
 
 	return dest;
-}
-
-char *tab_depth(int depth)
-{
-	static pstring spaces;
-	memset(spaces, ' ', depth * 4);
-	spaces[depth * 4] = 0;
-	return spaces;
 }

@@ -45,7 +45,6 @@
 #include <sys/wait.h>
 
 #include "byteorder.h"
-#include "config.h"
 #include "dir.h"
 #include "guards.h" /* IWYU pragma: keep */
 #include "ipc.h"
@@ -125,11 +124,6 @@ static const char *bind_addr = "0.0.0.0";
  *  Set by us for CORE protocol.
  */
 int max_send = BUFFER_SIZE;
-/*
- * Size of the data we can receive. Set by us.
- * Can be modified by the max xmit parameter.
- */
-int max_recv = BUFFER_SIZE;
 
 /* a fnum to use when chaining */
 int chain_fnum = -1;
@@ -147,8 +141,6 @@ static int find_free_connection(int hash);
 #define IS_DOS_READONLY(test_mode) (((test_mode) & aRONLY) != 0)
 #define IS_DOS_DIR(test_mode)      (((test_mode) & aDIR) != 0)
 #define IS_DOS_ARCHIVE(test_mode)  (((test_mode) & aARCH) != 0)
-#define IS_DOS_SYSTEM(test_mode)   (((test_mode) & aSYSTEM) != 0)
-#define IS_DOS_HIDDEN(test_mode)   (((test_mode) & aHIDDEN) != 0)
 
 /****************************************************************************
   when exiting, take the whole family
@@ -379,36 +371,6 @@ bool set_filetime(int cnum, char *fname, time_t mtime)
 }
 
 /****************************************************************************
-check if two filenames are equal
-
-this needs to be careful about whether we are case sensitive
-****************************************************************************/
-static bool fname_equal(char *name1, char *name2)
-{
-	int l1 = strlen(name1);
-	int l2 = strlen(name2);
-
-	/* handle filenames ending in a single dot */
-	if (l1 - l2 == 1 && name1[l1 - 1] == '.' && lp_strip_dot()) {
-		bool ret;
-		name1[l1 - 1] = 0;
-		ret = fname_equal(name1, name2);
-		name1[l1 - 1] = '.';
-		return ret;
-	}
-
-	if (l2 - l1 == 1 && name2[l2 - 1] == '.' && lp_strip_dot()) {
-		bool ret;
-		name2[l2 - 1] = 0;
-		ret = fname_equal(name1, name2);
-		name2[l2 - 1] = '.';
-		return ret;
-	}
-
-	return strequal(name1, name2);
-}
-
-/****************************************************************************
 mangle the 2nd name and check if it is then equal to the first name
 ****************************************************************************/
 static bool mangled_equal(char *name1, char *name2)
@@ -429,7 +391,7 @@ scan a directory to find a filename, matching without case sensitivity
 
 If the name looks like a mangled name then try via the mangling functions
 ****************************************************************************/
-static bool scan_directory(char *path, char *name, int cnum, bool docache)
+static bool scan_directory(char *path, char *name, int cnum)
 {
 	void *cur_dir;
 	char *dname;
@@ -441,12 +403,6 @@ static bool scan_directory(char *path, char *name, int cnum, bool docache)
 	/* handle null paths */
 	if (*path == 0)
 		path = ".";
-
-	if (docache &&
-	    (dname = dir_cache_check(path, name, CONN_SHARE(cnum)))) {
-		pstrcpy(name, dname);
-		return true;
-	}
 
 	/*
 	 * The incoming name can be mangled, and if we de-mangle it
@@ -472,11 +428,7 @@ static bool scan_directory(char *path, char *name, int cnum, bool docache)
 		name_map_mangle(name2, false, CONN_SHARE(cnum));
 
 		if ((mangled && mangled_equal(name, name2)) ||
-		    fname_equal(name, name2)) {
-			/* we've found the file, change it's name and return */
-			if (docache)
-				dir_cache_add(path, name, dname,
-				              CONN_SHARE(cnum));
+		    strequal(name, name2)) {
 			pstrcpy(name, dname);
 			close_dir(cur_dir);
 			return true;
@@ -558,7 +510,7 @@ bool unix_convert(char *name, int cnum, pstring saved_last_component,
 
 	/* now match each part of the path name separately, trying the names
 	   as is first, then trying to scan the directory for matching names */
-	for (; start; start = (end ? end + 1 : (char *) NULL)) {
+	for (; start; start = (end ? end + 1 : NULL)) {
 		/* pinpoint the end of this section of the filename */
 		end = strchr(start, '/');
 
@@ -592,8 +544,7 @@ bool unix_convert(char *name, int cnum, pstring saved_last_component,
 
 			/* try to find this part of the path in the directory */
 			if (strchr(start, '?') || strchr(start, '*') ||
-			    !scan_directory(dirpath, start, cnum,
-			                    end ? true : false)) {
+			    !scan_directory(dirpath, start, cnum)) {
 				if (end) {
 					/* an intermediate part of the name
 					 * can't be found */
@@ -790,12 +741,12 @@ static int fd_attempt_open(char *fname, int flags, int mode)
 	int fd = open(fname, flags, mode);
 
 	/* Fix for files ending in '.' */
-	if ((fd == -1) && (errno == ENOENT) && (strchr(fname, '.') == NULL)) {
+	if (fd == -1 && errno == ENOENT && strchr(fname, '.') == NULL) {
 		pstrcat(fname, ".");
 		fd = open(fname, flags, mode);
 	}
 
-	if ((fd == -1) && (errno == ENAMETOOLONG)) {
+	if (fd == -1 && errno == ENAMETOOLONG) {
 		int max_len;
 		char *p = strrchr(fname, '/');
 
@@ -803,7 +754,7 @@ static int fd_attempt_open(char *fname, int flags, int mode)
 		{
 			max_len = pathconf("/", _PC_NAME_MAX);
 			p++;
-		} else if ((p == NULL) || (p == fname)) {
+		} else if (p == NULL || p == fname) {
 			p = fname;
 			max_len = pathconf(".", _PC_NAME_MAX);
 		} else {
@@ -837,9 +788,9 @@ static struct open_fd *fd_get_already_open(struct stat *sbuf)
 
 	for (i = 0; i <= max_file_fd_used; i++) {
 		fd_ptr = &FileFd[i];
-		if ((fd_ptr->ref_count > 0) &&
-		    (((uint32_t) sbuf->st_dev) == fd_ptr->dev) &&
-		    (((uint32_t) sbuf->st_ino) == fd_ptr->inode)) {
+		if (fd_ptr->ref_count > 0 &&
+		    (uint32_t) sbuf->st_dev == fd_ptr->dev &&
+		    (uint32_t) sbuf->st_ino == fd_ptr->inode) {
 			fd_ptr->ref_count++;
 			DEBUG("Re-used struct open_fd %d, dev = %x, inode "
 			      "= %x, ref_count = %d\n",
@@ -1035,12 +986,11 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 		 * it has been opened for write, and if we wanted read it
 		 * was open for read.
 		 */
-		if (((accmode == O_WRONLY) &&
-		     (fd_ptr->real_open_flags == O_RDONLY)) ||
-		    ((accmode == O_RDONLY) &&
-		     (fd_ptr->real_open_flags == O_WRONLY)) ||
-		    ((accmode == O_RDWR) &&
-		     (fd_ptr->real_open_flags != O_RDWR))) {
+		if ((accmode == O_WRONLY &&
+		     fd_ptr->real_open_flags == O_RDONLY) ||
+		    (accmode == O_RDONLY &&
+		     fd_ptr->real_open_flags == O_WRONLY) ||
+		    (accmode == O_RDWR && fd_ptr->real_open_flags != O_RDWR)) {
 			DEBUG("Error opening (already open for flags=%d) "
 			      "file %s (%s) (flags=%d)\n",
 			      fd_ptr->real_open_flags, fname, strerror(EACCES),
@@ -1070,16 +1020,9 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 		/* Set the flags as needed without the read/write modes. */
 		open_flags = flags & ~(O_RDWR | O_WRONLY | O_RDONLY);
 		fd_ptr->fd = fd_attempt_open(fname, open_flags | O_RDWR, mode);
-		/*
-		 * On some systems opening a file for R/W access on a read only
-		 * filesystems sets errno to EROFS.
-		 */
-#ifdef EROFS
-		if ((fd_ptr->fd == -1) &&
-		    ((errno == EACCES) || (errno == EROFS))) {
-#else  /* No EROFS */
-		if ((fd_ptr->fd == -1) && (errno == EACCES)) {
-#endif /* EROFS */
+		/* On some systems opening a file for R/W access on a read only
+		 * filesystems sets errno to EROFS. */
+		if (fd_ptr->fd == -1 && (errno == EACCES || errno == EROFS)) {
 			if (accmode != O_RDWR) {
 				fd_ptr->fd = fd_attempt_open(
 				    fname, open_flags | accmode, mode);
@@ -1124,8 +1067,8 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 		fsp->pos = -1;
 		fsp->open = true;
 		fsp->can_lock = true;
-		fsp->can_read = ((flags & O_WRONLY) == 0);
-		fsp->can_write = ((flags & (O_WRONLY | O_RDWR)) != 0);
+		fsp->can_read = (flags & O_WRONLY) == 0;
+		fsp->can_write = (flags & (O_WRONLY | O_RDWR)) != 0;
 		fsp->share_mode = 0;
 		fsp->modified = false;
 		fsp->cnum = cnum;
@@ -1280,7 +1223,7 @@ void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
 		fs_p->share_mode = (deny_mode << 4) | open_mode;
 
 		if (Access)
-			(*Access) = open_mode;
+			*Access = open_mode;
 
 		if (action) {
 			if (file_existed && !(flags2 & O_TRUNC))
@@ -1405,14 +1348,10 @@ int cached_error_packet(char *inbuf, char *outbuf, int fnum, int line)
 	int32_t err = wbmpx->wr_error;
 
 	/* We can now delete the auxiliary struct */
-	free((char *) wbmpx);
+	free(wbmpx);
 	Files[fnum].wbmpx_ptr = NULL;
 	return error_packet(inbuf, outbuf, eclass, err, line);
 }
-
-#ifndef EDQUOT
-#define EDQUOT ENOSPC
-#endif
 
 struct {
 	int unixerror;
@@ -1424,16 +1363,8 @@ struct {
     {EIO, ERRHRD, ERRgeneral},        {EBADF, ERRSRV, ERRsrverror},
     {EINVAL, ERRSRV, ERRsrverror},    {EEXIST, ERRDOS, ERRfilexists},
     {ENFILE, ERRDOS, ERRnofids},      {EMFILE, ERRDOS, ERRnofids},
-    {ENOSPC, ERRHRD, ERRdiskfull},
-#ifdef EDQUOT
-    {EDQUOT, ERRHRD, ERRdiskfull},
-#endif
-#ifdef ENOTEMPTY
-    {ENOTEMPTY, ERRDOS, ERRnoaccess},
-#endif
-#ifdef EXDEV
-    {EXDEV, ERRDOS, ERRdiffdevice},
-#endif
+    {ENOSPC, ERRHRD, ERRdiskfull},    {EDQUOT, ERRHRD, ERRdiskfull},
+    {ENOTEMPTY, ERRDOS, ERRnoaccess}, {EXDEV, ERRDOS, ERRdiffdevice},
     {EROFS, ERRHRD, ERRnowrite},      {0, 0, 0}};
 
 /****************************************************************************
@@ -1932,7 +1863,7 @@ bool receive_next_smb(int smbfd, char *inbuf, int bufsize, int timeout)
 		ret = receive_message_or_smb(smbfd, inbuf, bufsize, timeout,
 		                             &got_smb);
 
-		if (ret && (CVAL(inbuf, 0) == 0x85)) {
+		if (ret && CVAL(inbuf, 0) == 0x85) {
 			/* Keepalive packet. */
 			got_smb = false;
 		}
@@ -1951,9 +1882,7 @@ static int sig_hup(void)
 	block_signals(true, SIGHUP);
 	ERROR("Got SIGHUP\n");
 
-#ifndef DONT_REINSTALL_SIG
 	signal(SIGHUP, SIGNAL_CAST sig_hup);
-#endif
 	block_signals(false, SIGHUP);
 	return 0;
 }
@@ -2017,7 +1946,7 @@ int make_connection(char *service, char *dev)
 	}
 
 	pcon = &Connections[cnum];
-	bzero((char *) pcon, sizeof(*pcon));
+	bzero(pcon, sizeof(*pcon));
 
 	pcon->read_only =
 	    share == ipc_service || !dir_world_writeable(share->path);
@@ -2118,7 +2047,7 @@ static int find_free_connection(int hash)
 {
 	int i;
 	bool used = false;
-	hash = (hash % (MAX_CONNECTIONS - 2)) + 1;
+	hash = hash % (MAX_CONNECTIONS - 2) + 1;
 
 again:
 
@@ -2158,10 +2087,9 @@ reply for the coreplus protocol
 ****************************************************************************/
 static int reply_coreplus(char *outbuf)
 {
-	int raw = (lp_readraw() ? 1 : 0) | (lp_writeraw() ? 2 : 0);
 	int outsize = set_message(outbuf, 13, 0, true);
-	SSVAL(outbuf, smb_vwv5, raw); /* tell redirector we support
-	                                 readbraw and writebraw (possibly) */
+	SSVAL(outbuf, smb_vwv5, 3); /* tell redirector we support
+	                               readbraw and writebraw (possibly) */
 	CVAL(outbuf, smb_flg) =
 	    0x81; /* Reply, SMBlockread, SMBwritelock supported */
 	SSVAL(outbuf, smb_vwv1, 0x1); /* user level security, don't encrypt */
@@ -2176,7 +2104,6 @@ reply for the lanman 1.0 protocol
 ****************************************************************************/
 static int reply_lanman1(char *outbuf)
 {
-	int raw = (lp_readraw() ? 1 : 0) | (lp_writeraw() ? 2 : 0);
 	int secword = 0;
 	time_t t = time(NULL);
 
@@ -2187,11 +2114,11 @@ static int reply_lanman1(char *outbuf)
 
 	CVAL(outbuf, smb_flg) =
 	    0x81; /* Reply, SMBlockread, SMBwritelock supported */
-	SSVAL(outbuf, smb_vwv2, max_recv);
+	SSVAL(outbuf, smb_vwv2, BUFFER_SIZE);
 	SSVAL(outbuf, smb_vwv3, MAX_MUX);
 	SSVAL(outbuf, smb_vwv4, 1);
-	SSVAL(outbuf, smb_vwv5, raw); /* tell redirector we support
-	                                 readbraw writebraw (possibly) */
+	SSVAL(outbuf, smb_vwv5, 3); /* tell redirector we support
+	                               readbraw writebraw (possibly) */
 	SIVAL(outbuf, smb_vwv6, getpid());
 	SSVAL(outbuf, smb_vwv10, time_zone(t) / 60);
 
@@ -2205,7 +2132,6 @@ reply for the lanman 2.0 protocol
 ****************************************************************************/
 static int reply_lanman2(char *outbuf)
 {
-	int raw = (lp_readraw() ? 1 : 0) | (lp_writeraw() ? 2 : 0);
 	int secword = 0;
 	time_t t = time(NULL);
 	char crypt_len = 0;
@@ -2218,10 +2144,10 @@ static int reply_lanman2(char *outbuf)
 
 	CVAL(outbuf, smb_flg) =
 	    0x81; /* Reply, SMBlockread, SMBwritelock supported */
-	SSVAL(outbuf, smb_vwv2, max_recv);
+	SSVAL(outbuf, smb_vwv2, BUFFER_SIZE);
 	SSVAL(outbuf, smb_vwv3, MAX_MUX);
 	SSVAL(outbuf, smb_vwv4, 1);
-	SSVAL(outbuf, smb_vwv5, raw); /* readbraw and/or writebraw */
+	SSVAL(outbuf, smb_vwv5, 3); /* readbraw and writebraw */
 	SSVAL(outbuf, smb_vwv10, time_zone(t) / 60);
 	put_dos_date(outbuf, smb_vwv8, t);
 
@@ -2234,7 +2160,7 @@ reply for the nt protocol
 static int reply_nt1(char *outbuf)
 {
 	/* dual names + lock_and_read + nt SMBs + remote API calls */
-	int capabilities = CAP_NT_FIND | CAP_LOCK_AND_READ;
+	int capabilities = CAP_NT_FIND | CAP_LOCK_AND_READ | CAP_RAW_MODE;
 	/*
 	  other valid capabilities which we may support at some time...
 	                     CAP_LARGE_FILES|CAP_NT_SMBS|CAP_RPC_REMOTE_APIS;
@@ -2245,10 +2171,6 @@ static int reply_nt1(char *outbuf)
 	time_t t = time(NULL);
 	int data_len;
 	char crypt_len = 0;
-
-	if (lp_readraw() && lp_writeraw()) {
-		capabilities |= CAP_RAW_MODE;
-	}
 
 	/* decide where (if) to put the encryption challenge, and
 	   follow it with the OEM'd domain name
@@ -2328,14 +2250,6 @@ protocol [LANMAN2.1]
   *  tim@fsg.com 09/29/95
   */
 
-#define ARCH_WFWG  0x3 /* This is a fudge because WfWg is like Win95 */
-#define ARCH_WIN95 0x2
-#define ARCH_OS2   0xC /* Again OS/2 is like NT */
-#define ARCH_WINNT 0x8
-#define ARCH_SAMBA 0x10
-
-#define ARCH_ALL 0x1F
-
 /* List of supported protocols, most desired first */
 struct {
 	char *proto_name;
@@ -2368,7 +2282,7 @@ static int reply_negprot(char *inbuf, char *outbuf, int size, int bufsize)
 	int bcc = SVAL(smb_buf(inbuf), -2);
 
 	p = smb_buf(inbuf) + 1;
-	while (p < (smb_buf(inbuf) + bcc)) {
+	while (p < smb_buf(inbuf) + bcc) {
 		Index++;
 		DEBUG("Requested protocol [%s]\n", p);
 		p += strlen(p) + 2;
@@ -2379,7 +2293,7 @@ static int reply_negprot(char *inbuf, char *outbuf, int size, int bufsize)
 	     protocol++) {
 		p = smb_buf(inbuf) + 1;
 		Index = 0;
-		while (p < (smb_buf(inbuf) + bcc)) {
+		while (p < smb_buf(inbuf) + bcc) {
 			if (strequal(p,
 			             supported_protocols[protocol].proto_name))
 				choice = Index;
@@ -2422,8 +2336,6 @@ close a cnum
 ****************************************************************************/
 void close_cnum(int cnum)
 {
-	dir_cache_flush(CONN_SHARE(cnum));
-
 	if (!OPEN_CNUM(cnum)) {
 		ERROR("Can't close cnum %d\n", cnum);
 		return;
@@ -2920,7 +2832,7 @@ static bool send_one_packet(char *buf, int len, struct in_addr ip, int port,
 	}
 
 	/* set the address and port */
-	bzero((char *) &sock_out, sizeof(sock_out));
+	bzero(&sock_out, sizeof(sock_out));
 	sock_out.sin_family = AF_INET;
 	sock_out.sin_addr = ip;
 	sock_out.sin_port = htons(port);
@@ -2932,8 +2844,8 @@ static bool send_one_packet(char *buf, int len, struct in_addr ip, int port,
 		      type == SOCK_DGRAM ? "DGRAM" : "STREAM");
 
 	/* send it */
-	ret = (sendto(out_fd, buf, len, 0, (struct sockaddr *) &sock_out,
-	              sizeof(sock_out)) >= 0);
+	ret = sendto(out_fd, buf, len, 0, (struct sockaddr *) &sock_out,
+	             sizeof(sock_out)) >= 0;
 
 	if (!ret)
 		ERROR("Packet send to %s(%d) failed ERRNO=%s\n", inet_ntoa(ip),
@@ -3011,12 +2923,12 @@ static void process(void)
 				if (Connections[i].open) {
 					/* close dirptrs on connections that are
 					 * idle */
-					if ((t - Connections[i].lastused) >
+					if (t - Connections[i].lastused >
 					    DPTR_IDLE_TIMEOUT)
 						dptr_idlecnum(i);
 
 					if (Connections[i].num_files_open > 0 ||
-					    (t - Connections[i].lastused) <
+					    t - Connections[i].lastused <
 					        DEFAULT_SMBD_TIMEOUT)
 						allidle = false;
 				}
@@ -3100,10 +3012,6 @@ int main(int argc, char *argv[])
 	int port = SMB_PORT;
 	int opt;
 
-#ifdef NEED_AUTH_PARAMETERS
-	set_auth_parameters(argc, argv);
-#endif
-
 	time_init();
 
 	pstrcpy(debugf, SMBLOGFILE);
@@ -3164,9 +3072,7 @@ int main(int argc, char *argv[])
 
 	init_structs();
 
-#ifndef NO_SIGNAL_TEST
 	signal(SIGHUP, SIGNAL_CAST sig_hup);
-#endif
 
 	/* Setup the signals that allow the debug log level
 	   to by dynamically changed. */
@@ -3176,8 +3082,6 @@ int main(int argc, char *argv[])
 		exit(1);
 
 	drop_privileges();
-
-	max_recv = MIN(lp_maxxmit(), BUFFER_SIZE);
 
 	process();
 

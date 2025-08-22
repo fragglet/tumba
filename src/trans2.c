@@ -84,16 +84,14 @@ static int send_trans2_replies(char *outbuf, int bufsize, char *params,
 	/* When sending params and data ensure that both are nicely aligned */
 	/* Only do this alignment when there is also data to send - else
 	   can cause NT redirector problems. */
-	if (((params_to_send % 4) != 0) && (data_to_send != 0))
+	if ((params_to_send % 4) != 0 && data_to_send != 0)
 		data_alignment_offset = 4 - (params_to_send % 4);
 
 	/* Space is bufsize minus Netbios over TCP header minus SMB header */
 	/* The alignment_offset is to align the param bytes on an even byte
 	   boundary. NT 4.0 Beta needs this to work correctly. */
-	useable_space =
-	    bufsize -
-	    ((smb_buf(outbuf) + alignment_offset + data_alignment_offset) -
-	     outbuf);
+	useable_space = bufsize - (smb_buf(outbuf) + alignment_offset +
+	                           data_alignment_offset - outbuf);
 
 	/* useable_space can never be more than max_send minus the
 	   alignment offset. */
@@ -132,8 +130,8 @@ static int send_trans2_replies(char *outbuf, int bufsize, char *params,
 			   use smb_base() to subtract them from the calculation
 			 */
 			SSVAL(outbuf, smb_proff,
-			      ((smb_buf(outbuf) + alignment_offset) -
-			       smb_base(outbuf)));
+			      smb_buf(outbuf) + alignment_offset -
+			          smb_base(outbuf));
 			/* Absolute displacement of param bytes sent in this
 			 * packet */
 			SSVAL(outbuf, smb_prdisp, pp - params);
@@ -148,15 +146,15 @@ static int send_trans2_replies(char *outbuf, int bufsize, char *params,
 			   parameter bytes plus the number of parameters being
 			   sent this time */
 			SSVAL(outbuf, smb_droff,
-			      ((smb_buf(outbuf) + alignment_offset) -
-			       smb_base(outbuf)) +
-			          params_sent_thistime + data_alignment_offset);
+			      smb_buf(outbuf) + alignment_offset -
+			          smb_base(outbuf) + params_sent_thistime +
+			          data_alignment_offset);
 			SSVAL(outbuf, smb_drdisp, pd - pdata);
 		}
 
 		/* Copy the param bytes into the packet */
 		if (params_sent_thistime)
-			memcpy((smb_buf(outbuf) + alignment_offset), pp,
+			memcpy(smb_buf(outbuf) + alignment_offset, pp,
 			       params_sent_thistime);
 		/* Copy in the data bytes */
 		if (data_sent_thistime)
@@ -227,7 +225,7 @@ static int call_trans2open(char *inbuf, char *outbuf, int bufsize, int cnum,
 		return ERROR_CODE(ERRSRV, ERRnofids);
 
 	if (!check_name(fname, cnum)) {
-		if ((errno == ENOENT) && bad_path) {
+		if (errno == ENOENT && bad_path) {
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
@@ -239,7 +237,7 @@ static int call_trans2open(char *inbuf, char *outbuf, int bufsize, int cnum,
 	                 open_attr | aARCH, &rmode, &smb_action);
 
 	if (!Files[fnum].open) {
-		if ((errno == ENOENT) && bad_path) {
+		if (errno == ENOENT && bad_path) {
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
@@ -302,9 +300,9 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 	uint32_t size = 0, len;
 	uint32_t mdate = 0, adate = 0, cdate = 0;
 	char *nameptr;
-	bool isrootdir = (strequal(Connections[cnum].dirpath, "./") ||
-	                  strequal(Connections[cnum].dirpath, ".") ||
-	                  strequal(Connections[cnum].dirpath, "/"));
+	bool isrootdir = strequal(Connections[cnum].dirpath, "./") ||
+	                 strequal(Connections[cnum].dirpath, ".") ||
+	                 strequal(Connections[cnum].dirpath, "/");
 	bool was_8_3;
 	int nt_extmode; /* Used for NT connections instead of mode */
 	bool needslash =
@@ -637,9 +635,9 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 	char *pdata;
 	int dirtype = SVAL(params, 0);
 	int maxentries = SVAL(params, 2);
-	bool close_after_first = BITSETW(params + 4, 0);
-	bool close_if_end = BITSETW(params + 4, 1);
-	bool requires_resume_key = BITSETW(params + 4, 2);
+	bool close_after_first = (SVAL(params, 4) & 1) != 0;
+	bool close_if_end = (SVAL(params, 4) & 2) != 0;
+	bool requires_resume_key = (SVAL(params, 4) & 4) != 0;
 	int info_level = SVAL(params, 6);
 	pstring directory;
 	pstring mask;
@@ -682,7 +680,7 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 
 	unix_convert(directory, cnum, 0, &bad_path);
 	if (!check_name(directory, cnum)) {
-		if ((errno == ENOENT) && bad_path) {
+		if (errno == ENOENT && bad_path) {
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
@@ -728,7 +726,7 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 	space_remaining = max_data_bytes;
 	out_of_space = false;
 
-	for (i = 0; (i < maxentries) && !finished && !out_of_space; i++) {
+	for (i = 0; i < maxentries && !finished && !out_of_space; i++) {
 
 		/* this is a heuristic to avoid seeking the dirptr except when
 		   absolutely necessary. It allows for a filename of about 40
@@ -778,7 +776,7 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 	send_trans2_replies(outbuf, bufsize, params, 10, pdata,
 	                    PTR_DIFF(p, pdata));
 
-	if ((!*directory) && dptr_path(dptr_num))
+	if (!*directory && dptr_path(dptr_num))
 		snprintf(directory, sizeof(directory), "(%s)",
 		         dptr_path(dptr_num));
 
@@ -808,10 +806,10 @@ static int call_trans2findnext(char *inbuf, char *outbuf, int length,
 	int maxentries = SVAL(params, 2);
 	uint16_t info_level = SVAL(params, 4);
 	uint32_t resume_key = IVAL(params, 6);
-	bool close_after_request = BITSETW(params + 10, 0);
-	bool close_if_end = BITSETW(params + 10, 1);
-	bool requires_resume_key = BITSETW(params + 10, 2);
-	bool continue_bit = BITSETW(params + 10, 3);
+	bool close_after_request = (SVAL(params, 10) & 1) != 0;
+	bool close_if_end = (SVAL(params, 10) & 2) != 0;
+	bool requires_resume_key = (SVAL(params, 10) & 4) != 0;
+	bool continue_bit = (SVAL(params, 10) & 8) != 0;
 	pstring resume_name;
 	pstring mask;
 	pstring directory;
@@ -957,7 +955,7 @@ static int call_trans2findnext(char *inbuf, char *outbuf, int length,
 		}
 	}
 
-	for (i = 0; (i < (int) maxentries) && !finished && !out_of_space; i++) {
+	for (i = 0; i < (int) maxentries && !finished && !out_of_space; i++) {
 		/* this is a heuristic to avoid seeking the dirptr except when
 		   absolutely necessary. It allows for a filename of about 40
 		   chars */
@@ -995,7 +993,7 @@ static int call_trans2findnext(char *inbuf, char *outbuf, int length,
 	send_trans2_replies(outbuf, bufsize, params, 8, pdata,
 	                    PTR_DIFF(p, pdata));
 
-	if ((!*directory) && dptr_path(dptr_num))
+	if (!*directory && dptr_path(dptr_num))
 		snprintf(directory, sizeof(directory), "(%s)",
 		         dptr_path(dptr_num));
 
@@ -1189,7 +1187,7 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
 		if (!check_name(fname, cnum) || stat(fname, &sbuf)) {
 			DEBUG("fileinfo of %s failed (%s)\n", fname,
 			      strerror(errno));
-			if ((errno == ENOENT) && bad_path) {
+			if (errno == ENOENT && bad_path) {
 				unix_ERR_class = ERRDOS;
 				unix_ERR_code = ERRbadpath;
 			}
@@ -1343,7 +1341,7 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
 		SIVAL(pdata, 0, l);
 		pstrcpy(pdata + 4, fname);
 		pdata += 4 + l;
-		data_size = PTR_DIFF(pdata, (*ppdata));
+		data_size = PTR_DIFF(pdata, *ppdata);
 		break;
 
 	case SMB_QUERY_FILE_STREAM_INFO:
@@ -1408,7 +1406,7 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 		pstrcpy(fname, &params[6]);
 		unix_convert(fname, cnum, 0, &bad_path);
 		if (!check_name(fname, cnum)) {
-			if ((errno == ENOENT) && bad_path) {
+			if (errno == ENOENT && bad_path) {
 				unix_ERR_class = ERRDOS;
 				unix_ERR_code = ERRbadpath;
 			}
@@ -1418,7 +1416,7 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 		if (stat(fname, &st) != 0) {
 			DEBUG("stat of %s failed (%s)\n", fname,
 			      strerror(errno));
-			if ((errno == ENOENT) && bad_path) {
+			if (errno == ENOENT && bad_path) {
 				unix_ERR_class = ERRDOS;
 				unix_ERR_code = ERRbadpath;
 			}
@@ -1579,7 +1577,7 @@ static int call_trans2mkdir(char *inbuf, char *outbuf, int length, int bufsize,
 
 	if (ret < 0) {
 		DEBUG("error (%s)\n", strerror(errno));
-		if ((errno == ENOENT) && bad_path) {
+		if (errno == ENOENT && bad_path) {
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
@@ -1760,8 +1758,7 @@ int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize)
 			ret = receive_next_smb(Client, inbuf, bufsize,
 			                       SMB_SECONDARY_WAIT);
 
-			if ((ret && (CVAL(inbuf, smb_com) != SMBtranss2)) ||
-			    !ret) {
+			if (!ret || CVAL(inbuf, smb_com) != SMBtranss2) {
 				outsize = set_message(outbuf, 0, 0, true);
 				if (ret)
 					ERROR("reply_trans2: Invalid "

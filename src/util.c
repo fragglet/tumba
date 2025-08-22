@@ -39,8 +39,6 @@
 /* To which file do our syslog messages go? */
 #define SYSLOG_FACILITY LOG_DAEMON
 
-#define USE_SIGPROCMASK
-
 char client_addr[32] = "";
 
 int LOGLEVEL = 1;
@@ -196,17 +194,6 @@ bool directory_exist(char *dname, struct stat *st)
 	if (!ret)
 		errno = ENOTDIR;
 	return ret;
-}
-
-/*******************************************************************
-returns the size in bytes of the named file
-********************************************************************/
-uint32_t file_size(char *file_name)
-{
-	struct stat buf;
-	buf.st_size = 0;
-	stat(file_name, &buf);
-	return buf.st_size;
 }
 
 static void print_asc(unsigned char *buf, int len)
@@ -674,17 +661,8 @@ block sigs
 ********************************************************************/
 void block_signals(bool block, int signum)
 {
-#ifdef USE_SIGBLOCK
-	int block_mask = sigmask(signum);
-	static int oldmask = 0;
-	if (block)
-		oldmask = sigblock(block_mask);
-	else
-		sigsetmask(oldmask);
-#elif defined(USE_SIGPROCMASK)
 	sigset_t set;
 	sigemptyset(&set);
 	sigaddset(&set, signum);
 	sigprocmask(block ? SIG_BLOCK : SIG_UNBLOCK, &set, NULL);
-#endif
 }

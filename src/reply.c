@@ -29,7 +29,6 @@
 #include <utime.h>
 
 #include "byteorder.h"
-#include "config.h"
 #include "dir.h"
 #include "guards.h" /* IWYU pragma: keep */
 #include "locking.h"
@@ -197,7 +196,7 @@ int reply_tcon(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		return connection_error(inbuf, outbuf, connection_num);
 
 	outsize = set_message(outbuf, 2, 0, true);
-	SSVAL(outbuf, smb_vwv0, max_recv);
+	SSVAL(outbuf, smb_vwv0, BUFFER_SIZE);
 	SSVAL(outbuf, smb_vwv1, connection_num);
 	SSVAL(outbuf, smb_tid, connection_num);
 
@@ -411,7 +410,7 @@ int reply_getatr(char *inbuf, char *outbuf, int in_size, int buffsize)
 
 	/* dos smetimes asks for a stat of "" - it returns a "hidden directory"
 	   under WfWg - weird! */
-	if (!(*fname)) {
+	if (!*fname) {
 		mode = aHIDDEN | aDIR;
 		if (!CAN_WRITE(cnum))
 			mode |= aRONLY;
@@ -432,7 +431,7 @@ int reply_getatr(char *inbuf, char *outbuf, int in_size, int buffsize)
 	}
 
 	if (!ok) {
-		if ((errno == ENOENT) && bad_path) {
+		if (errno == ENOENT && bad_path) {
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
@@ -486,7 +485,7 @@ int reply_setatr(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		ok = set_filetime(cnum, fname, mtime);
 
 	if (!ok) {
-		if ((errno == ENOENT) && bad_path) {
+		if (errno == ENOENT && bad_path) {
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
@@ -688,7 +687,7 @@ int reply_search(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 			                       SVAL(inbuf, smb_pid));
 			if (dptr_num < 0) {
 				if (dptr_num == -2) {
-					if ((errno == ENOENT) && bad_path) {
+					if (errno == ENOENT && bad_path) {
 						unix_ERR_class = ERRDOS;
 						unix_ERR_code = ERRbadpath;
 					}
@@ -708,17 +707,18 @@ int reply_search(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 				                CONN_SHARE(cnum)->name, 0,
 				                aVOLID, 0);
 				dptr_fill(p + 12, dptr_num);
-				if (dptr_zero(p + 12) && (status_len == 0))
+				if (dptr_zero(p + 12) && status_len == 0)
 					numentries = 1;
 				else
 					numentries = 0;
 			} else {
 				for (i = numentries;
-				     (i < maxentries) && !finished; i++) {
+				     i < maxentries && !finished; i++) {
 					/* check to make sure we have room in
 					 * the buffer */
-					if ((PTR_DIFF(p, outbuf) +
-					     DIR_STRUCT_SIZE) > BUFFER_SIZE) {
+					if (PTR_DIFF(p, outbuf) +
+					        DIR_STRUCT_SIZE >
+					    BUFFER_SIZE) {
 						break;
 					}
 					finished = !get_dir_entry(
@@ -774,7 +774,7 @@ search_empty:
 	outsize += DIR_STRUCT_SIZE * numentries;
 	smb_setlen(outbuf, outsize - 4);
 
-	if ((!*directory) && dptr_path(dptr_num))
+	if (!*directory && dptr_path(dptr_num))
 		snprintf(directory, sizeof(directory), "(%s)",
 		         dptr_path(dptr_num));
 
@@ -850,7 +850,7 @@ int reply_open(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		return ERROR_CODE(ERRSRV, ERRnofids);
 
 	if (!check_name(fname, cnum)) {
-		if ((errno == ENOENT) && bad_path) {
+		if (errno == ENOENT && bad_path) {
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
@@ -863,7 +863,7 @@ int reply_open(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	fsp = &Files[fnum];
 
 	if (!fsp->open) {
-		if ((errno == ENOENT) && bad_path) {
+		if (errno == ENOENT && bad_path) {
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
@@ -933,7 +933,7 @@ int reply_open_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 		return ERROR_CODE(ERRSRV, ERRnofids);
 
 	if (!check_name(fname, cnum)) {
-		if ((errno == ENOENT) && bad_path) {
+		if (errno == ENOENT && bad_path) {
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
@@ -947,7 +947,7 @@ int reply_open_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	fsp = &Files[fnum];
 
 	if (!fsp->open) {
-		if ((errno == ENOENT) && bad_path) {
+		if (errno == ENOENT && bad_path) {
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
@@ -1039,7 +1039,7 @@ int reply_mknew(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		return ERROR_CODE(ERRSRV, ERRnofids);
 
 	if (!check_name(fname, cnum)) {
-		if ((errno == ENOENT) && bad_path) {
+		if (errno == ENOENT && bad_path) {
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
@@ -1063,7 +1063,7 @@ int reply_mknew(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	fsp = &Files[fnum];
 
 	if (!fsp->open) {
-		if ((errno == ENOENT) && bad_path) {
+		if (errno == ENOENT && bad_path) {
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
@@ -1107,7 +1107,7 @@ int reply_ctemp(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		return ERROR_CODE(ERRSRV, ERRnofids);
 
 	if (!check_name(fname, cnum)) {
-		if ((errno == ENOENT) && bad_path) {
+		if (errno == ENOENT && bad_path) {
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
@@ -1125,7 +1125,7 @@ int reply_ctemp(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	fsp = &Files[fnum];
 
 	if (!fsp->open) {
-		if ((errno == ENOENT) && bad_path) {
+		if (errno == ENOENT && bad_path) {
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
@@ -1259,7 +1259,7 @@ int reply_unlink(char *inbuf, char *outbuf, int dum_size, int dum_bufsize)
 		if (exists)
 			return ERROR_CODE(ERRDOS, error);
 		else {
-			if ((errno == ENOENT) && bad_path) {
+			if (errno == ENOENT && bad_path) {
 				unix_ERR_class = ERRDOS;
 				unix_ERR_code = ERRbadpath;
 			}
@@ -1286,8 +1286,7 @@ static int transfer_file(int infd, int outfd, int n, char *header, int headlen,
 	DEBUG("n=%d (head=%d)\n", n, headlen);
 
 	if (size == 0) {
-		size = lp_readsize();
-		size = MAX(size, 1024);
+		size = 16 * 1024;
 	}
 
 	while (!buf && size > 0) {
@@ -1312,7 +1311,7 @@ static int transfer_file(int infd, int outfd, int n, char *header, int headlen,
 
 		ret = 0;
 
-		if (header && (headlen >= MIN(s, 1024))) {
+		if (header && headlen >= MIN(s, 1024)) {
 			buf1 = header;
 			s = headlen;
 			ret = headlen;
@@ -1399,31 +1398,12 @@ int reply_readbraw(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	DEBUG("fnum=%d cnum=%d start=%d max=%d min=%d nread=%d\n", fnum, cnum,
 	      startpos, maxcount, mincount, nread);
 
-#if UNSAFE_READRAW
-	{
-		int predict = 0;
-		_smb_setlen(header, nread);
-
-		if ((nread - predict) > 0)
-			seek_file(fnum, startpos + predict);
-
-		ret = transfer_file(fd, Client, nread - predict, header,
-		                    4 + predict, startpos + predict);
-	}
-
-	if (ret != nread + 4)
-		ERROR(
-		    "ERROR: file read failure on %s at %d for %d bytes (%d)\n",
-		    fname, startpos, nread, ret);
-
-#else
 	ret = read_file(fnum, header + 4, startpos, nread);
 	if (ret < mincount)
 		ret = 0;
 
 	_smb_setlen(header, ret);
 	transfer_file(0, Client, 0, header, 4 + ret, 0);
-#endif
 
 	DEBUG("finished\n");
 	return -1;
@@ -1581,7 +1561,7 @@ int reply_writebraw(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	tcount = IVAL(inbuf, smb_vwv1);
 	startpos = IVAL(inbuf, smb_vwv3);
-	write_through = BITSETW(inbuf + smb_vwv7, 0);
+	write_through = (SVAL(inbuf, smb_vwv7) & 1) != 0;
 
 	/* We have to deal with slightly different formats depending
 	   on whether we are using the core+ or lanman1.0 protocol */
@@ -1692,7 +1672,7 @@ int reply_writeunlock(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	else
 		nwritten = write_file(fnum, data, numtowrite);
 
-	if (((nwritten == 0) && (numtowrite != 0)) || (nwritten < 0))
+	if ((nwritten == 0 && numtowrite != 0) || nwritten < 0)
 		return UNIX_ERROR_CODE(ERRDOS, ERRnoaccess);
 
 	if (!do_unlock(fnum, cnum, numtowrite, startpos, &eclass, &ecode))
@@ -1741,7 +1721,7 @@ int reply_write(char *inbuf, char *outbuf, int dum1, int dum2)
 		nwritten = ftruncate(Files[fnum].fd_ptr->fd, startpos);
 	}
 
-	if (((nwritten == 0) && (numtowrite != 0)) || (nwritten < 0))
+	if ((nwritten == 0 && numtowrite != 0) || nwritten < 0)
 		return UNIX_ERROR_CODE(ERRDOS, ERRnoaccess);
 
 	outsize = set_message(outbuf, 1, 0, true);
@@ -1791,7 +1771,7 @@ int reply_write_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	else
 		nwritten = write_file(fnum, data, smb_dsize);
 
-	if (((nwritten == 0) && (smb_dsize != 0)) || (nwritten < 0))
+	if ((nwritten == 0 && smb_dsize != 0) || nwritten < 0)
 		return UNIX_ERROR_CODE(ERRDOS, ERRnoaccess);
 
 	set_message(outbuf, 6, 0, true);
@@ -2143,7 +2123,7 @@ int reply_mkdir(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		ret = mkdir(directory, unix_mode(cnum, aDIR));
 
 	if (ret < 0) {
-		if ((errno == ENOENT) && bad_path) {
+		if (errno == ENOENT && bad_path) {
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
@@ -2182,7 +2162,7 @@ int reply_rmdir(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	}
 
 	if (!ok) {
-		if ((errno == ENOENT) && bad_path) {
+		if (errno == ENOENT && bad_path) {
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;
 		}
@@ -2455,7 +2435,7 @@ int reply_mv(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		if (exists)
 			return ERROR_CODE(ERRDOS, error);
 		else {
-			if ((errno == ENOENT) && (bad_path1 || bad_path2)) {
+			if (errno == ENOENT && (bad_path1 || bad_path2)) {
 				unix_ERR_class = ERRDOS;
 				unix_ERR_code = ERRbadpath;
 			}
@@ -2655,7 +2635,7 @@ int reply_copy(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		if (exists)
 			return ERROR_CODE(ERRDOS, error);
 		else {
-			if ((errno == ENOENT) && (bad_path1 || bad_path2)) {
+			if (errno == ENOENT && (bad_path1 || bad_path2)) {
 				unix_ERR_class = ERRDOS;
 				unix_ERR_code = ERRbadpath;
 			}
@@ -2732,7 +2712,7 @@ int reply_lockingX(char *inbuf, char *outbuf, int length, int bufsize)
 		count = IVAL(data, SMB_LKLEN_OFFSET(i));
 		offset = IVAL(data, SMB_LKOFF_OFFSET(i));
 		if (!do_lock(fnum, cnum, count, offset,
-		             ((locktype & 1) ? F_RDLCK : F_WRLCK), &eclass,
+		             (locktype & 1) ? F_RDLCK : F_WRLCK, &eclass,
 		             &ecode))
 			break;
 	}
@@ -2787,7 +2767,7 @@ int reply_writebmpx(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	tcount = SVAL(inbuf, smb_vwv1);
 	startpos = IVAL(inbuf, smb_vwv3);
-	write_through = BITSETW(inbuf + smb_vwv7, 0);
+	write_through = (SVAL(inbuf, smb_vwv7) & 1) != 0;
 	numtowrite = SVAL(inbuf, smb_vwv10);
 	smb_doff = SVAL(inbuf, smb_vwv11);
 
@@ -2914,7 +2894,7 @@ int reply_writebs(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 			send_response = true;
 		}
 
-		free((char *) wbms);
+		free(wbms);
 		Files[fnum].wbmpx_ptr = NULL;
 	}
 
@@ -2952,13 +2932,13 @@ int reply_setattrE(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	 * Sometimes times are sent as zero - ignore them.
 	 */
 
-	if ((unix_times.actime == 0) && (unix_times.modtime == 0)) {
+	if (unix_times.actime == 0 && unix_times.modtime == 0) {
 		/* Ignore request */
 		DEBUG("fnum=%d cnum=%d ignoring zero request - "
 		      "not setting timestamps of 0\n",
 		      fnum, cnum);
 		return outsize;
-	} else if ((unix_times.actime != 0) && (unix_times.modtime == 0)) {
+	} else if (unix_times.actime != 0 && unix_times.modtime == 0) {
 		/* set modify time = to access time if modify time was 0 */
 		unix_times.modtime = unix_times.actime;
 	}

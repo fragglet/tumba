@@ -17,7 +17,6 @@
 #include <string.h>
 #include <strings.h>
 
-#include "config.h"
 #include "guards.h" /* IWYU pragma: keep */
 #include "smb.h"
 #include "strfunc.h"
@@ -110,7 +109,7 @@ bool is_8_3(char *fname, bool check_case)
 	dot_pos = 0;
 	for (p = fname; *p != '\0'; ++p) {
 		if (*p == '.' && !dot_pos)
-			dot_pos = (char *) p;
+			dot_pos = p;
 		if (!isdoschar(*p))
 			return false;
 	}
@@ -129,13 +128,8 @@ bool is_8_3(char *fname, bool check_case)
 	if (l > 8)
 		return false;
 
-	if (lp_strip_dot() && len - l == 1 && !strchr(dot_pos + 1, '.')) {
-		*dot_pos = 0;
-		return true;
-	}
-
 	/* extension must be between 1 and 3 */
-	if ((len - l < 2) || (len - l > 4))
+	if (len - l < 2 || len - l > 4)
 		return false;
 
 	/* extension can't have a dot */
@@ -193,7 +187,7 @@ void mangle_name_83(char *s, int s_len)
 	base[0] = 0;
 
 	p = strrchr(s, '.');
-	if (p && (strlen(p + 1) < (size_t) 4)) {
+	if (p && strlen(p + 1) < (size_t) 4) {
 		bool all_normal = (strisnormal(p + 1)); /* XXXXXXXXX */
 
 		if (all_normal && p[1] != 0) {
@@ -255,7 +249,7 @@ static bool illegal_name(char *name)
 		char *ill = "*\\/?<>|\":";
 		initialised = true;
 
-		bzero((char *) illegal, 256);
+		bzero(illegal, 256);
 		for (s = (unsigned char *) ill; *s; s++)
 			illegal[*s] = true;
 	}

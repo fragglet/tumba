@@ -28,7 +28,7 @@ static bool fcntl_lock(int fd, int op, uint32_t offset, uint32_t count,
 {
 	struct flock lock;
 	int ret;
-	uint32_t mask = ((unsigned) 1 << 31);
+	uint32_t mask = (uint32_t) 1 << 31;
 	int32_t s_count = (int32_t) count;   /* Signed count. */
 	int32_t s_offset = (int32_t) offset; /* Signed offset. */
 
@@ -41,7 +41,7 @@ static bool fcntl_lock(int fd, int op, uint32_t offset, uint32_t count,
 		s_offset &= ~mask;
 
 	/* count + offset must be in range */
-	while ((s_offset < 0 || (s_offset + s_count < 0)) && mask) {
+	while ((s_offset < 0 || s_offset + s_count < 0) && mask) {
 		s_offset &= ~mask;
 		mask = mask >> 1;
 	}
@@ -67,8 +67,8 @@ static bool fcntl_lock(int fd, int op, uint32_t offset, uint32_t count,
 
 	/* a lock query */
 	if (op == F_GETLK) {
-		if ((ret != -1) && (lock.l_type != F_UNLCK) &&
-		    (lock.l_pid != 0) && (lock.l_pid != getpid())) {
+		if (ret != -1 && lock.l_type != F_UNLCK && lock.l_pid != 0 &&
+		    lock.l_pid != getpid()) {
 			DEBUG("fd %d is locked by pid %d\n", fd, lock.l_pid);
 			return true;
 		}
@@ -104,8 +104,7 @@ static bool fcntl_lock(int fd, int op, uint32_t offset, uint32_t count,
 
 static int map_lock_type(struct open_file *fsp, int lock_type)
 {
-	if ((lock_type == F_WRLCK) &&
-	    (fsp->fd_ptr->real_open_flags == O_RDONLY)) {
+	if (lock_type == F_WRLCK && fsp->fd_ptr->real_open_flags == O_RDONLY) {
 		/*
 		 * Many UNIX's cannot get a write lock on a file opened
 		 * read-only. Win32 locking semantics allow this. Do the best we
@@ -114,8 +113,8 @@ static int map_lock_type(struct open_file *fsp, int lock_type)
 		DEBUG("Downgrading write lock to read due to "
 		      "read-only file.\n");
 		return F_RDLCK;
-	} else if ((lock_type == F_RDLCK) &&
-	           (fsp->fd_ptr->real_open_flags == O_WRONLY)) {
+	} else if (lock_type == F_RDLCK &&
+	           fsp->fd_ptr->real_open_flags == O_WRONLY) {
 		/*
 		 * Ditto for read locks on write only files.
 		 */
@@ -148,7 +147,7 @@ bool do_lock(int fnum, int cnum, uint32_t count, uint32_t offset, int lock_type,
 		return false;
 	}
 
-	if (OPEN_FNUM(fnum) && fsp->can_lock && (fsp->cnum == cnum))
+	if (OPEN_FNUM(fnum) && fsp->can_lock && fsp->cnum == cnum)
 		ok = fcntl_lock(fsp->fd_ptr->fd, F_SETLK, offset, count,
 		                map_lock_type(fsp, lock_type));
 
@@ -170,7 +169,7 @@ bool do_unlock(int fnum, int cnum, uint32_t count, uint32_t offset, int *eclass,
 	bool ok = false;
 	struct open_file *fsp = &Files[fnum];
 
-	if (OPEN_FNUM(fnum) && fsp->can_lock && (fsp->cnum == cnum))
+	if (OPEN_FNUM(fnum) && fsp->can_lock && fsp->cnum == cnum)
 		ok = fcntl_lock(fsp->fd_ptr->fd, F_SETLK, offset, count,
 		                F_UNLCK);
 

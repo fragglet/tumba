@@ -39,6 +39,3 @@ void close_dir(void *p);
 char *read_dir_name(void *p);
 bool seek_dir(void *p, int pos);
 int tell_dir(void *p);
-void dir_cache_add(char *path, char *name, char *dname, const struct share *);
-char *dir_cache_check(char *path, char *name, const struct share *);
-void dir_cache_flush(const struct share *);

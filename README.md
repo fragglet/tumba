@@ -1,3 +1,8 @@
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/fragglet/tumba/ci.yml)
+![GitHub License](https://img.shields.io/github/license/fragglet/tumba)
+![GitHub repo size](https://img.shields.io/github/repo-size/fragglet/tumba)
+[![GitHub Repo stars](https://img.shields.io/github/stars/fragglet/tumba)](https://github.com/fragglet/tumba/stargazers)
+
 **Tumba** is a stripped-down fork of a very old version of
 [Samba](https://en.wikipedia.org/wiki/Samba_software), for retro computing
 purposes.
@@ -120,3 +125,9 @@ systems has not yet been written.
   You can specify the `-a` command line argument to open connections from all
   public IP addresses, but you should understand the implications of doing this
   and consider if it is really what you want.
+
+* **Why can't I connect to the server using smbclient / Gnome / etc.?**
+  These clients are based on Samba, and recent versions of Samba will not use
+  the SMB1 protocol unless explicitly configured to do so (for the record, I
+  believe this is a good thing). The workaround is to set
+  `client min protocol = NT1` in `/etc/samba/smb.conf`.
