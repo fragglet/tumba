@@ -2123,10 +2123,9 @@ reply for the coreplus protocol
 ****************************************************************************/
 static int reply_coreplus(char *outbuf)
 {
-	int raw = (lp_readraw() ? 1 : 0) | (lp_writeraw() ? 2 : 0);
 	int outsize = set_message(outbuf, 13, 0, true);
-	SSVAL(outbuf, smb_vwv5, raw); /* tell redirector we support
-	                                 readbraw and writebraw (possibly) */
+	SSVAL(outbuf, smb_vwv5, 3); /* tell redirector we support
+	                               readbraw and writebraw (possibly) */
 	CVAL(outbuf, smb_flg) =
 	    0x81; /* Reply, SMBlockread, SMBwritelock supported */
 	SSVAL(outbuf, smb_vwv1, 0x1); /* user level security, don't encrypt */
@@ -2141,7 +2140,6 @@ reply for the lanman 1.0 protocol
 ****************************************************************************/
 static int reply_lanman1(char *outbuf)
 {
-	int raw = (lp_readraw() ? 1 : 0) | (lp_writeraw() ? 2 : 0);
 	int secword = 0;
 	time_t t = time(NULL);
 
@@ -2155,8 +2153,8 @@ static int reply_lanman1(char *outbuf)
 	SSVAL(outbuf, smb_vwv2, max_recv);
 	SSVAL(outbuf, smb_vwv3, MAX_MUX);
 	SSVAL(outbuf, smb_vwv4, 1);
-	SSVAL(outbuf, smb_vwv5, raw); /* tell redirector we support
-	                                 readbraw writebraw (possibly) */
+	SSVAL(outbuf, smb_vwv5, 3); /* tell redirector we support
+	                               readbraw writebraw (possibly) */
 	SIVAL(outbuf, smb_vwv6, getpid());
 	SSVAL(outbuf, smb_vwv10, time_zone(t) / 60);
 
@@ -2170,7 +2168,6 @@ reply for the lanman 2.0 protocol
 ****************************************************************************/
 static int reply_lanman2(char *outbuf)
 {
-	int raw = (lp_readraw() ? 1 : 0) | (lp_writeraw() ? 2 : 0);
 	int secword = 0;
 	time_t t = time(NULL);
 	char crypt_len = 0;
@@ -2186,7 +2183,7 @@ static int reply_lanman2(char *outbuf)
 	SSVAL(outbuf, smb_vwv2, max_recv);
 	SSVAL(outbuf, smb_vwv3, MAX_MUX);
 	SSVAL(outbuf, smb_vwv4, 1);
-	SSVAL(outbuf, smb_vwv5, raw); /* readbraw and/or writebraw */
+	SSVAL(outbuf, smb_vwv5, 3); /* readbraw and writebraw */
 	SSVAL(outbuf, smb_vwv10, time_zone(t) / 60);
 	put_dos_date(outbuf, smb_vwv8, t);
 
@@ -2199,7 +2196,7 @@ reply for the nt protocol
 static int reply_nt1(char *outbuf)
 {
 	/* dual names + lock_and_read + nt SMBs + remote API calls */
-	int capabilities = CAP_NT_FIND | CAP_LOCK_AND_READ;
+	int capabilities = CAP_NT_FIND | CAP_LOCK_AND_READ | CAP_RAW_MODE;
 	/*
 	  other valid capabilities which we may support at some time...
 	                     CAP_LARGE_FILES|CAP_NT_SMBS|CAP_RPC_REMOTE_APIS;
@@ -2210,10 +2207,6 @@ static int reply_nt1(char *outbuf)
 	time_t t = time(NULL);
 	int data_len;
 	char crypt_len = 0;
-
-	if (lp_readraw() && lp_writeraw()) {
-		capabilities |= CAP_RAW_MODE;
-	}
 
 	/* decide where (if) to put the encryption challenge, and
 	   follow it with the OEM'd domain name

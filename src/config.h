@@ -15,27 +15,6 @@
 // functions that return constants. The function comments are from the manpage
 // for smb.conf.
 
-// This options allows you to override the name of the Samba log file (also
-// known as the debug file).
-static inline char *lp_logfile(void)
-{
-	return "";
-}
-
-// This parameter controls whether or not the server will support raw reads
-// when transferring data to clients.
-static inline bool lp_readraw(void)
-{
-	return true;
-}
-
-// This parameter controls whether or not the server will support raw writes
-// when transferring data from clients.
-static inline bool lp_writeraw(void)
-{
-	return true;
-}
-
 // This is a boolean that controls whether to strip trailing dots off UNIX
 // filenames. This helps with some CDROMs that have filenames ending in a
 // single dot.
