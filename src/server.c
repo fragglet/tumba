@@ -1918,9 +1918,7 @@ static int sig_hup(void)
 	block_signals(true, SIGHUP);
 	ERROR("Got SIGHUP\n");
 
-#ifndef DONT_REINSTALL_SIG
 	signal(SIGHUP, SIGNAL_CAST sig_hup);
-#endif
 	block_signals(false, SIGHUP);
 	return 0;
 }
@@ -3057,10 +3055,6 @@ int main(int argc, char *argv[])
 	int port = SMB_PORT;
 	int opt;
 
-#ifdef NEED_AUTH_PARAMETERS
-	set_auth_parameters(argc, argv);
-#endif
-
 	time_init();
 
 	pstrcpy(debugf, SMBLOGFILE);
@@ -3121,9 +3115,7 @@ int main(int argc, char *argv[])
 
 	init_structs();
 
-#ifndef NO_SIGNAL_TEST
 	signal(SIGHUP, SIGNAL_CAST sig_hup);
-#endif
 
 	/* Setup the signals that allow the debug log level
 	   to by dynamically changed. */

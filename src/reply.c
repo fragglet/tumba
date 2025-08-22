@@ -1392,31 +1392,12 @@ int reply_readbraw(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 	DEBUG("fnum=%d cnum=%d start=%d max=%d min=%d nread=%d\n", fnum, cnum,
 	      startpos, maxcount, mincount, nread);
 
-#if UNSAFE_READRAW
-	{
-		int predict = 0;
-		_smb_setlen(header, nread);
-
-		if (nread - predict > 0)
-			seek_file(fnum, startpos + predict);
-
-		ret = transfer_file(fd, Client, nread - predict, header,
-		                    4 + predict, startpos + predict);
-	}
-
-	if (ret != nread + 4)
-		ERROR(
-		    "ERROR: file read failure on %s at %d for %d bytes (%d)\n",
-		    fname, startpos, nread, ret);
-
-#else
 	ret = read_file(fnum, header + 4, startpos, nread);
 	if (ret < mincount)
 		ret = 0;
 
 	_smb_setlen(header, ret);
 	transfer_file(0, Client, 0, header, 4 + ret, 0);
-#endif
 
 	DEBUG("finished\n");
 	return -1;

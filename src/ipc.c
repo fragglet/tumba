@@ -89,12 +89,7 @@ static void send_trans_reply(char *outbuf, char *data, char *param,
 	this_ldata = MIN(
 	    ldata, max_send - (500 + lsetup * sizeof(uint16_t) + this_lparam));
 
-#ifdef CONFUSE_NETMONITOR_MSRPC_DECODING
-	/* if you don't want Net Monitor to decode your packets, do this!!! */
-	align = (this_lparam + 1) % 4;
-#else
 	align = this_lparam % 4;
-#endif
 
 	set_message(outbuf, 10 + lsetup, align + this_ldata + this_lparam,
 	            true);

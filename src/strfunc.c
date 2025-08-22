@@ -253,17 +253,6 @@ static int name_interpret(char *in, char *out)
 	*out = 0;
 	ret = out[-1];
 
-#ifdef NETBIOS_SCOPE
-	/* Handle any scope names */
-	while (*in) {
-		*out++ = '.'; /* Scope names are separated by periods */
-		len = *(unsigned char *) in++;
-		strlcpy(out, in, len + 1);
-		out += len;
-		*out = 0;
-		in += len;
-	}
-#endif
 	return ret;
 }
 
