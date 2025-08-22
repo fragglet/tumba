@@ -127,7 +127,6 @@ struct service_connection {
 extern const char *workgroup;
 extern int chain_fnum;
 extern int max_send;
-extern int max_recv;
 extern struct open_file Files[];
 extern struct service_connection Connections[];
 

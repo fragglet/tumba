@@ -125,11 +125,6 @@ static const char *bind_addr = "0.0.0.0";
  *  Set by us for CORE protocol.
  */
 int max_send = BUFFER_SIZE;
-/*
- * Size of the data we can receive. Set by us.
- * Can be modified by the max xmit parameter.
- */
-int max_recv = BUFFER_SIZE;
 
 /* a fnum to use when chaining */
 int chain_fnum = -1;
@@ -2150,7 +2145,7 @@ static int reply_lanman1(char *outbuf)
 
 	CVAL(outbuf, smb_flg) =
 	    0x81; /* Reply, SMBlockread, SMBwritelock supported */
-	SSVAL(outbuf, smb_vwv2, max_recv);
+	SSVAL(outbuf, smb_vwv2, BUFFER_SIZE);
 	SSVAL(outbuf, smb_vwv3, MAX_MUX);
 	SSVAL(outbuf, smb_vwv4, 1);
 	SSVAL(outbuf, smb_vwv5, 3); /* tell redirector we support
@@ -2180,7 +2175,7 @@ static int reply_lanman2(char *outbuf)
 
 	CVAL(outbuf, smb_flg) =
 	    0x81; /* Reply, SMBlockread, SMBwritelock supported */
-	SSVAL(outbuf, smb_vwv2, max_recv);
+	SSVAL(outbuf, smb_vwv2, BUFFER_SIZE);
 	SSVAL(outbuf, smb_vwv3, MAX_MUX);
 	SSVAL(outbuf, smb_vwv4, 1);
 	SSVAL(outbuf, smb_vwv5, 3); /* readbraw and writebraw */
@@ -3118,8 +3113,6 @@ int main(int argc, char *argv[])
 		exit(1);
 
 	drop_privileges();
-
-	max_recv = MIN(lp_maxxmit(), BUFFER_SIZE);
 
 	process();
 

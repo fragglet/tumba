@@ -189,7 +189,7 @@ int reply_tcon(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		return connection_error(inbuf, outbuf, connection_num);
 
 	outsize = set_message(outbuf, 2, 0, true);
-	SSVAL(outbuf, smb_vwv0, max_recv);
+	SSVAL(outbuf, smb_vwv0, BUFFER_SIZE);
 	SSVAL(outbuf, smb_vwv1, connection_num);
 	SSVAL(outbuf, smb_tid, connection_num);
 

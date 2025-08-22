@@ -23,13 +23,6 @@ static inline bool lp_strip_dot(void)
 	return false;
 }
 
-// This option controls the maximum packet size that will be negotiated by
-// Samba. The default is 65535, which is the maximum.
-static inline int lp_maxxmit(void)
-{
-	return 65535;
-}
-
 // The option "read size" affects the overlap of disk reads/writes with network
 // reads/writes.
 static inline int lp_readsize(void)
