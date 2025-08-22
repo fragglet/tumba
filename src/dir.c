@@ -543,7 +543,7 @@ void *open_dir(int cnum, char *name)
 	}
 
 	closedir(d);
-	return (void *) dirp;
+	return dirp;
 }
 
 /*******************************************************************

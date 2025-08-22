@@ -343,7 +343,7 @@ time_t make_unix_date2(void *date_ptr)
 	x2 = ((x & 0xFFFF) << 16) | ((x & 0xFFFF0000) >> 16);
 	SIVAL(&x, 0, x2);
 
-	return make_unix_date((void *) &x);
+	return make_unix_date(&x);
 }
 
 /*******************************************************************
