@@ -29,7 +29,6 @@
 #include <utime.h>
 
 #include "byteorder.h"
-#include "config.h"
 #include "dir.h"
 #include "guards.h" /* IWYU pragma: keep */
 #include "locking.h"

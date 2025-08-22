@@ -45,7 +45,6 @@
 #include <sys/wait.h>
 
 #include "byteorder.h"
-#include "config.h"
 #include "dir.h"
 #include "guards.h" /* IWYU pragma: keep */
 #include "ipc.h"
@@ -372,36 +371,6 @@ bool set_filetime(int cnum, char *fname, time_t mtime)
 }
 
 /****************************************************************************
-check if two filenames are equal
-
-this needs to be careful about whether we are case sensitive
-****************************************************************************/
-static bool fname_equal(char *name1, char *name2)
-{
-	int l1 = strlen(name1);
-	int l2 = strlen(name2);
-
-	/* handle filenames ending in a single dot */
-	if (l1 - l2 == 1 && name1[l1 - 1] == '.' && lp_strip_dot()) {
-		bool ret;
-		name1[l1 - 1] = 0;
-		ret = fname_equal(name1, name2);
-		name1[l1 - 1] = '.';
-		return ret;
-	}
-
-	if (l2 - l1 == 1 && name2[l2 - 1] == '.' && lp_strip_dot()) {
-		bool ret;
-		name2[l2 - 1] = 0;
-		ret = fname_equal(name1, name2);
-		name2[l2 - 1] = '.';
-		return ret;
-	}
-
-	return strequal(name1, name2);
-}
-
-/****************************************************************************
 mangle the 2nd name and check if it is then equal to the first name
 ****************************************************************************/
 static bool mangled_equal(char *name1, char *name2)
@@ -459,7 +428,7 @@ static bool scan_directory(char *path, char *name, int cnum)
 		name_map_mangle(name2, false, CONN_SHARE(cnum));
 
 		if ((mangled && mangled_equal(name, name2)) ||
-		    fname_equal(name, name2)) {
+		    strequal(name, name2)) {
 			pstrcpy(name, dname);
 			close_dir(cur_dir);
 			return true;
