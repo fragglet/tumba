@@ -635,9 +635,9 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 	char *pdata;
 	int dirtype = SVAL(params, 0);
 	int maxentries = SVAL(params, 2);
-	bool close_after_first = BITSETW(params + 4, 0);
-	bool close_if_end = BITSETW(params + 4, 1);
-	bool requires_resume_key = BITSETW(params + 4, 2);
+	bool close_after_first = (SVAL(params, 4) & 1) != 0;
+	bool close_if_end = (SVAL(params, 4) & 2) != 0;
+	bool requires_resume_key = (SVAL(params, 4) & 4) != 0;
 	int info_level = SVAL(params, 6);
 	pstring directory;
 	pstring mask;
@@ -806,10 +806,10 @@ static int call_trans2findnext(char *inbuf, char *outbuf, int length,
 	int maxentries = SVAL(params, 2);
 	uint16_t info_level = SVAL(params, 4);
 	uint32_t resume_key = IVAL(params, 6);
-	bool close_after_request = BITSETW(params + 10, 0);
-	bool close_if_end = BITSETW(params + 10, 1);
-	bool requires_resume_key = BITSETW(params + 10, 2);
-	bool continue_bit = BITSETW(params + 10, 3);
+	bool close_after_request = (SVAL(params, 10) & 1) != 0;
+	bool close_if_end = (SVAL(params, 10) & 2) != 0;
+	bool requires_resume_key = (SVAL(params, 10) & 4) != 0;
+	bool continue_bit = (SVAL(params, 10) & 8) != 0;
 	pstring resume_name;
 	pstring mask;
 	pstring directory;

@@ -1573,7 +1573,7 @@ int reply_writebraw(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	tcount = IVAL(inbuf, smb_vwv1);
 	startpos = IVAL(inbuf, smb_vwv3);
-	write_through = BITSETW(inbuf + smb_vwv7, 0);
+	write_through = (SVAL(inbuf, smb_vwv7) & 1) != 0;
 
 	/* We have to deal with slightly different formats depending
 	   on whether we are using the core+ or lanman1.0 protocol */
@@ -2779,7 +2779,7 @@ int reply_writebmpx(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 
 	tcount = SVAL(inbuf, smb_vwv1);
 	startpos = IVAL(inbuf, smb_vwv3);
-	write_through = BITSETW(inbuf + smb_vwv7, 0);
+	write_through = (SVAL(inbuf, smb_vwv7) & 1) != 0;
 	numtowrite = SVAL(inbuf, smb_vwv10);
 	smb_doff = SVAL(inbuf, smb_vwv11);
 

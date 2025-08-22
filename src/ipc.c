@@ -797,8 +797,8 @@ int reply_trans(char *inbuf, char *outbuf, int size, int bufsize)
 	int mprcnt = SVAL(inbuf, smb_vwv2);
 	int mdrcnt = SVAL(inbuf, smb_vwv3);
 	int msrcnt = CVAL(inbuf, smb_vwv4);
-	bool close_on_completion = BITSETW(inbuf + smb_vwv5, 0);
-	bool one_way = BITSETW(inbuf + smb_vwv5, 1);
+	bool close_on_completion = (SVAL(inbuf, smb_vwv5) & 1) != 0;
+	bool one_way = (SVAL(inbuf, smb_vwv5) & 2) != 0;
 	int pscnt = SVAL(inbuf, smb_vwv9);
 	int psoff = SVAL(inbuf, smb_vwv10);
 	int dscnt = SVAL(inbuf, smb_vwv11);
