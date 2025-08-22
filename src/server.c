@@ -1389,10 +1389,6 @@ int cached_error_packet(char *inbuf, char *outbuf, int fnum, int line)
 	return error_packet(inbuf, outbuf, eclass, err, line);
 }
 
-#ifndef EDQUOT
-#define EDQUOT ENOSPC
-#endif
-
 struct {
 	int unixerror;
 	int smbclass;
@@ -1403,16 +1399,8 @@ struct {
     {EIO, ERRHRD, ERRgeneral},        {EBADF, ERRSRV, ERRsrverror},
     {EINVAL, ERRSRV, ERRsrverror},    {EEXIST, ERRDOS, ERRfilexists},
     {ENFILE, ERRDOS, ERRnofids},      {EMFILE, ERRDOS, ERRnofids},
-    {ENOSPC, ERRHRD, ERRdiskfull},
-#ifdef EDQUOT
-    {EDQUOT, ERRHRD, ERRdiskfull},
-#endif
-#ifdef ENOTEMPTY
-    {ENOTEMPTY, ERRDOS, ERRnoaccess},
-#endif
-#ifdef EXDEV
-    {EXDEV, ERRDOS, ERRdiffdevice},
-#endif
+    {ENOSPC, ERRHRD, ERRdiskfull},    {EDQUOT, ERRHRD, ERRdiskfull},
+    {ENOTEMPTY, ERRDOS, ERRnoaccess}, {EXDEV, ERRDOS, ERRdiffdevice},
     {EROFS, ERRHRD, ERRnowrite},      {0, 0, 0}};
 
 /****************************************************************************
