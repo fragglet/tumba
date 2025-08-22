@@ -60,8 +60,8 @@ static int copy_and_advance(char **dst, char *src, int *n)
 		return 0;
 	strlcpy(*dst, src, *n + 1);
 	l = strlen(*dst) + 1;
-	(*dst) += l;
-	(*n) -= l;
+	*dst += l;
+	*n -= l;
 	return l;
 }
 
@@ -91,9 +91,9 @@ static void send_trans_reply(char *outbuf, char *data, char *param,
 
 #ifdef CONFUSE_NETMONITOR_MSRPC_DECODING
 	/* if you don't want Net Monitor to decode your packets, do this!!! */
-	align = ((this_lparam + 1) % 4);
+	align = (this_lparam + 1) % 4;
 #else
-	align = (this_lparam % 4);
+	align = this_lparam % 4;
 #endif
 
 	set_message(outbuf, 10 + lsetup, align + this_ldata + this_lparam,
@@ -128,7 +128,7 @@ static void send_trans_reply(char *outbuf, char *data, char *param,
 		this_ldata =
 		    MIN(ldata - tot_data, max_send - (500 + this_lparam));
 
-		align = (this_lparam % 4);
+		align = this_lparam % 4;
 
 		set_message(outbuf, 10, this_ldata + this_lparam + align,
 		            false);
@@ -276,7 +276,7 @@ static int fill_share_info(int cnum, const struct share *share, int uLevel,
 
 	len = struct_len;
 	p = *buf;
-	if ((*buflen) < struct_len)
+	if (*buflen < struct_len)
 		return -1;
 	if (stringbuf) {
 		p2 = *stringbuf;
@@ -325,13 +325,13 @@ static int fill_share_info(int cnum, const struct share *share, int uLevel,
 	}
 
 	if (stringbuf) {
-		(*buf) = p + struct_len;
-		(*buflen) -= struct_len;
-		(*stringbuf) = p2;
-		(*stringspace) = l2;
+		*buf = p + struct_len;
+		*buflen -= struct_len;
+		*stringbuf = p2;
+		*stringspace = l2;
 	} else {
-		(*buf) = p2;
-		(*buflen) -= len;
+		*buf = p2;
+		*buflen -= len;
 	}
 	return len;
 }

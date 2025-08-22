@@ -28,7 +28,7 @@ static bool fcntl_lock(int fd, int op, uint32_t offset, uint32_t count,
 {
 	struct flock lock;
 	int ret;
-	uint32_t mask = ((unsigned) 1 << 31);
+	uint32_t mask = (uint32_t) 1 << 31;
 	int32_t s_count = (int32_t) count;   /* Signed count. */
 	int32_t s_offset = (int32_t) offset; /* Signed offset. */
 

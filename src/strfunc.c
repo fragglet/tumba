@@ -568,7 +568,7 @@ bool mask_match(char *str, char *regexp, bool trans2)
 				cp2 = fp ? fp + 1 : "";
 
 				if (last_wcard_was_star ||
-				    ((cp1 != NULL) && (*cp1 == '*'))) {
+				    (cp1 != NULL && *cp1 == '*')) {
 					/* Eat the extra path components. */
 					int i;
 
@@ -580,7 +580,7 @@ bool mask_match(char *str, char *regexp, bool trans2)
 						if (fp)
 							*fp = '\0';
 
-						if ((cp1 != NULL) &&
+						if (cp1 != NULL &&
 						    do_match(cp2, cp1)) {
 							cp2 = fp ? fp + 1 : "";
 							break;
@@ -591,7 +591,7 @@ bool mask_match(char *str, char *regexp, bool trans2)
 				}
 			}
 			if (cp1 == NULL &&
-			    ((*cp2 == '\0') || last_wcard_was_star))
+			    (*cp2 == '\0' || last_wcard_was_star))
 				matched = true;
 		}
 	} else {
@@ -649,7 +649,7 @@ bool mask_match(char *str, char *regexp, bool trans2)
 			}
 
 			p = strrchr(t_filename, '.');
-			if (p && (p[1] == 0)) {
+			if (p && p[1] == 0) {
 				/*
 				 * Filename has an extension of '.' only.
 				 */

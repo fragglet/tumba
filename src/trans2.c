@@ -300,9 +300,9 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 	uint32_t size = 0, len;
 	uint32_t mdate = 0, adate = 0, cdate = 0;
 	char *nameptr;
-	bool isrootdir = (strequal(Connections[cnum].dirpath, "./") ||
-	                  strequal(Connections[cnum].dirpath, ".") ||
-	                  strequal(Connections[cnum].dirpath, "/"));
+	bool isrootdir = strequal(Connections[cnum].dirpath, "./") ||
+	                 strequal(Connections[cnum].dirpath, ".") ||
+	                 strequal(Connections[cnum].dirpath, "/");
 	bool was_8_3;
 	int nt_extmode; /* Used for NT connections instead of mode */
 	bool needslash =
@@ -1341,7 +1341,7 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
 		SIVAL(pdata, 0, l);
 		pstrcpy(pdata + 4, fname);
 		pdata += 4 + l;
-		data_size = PTR_DIFF(pdata, (*ppdata));
+		data_size = PTR_DIFF(pdata, *ppdata);
 		break;
 
 	case SMB_QUERY_FILE_STREAM_INFO:

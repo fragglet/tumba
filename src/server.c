@@ -1022,12 +1022,11 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 		 * it has been opened for write, and if we wanted read it
 		 * was open for read.
 		 */
-		if (((accmode == O_WRONLY) &&
-		     (fd_ptr->real_open_flags == O_RDONLY)) ||
-		    ((accmode == O_RDONLY) &&
-		     (fd_ptr->real_open_flags == O_WRONLY)) ||
-		    ((accmode == O_RDWR) &&
-		     (fd_ptr->real_open_flags != O_RDWR))) {
+		if ((accmode == O_WRONLY &&
+		     fd_ptr->real_open_flags == O_RDONLY) ||
+		    (accmode == O_RDONLY &&
+		     fd_ptr->real_open_flags == O_WRONLY) ||
+		    (accmode == O_RDWR && fd_ptr->real_open_flags != O_RDWR)) {
 			DEBUG("Error opening (already open for flags=%d) "
 			      "file %s (%s) (flags=%d)\n",
 			      fd_ptr->real_open_flags, fname, strerror(EACCES),
@@ -1110,8 +1109,8 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 		fsp->pos = -1;
 		fsp->open = true;
 		fsp->can_lock = true;
-		fsp->can_read = ((flags & O_WRONLY) == 0);
-		fsp->can_write = ((flags & (O_WRONLY | O_RDWR)) != 0);
+		fsp->can_read = (flags & O_WRONLY) == 0;
+		fsp->can_write = (flags & (O_WRONLY | O_RDWR)) != 0;
 		fsp->share_mode = 0;
 		fsp->modified = false;
 		fsp->cnum = cnum;
@@ -1266,7 +1265,7 @@ void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
 		fs_p->share_mode = (deny_mode << 4) | open_mode;
 
 		if (Access)
-			(*Access) = open_mode;
+			*Access = open_mode;
 
 		if (action) {
 			if (file_existed && !(flags2 & O_TRUNC))
@@ -2987,7 +2986,7 @@ static void process(void)
 				if (Connections[i].open) {
 					/* close dirptrs on connections that are
 					 * idle */
-					if ((t - Connections[i].lastused) >
+					if (t - Connections[i].lastused >
 					    DPTR_IDLE_TIMEOUT)
 						dptr_idlecnum(i);
 

@@ -700,7 +700,7 @@ int reply_search(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 				                CONN_SHARE(cnum)->name, 0,
 				                aVOLID, 0);
 				dptr_fill(p + 12, dptr_num);
-				if (dptr_zero(p + 12) && (status_len == 0))
+				if (dptr_zero(p + 12) && status_len == 0)
 					numentries = 1;
 				else
 					numentries = 0;
@@ -709,8 +709,9 @@ int reply_search(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 				     i < maxentries && !finished; i++) {
 					/* check to make sure we have room in
 					 * the buffer */
-					if ((PTR_DIFF(p, outbuf) +
-					     DIR_STRUCT_SIZE) > BUFFER_SIZE) {
+					if (PTR_DIFF(p, outbuf) +
+					        DIR_STRUCT_SIZE >
+					    BUFFER_SIZE) {
 						break;
 					}
 					finished = !get_dir_entry(
@@ -1304,7 +1305,7 @@ static int transfer_file(int infd, int outfd, int n, char *header, int headlen,
 
 		ret = 0;
 
-		if (header && (headlen >= MIN(s, 1024))) {
+		if (header && headlen >= MIN(s, 1024)) {
 			buf1 = header;
 			s = headlen;
 			ret = headlen;
@@ -2724,7 +2725,7 @@ int reply_lockingX(char *inbuf, char *outbuf, int length, int bufsize)
 		count = IVAL(data, SMB_LKLEN_OFFSET(i));
 		offset = IVAL(data, SMB_LKOFF_OFFSET(i));
 		if (!do_lock(fnum, cnum, count, offset,
-		             ((locktype & 1) ? F_RDLCK : F_WRLCK), &eclass,
+		             (locktype & 1) ? F_RDLCK : F_WRLCK, &eclass,
 		             &ecode))
 			break;
 	}
