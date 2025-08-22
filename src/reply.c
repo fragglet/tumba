@@ -1279,8 +1279,7 @@ static int transfer_file(int infd, int outfd, int n, char *header, int headlen,
 	DEBUG("n=%d (head=%d)\n", n, headlen);
 
 	if (size == 0) {
-		size = lp_readsize();
-		size = MAX(size, 1024);
+		size = 16 * 1024;
 	}
 
 	while (!buf && size > 0) {

@@ -22,10 +22,3 @@ static inline bool lp_strip_dot(void)
 {
 	return false;
 }
-
-// The option "read size" affects the overlap of disk reads/writes with network
-// reads/writes.
-static inline int lp_readsize(void)
-{
-	return 16 * 1024;
-}
