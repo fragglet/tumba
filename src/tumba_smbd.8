@@ -114,6 +114,11 @@ the files it accesses must also have their individual permissions set to
 world-readable (and world-writable for non-readonly shares). Since the files
 will be world-accessible via the network anyway, this is not a security issue.
 .SH LIMITATIONS
+Shares are always reported as being 1GiB in size with 512MiB free. This is
+because modern disks are much larger than they were when the SMB protocol was
+first introduced, and some older operating systems will integer-overflow when
+trying to process very large disk sizes.
+.PP
 \fBTumba\fR is an intentionally minimalist implementation of the SMB protocol,
 and does not implement many of the features of the SMBv1 protocol. The
 following is a nonexhaustive list:
