@@ -22,10 +22,6 @@
 #include "strfunc.h"
 #include "util.h"
 
-/* shall filenames with illegal chars in them get mangled in long
-   filename listings? */
-#define MANGLE_LONG_FILENAMES
-
 static const char *reserved_devices[] = {
     "CLOCK$", "CON",  "AUX",  "COM1", "COM2", "COM3", "COM4",
     "LPT1",   "LPT2", "LPT3", "NUL",  "PRN",  NULL,
@@ -266,10 +262,8 @@ convert a filename to DOS format. return true if successful.
 ****************************************************************************/
 void name_map_mangle(char *OutName, bool need83, const struct share *share)
 {
-#ifdef MANGLE_LONG_FILENAMES
 	if (!need83 && illegal_name(OutName))
 		need83 = true;
-#endif
 
 	/* check if it's already in 8.3 format */
 	if (need83 && !is_8_3(OutName, true)) {
