@@ -74,18 +74,6 @@ int Debug1(char *format_str, ...)
 	return 0;
 }
 
-/****************************************************************************
-line strncpy but always null terminates. Make sure there is room!
-****************************************************************************/
-char *StrnCpy(char *dest, char *src, int n)
-{
-	char *d = dest;
-	while (n-- && (*d++ = *src++))
-		;
-	*d = 0;
-	return dest;
-}
-
 /*******************************************************************
   convert a string to upper case
 ********************************************************************/
