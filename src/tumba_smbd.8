@@ -109,7 +109,7 @@ a \fBsystemd\fR(1) service configuration file that will grant it permission to
 that port without ever needing to run as root.
 .PP
 The \fBo+w\fR permission on a shared directory controls whether that share will
-be read-only or not However, because the server runs as an unprivileged user,
+be read-only or not. However, because the server runs as an unprivileged user,
 the files it accesses must also have their individual permissions set to
 world-readable (and world-writable for non-readonly shares). Since the files
 will be world-accessible via the network anyway, this is not a security issue.
@@ -127,7 +127,7 @@ sensitive enough to need password protection, you should find other ways to
 protect them. One example might be to use a VPN; another option you should
 consider is to use a different protocol.
 .IP \(bu
-\fBPer-user home directory shares\fR. This is a feature found in \fBsmbd\fR(1)
+\fBPer-user home directory shares\fR. This is a feature found in \fBsmbd\fR(8)
 that allows users to access their Unix home directories. \fBTumba\fR only ever
 shares a static list of directories.
 .IP \(bu
