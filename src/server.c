@@ -393,7 +393,7 @@ If the name looks like a mangled name then try via the mangling functions
 ****************************************************************************/
 static bool scan_directory(char *path, char *name, int cnum)
 {
-	void *cur_dir;
+	Dir *cur_dir;
 	char *dname;
 	bool mangled;
 	pstring name2;

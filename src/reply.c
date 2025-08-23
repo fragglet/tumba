@@ -1209,7 +1209,7 @@ int reply_unlink(char *inbuf, char *outbuf, int dum_size, int dum_bufsize)
 		if (!count)
 			exists = file_exist(directory, NULL);
 	} else {
-		void *dirptr = NULL;
+		Dir *dirptr = NULL;
 		char *dname;
 
 		if (check_name(directory, cnum))
@@ -2371,7 +2371,7 @@ int reply_mv(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 			error = 183;
 		}
 	} else {
-		void *dirptr = NULL;
+		Dir *dirptr = NULL;
 		char *dname;
 		pstring destname;
 
@@ -2587,7 +2587,7 @@ int reply_copy(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 		if (!count)
 			exists = file_exist(directory, NULL);
 	} else {
-		void *dirptr = NULL;
+		Dir *dirptr = NULL;
 		char *dname;
 		pstring destname;
 

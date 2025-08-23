@@ -41,7 +41,7 @@ static struct dptr_struct {
 	int pid;
 	int cnum;
 	uint32_t lastused;
-	void *ptr;
+	Dir *ptr;
 	bool valid;
 	bool finished;
 	bool expect_close;
@@ -109,7 +109,7 @@ static void dptr_idleoldest(void)
 /****************************************************************************
 get the dir ptr for a dir index
 ****************************************************************************/
-static void *dptr_get(int key, uint32_t lastused)
+static Dir *dptr_get(int key, uint32_t lastused)
 {
 	struct dptr_struct *dp = &dirptrs[key];
 
@@ -352,7 +352,7 @@ fill the 5 byte server reserved dptr field
 bool dptr_fill(char *buf1, unsigned int key)
 {
 	unsigned char *buf = (unsigned char *) buf1;
-	void *p = dptr_get(key, 0);
+	Dir *p = dptr_get(key, 0);
 	uint32_t offset;
 	if (!p) {
 		WARNING("filling null dirptr %d\n", key);
@@ -376,10 +376,10 @@ bool dptr_zero(char *buf)
 /****************************************************************************
 fetch the dir ptr and seek it given the 5 byte server field
 ****************************************************************************/
-void *dptr_fetch(char *buf, int *num)
+Dir *dptr_fetch(char *buf, int *num)
 {
 	unsigned int key = *(unsigned char *) buf;
-	void *p = dptr_get(key, dircounter++);
+	Dir *p = dptr_get(key, dircounter++);
 	uint32_t offset;
 	if (!p) {
 		INFO("fetched null dirptr %d\n", key);
@@ -396,9 +396,9 @@ void *dptr_fetch(char *buf, int *num)
 /****************************************************************************
 fetch the dir ptr.
 ****************************************************************************/
-void *dptr_fetch_lanman2(int dptr_num)
+Dir *dptr_fetch_lanman2(int dptr_num)
 {
-	void *p = dptr_get(dptr_num, dircounter++);
+	Dir *p = dptr_get(dptr_num, dircounter++);
 
 	if (!p) {
 		INFO("fetched null dirptr %d\n", dptr_num);
@@ -503,18 +503,18 @@ bool get_dir_entry(int cnum, char *mask, int dirtype, char *fname, int *size,
 	return found;
 }
 
-typedef struct {
+struct dir_struct {
 	int pos;
 	int numentries;
 	int mallocsize;
 	char *data;
 	char *current;
-} Dir;
+};
 
 /*******************************************************************
 open a directory
 ********************************************************************/
-void *open_dir(int cnum, char *name)
+Dir *open_dir(int cnum, char *name)
 {
 	Dir *dirp;
 	struct dirent *de;
@@ -549,9 +549,8 @@ void *open_dir(int cnum, char *name)
 /*******************************************************************
 close a directory
 ********************************************************************/
-void close_dir(void *p)
+void close_dir(Dir *dirp)
 {
-	Dir *dirp = (Dir *) p;
 	if (!dirp)
 		return;
 	free(dirp->data);
@@ -561,10 +560,9 @@ void close_dir(void *p)
 /*******************************************************************
 read from a directory
 ********************************************************************/
-char *read_dir_name(void *p)
+char *read_dir_name(Dir *dirp)
 {
 	char *ret;
-	Dir *dirp = (Dir *) p;
 
 	if (!dirp || !dirp->current || dirp->pos >= dirp->numentries)
 		return NULL;
@@ -579,10 +577,8 @@ char *read_dir_name(void *p)
 /*******************************************************************
 seek a dir
 ********************************************************************/
-bool seek_dir(void *p, int pos)
+bool seek_dir(Dir *dirp, int pos)
 {
-	Dir *dirp = (Dir *) p;
-
 	if (!dirp)
 		return false;
 
@@ -591,7 +587,7 @@ bool seek_dir(void *p, int pos)
 		dirp->pos = 0;
 	}
 
-	while (dirp->pos < pos && read_dir_name(p))
+	while (dirp->pos < pos && read_dir_name(dirp))
 		;
 
 	return dirp->pos == pos;
@@ -600,10 +596,8 @@ bool seek_dir(void *p, int pos)
 /*******************************************************************
 tell a dir position
 ********************************************************************/
-int tell_dir(void *p)
+int tell_dir(Dir *dirp)
 {
-	Dir *dirp = (Dir *) p;
-
 	if (!dirp)
 		return -1;
 
