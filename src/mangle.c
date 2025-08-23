@@ -23,8 +23,8 @@
 #include "util.h"
 
 static const char *reserved_devices[] = {
-    "CLOCK$", "CON",  "AUX",  "COM1", "COM2", "COM3", "COM4",
-    "LPT1",   "LPT2", "LPT3", "NUL",  "PRN",  NULL,
+    "CLOCK$", "CON",  "AUX",  "COM1", "COM2", "COM3",
+    "COM4",   "LPT1", "LPT2", "LPT3", "NUL",  "PRN",
 };
 
 /****************************************************************************
@@ -66,7 +66,7 @@ static bool is_reserved_msdos(char *fname)
 	if (p)
 		*p = '\0';
 
-	for (i = 0; reserved_devices[i] != NULL; ++i) {
+	for (i = 0; i < arrlen(reserved_devices); ++i) {
 		if (!strcasecmp(fname2, reserved_devices[i])) {
 			return true;
 		}
