@@ -237,15 +237,46 @@ static bool extract_name_len(const uint8_t *buf, size_t buf_len, size_t *result)
 	}
 }
 
-static int nmb_len(const uint8_t *buf)
+static int nmb_resource_records_len(const uint8_t *buf, size_t buf_len,
+                                    const char *name, size_t num_records)
 {
-	int i;
-	int ret = 12;
+	int i, rdlength, ret = 0;
+
+	for (i = 0; i < num_records; i++) {
+		// TODO: name_len() should check buffer length too:
+		ret += name_len((char *) buf + ret) + 8;
+		if (ret + 2 > buf_len) {
+			DEBUG("%s section overflows, #%d, %d > %d\n",
+			      i, ret + 2, (int) buf_len);
+			return -1;
+		}
+		rdlength = RSVAL(buf, ret);
+		ret += rdlength + 2;
+		if (ret > buf_len) {
+			DEBUG("%s section overflows, #%d, %d > %d\n",
+			      name, i, ret, (int) buf_len);
+			return -1;
+		}
+	}
+
+	return ret;
+}
+
+static int nmb_len(const uint8_t *buf, size_t buf_len)
+{
+	int i, ret, rr_len;
 	const uint8_t *p = buf;
-	int qdcount = RSVAL(buf, 4);
-	int ancount = RSVAL(buf, 6);
-	int nscount = RSVAL(buf, 8);
-	int arcount = RSVAL(buf, 10);
+	int qdcount, ancount, nscount, arcount;
+
+	if (buf_len < 12) {
+		DEBUG("Buffer too short, %d < 12\n", (int) buf_len);
+		return 0;
+	}
+
+	qdcount = RSVAL(buf, 4);
+	ancount = RSVAL(buf, 6);
+	nscount = RSVAL(buf, 8);
+	arcount = RSVAL(buf, 10);
 
 	/* check for insane qdcount values? */
 	if (qdcount > 100 || qdcount < 0) {
@@ -253,19 +284,37 @@ static int nmb_len(const uint8_t *buf)
 		return 0;
 	}
 
+	ret = 12;
 	for (i = 0; i < qdcount; i++) {
+		if (ret >= buf_len) {
+			DEBUG("qd name #%d overflows, %d > %d\n",
+			      i, ret, (int) buf_len);
+			return 0;
+		}
 		p = buf + ret;
 		ret += name_len((char *) p) + 4;
 	}
 
-	for (i = 0; i < (ancount + nscount + arcount); i++) {
-		int rdlength;
-		p = buf + ret;
-		ret += name_len((char *) p) + 8;
-		p = buf + ret;
-		rdlength = RSVAL(p, 0);
-		ret += rdlength + 2;
+	rr_len = nmb_resource_records_len(buf + ret, buf_len - ret,
+	                                  "answer", ancount);
+	if (rr_len < 0) {
+		return 0;
 	}
+	ret += rr_len;
+
+	rr_len = nmb_resource_records_len(buf + ret, buf_len - ret,
+	                                  "authority", nscount);
+	if (rr_len < 0) {
+		return 0;
+	}
+	ret += rr_len;
+
+	rr_len = nmb_resource_records_len(buf + ret, buf_len - ret,
+	                                  "additional", arcount);
+	if (rr_len < 0) {
+		return 0;
+	}
+	ret += rr_len;
 
 	return ret;
 }
@@ -446,7 +495,7 @@ static void reply_reg_request(const uint8_t *inbuf, size_t inbuf_len,
 		return;
 	}
 
-	send_reply(outbuf, nmb_len(outbuf));
+	send_reply(outbuf, nmb_len(outbuf, sizeof(outbuf)));
 }
 
 static void reply_name_query(const uint8_t *inbuf, size_t inbuf_len,
@@ -492,7 +541,7 @@ static void reply_name_query(const uint8_t *inbuf, size_t inbuf_len,
 	memcpy(p, &src_iface->ip, 4);
 	p += 4;
 
-	send_reply(outbuf, nmb_len(outbuf));
+	send_reply(outbuf, nmb_len(outbuf, sizeof(outbuf)));
 }
 
 static const char *rcode_description(int rcode)
@@ -568,7 +617,7 @@ static void construct_reply(const uint8_t *inbuf, size_t inbuf_len)
 		return;
 	}
 
-	if (inbuf_len < 4 || nmb_len(inbuf) <= 0) {
+	if (inbuf_len < 4 || nmb_len(inbuf, inbuf_len) <= 0) {
 		return;
 	}
 
@@ -668,7 +717,7 @@ static void send_registration(const struct network_address *addr, bool demand,
 	send_addr.sin_port = htons(137);
 	send_addr.sin_addr = addr->bcast_ip;
 
-	if (sendto(server_sock, outbuf, nmb_len(outbuf), 0,
+	if (sendto(server_sock, outbuf, nmb_len(outbuf, sizeof(outbuf)), 0,
 	           (struct sockaddr *) &send_addr, sizeof(send_addr)) < 0) {
 		ERROR("Error sending packet: %s\n", strerror(errno));
 	}
