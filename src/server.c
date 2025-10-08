@@ -2804,47 +2804,6 @@ static void process_smb(char *inbuf, char *outbuf)
 }
 
 /****************************************************************************
-send a single packet to a port on another machine
-****************************************************************************/
-static bool send_one_packet(char *buf, int len, struct in_addr ip, int port,
-                            int type)
-{
-	bool ret;
-	int out_fd;
-	struct sockaddr_in sock_out;
-
-	/* create a socket to write to */
-	out_fd = socket(AF_INET, type, 0);
-	if (out_fd == -1) {
-		ERROR("socket failed");
-		return false;
-	}
-
-	/* set the address and port */
-	bzero(&sock_out, sizeof(sock_out));
-	sock_out.sin_family = AF_INET;
-	sock_out.sin_addr = ip;
-	sock_out.sin_port = htons(port);
-
-	if (LOGLEVEL > 0)
-		DEBUG("sending a packet of len %d to (%s) on port %d of "
-		      "type %s\n",
-		      len, inet_ntoa(ip), port,
-		      type == SOCK_DGRAM ? "DGRAM" : "STREAM");
-
-	/* send it */
-	ret = sendto(out_fd, buf, len, 0, (struct sockaddr *) &sock_out,
-	             sizeof(sock_out)) >= 0;
-
-	if (!ret)
-		ERROR("Packet send to %s(%d) failed ERRNO=%s\n", inet_ntoa(ip),
-		      port, strerror(errno));
-
-	close(out_fd);
-	return ret;
-}
-
-/****************************************************************************
   process commands from the client
 ****************************************************************************/
 static void process(void)
