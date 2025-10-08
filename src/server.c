@@ -76,10 +76,6 @@ static const uint8_t smb2_protocol_id[4] = {0xfe, 'S', 'M', 'B'};
 #define DPTR_IDLE_TIMEOUT    (120)
 #define SMBD_SELECT_LOOP     (10)
 
-/* do you want smbd to send a 1 byte packet to nmbd to trigger it to start
-   when smbd starts? */
-#define PRIME_NMBD
-
 #define RUN_AS_USER    "nobody"
 #define DOSATTRIB_NAME "user.DOSATTRIB"
 
@@ -2858,16 +2854,6 @@ static void process(void)
 
 	InBuffer += SMB_ALIGNMENT;
 	OutBuffer += SMB_ALIGNMENT;
-
-#ifdef PRIME_NMBD
-	/* TODO: Needed? */
-	DEBUG("priming nmbd\n");
-	{
-		struct in_addr ip = {htonl(INADDR_LOOPBACK)};
-		*OutBuffer = 0;
-		send_one_packet(OutBuffer, 1, ip, NMB_PORT, SOCK_DGRAM);
-	}
-#endif
 
 	/* re-initialise the timezone */
 	time_init();
