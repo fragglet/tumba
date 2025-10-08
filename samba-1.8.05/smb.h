@@ -204,12 +204,18 @@ typedef char fstring[128];
 #define smb_droff  smb_vwv7
 #define smb_drdisp smb_vwv8
 
+#ifdef __GNUC__
+#define PRINTF_ATTRIBUTE(x, y) __attribute__((format(printf, x, y)))
+#else
+#define PRINTF_ATTRIBUTE(x, y)
+#endif
+
 char *skip_string(char *buf, int n);
 int set_message(char *buf, int num_words, int num_bytes, bool zero);
 void strupper(char *s);
 char *smb_buf(char *buf);
 int name_len(char *s);
-int Debug1(char *, ...);
+int Debug1(char *, ...) PRINTF_ATTRIBUTE(1, 2);
 
 #ifndef MIN
 #define MIN(a, b) ((a) < (b) ? (a) : (b))

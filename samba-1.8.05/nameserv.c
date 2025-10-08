@@ -389,7 +389,7 @@ static void reply_reg_request(const uint8_t *inbuf, size_t inbuf_len,
 
 	if (inbuf_len < 12) {
 		DEBUG("Registration request packet too short (%d < 12)\n",
-		      inbuf_len);
+		      (int) inbuf_len);
 		return;
 	}
 
@@ -424,7 +424,7 @@ static void reply_reg_request(const uint8_t *inbuf, size_t inbuf_len,
 	if (inbuf_len - offs < 16) {
 		DEBUG("Registration request too short; failed to decode "
 		      "IN record (%d + 16 >= %d)\n",
-		      offs, inbuf_len);
+		      offs, (int) inbuf_len);
 		return;
 	}
 
@@ -435,7 +435,7 @@ static void reply_reg_request(const uint8_t *inbuf, size_t inbuf_len,
 	if (RSVAL(inbuf + offs, 2) != 1 || datalen != 6) {
 		DEBUG("Registration request wrong record type/len; got "
 		      "type=%d, datalen=%d\n",
-		      RSVAL(inbuf + offs, 2), datalen);
+		      RSVAL(inbuf + offs, 2), (int) datalen);
 		return;
 	}
 
