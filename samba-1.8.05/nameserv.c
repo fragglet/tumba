@@ -894,15 +894,15 @@ static void process(void)
 	}
 }
 
-static bool open_server_sock(struct in_addr bind_addr, int port)
+static void open_server_sock(struct in_addr bind_addr, int port)
 {
 	int one = 1;
 	struct sockaddr_in bind_addr_in;
 
 	server_sock = socket(AF_INET, SOCK_DGRAM, 0);
 	if (server_sock == -1) {
-		ERROR("socket failed\n");
-		return false;
+		ERROR("failed to create socket: %s\n", strerror(errno));
+		exit(1);
 	}
 
 	if (setsockopt(server_sock, SOL_SOCKET, SO_REUSEADDR, &one,
@@ -921,14 +921,11 @@ static bool open_server_sock(struct in_addr bind_addr, int port)
 
 	if (bind(server_sock, (struct sockaddr *) &bind_addr_in,
 	         sizeof(bind_addr_in)) < 0) {
-		ERROR("bind failed on port %d\n", port);
-		close(server_sock);
-		return false;
+		ERROR("bind failed on port %d: %s\n", port, strerror(errno));
+		exit(1);
 	}
 
 	NOTICE("bind successful for %s port %d\n", inet_ntoa(bind_addr), port);
-
-	return true;
 }
 
 static void init_names(void)
@@ -1048,10 +1045,10 @@ int main(int argc, char *argv[])
 
 	init_names();
 
-	if (open_server_sock(bind_addr, port)) {
-		process();
-		close_sockets();
-	}
+	open_server_sock(bind_addr, port);
+	process();
+	close_sockets();
+
 	if (dbf)
 		fclose(dbf);
 	return 0;
