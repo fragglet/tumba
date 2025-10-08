@@ -247,7 +247,7 @@ static int nmb_resource_records_len(const uint8_t *buf, size_t buf_len,
 		ret += name_len((char *) buf + ret) + 8;
 		if (ret + 2 > buf_len) {
 			DEBUG("%s section overflows, #%d, %d > %d\n",
-			      i, ret + 2, (int) buf_len);
+			      name, i, ret + 2, (int) buf_len);
 			return -1;
 		}
 		rdlength = RSVAL(buf, ret);
