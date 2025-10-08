@@ -278,12 +278,6 @@ static int nmb_len(const uint8_t *buf, size_t buf_len)
 	nscount = RSVAL(buf, 8);
 	arcount = RSVAL(buf, 10);
 
-	/* check for insane qdcount values? */
-	if (qdcount > 100 || qdcount < 0) {
-		DEBUG("Invalid qdcount? qdcount=%d\n", qdcount);
-		return 0;
-	}
-
 	ret = 12;
 	for (i = 0; i < qdcount; i++) {
 		if (ret >= buf_len) {
