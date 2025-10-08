@@ -393,7 +393,7 @@ If the name looks like a mangled name then try via the mangling functions
 ****************************************************************************/
 static bool scan_directory(char *path, char *name, int cnum)
 {
-	void *cur_dir;
+	Dir *cur_dir;
 	char *dname;
 	bool mangled;
 	pstring name2;
@@ -1568,7 +1568,7 @@ static bool is_private_peer(void)
 		return false;
 	}
 
-	for (i = 0; i < sizeof(ranges) / sizeof(*ranges); i++) {
+	for (i = 0; i < arrlen(ranges); i++) {
 		in_addr_t mask = ~((1 << (32 - ranges[i].bits)) - 1);
 		if ((ntohl(sockin.sin_addr.s_addr) & mask) ==
 		    (ntohl(ranges[i].addr) & mask)) {
@@ -2518,19 +2518,13 @@ return a string containing the function name of a SMB command
 ****************************************************************************/
 char *smb_fn_name(int type)
 {
-	static char *unknown_name = "SMBunknown";
-	static int num_smb_messages =
-	    sizeof(smb_messages) / sizeof(struct smb_message_struct);
 	int match;
 
-	for (match = 0; match < num_smb_messages; match++)
+	for (match = 0; match < arrlen(smb_messages); match++)
 		if (smb_messages[match].code == type)
-			break;
+			return smb_messages[match].name;
 
-	if (match == num_smb_messages)
-		return unknown_name;
-
-	return smb_messages[match].name;
+	return "SMBunknown";
 }
 
 /****************************************************************************
@@ -2542,8 +2536,7 @@ static int switch_message(int type, char *inbuf, char *outbuf, int size,
 	const char *hdr;
 	static int pid = -1;
 	int outsize = 0;
-	static int num_smb_messages =
-	    sizeof(smb_messages) / sizeof(struct smb_message_struct);
+	static int num_smb_messages = arrlen(smb_messages);
 	int match;
 
 #if PROFILING

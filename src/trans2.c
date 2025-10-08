@@ -899,7 +899,7 @@ static int call_trans2findnext(char *inbuf, char *outbuf, int length,
 
 		int current_pos, start_pos;
 		char *dname = NULL;
-		void *dirptr = Connections[cnum].dirptr;
+		Dir *dirptr = Connections[cnum].dirptr;
 		start_pos = tell_dir(dirptr);
 		for (current_pos = start_pos; current_pos >= 0; current_pos--) {
 			DEBUG("seeking to pos %d\n", current_pos);

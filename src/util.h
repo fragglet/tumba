@@ -40,6 +40,7 @@
 #define REALLOC(ptr, size) checked_realloc(ptr, MAX((size), 4 * 1024))
 
 #define checked_malloc(bytes) checked_realloc(NULL, bytes)
+#define arrlen(x)             (sizeof(x) / sizeof(*(x)))
 
 struct stat;
 

@@ -13,6 +13,8 @@
 #include <stdint.h>
 #include <time.h>
 
+typedef struct dir_struct Dir;
+
 struct share;
 struct stat;
 
@@ -29,13 +31,13 @@ void dptr_closepath(char *path, int pid);
 int dptr_create(int cnum, char *path, bool expect_close, int pid);
 bool dptr_fill(char *buf1, unsigned int key);
 bool dptr_zero(char *buf);
-void *dptr_fetch(char *buf, int *num);
-void *dptr_fetch_lanman2(int dptr_num);
+Dir *dptr_fetch(char *buf, int *num);
+Dir *dptr_fetch_lanman2(int dptr_num);
 bool dir_check_ftype(int cnum, int mode, struct stat *st, int dirtype);
 bool get_dir_entry(int cnum, char *mask, int dirtype, char *fname, int *size,
                    int *mode, time_t *date);
-void *open_dir(int cnum, char *name);
-void close_dir(void *p);
-char *read_dir_name(void *p);
-bool seek_dir(void *p, int pos);
-int tell_dir(void *p);
+Dir *open_dir(int cnum, char *name);
+void close_dir(Dir *dirp);
+char *read_dir_name(Dir *dirp);
+bool seek_dir(Dir *dirp, int pos);
+int tell_dir(Dir *dirp);

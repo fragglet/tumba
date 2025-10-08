@@ -22,9 +22,10 @@
 #include "strfunc.h"
 #include "util.h"
 
-/* shall filenames with illegal chars in them get mangled in long
-   filename listings? */
-#define MANGLE_LONG_FILENAMES
+static const char *reserved_devices[] = {
+    "CLOCK$", "CON",  "AUX",  "COM1", "COM2", "COM3",
+    "COM4",   "LPT1", "LPT2", "LPT3", "NUL",  "PRN",
+};
 
 /****************************************************************************
  * Provide a checksum on a string
@@ -54,30 +55,22 @@ return true if a name is a special msdos reserved name
 ****************************************************************************/
 static bool is_reserved_msdos(char *fname)
 {
-	char upperFname[13];
+	char fname2[13];
 	char *p;
+	int i;
 
-	strlcpy(upperFname, fname, sizeof(upperFname));
+	strlcpy(fname2, fname, sizeof(fname2));
 
 	/* lpt1.txt and con.txt etc are also illegal */
-	p = strchr(upperFname, '.');
+	p = strchr(fname2, '.');
 	if (p)
 		*p = '\0';
-	strupper(upperFname);
-	if ((strcmp(upperFname, "CLOCK$") == 0) ||
-	    (strcmp(upperFname, "CON") == 0) ||
-	    (strcmp(upperFname, "AUX") == 0) ||
-	    (strcmp(upperFname, "COM1") == 0) ||
-	    (strcmp(upperFname, "COM2") == 0) ||
-	    (strcmp(upperFname, "COM3") == 0) ||
-	    (strcmp(upperFname, "COM4") == 0) ||
-	    (strcmp(upperFname, "LPT1") == 0) ||
-	    (strcmp(upperFname, "LPT2") == 0) ||
-	    (strcmp(upperFname, "LPT3") == 0) ||
-	    (strcmp(upperFname, "NUL") == 0) ||
-	    (strcmp(upperFname, "PRN") == 0))
-		return true;
 
+	for (i = 0; i < arrlen(reserved_devices); ++i) {
+		if (!strcasecmp(fname2, reserved_devices[i])) {
+			return true;
+		}
+	}
 	return false;
 }
 
@@ -269,10 +262,8 @@ convert a filename to DOS format. return true if successful.
 ****************************************************************************/
 void name_map_mangle(char *OutName, bool need83, const struct share *share)
 {
-#ifdef MANGLE_LONG_FILENAMES
 	if (!need83 && illegal_name(OutName))
 		need83 = true;
-#endif
 
 	/* check if it's already in 8.3 format */
 	if (need83 && !is_8_3(OutName, true)) {
