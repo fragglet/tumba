@@ -1982,26 +1982,8 @@ int reply_echo(char *inbuf, char *outbuf, int size, int bufsize)
 	return -1;
 }
 
-/* Reply to an SMBsplopen */
-int reply_printopen(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
-{
-	return ERROR_CODE(ERRDOS, ERRnoaccess);
-}
-
-/* Reply to an SMBsplclose */
-int reply_printclose(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
-{
-	return ERROR_CODE(ERRDOS, ERRnoaccess);
-}
-
-/* Reply to an SMBsplretq */
-int reply_printqueue(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
-{
-	return ERROR_CODE(ERRDOS, ERRnoaccess);
-}
-
-/* Reply to an SMBsplwr */
-int reply_printwrite(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
+/* Reply to an SMBsplopen, SMBsplclose, SMBsplretq or SMBsplwr */
+int reply_printfn(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 {
 	return ERROR_CODE(ERRDOS, ERRnoaccess);
 }
