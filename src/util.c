@@ -62,9 +62,6 @@ int smb_read_error = 0;
 
 static bool log_start_of_line = true;
 
-/*******************************************************************
-  get ready for syslog stuff
-  ******************************************************************/
 void setup_logging(char *pname)
 {
 	char *p = strrchr(pname, '/');
@@ -104,10 +101,7 @@ static void syslog_output(int level, char *format_str, va_list ap)
 	syslog(priority, "%s", msgbuf);
 }
 
-/*******************************************************************
-write an debug message on the debugfile. This is called by the LOG
-macro
-********************************************************************/
+/* Write an debug message on the debugfile. This is called by the LOG macro. */
 int log_output(const char *funcname, int linenum, int level, char *format_str,
                ...)
 {
@@ -161,9 +155,7 @@ int log_output(const char *funcname, int linenum, int level, char *format_str,
 	return 0;
 }
 
-/*******************************************************************
-  check if a file exists
-********************************************************************/
+/* Check if a file exists */
 bool file_exist(char *fname, struct stat *sbuf)
 {
 	struct stat st;
@@ -176,9 +168,7 @@ bool file_exist(char *fname, struct stat *sbuf)
 	return S_ISREG(sbuf->st_mode);
 }
 
-/*******************************************************************
-  check if a directory exists
-********************************************************************/
+/* Check if a directory exists */
 bool directory_exist(char *dname, struct stat *st)
 {
 	struct stat st2;
@@ -246,9 +236,7 @@ static void dump_data(char *buf1, int len)
 	}
 }
 
-/*******************************************************************
-  show a smb message structure
-********************************************************************/
+/* Show a smb message structure */
 void show_msg(char *buf)
 {
 	int i;
@@ -281,17 +269,13 @@ void show_msg(char *buf)
 	dump_data(smb_buf(buf), MIN(bcc, 512));
 }
 
-/*******************************************************************
-  return the length of an smb packet
-********************************************************************/
+/* Return the length of an smb packet */
 int smb_len(char *buf)
 {
 	return PVAL(buf, 3) | (PVAL(buf, 2) << 8) | ((PVAL(buf, 1) & 1) << 16);
 }
 
-/*******************************************************************
-  set the length of an smb packet
-********************************************************************/
+/* Set the length of an smb packet */
 void _smb_setlen(char *buf, int len)
 {
 	buf[0] = 0;
@@ -300,9 +284,7 @@ void _smb_setlen(char *buf, int len)
 	buf[3] = len & 0xFF;
 }
 
-/*******************************************************************
-  set the length and marker of an smb packet
-********************************************************************/
+/* Set the length and marker of an smb packet */
 void smb_setlen(char *buf, int len)
 {
 	_smb_setlen(buf, len);
@@ -313,9 +295,7 @@ void smb_setlen(char *buf, int len)
 	CVAL(buf, 7) = 'B';
 }
 
-/*******************************************************************
-  setup the word count and byte count for a smb message
-********************************************************************/
+/* Set up the word count and byte count for a smb message */
 int set_message(char *buf, int num_words, int num_bytes, bool zero)
 {
 	if (zero)
@@ -326,49 +306,37 @@ int set_message(char *buf, int num_words, int num_bytes, bool zero)
 	return smb_size + num_words * 2 + num_bytes;
 }
 
-/*******************************************************************
-return the number of smb words
-********************************************************************/
+/* Return the number of smb words */
 static int smb_numwords(char *buf)
 {
 	return CVAL(buf, smb_wct);
 }
 
-/*******************************************************************
-return the size of the smb_buf region of a message
-********************************************************************/
+/* Return the size of the smb_buf region of a message */
 int smb_buflen(char *buf)
 {
 	return SVAL(buf, smb_vwv0 + smb_numwords(buf) * 2);
 }
 
-/*******************************************************************
-  return a pointer to the smb_buf data area
-********************************************************************/
+/* Return a pointer to the smb_buf data area */
 static int smb_buf_ofs(char *buf)
 {
 	return smb_size + CVAL(buf, smb_wct) * 2;
 }
 
-/*******************************************************************
-  return a pointer to the smb_buf data area
-********************************************************************/
+/* Return a pointer to the smb_buf data area */
 char *smb_buf(char *buf)
 {
 	return buf + smb_buf_ofs(buf);
 }
 
-/*******************************************************************
-return the SMB offset into an SMB buffer
-********************************************************************/
+/* Return the SMB offset into an SMB buffer */
 int smb_offset(char *p, char *buf)
 {
 	return PTR_DIFF(p, buf + 4) + chain_size;
 }
 
-/*******************************************************************
-close the low 3 fd's and open dev/null in their place
-********************************************************************/
+/* Close the low 3 FDs and open dev/null in their place */
 void close_low_fds(void)
 {
 	int fd;
@@ -393,9 +361,6 @@ void close_low_fds(void)
 	}
 }
 
-/****************************************************************************
-write to a socket
-****************************************************************************/
 static int write_socket(int fd, char *buf, int len)
 {
 	int ret = 0;
@@ -412,11 +377,11 @@ static int write_socket(int fd, char *buf, int len)
 	return ret;
 }
 
-/****************************************************************************
-read data from a device with a timout in msec.
+/*
+Read data from a device with a timout in msec.
 mincount = if timeout, minimum to read before returning
 maxcount = number to be read.
-****************************************************************************/
+*/
 static int read_with_timeout(int fd, char *buf, int mincnt, int maxcnt,
                              long time_out)
 {
@@ -503,9 +468,7 @@ static int read_with_timeout(int fd, char *buf, int mincnt, int maxcnt,
 	return nread;
 }
 
-/****************************************************************************
-  read data from the client, reading exactly N bytes.
-****************************************************************************/
+/* Read data from the client, reading exactly N bytes. */
 int read_data(int fd, char *buffer, int N)
 {
 	int ret;
@@ -528,9 +491,6 @@ int read_data(int fd, char *buffer, int N)
 	return total;
 }
 
-/****************************************************************************
-  write data to a fd
-****************************************************************************/
 int write_data(int fd, char *buffer, int N)
 {
 	int total = 0;
@@ -549,12 +509,12 @@ int write_data(int fd, char *buffer, int N)
 	return total;
 }
 
-/****************************************************************************
-read 4 bytes of a smb packet and return the smb length of the packet
+/*
+Read 4 bytes of a smb packet and return the smb length of the packet
 store the result in the buffer
 This version of the function will return a length of zero on receiving
 a keepalive packet.
-****************************************************************************/
+*/
 int read_smb_length_return_keepalive(int fd, char *inbuf, int timeout)
 {
 	int len = 0, msg_type;
@@ -581,11 +541,11 @@ int read_smb_length_return_keepalive(int fd, char *inbuf, int timeout)
 	return len;
 }
 
-/****************************************************************************
-read 4 bytes of a smb packet and return the smb length of the packet
+/*
+Read 4 bytes of a smb packet and return the smb length of the packet
 store the result in the buffer. This version of the function will
 never return a session keepalive (length of zero).
-****************************************************************************/
+*/
 int read_smb_length(int fd, char *inbuf, int timeout)
 {
 	int len;
@@ -604,9 +564,6 @@ int read_smb_length(int fd, char *inbuf, int timeout)
 	return len;
 }
 
-/****************************************************************************
-  send an smb to a fd
-****************************************************************************/
 bool send_smb(int fd, char *buffer)
 {
 	int len;
@@ -626,9 +583,7 @@ bool send_smb(int fd, char *buffer)
 	return true;
 }
 
-/****************************************************************************
-checked result memory functions
-****************************************************************************/
+/* Checked result memory functions */
 void *checked_realloc(void *p, size_t bytes)
 {
 	void *result = (realloc) (p, bytes);
@@ -656,9 +611,6 @@ char *checked_strdup(const char *s)
 	return result;
 }
 
-/*******************************************************************
-block sigs
-********************************************************************/
 void block_signals(bool block, int signum)
 {
 	sigset_t set;

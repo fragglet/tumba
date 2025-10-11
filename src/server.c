@@ -138,26 +138,21 @@ static int find_free_connection(int hash);
 #define IS_DOS_DIR(test_mode)      (((test_mode) & aDIR) != 0)
 #define IS_DOS_ARCHIVE(test_mode)  (((test_mode) & aARCH) != 0)
 
-/****************************************************************************
-  when exiting, take the whole family
-****************************************************************************/
 static void *dflt_sig(void)
 {
 	exit_server("caught signal");
 	return 0; /* Keep -Wall happy :-) */
 }
 
-/****************************************************************************
-  Send a SIGTERM to our process group.
-*****************************************************************************/
+/* Send a SIGTERM to our process group. */
 static void killkids(void)
 {
 	if (am_parent)
 		kill(0, SIGTERM);
 }
 
-/****************************************************************************
-  change a dos mode to a unix mode
+/*
+  Change a dos mode to a unix mode
     base permission for files:
          everybody gets read bit set
          dos readonly is represented in unix by removing everyone's write bit
@@ -168,7 +163,7 @@ static void killkids(void)
 
   IMPORTANT NOTE: this function will not convert the s, h, or a attributes;
   they are read and written separately using {read,write}_dosattrib below.
-****************************************************************************/
+*/
 mode_t unix_mode(int cnum, int dosmode)
 {
 	mode_t result = (S_IRUSR | S_IRGRP | S_IROTH);
@@ -251,9 +246,7 @@ static void write_dosattrib(const char *path, int attrib)
 	}
 }
 
-/****************************************************************************
-  change a unix mode to a dos mode
-****************************************************************************/
+/* Change a unix mode to a dos mode */
 int dos_mode(int cnum, char *path, struct stat *sbuf)
 {
 	int result = 0;
@@ -293,9 +286,7 @@ int dos_mode(int cnum, char *path, struct stat *sbuf)
 	return result;
 }
 
-/*******************************************************************
-chmod a file - but preserve some bits
-********************************************************************/
+/* chmod a file - but preserve some bits */
 int dos_chmod(int cnum, char *fname, int dosmode, struct stat *st)
 {
 	struct stat st1;
@@ -347,9 +338,6 @@ int dos_chmod(int cnum, char *fname, int dosmode, struct stat *st)
 	return chmod(fname, unixmode);
 }
 
-/*******************************************************************
-Change a filetime
-*******************************************************************/
 bool set_filetime(int cnum, char *fname, time_t mtime)
 {
 	struct utimbuf times;
@@ -366,9 +354,7 @@ bool set_filetime(int cnum, char *fname, time_t mtime)
 	return true;
 }
 
-/****************************************************************************
-mangle the 2nd name and check if it is then equal to the first name
-****************************************************************************/
+/* Mangle the 2nd name and check if it is then equal to the first name */
 static bool mangled_equal(char *name1, char *name2)
 {
 	pstring tmpname;
@@ -382,11 +368,11 @@ static bool mangled_equal(char *name1, char *name2)
 	return strequal(name1, tmpname);
 }
 
-/****************************************************************************
-scan a directory to find a filename, matching without case sensitivity
+/*
+Scan a directory to find a filename, matching without case sensitivity
 
 If the name looks like a mangled name then try via the mangling functions
-****************************************************************************/
+*/
 static bool scan_directory(char *path, char *name, int cnum)
 {
 	Dir *cur_dir;
@@ -435,7 +421,7 @@ static bool scan_directory(char *path, char *name, int cnum)
 	return false;
 }
 
-/****************************************************************************
+/*
 This routine is called to convert names from the dos namespace to unix
 namespace. It needs to handle any case conversions, mangling, format
 changes etc.
@@ -455,7 +441,7 @@ The bad_path arg is set to true if the filename walk failed. This is
 used to pick the correct error code to return between ENOENT and ENOTDIR
 as Windows applications depend on ERRbadpath being returned if a component
 of a pathname does not exist.
-****************************************************************************/
+*/
 bool unix_convert(char *name, int cnum, pstring saved_last_component,
                   bool *bad_path)
 {
@@ -588,9 +574,7 @@ bool unix_convert(char *name, int cnum, pstring saved_last_component,
 	return true;
 }
 
-/****************************************************************************
-  return number of 1K blocks available on a path and total number
-****************************************************************************/
+/* Return number of 1K blocks available on a path and total number */
 static int disk_free(char *path, int *bsize, int *dfree, int *dsize)
 {
 	/* Don't bother. We always say it's a 1GiB disk with 512MiB free.
@@ -602,9 +586,7 @@ static int disk_free(char *path, int *bsize, int *dfree, int *dsize)
 	return 0;
 }
 
-/****************************************************************************
-wrap it to get filenames right
-****************************************************************************/
+/* Wrap it to get filenames right */
 int sys_disk_free(char *path, int *bsize, int *dfree, int *dsize)
 {
 	return disk_free(path, bsize, dfree, dsize);
@@ -668,13 +650,13 @@ static bool check_path_contained(const char *name, const char *top)
 	}
 }
 
-/****************************************************************************
-check a filename - possibly caling reducename
+/*
+Check a filename - possibly caling reducename
 
 This is called by every routine before it allows an operation on a filename.
 It does any final confirmation necessary to ensure that the filename is
 a valid one for the user to access.
-****************************************************************************/
+*/
 bool check_name(char *name, int cnum)
 {
 	const char *top = Connections[cnum].connectpath;
@@ -713,9 +695,7 @@ bool check_name(char *name, int cnum)
 	return success;
 }
 
-/****************************************************************************
-check a filename - possibly caling reducename
-****************************************************************************/
+/* Check a filename - possibly calling reducename */
 static void check_for_pipe(char *fname)
 {
 	/* special case of pipe opens */
@@ -729,9 +709,6 @@ static void check_for_pipe(char *fname)
 	}
 }
 
-/****************************************************************************
-fd support routines - attempt to do a open
-****************************************************************************/
 static int fd_attempt_open(char *fname, int flags, int mode)
 {
 	int fd = open(fname, flags, mode);
@@ -770,10 +747,8 @@ static int fd_attempt_open(char *fname, int flags, int mode)
 	return fd;
 }
 
-/****************************************************************************
-fd support routines - attempt to find an already open file by dev
-and inode - increments the ref_count of the returned struct open_fd *.
-****************************************************************************/
+/* Attempt to find an already open file by dev and inode - incrementing the
+ * ref_count of the returned struct open_fd *. */
 static struct open_fd *fd_get_already_open(struct stat *sbuf)
 {
 	int i;
@@ -797,10 +772,8 @@ static struct open_fd *fd_get_already_open(struct stat *sbuf)
 	return 0;
 }
 
-/****************************************************************************
-fd support routines - attempt to find a empty slot in the FileFd array.
-Increments the ref_count of the returned entry.
-****************************************************************************/
+/* Attempt to find a empty slot in the FileFd array. Increments the ref_count
+ * of the returned entry. */
 static struct open_fd *fd_get_new(void)
 {
 	int i;
@@ -831,10 +804,8 @@ static struct open_fd *fd_get_new(void)
 	return 0;
 }
 
-/****************************************************************************
-fd support routines - attempt to re-open an already open fd as O_RDWR.
-Save the already open fd (we cannot close due to POSIX file locking braindamage.
-****************************************************************************/
+/* Attempt to re-open an already open fd as O_RDWR. Save the already open fd
+ * (we cannot close due to POSIX file locking brain damage) */
 static void fd_attempt_reopen(char *fname, int mode, struct open_fd *fd_ptr)
 {
 	int fd = open(fname, O_RDWR, mode);
@@ -851,10 +822,8 @@ static void fd_attempt_reopen(char *fname, int mode, struct open_fd *fd_ptr)
 	fd_ptr->real_open_flags = O_RDWR;
 }
 
-/****************************************************************************
-fd support routines - attempt to close the file referenced by this fd.
-Decrements the ref_count and returns it.
-****************************************************************************/
+/* Attempt to close the file referenced by this fd. Decrements the ref_count
+ * and returns it. */
 static int fd_attempt_close(struct open_fd *fd_ptr)
 {
 	DEBUG("open_fd %d, fd = %d, dev = %x, "
@@ -881,9 +850,6 @@ static int fd_attempt_close(struct open_fd *fd_ptr)
 	return fd_ptr->ref_count;
 }
 
-/****************************************************************************
-open a file
-****************************************************************************/
 static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
                       struct stat *sbuf)
 {
@@ -1078,14 +1044,14 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 	}
 }
 
-/****************************************************************************
-close a file - possibly invalidating the read prediction
+/*
+Close a file - possibly invalidating the read prediction
 
 If normal_close is 1 then this came from a normal SMBclose (or equivalent)
 operation otherwise it came as the result of some other operation such as
 the closing of the connection. In the latter case printing and
 magic scripts are not run
-****************************************************************************/
+*/
 void close_file(int fnum, bool normal_close)
 {
 	struct open_file *fs_p = &Files[fnum];
@@ -1111,9 +1077,6 @@ void close_file(int fnum, bool normal_close)
 	memset(fs_p, 0, sizeof(*fs_p));
 }
 
-/****************************************************************************
-open a file with a share mode
-****************************************************************************/
 void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
                       int dosmode, int *Access, int *action)
 {
@@ -1241,9 +1204,6 @@ void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
 	}
 }
 
-/****************************************************************************
-seek a file. Try to avoid the seek if possible
-****************************************************************************/
 int seek_file(int fnum, uint32_t pos)
 {
 	uint32_t offset = 0;
@@ -1254,9 +1214,6 @@ int seek_file(int fnum, uint32_t pos)
 	return Files[fnum].pos;
 }
 
-/****************************************************************************
-read from a file
-****************************************************************************/
 int read_file(int fnum, char *data, uint32_t pos, int n)
 {
 	int ret = 0, readret;
@@ -1278,9 +1235,6 @@ int read_file(int fnum, char *data, uint32_t pos, int n)
 	return ret;
 }
 
-/****************************************************************************
-write to a file
-****************************************************************************/
 int write_file(int fnum, char *data, int n)
 {
 	if (!Files[fnum].can_write) {
@@ -1304,9 +1258,7 @@ int write_file(int fnum, char *data, int n)
 	return write_data(Files[fnum].fd_ptr->fd, data, n);
 }
 
-/****************************************************************************
-load parameters specific to a connection/service
-****************************************************************************/
+/* Load parameters specific to a connection/service */
 static bool become_service(int cnum)
 {
 	static int last_cnum = -1;
@@ -1333,9 +1285,7 @@ static bool become_service(int cnum)
 	return true;
 }
 
-/****************************************************************************
-  create an error packet from a cached error.
-****************************************************************************/
+/* Create an error packet from a cached error. */
 int cached_error_packet(char *inbuf, char *outbuf, int fnum, int line)
 {
 	struct bmpx_data *wbmpx = Files[fnum].wbmpx_ptr;
@@ -1363,9 +1313,7 @@ struct {
     {ENOTEMPTY, ERRDOS, ERRnoaccess}, {EXDEV, ERRDOS, ERRdiffdevice},
     {EROFS, ERRHRD, ERRnowrite},      {0, 0, 0}};
 
-/****************************************************************************
-  create an error packet from errno
-****************************************************************************/
+/* Create an error packet from errno */
 int unix_error_packet(char *inbuf, char *outbuf, int def_class,
                       uint32_t def_code, int line)
 {
@@ -1392,9 +1340,7 @@ int unix_error_packet(char *inbuf, char *outbuf, int def_class,
 	return error_packet(inbuf, outbuf, eclass, ecode, line);
 }
 
-/****************************************************************************
-  create an error packet. Normally called using the ERROR_CODE() macro
-****************************************************************************/
+/* Create an error packet. Normally called using the ERROR_CODE() macro */
 int error_packet(char *inbuf, char *outbuf, int error_class,
                  uint32_t error_code, int line)
 {
@@ -1413,9 +1359,6 @@ int error_packet(char *inbuf, char *outbuf, int error_class,
 	return outsize;
 }
 
-/****************************************************************************
-this prevents zombie child processes
-****************************************************************************/
 static int sigchld_handler(void)
 {
 	static int depth = 0;
@@ -1458,9 +1401,7 @@ static int sigchld_handler(void)
 	return 0;
 }
 
-/****************************************************************************
-  this is called when the client exits abruptly
-  **************************************************************************/
+/* This is called when the client exits abruptly */
 static int sig_pipe(void)
 {
 	block_signals(true, SIGPIPE);
@@ -1575,9 +1516,7 @@ static bool is_private_peer(void)
 	return false;
 }
 
-/*******************************************************************
- return the IP addr of the remote host connected to a socket
- ******************************************************************/
+/* Return the IP addr of the remote host connected to a socket */
 static const char *get_peer_addr(int fd)
 {
 	struct sockaddr_in sockin;
@@ -1633,9 +1572,6 @@ static void set_descriptive_argv(void)
 #endif
 }
 
-/****************************************************************************
-  open the socket communication
-****************************************************************************/
 static bool open_sockets(int port)
 {
 	struct in_addr addr;
@@ -1748,14 +1684,14 @@ static bool open_sockets(int port)
 	return true;
 }
 
-/****************************************************************************
-  read an smb from a fd. Note that the buffer *MUST* be of size
+/*
+  Read an smb from a fd. Note that the buffer *MUST* be of size
   BUFFER_SIZE+SAFETY_MARGIN.
   The timeout is in milli seconds.
 
   This function will return on a
   receipt of a session keepalive packet.
-****************************************************************************/
+*/
 static bool receive_smb(int fd, char *buffer, size_t buflen, int timeout)
 {
 	int len, ret;
@@ -1783,7 +1719,7 @@ static bool receive_smb(int fd, char *buffer, size_t buflen, int timeout)
 	return true;
 }
 
-/****************************************************************************
+/*
   Do a select on an two fd's - with timeout.
 
   If a local udp message has been pushed onto the
@@ -1802,7 +1738,7 @@ static bool receive_smb(int fd, char *buffer, size_t buflen, int timeout)
   Else returns true.
 
 The timeout is in milli seconds
-****************************************************************************/
+*/
 static bool receive_message_or_smb(int smbfd, char *buffer, int buffer_len,
                                    int timeout, bool *got_smb)
 {
@@ -1846,10 +1782,7 @@ static bool receive_message_or_smb(int smbfd, char *buffer, int buffer_len,
 	}
 }
 
-/****************************************************************************
-Get the next SMB packet, doing the local message processing automatically.
-****************************************************************************/
-
+/* Get the next SMB packet, doing the local message processing automatically. */
 bool receive_next_smb(int smbfd, char *inbuf, int bufsize, int timeout)
 {
 	bool got_smb = false;
@@ -1868,10 +1801,6 @@ bool receive_next_smb(int smbfd, char *inbuf, int bufsize, int timeout)
 
 	return ret;
 }
-
-/****************************************************************************
-this prevents zombie child processes
-****************************************************************************/
 
 static int sig_hup(void)
 {
@@ -1899,9 +1828,6 @@ static bool dir_world_writeable(const char *path)
 	return S_ISDIR(st.st_mode) && (st.st_mode & S_IWOTH) != 0;
 }
 
-/****************************************************************************
-  make a connection to a service
-****************************************************************************/
 int make_connection(char *service, char *dev)
 {
 	const struct share *share;
@@ -1990,9 +1916,7 @@ int make_connection(char *service, char *dev)
 	return cnum;
 }
 
-/****************************************************************************
-  find first available file slot
-****************************************************************************/
+/* Find first available file slot */
 int find_free_file(void)
 {
 	int i;
@@ -2034,11 +1958,9 @@ int find_free_file(void)
 	return -1;
 }
 
-/****************************************************************************
-  find first available connection slot, starting from a random position.
-The randomisation stops problems with the server dieing and clients
-thinking the server is still available.
-****************************************************************************/
+/* Find first available connection slot, starting from a random position.  The
+ * randomisation stops problems with the server dieing and clients thinking the
+ * server is still available. */
 static int find_free_connection(int hash)
 {
 	int i;
@@ -2066,9 +1988,7 @@ again:
 	return -1;
 }
 
-/****************************************************************************
-reply for the core protocol
-****************************************************************************/
+/* Reply for the core protocol */
 static int reply_corep(char *outbuf)
 {
 	int outsize = set_message(outbuf, 1, 0, true);
@@ -2078,9 +1998,7 @@ static int reply_corep(char *outbuf)
 	return outsize;
 }
 
-/****************************************************************************
-reply for the coreplus protocol
-****************************************************************************/
+/* Reply for the coreplus protocol */
 static int reply_coreplus(char *outbuf)
 {
 	int outsize = set_message(outbuf, 13, 0, true);
@@ -2095,9 +2013,7 @@ static int reply_coreplus(char *outbuf)
 	return outsize;
 }
 
-/****************************************************************************
-reply for the lanman 1.0 protocol
-****************************************************************************/
+/* Reply for the lanman 1.0 protocol */
 static int reply_lanman1(char *outbuf)
 {
 	int secword = 0;
@@ -2123,9 +2039,7 @@ static int reply_lanman1(char *outbuf)
 	return smb_len(outbuf) + 4;
 }
 
-/****************************************************************************
-reply for the lanman 2.0 protocol
-****************************************************************************/
+/* Reply for the lanman 2.0 protocol */
 static int reply_lanman2(char *outbuf)
 {
 	int secword = 0;
@@ -2150,9 +2064,7 @@ static int reply_lanman2(char *outbuf)
 	return smb_len(outbuf) + 4;
 }
 
-/****************************************************************************
-reply for the nt protocol
-****************************************************************************/
+/* Reply for the nt protocol */
 static int reply_nt1(char *outbuf)
 {
 	/* dual names + lock_and_read + nt SMBs + remote API calls */
@@ -2265,9 +2177,7 @@ struct {
     {NULL, NULL},
 };
 
-/****************************************************************************
-  reply to a negprot
-****************************************************************************/
+/* Reply to an SMBnegprot */
 static int reply_negprot(char *inbuf, char *outbuf, int size, int bufsize)
 {
 	int outsize = set_message(outbuf, 1, 0, true);
@@ -2315,9 +2225,7 @@ static int reply_negprot(char *inbuf, char *outbuf, int size, int bufsize)
 	return outsize;
 }
 
-/****************************************************************************
-close all open files for a connection
-****************************************************************************/
+/* Close all open files for a connection */
 static void close_open_files(int cnum)
 {
 	int i;
@@ -2327,9 +2235,6 @@ static void close_open_files(int cnum)
 		}
 }
 
-/****************************************************************************
-close a cnum
-****************************************************************************/
 void close_cnum(int cnum)
 {
 	if (!OPEN_CNUM(cnum)) {
@@ -2350,9 +2255,6 @@ void close_cnum(int cnum)
 	set_descriptive_argv();
 }
 
-/****************************************************************************
-exit the server
-****************************************************************************/
 void exit_server(char *reason)
 {
 	static int firsttime = 1;
@@ -2509,9 +2411,7 @@ struct smb_message_struct {
     {SMBcancelf, "SMBcancelf", NULL, 0},
     {SMBgetmac, "SMBgetmac", NULL, 0}};
 
-/****************************************************************************
-return a string containing the function name of a SMB command
-****************************************************************************/
+/* Returns a string containing the function name of a SMB command */
 char *smb_fn_name(int type)
 {
 	int match;
@@ -2523,9 +2423,7 @@ char *smb_fn_name(int type)
 	return "SMBunknown";
 }
 
-/****************************************************************************
-do a switch on the message type, and return the response size
-****************************************************************************/
+/* Do a switch on the message type, and return the response size */
 static int switch_message(int type, char *inbuf, char *outbuf, int size,
                           int bufsize)
 {
@@ -2628,9 +2526,7 @@ static int switch_message(int type, char *inbuf, char *outbuf, int size,
 	return outsize;
 }
 
-/****************************************************************************
-  construct a chained reply and add it to the already made reply
-  **************************************************************************/
+/* Construct a chained reply and add it to the already made reply */
 int chain_reply(char *inbuf, char *outbuf, int size, int bufsize)
 {
 	static char *orig_inbuf;
@@ -2724,9 +2620,7 @@ int chain_reply(char *inbuf, char *outbuf, int size, int bufsize)
 	return outsize2;
 }
 
-/****************************************************************************
-  construct a reply to the incoming packet
-****************************************************************************/
+/* Construct a reply to the incoming packet */
 static int construct_reply(char *inbuf, char *outbuf, int size, int bufsize)
 {
 	int type = CVAL(inbuf, smb_com);
@@ -2768,11 +2662,8 @@ static int construct_reply(char *inbuf, char *outbuf, int size, int bufsize)
 	return outsize;
 }
 
-/****************************************************************************
-  process an smb from the client - split out from the process() code so
-  it can be used by the oplock break code.
-****************************************************************************/
-
+/* Process an smb from the client - split out from the process() code so it can
+ * be used by the oplock break code. */
 static void process_smb(char *inbuf, char *outbuf)
 {
 	static int trans_num;
@@ -2803,9 +2694,7 @@ static void process_smb(char *inbuf, char *outbuf)
 	trans_num++;
 }
 
-/****************************************************************************
-  process commands from the client
-****************************************************************************/
+/* Process commands from the client */
 static void process(void)
 {
 	InBuffer = checked_malloc(BUFFER_SIZE + SAFETY_MARGIN);
@@ -2882,9 +2771,7 @@ static void process(void)
 	}
 }
 
-/****************************************************************************
-  initialise connect, service and file structs
-****************************************************************************/
+/* Initialise connect, service and file structs */
 static void init_structs(void)
 {
 	int i;
@@ -2917,9 +2804,6 @@ static void init_structs(void)
 	init_dptrs();
 }
 
-/****************************************************************************
-usage on the program
-****************************************************************************/
 static void usage(void)
 {
 	ERROR("Incorrect program usage - are you sure the command line is "
@@ -2942,9 +2826,6 @@ static void usage(void)
 	       "\n");
 }
 
-/****************************************************************************
-  main program
-****************************************************************************/
 int main(int argc, char *argv[])
 {
 	int port = SMB_PORT;
