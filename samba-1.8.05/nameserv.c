@@ -320,13 +320,15 @@ static void close_sockets(void)
 }
 
 /* Safe version of `strcpy()` that ensures written string is entirely inside
-   the given buffer. */
-static void strcpy_into(uint8_t *buf, size_t buf_len, void *to,
-                        const void *from)
+   the given buffer. Returns number of bytes written (including NUL). */
+static size_t strcpy_into(uint8_t *buf, size_t buf_len, void *to,
+                          const void *from)
 {
+	size_t result;
 	assert((uint8_t *) to >= buf && (uint8_t *) to <= (buf + buf_len));
 	buf_len -= ((uint8_t *) to) - buf;
-	strlcpy(to, from, buf_len);
+	result = strlcpy(to, from, buf_len) + 1;
+	return MAX(result, buf_len);
 }
 
 /* Send a packet back to the client that sent the packet we are processing */
@@ -805,8 +807,7 @@ static bool announce_host(const char *group, const struct network_address *addr)
 	SSVAL(p, smb_vwv16, 2);
 	SSVAL(p, smb_vwv17, 1);
 	p2 = (uint8_t *) smb_buf((char *) p);
-	strcpy_into(outbuf, sizeof(outbuf), p2, "\\MAILSLOT\\BROWSE");
-	p2 = (uint8_t *) skip_string((char *) p2, 1);
+	p2 += strcpy_into(outbuf, sizeof(outbuf), p2, "\\MAILSLOT\\BROWSE");
 
 	CVAL(p2, 0) = 1;                      /* host announce */
 	CVAL(p2, 1) = 5;                      /* update count */

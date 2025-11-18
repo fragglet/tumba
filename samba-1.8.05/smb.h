@@ -210,7 +210,6 @@ typedef char fstring[128];
 #define PRINTF_ATTRIBUTE(x, y)
 #endif
 
-char *skip_string(char *buf, int n);
 int set_message(char *buf, int num_words, int num_bytes, bool zero);
 void strupper(char *s);
 char *smb_buf(char *buf);

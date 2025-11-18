@@ -135,16 +135,6 @@ char *smb_buf(char *buf)
 	return buf + smb_buf_ofs(buf);
 }
 
-/*******************************************************************
-skip past some strings in a buffer
-********************************************************************/
-char *skip_string(char *buf, int n)
-{
-	while (n--)
-		buf += strlen(buf) + 1;
-	return buf;
-}
-
 /****************************************************************************
 return the total storage length of a mangled name
 ****************************************************************************/
