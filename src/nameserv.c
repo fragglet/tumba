@@ -326,7 +326,7 @@ static size_t strcpy_into(uint8_t *buf, size_t buf_len, void *to,
 	assert((uint8_t *) to >= buf && (uint8_t *) to <= (buf + buf_len));
 	buf_len -= ((uint8_t *) to) - buf;
 	result = strlcpy(to, from, buf_len) + 1;
-	return MAX(result, buf_len);
+	return MIN(result, buf_len);
 }
 
 /* Send a packet back to the client that sent the packet we are processing */
