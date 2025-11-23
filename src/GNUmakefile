@@ -7,10 +7,7 @@ DATADIR = /var/tumba
 PUBLIC_SHARE = $(DESTDIR)$(DATADIR)/public
 READONLY_SHARE = $(DESTDIR)$(DATADIR)/readonly
 
-SMBLOGFILE = /var/log/tumba_smbd.log
-
-DEFINES = -DSMBLOGFILE=\"$(SMBLOGFILE)\" \
-          -D_FORTIFY_SOURCE=1
+DEFINES = -D_FORTIFY_SOURCE=1
 
 IWYU = iwyu
 IWYU_FLAGS = --error

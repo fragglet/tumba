@@ -50,10 +50,10 @@ extern fstring local_machine;
 extern int LOGLEVEL;
 extern int Protocol;
 extern int chain_size;
-extern pstring debugf;
 extern char client_addr[32];
 
 void setup_logging(char *pname);
+void open_log_file(const char *filename);
 int log_output(const char *funcname, int linenum, int level, char *format_str,
                ...) PRINTF_ATTRIBUTE(4, 5);
 bool file_exist(char *fname, struct stat *sbuf);

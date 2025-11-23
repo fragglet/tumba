@@ -45,16 +45,14 @@ int LOGLEVEL = 1;
 
 int Protocol = PROTOCOL_COREPLUS;
 
-/* these are some file handles where debug info will be stored */
-FILE *dbf = NULL;
+/* If non-NULL, log messages will be written to this file. */
+FILE *log_file = NULL;
 
 /* the client file descriptor */
 int Client = -1;
 
 /* this is used by the chaining code */
 int chain_size = 0;
-
-pstring debugf = "";
 
 fstring local_machine = "";
 
@@ -101,25 +99,36 @@ static void syslog_output(int level, char *format_str, va_list ap)
 	syslog(priority, "%s", msgbuf);
 }
 
-/* Write an debug message on the debugfile. This is called by the LOG macro. */
+void open_log_file(const char *filename)
+{
+	if (!strcmp(filename, "-")) {
+		log_file = stdout;
+	} else {
+		int oldumask = umask(022);
+		log_file = fopen(filename, "a");
+		umask(oldumask);
+
+		// If we fail to open the log file, write the error message
+		// to stderr (rather than using the ERROR macro) so that the
+		// user gets to see the message.
+		if (log_file == NULL) {
+			fprintf(stderr, "Failed to open log file '%s': %s\n",
+			        filename, strerror(errno));
+			exit(1);
+		}
+	}
+
+	// Don't buffer log output.
+	setbuf(log_file, NULL);
+}
+
+/* Write a message to the log file. This is called by the LOG macro. */
 int log_output(const char *funcname, int linenum, int level, char *format_str,
                ...)
 {
 	va_list ap;
 	int old_errno = errno;
 	size_t n;
-
-	if (!dbf) {
-		int oldumask = umask(022);
-		dbf = fopen(debugf, "a");
-		umask(oldumask);
-		if (dbf) {
-			setbuf(dbf, NULL);
-		} else {
-			errno = old_errno;
-			return 0;
-		}
-	}
 
 	/* we do not pass debug messages to syslog */
 	if (level < 4) {
@@ -128,22 +137,26 @@ int log_output(const char *funcname, int linenum, int level, char *format_str,
 		va_end(ap);
 	}
 
+	if (log_file == NULL) {
+		return 0;
+	}
+
 	if (log_start_of_line) {
 		log_start_of_line = false;
-		fprintf(dbf, "%s ", timestring());
+		fprintf(log_file, "%s ", timestring());
 
 		if (client_addr[0] != '\0') {
-			fprintf(dbf, "[%s] ", client_addr);
+			fprintf(log_file, "[%s] ", client_addr);
 		}
 		if (funcname != NULL) {
-			fprintf(dbf, "%s (#%d): ", funcname, linenum);
+			fprintf(log_file, "%s (#%d): ", funcname, linenum);
 		}
 	}
 
 	va_start(ap, format_str);
-	vfprintf(dbf, format_str, ap);
+	vfprintf(log_file, format_str, ap);
 	va_end(ap);
-	fflush(dbf);
+	fflush(log_file);
 
 	n = strlen(format_str);
 	if (n > 0 && format_str[strlen(format_str) - 1] == '\n') {

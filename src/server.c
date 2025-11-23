@@ -2832,9 +2832,6 @@ int main(int argc, char *argv[])
 	int opt;
 
 	time_init();
-
-	pstrcpy(debugf, SMBLOGFILE);
-
 	setup_logging(argv[0]);
 
 	init_dos_char_table();
@@ -2852,7 +2849,7 @@ int main(int argc, char *argv[])
 			bind_addr = optarg;
 			break;
 		case 'l':
-			pstrcpy(debugf, optarg);
+			open_log_file(optarg);
 			break;
 		case 'd':
 			LOGLEVEL = atoi(optarg);
