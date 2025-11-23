@@ -27,14 +27,12 @@ static const char *reserved_devices[] = {
     "COM4",   "LPT1", "LPT2", "LPT3", "NUL",  "PRN",
 };
 
-/****************************************************************************
- * Provide a checksum on a string
+/* Provide a checksum on a string
  *
  *  Input:  s - the nul-terminated character string for which the checksum
  *              will be calculated.
  *  Output: The checksum value calculated for s.
- *
- ****************************************************************************/
+ */
 int str_checksum(char *s)
 {
 	int res = 0;
@@ -50,9 +48,7 @@ int str_checksum(char *s)
 	return res;
 }
 
-/****************************************************************************
-return true if a name is a special msdos reserved name
-****************************************************************************/
+/* Returns true if a name is a special msdos reserved name */
 static bool is_reserved_msdos(char *fname)
 {
 	char fname2[13];
@@ -74,9 +70,7 @@ static bool is_reserved_msdos(char *fname)
 	return false;
 }
 
-/****************************************************************************
-return true if a name is in 8.3 dos format
-****************************************************************************/
+/* Returns true if a name is in 8.3 dos format */
 bool is_8_3(char *fname, bool check_case)
 {
 	int len;
@@ -136,9 +130,7 @@ bool is_8_3(char *fname, bool check_case)
 /* this is the magic char used for mangling */
 #define MAGIC_CHAR '~'
 
-/****************************************************************************
-return true if the name could be a mangled name
-****************************************************************************/
+/* Returns true if the name could be a mangled name */
 bool is_mangled(char *s)
 {
 	char *m = strchr(s, MAGIC_CHAR);
@@ -155,18 +147,14 @@ bool is_mangled(char *s)
 	return true;
 }
 
-/****************************************************************************
-return a base 36 character. v must be from 0 to 35.
-****************************************************************************/
+/* Returns a base 36 character. v must be from 0 to 35. */
 static char base36(unsigned int v)
 {
 	static char basechars[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 	return basechars[v % 36];
 }
 
-/****************************************************************************
-do the actual mangling to 8.3 format
-****************************************************************************/
+/* Do the actual mangling to 8.3 format */
 void mangle_name_83(char *s, int s_len)
 {
 	int csum = str_checksum(s);
@@ -229,9 +217,7 @@ void mangle_name_83(char *s, int s_len)
 	DEBUG("%s\n", s);
 }
 
-/*******************************************************************
-  work out if a name is illegal, even for long names
-  ******************************************************************/
+/* Work out if a name is illegal, even for long names */
 static bool illegal_name(char *name)
 {
 	static unsigned char illegal[256];
@@ -257,9 +243,7 @@ static bool illegal_name(char *name)
 	return false;
 }
 
-/****************************************************************************
-convert a filename to DOS format. return true if successful.
-****************************************************************************/
+/* Convert a filename to DOS format. return true if successful. */
 void name_map_mangle(char *OutName, bool need83, const struct share *share)
 {
 	if (!need83 && illegal_name(OutName))

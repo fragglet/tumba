@@ -26,11 +26,6 @@
 
 struct tm;
 
-/*
-  This stuff was largely rewritten by Paul Eggert <eggert@twinsun.com>
-  in May 1996
-  */
-
 static int serverzone = 0;
 
 #ifndef CHAR_BIT
@@ -49,9 +44,7 @@ static int serverzone = 0;
 
 #define TM_YEAR_BASE 1900
 
-/*******************************************************************
-yield the difference between *A and *B, in seconds, ignoring leap seconds
-********************************************************************/
+/* Yield the difference between *A and *B, in seconds, ignoring leap seconds */
 static int tm_diff(struct tm *a, struct tm *b)
 {
 	int ay = a->tm_year + (TM_YEAR_BASE - 1);
@@ -68,9 +61,7 @@ static int tm_diff(struct tm *a, struct tm *b)
 	return seconds;
 }
 
-/*******************************************************************
-  return the UTC offset in seconds west of UTC, or 0 if it cannot be determined
-  ******************************************************************/
+/* Return UTC offset in seconds west of UTC, or 0 if it cannot be determined */
 int time_zone(time_t t)
 {
 	struct tm *tm = gmtime(&t);
@@ -84,9 +75,7 @@ int time_zone(time_t t)
 	return tm_diff(&tm_utc, tm);
 }
 
-/*******************************************************************
-init the time differences
-********************************************************************/
+/* Init the time differences */
 void time_init(void)
 {
 	serverzone = time_zone(time(NULL));
@@ -99,13 +88,13 @@ void time_init(void)
 	DEBUG("Serverzone is %d\n", serverzone);
 }
 
-/****************************************************************************
-  return the UTC offset in seconds west of UTC, adjusted for extra time
+/*
+  Return the UTC offset in seconds west of UTC, adjusted for extra time
   offset, for a local time value.  If ut = lt + loc_time_diff(lt), then
   lt = ut - time_diff(ut), but the converse does not necessarily hold near
   daylight savings transitions because some local times are ambiguous.
   loc_time_diff(t) equals time_diff(t) except near daylight savings transitions.
-  +**************************************************************************/
+ */
 static int loc_time_diff(time_t lte)
 {
 	time_t lt = lte;
@@ -124,15 +113,15 @@ static int loc_time_diff(time_t lte)
 #define TIME_FIXUP_CONSTANT                                                    \
 	(369.0 * 365.25 * 24 * 60 * 60 - (3.0 * 24 * 60 * 60 + 6.0 * 60 * 60))
 
-/****************************************************************************
-interpret an 8 byte "filetime" structure to a time_t
+/*
+Interpret an 8 byte "filetime" structure to a time_t
 It's originally in "100ns units since jan 1st 1601"
 
 It appears to be kludge-GMT (at least for file listings). This means
 its the GMT you get by taking a localtime and adding the
 serverzone. This is NOT the same as GMT in some cases. This routine
 converts this to real GMT.
-****************************************************************************/
+*/
 time_t interpret_long_date(char *p)
 {
 	double d;
@@ -168,10 +157,8 @@ time_t interpret_long_date(char *p)
 	return ret;
 }
 
-/****************************************************************************
-put a 8 byte filetime from a time_t
-This takes real GMT as input and converts to kludge-GMT
-****************************************************************************/
+/* Put a 8 byte filetime from a time_t. This takes real GMT as input and
+ * converts to kludge-GMT */
 void put_long_date(char *p, time_t t)
 {
 	uint32_t tlow, thigh;
@@ -199,9 +186,7 @@ void put_long_date(char *p, time_t t)
 	SIVAL(p, 4, thigh);
 }
 
-/****************************************************************************
-check if it's a null mtime
-****************************************************************************/
+/* Check if it's a null mtime */
 bool null_mtime(time_t mtime)
 {
 	if (mtime == 0 || mtime == 0xFFFFFFFF || mtime == (time_t) -1)
@@ -209,9 +194,7 @@ bool null_mtime(time_t mtime)
 	return false;
 }
 
-/*******************************************************************
-  create a 16 bit dos packed date
-********************************************************************/
+/* Create a 16 bit dos packed date */
 static uint16_t make_dos_date1(time_t unixdate, struct tm *t)
 {
 	uint16_t ret = 0;
@@ -221,9 +204,7 @@ static uint16_t make_dos_date1(time_t unixdate, struct tm *t)
 	return ret;
 }
 
-/*******************************************************************
-  create a 16 bit dos packed time
-********************************************************************/
+/* Create a 16 bit dos packed time */
 static uint16_t make_dos_time1(time_t unixdate, struct tm *t)
 {
 	uint16_t ret = 0;
@@ -234,10 +215,8 @@ static uint16_t make_dos_time1(time_t unixdate, struct tm *t)
 	return ret;
 }
 
-/*******************************************************************
-  create a 32 bit dos packed date/time from some parameters
-  This takes a GMT time and returns a packed localtime structure
-********************************************************************/
+/* Create a 32 bit dos packed date/time from some parameters. This takes a GMT
+ * time and returns a packed localtime structure */
 static uint32_t make_dos_date(time_t unixdate)
 {
 	struct tm *t;
@@ -253,20 +232,16 @@ static uint32_t make_dos_date(time_t unixdate)
 	return ret;
 }
 
-/*******************************************************************
-put a dos date into a buffer (time/date format)
-This takes GMT time and puts local time in the buffer
-********************************************************************/
+/* Put a dos date into a buffer (time/date format). This takes GMT time and
+ * puts local time in the buffer. */
 void put_dos_date(char *buf, int offset, time_t unixdate)
 {
 	uint32_t x = make_dos_date(unixdate);
 	SIVAL(buf, offset, x);
 }
 
-/*******************************************************************
-put a dos date into a buffer (date/time format)
-This takes GMT time and puts local time in the buffer
-********************************************************************/
+/* Put a dos date into a buffer (date/time format). This takes GMT time and
+ * puts local time in the buffer */
 void put_dos_date2(char *buf, int offset, time_t unixdate)
 {
 	uint32_t x = make_dos_date(unixdate);
@@ -274,11 +249,11 @@ void put_dos_date2(char *buf, int offset, time_t unixdate)
 	SIVAL(buf, offset, x);
 }
 
-/*******************************************************************
-put a dos 32 bit "unix like" date into a buffer. This routine takes
+/*
+Put a dos 32 bit "unix like" date into a buffer. This routine takes
 GMT and converts it to LOCAL time before putting it (most SMBs assume
 localtime for this sort of date)
-********************************************************************/
+*/
 void put_dos_date3(char *buf, int offset, time_t unixdate)
 {
 	if (!null_mtime(unixdate))
@@ -286,9 +261,7 @@ void put_dos_date3(char *buf, int offset, time_t unixdate)
 	SIVAL(buf, offset, unixdate);
 }
 
-/*******************************************************************
-  interpret a 32 bit dos packed date/time to some parameters
-********************************************************************/
+/* Interpret a 32 bit dos packed date/time to some parameters */
 static void interpret_dos_date(uint32_t date, int *year, int *month, int *day,
                                int *hour, int *minute, int *second)
 {
@@ -307,10 +280,8 @@ static void interpret_dos_date(uint32_t date, int *year, int *month, int *day,
 	*year = ((p3 >> 1) & 0xFF) + 80;
 }
 
-/*******************************************************************
-  create a unix date (int GMT) from a dos date (which is actually in
-  localtime)
-********************************************************************/
+/* Create a unix date (int GMT) from a dos date (which is actually in
+ * localtime) */
 static time_t make_unix_date(void *date_ptr)
 {
 	uint32_t dos_date = 0;
@@ -332,9 +303,7 @@ static time_t make_unix_date(void *date_ptr)
 	return ret;
 }
 
-/*******************************************************************
-like make_unix_date() but the words are reversed
-********************************************************************/
+/* Like make_unix_date() but the words are reversed */
 time_t make_unix_date2(void *date_ptr)
 {
 	uint32_t x, x2;
@@ -346,10 +315,8 @@ time_t make_unix_date2(void *date_ptr)
 	return make_unix_date(&x);
 }
 
-/*******************************************************************
-  create a unix GMT date from a dos date in 32 bit "unix like" format
-  these generally arrive as localtimes, with corresponding DST
-  ******************************************************************/
+/* Create a unix GMT date from a dos date in 32 bit "unix like" format these
+ * generally arrive as localtimes, with corresponding DST */
 time_t make_unix_date3(void *date_ptr)
 {
 	time_t t = IVAL(date_ptr, 0);
@@ -358,9 +325,7 @@ time_t make_unix_date3(void *date_ptr)
 	return t;
 }
 
-/****************************************************************************
-  return the date and time as a string
-****************************************************************************/
+/* Return the date and time as a string */
 char *timestring(void)
 {
 	static fstring time_buf;
@@ -375,11 +340,8 @@ char *timestring(void)
 	return time_buf;
 }
 
-/****************************************************************************
-  return the best approximation to a 'create time' under UNIX from a stat
-  structure.
-****************************************************************************/
-
+/* Return the best approximation to a 'create time' under UNIX from a stat
+ * structure. */
 time_t get_create_time(struct stat *st)
 {
 	time_t ret, ret1;

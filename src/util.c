@@ -45,8 +45,8 @@ int LOGLEVEL = 1;
 
 int Protocol = PROTOCOL_COREPLUS;
 
-/* these are some file handles where debug info will be stored */
-FILE *dbf = NULL;
+/* If non-NULL, log messages will be written to this file. */
+FILE *log_file = NULL;
 
 /* the client file descriptor */
 int Client = -1;
@@ -54,17 +54,12 @@ int Client = -1;
 /* this is used by the chaining code */
 int chain_size = 0;
 
-pstring debugf = "";
-
 fstring local_machine = "";
 
 int smb_read_error = 0;
-
+static bool log_time_prefix = true;
 static bool log_start_of_line = true;
 
-/*******************************************************************
-  get ready for syslog stuff
-  ******************************************************************/
 void setup_logging(char *pname)
 {
 	char *p = strrchr(pname, '/');
@@ -104,28 +99,53 @@ static void syslog_output(int level, char *format_str, va_list ap)
 	syslog(priority, "%s", msgbuf);
 }
 
-/*******************************************************************
-write an debug message on the debugfile. This is called by the LOG
-macro
-********************************************************************/
+void open_log_file(const char *filename)
+{
+	if (!strcmp(filename, "-")) {
+		// When using stdout for log messages, don't include the
+		// timestamp. This is a special case for systemd, which logs
+		// messages written to stdout with a timestamp already.
+		log_file = stdout;
+		log_time_prefix = false;
+	} else {
+		int oldumask = umask(022);
+		log_file = fopen(filename, "a");
+		umask(oldumask);
+
+		// If we fail to open the log file, write the error message
+		// to stderr (rather than using the ERROR macro) so that the
+		// user gets to see the message.
+		if (log_file == NULL) {
+			STARTUP_ERROR("Failed to open log file '%s': %s\n",
+			              filename, strerror(errno));
+		}
+
+		log_time_prefix = true;
+	}
+
+	// Don't buffer log output.
+	setbuf(log_file, NULL);
+}
+
+/* Used for errors that occur during startup. Does not return. */
+void startup_error(const char *funcname, char *format_str, ...)
+{
+	va_list ap;
+
+	va_start(ap, format_str);
+	fprintf(stderr, "[%s] ", funcname);
+	vfprintf(stderr, format_str, ap);
+	va_end(ap);
+	exit(1);
+}
+
+/* Write a message to the log file. This is called by the LOG macro. */
 int log_output(const char *funcname, int linenum, int level, char *format_str,
                ...)
 {
 	va_list ap;
 	int old_errno = errno;
 	size_t n;
-
-	if (!dbf) {
-		int oldumask = umask(022);
-		dbf = fopen(debugf, "a");
-		umask(oldumask);
-		if (dbf) {
-			setbuf(dbf, NULL);
-		} else {
-			errno = old_errno;
-			return 0;
-		}
-	}
 
 	/* we do not pass debug messages to syslog */
 	if (level < 4) {
@@ -134,22 +154,28 @@ int log_output(const char *funcname, int linenum, int level, char *format_str,
 		va_end(ap);
 	}
 
+	if (log_file == NULL) {
+		return 0;
+	}
+
 	if (log_start_of_line) {
 		log_start_of_line = false;
-		fprintf(dbf, "%s ", timestring());
+		if (log_time_prefix) {
+			fprintf(log_file, "%s ", timestring());
+		}
 
 		if (client_addr[0] != '\0') {
-			fprintf(dbf, "[%s] ", client_addr);
+			fprintf(log_file, "[%s] ", client_addr);
 		}
 		if (funcname != NULL) {
-			fprintf(dbf, "%s (#%d): ", funcname, linenum);
+			fprintf(log_file, "%s (#%d): ", funcname, linenum);
 		}
 	}
 
 	va_start(ap, format_str);
-	vfprintf(dbf, format_str, ap);
+	vfprintf(log_file, format_str, ap);
 	va_end(ap);
-	fflush(dbf);
+	fflush(log_file);
 
 	n = strlen(format_str);
 	if (n > 0 && format_str[strlen(format_str) - 1] == '\n') {
@@ -161,9 +187,7 @@ int log_output(const char *funcname, int linenum, int level, char *format_str,
 	return 0;
 }
 
-/*******************************************************************
-  check if a file exists
-********************************************************************/
+/* Check if a file exists */
 bool file_exist(char *fname, struct stat *sbuf)
 {
 	struct stat st;
@@ -176,9 +200,7 @@ bool file_exist(char *fname, struct stat *sbuf)
 	return S_ISREG(sbuf->st_mode);
 }
 
-/*******************************************************************
-  check if a directory exists
-********************************************************************/
+/* Check if a directory exists */
 bool directory_exist(char *dname, struct stat *st)
 {
 	struct stat st2;
@@ -246,9 +268,7 @@ static void dump_data(char *buf1, int len)
 	}
 }
 
-/*******************************************************************
-  show a smb message structure
-********************************************************************/
+/* Show a smb message structure */
 void show_msg(char *buf)
 {
 	int i;
@@ -281,17 +301,13 @@ void show_msg(char *buf)
 	dump_data(smb_buf(buf), MIN(bcc, 512));
 }
 
-/*******************************************************************
-  return the length of an smb packet
-********************************************************************/
+/* Return the length of an smb packet */
 int smb_len(char *buf)
 {
 	return PVAL(buf, 3) | (PVAL(buf, 2) << 8) | ((PVAL(buf, 1) & 1) << 16);
 }
 
-/*******************************************************************
-  set the length of an smb packet
-********************************************************************/
+/* Set the length of an smb packet */
 void _smb_setlen(char *buf, int len)
 {
 	buf[0] = 0;
@@ -300,9 +316,7 @@ void _smb_setlen(char *buf, int len)
 	buf[3] = len & 0xFF;
 }
 
-/*******************************************************************
-  set the length and marker of an smb packet
-********************************************************************/
+/* Set the length and marker of an smb packet */
 void smb_setlen(char *buf, int len)
 {
 	_smb_setlen(buf, len);
@@ -313,9 +327,7 @@ void smb_setlen(char *buf, int len)
 	CVAL(buf, 7) = 'B';
 }
 
-/*******************************************************************
-  setup the word count and byte count for a smb message
-********************************************************************/
+/* Set up the word count and byte count for a smb message */
 int set_message(char *buf, int num_words, int num_bytes, bool zero)
 {
 	if (zero)
@@ -326,76 +338,64 @@ int set_message(char *buf, int num_words, int num_bytes, bool zero)
 	return smb_size + num_words * 2 + num_bytes;
 }
 
-/*******************************************************************
-return the number of smb words
-********************************************************************/
+/* Return the number of smb words */
 static int smb_numwords(char *buf)
 {
 	return CVAL(buf, smb_wct);
 }
 
-/*******************************************************************
-return the size of the smb_buf region of a message
-********************************************************************/
+/* Return the size of the smb_buf region of a message */
 int smb_buflen(char *buf)
 {
 	return SVAL(buf, smb_vwv0 + smb_numwords(buf) * 2);
 }
 
-/*******************************************************************
-  return a pointer to the smb_buf data area
-********************************************************************/
+/* Return a pointer to the smb_buf data area */
 static int smb_buf_ofs(char *buf)
 {
 	return smb_size + CVAL(buf, smb_wct) * 2;
 }
 
-/*******************************************************************
-  return a pointer to the smb_buf data area
-********************************************************************/
+/* Return a pointer to the smb_buf data area */
 char *smb_buf(char *buf)
 {
 	return buf + smb_buf_ofs(buf);
 }
 
-/*******************************************************************
-return the SMB offset into an SMB buffer
-********************************************************************/
+/* Return the SMB offset into an SMB buffer */
 int smb_offset(char *p, char *buf)
 {
 	return PTR_DIFF(p, buf + 4) + chain_size;
 }
 
-/*******************************************************************
-close the low 3 fd's and open dev/null in their place
-********************************************************************/
-void close_low_fds(void)
+static void close_low_fd(int fd, int flags)
 {
-	int fd;
-	int i;
-	close(0);
-	close(1);
-	close(2);
-	/* try and use up these file descriptors, so silly
-	   library routines writing to stdout etc won't cause havoc */
-	for (i = 0; i < 3; i++) {
-		fd = open("/dev/null", O_RDWR, 0);
-		if (fd < 0)
-			fd = open("/dev/null", O_WRONLY, 0);
-		if (fd < 0) {
-			ERROR("Can't open /dev/null\n");
-			return;
-		}
-		if (fd != i) {
-			ERROR("Didn't get file descriptor %d\n", i);
-			return;
-		}
+	int new_fd;
+
+	close(fd);
+	new_fd = open("/dev/null", flags, 0);
+	if (new_fd < 0) {
+		ERROR("Failed to reopen fd %d: %s\n", fd, strerror(errno));
+		return;
+	}
+	if (new_fd != fd) {
+		ERROR("Failed to reopen fd %d; got fd=%d\n", fd, new_fd);
+		close(new_fd);
 	}
 }
 
-/****************************************************************************
-write to a socket
-****************************************************************************/
+/* Close the low 3 FDs and open /dev/null in their place */
+void close_low_fds(void)
+{
+	close_low_fd(0, 0);
+	close_low_fd(2, O_WRONLY);
+
+	// Don't close stdout if we're using it for the log file output.
+	if (log_file != stdout) {
+		close_low_fd(1, O_WRONLY);
+	}
+}
+
 static int write_socket(int fd, char *buf, int len)
 {
 	int ret = 0;
@@ -412,11 +412,11 @@ static int write_socket(int fd, char *buf, int len)
 	return ret;
 }
 
-/****************************************************************************
-read data from a device with a timout in msec.
+/*
+Read data from a device with a timout in msec.
 mincount = if timeout, minimum to read before returning
 maxcount = number to be read.
-****************************************************************************/
+*/
 static int read_with_timeout(int fd, char *buf, int mincnt, int maxcnt,
                              long time_out)
 {
@@ -503,9 +503,7 @@ static int read_with_timeout(int fd, char *buf, int mincnt, int maxcnt,
 	return nread;
 }
 
-/****************************************************************************
-  read data from the client, reading exactly N bytes.
-****************************************************************************/
+/* Read data from the client, reading exactly N bytes. */
 int read_data(int fd, char *buffer, int N)
 {
 	int ret;
@@ -528,9 +526,6 @@ int read_data(int fd, char *buffer, int N)
 	return total;
 }
 
-/****************************************************************************
-  write data to a fd
-****************************************************************************/
 int write_data(int fd, char *buffer, int N)
 {
 	int total = 0;
@@ -549,12 +544,12 @@ int write_data(int fd, char *buffer, int N)
 	return total;
 }
 
-/****************************************************************************
-read 4 bytes of a smb packet and return the smb length of the packet
+/*
+Read 4 bytes of a smb packet and return the smb length of the packet
 store the result in the buffer
 This version of the function will return a length of zero on receiving
 a keepalive packet.
-****************************************************************************/
+*/
 int read_smb_length_return_keepalive(int fd, char *inbuf, int timeout)
 {
 	int len = 0, msg_type;
@@ -581,11 +576,11 @@ int read_smb_length_return_keepalive(int fd, char *inbuf, int timeout)
 	return len;
 }
 
-/****************************************************************************
-read 4 bytes of a smb packet and return the smb length of the packet
+/*
+Read 4 bytes of a smb packet and return the smb length of the packet
 store the result in the buffer. This version of the function will
 never return a session keepalive (length of zero).
-****************************************************************************/
+*/
 int read_smb_length(int fd, char *inbuf, int timeout)
 {
 	int len;
@@ -604,9 +599,6 @@ int read_smb_length(int fd, char *inbuf, int timeout)
 	return len;
 }
 
-/****************************************************************************
-  send an smb to a fd
-****************************************************************************/
 bool send_smb(int fd, char *buffer)
 {
 	int len;
@@ -626,9 +618,7 @@ bool send_smb(int fd, char *buffer)
 	return true;
 }
 
-/****************************************************************************
-checked result memory functions
-****************************************************************************/
+/* Checked result memory functions */
 void *checked_realloc(void *p, size_t bytes)
 {
 	void *result = (realloc) (p, bytes);
@@ -656,9 +646,6 @@ char *checked_strdup(const char *s)
 	return result;
 }
 
-/*******************************************************************
-block sigs
-********************************************************************/
 void block_signals(bool block, int signum)
 {
 	sigset_t set;

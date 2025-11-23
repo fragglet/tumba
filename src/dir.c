@@ -54,9 +54,7 @@ static struct dptr_struct {
 
 static int dptrs_open = 0;
 
-/****************************************************************************
-initialise the dir array
-****************************************************************************/
+/* Initialise the dir array */
 void init_dptrs(void)
 {
 	static bool dptrs_init = false;
@@ -73,9 +71,7 @@ void init_dptrs(void)
 	dptrs_init = true;
 }
 
-/****************************************************************************
-idle a dptr - the directory is closed but the control info is kept
-****************************************************************************/
+/* Idle a dptr - the directory is closed but the control info is kept */
 static void dptr_idle(int key)
 {
 	if (dirptrs[key].valid && dirptrs[key].ptr) {
@@ -86,9 +82,6 @@ static void dptr_idle(int key)
 	}
 }
 
-/****************************************************************************
-idle the oldest dptr
-****************************************************************************/
 static void dptr_idleoldest(void)
 {
 	int i;
@@ -106,9 +99,7 @@ static void dptr_idleoldest(void)
 		ERROR("No dptrs available to idle??\n");
 }
 
-/****************************************************************************
-get the dir ptr for a dir index
-****************************************************************************/
+/* Get the dir ptr for a dir index */
 static Dir *dptr_get(int key, uint32_t lastused)
 {
 	struct dptr_struct *dp = &dirptrs[key];
@@ -128,9 +119,7 @@ static Dir *dptr_get(int key, uint32_t lastused)
 	return NULL;
 }
 
-/****************************************************************************
-get the dir path for a dir index
-****************************************************************************/
+/* Get the dir path for a dir index */
 char *dptr_path(int key)
 {
 	if (dirptrs[key].valid)
@@ -138,9 +127,7 @@ char *dptr_path(int key)
 	return NULL;
 }
 
-/****************************************************************************
-get the dir wcard for a dir index (lanman2 specific)
-****************************************************************************/
+/* Get the dir wcard for a dir index (lanman2 specific) */
 char *dptr_wcard(int key)
 {
 	if (dirptrs[key].valid)
@@ -148,10 +135,7 @@ char *dptr_wcard(int key)
 	return NULL;
 }
 
-/****************************************************************************
-set the dir wcard for a dir index (lanman2 specific)
-Returns 0 on ok, 1 on fail.
-****************************************************************************/
+/* Set the dir wcard for a dir index (lanman2 specific) */
 bool dptr_set_wcard(int key, char *wcard)
 {
 	if (dirptrs[key].valid) {
@@ -161,10 +145,7 @@ bool dptr_set_wcard(int key, char *wcard)
 	return false;
 }
 
-/****************************************************************************
-set the dir attrib for a dir index (lanman2 specific)
-Returns 0 on ok, 1 on fail.
-****************************************************************************/
+/* Set the dir attrib for a dir index (lanman2 specific) */
 bool dptr_set_attr(int key, uint16_t attr)
 {
 	if (dirptrs[key].valid) {
@@ -174,9 +155,7 @@ bool dptr_set_attr(int key, uint16_t attr)
 	return false;
 }
 
-/****************************************************************************
-get the dir attrib for a dir index (lanman2 specific)
-****************************************************************************/
+/* Get the dir attrib for a dir index (lanman2 specific) */
 uint16_t dptr_attr(int key)
 {
 	if (dirptrs[key].valid)
@@ -184,9 +163,6 @@ uint16_t dptr_attr(int key)
 	return 0;
 }
 
-/****************************************************************************
-close a dptr
-****************************************************************************/
 void dptr_close(int key)
 {
 	/* OS/2 seems to use -1 to indicate "close all directories" */
@@ -215,9 +191,7 @@ void dptr_close(int key)
 	}
 }
 
-/****************************************************************************
-close all dptrs for a cnum
-****************************************************************************/
+/* Close all dptrs for a cnum */
 void dptr_closecnum(int cnum)
 {
 	int i;
@@ -226,9 +200,7 @@ void dptr_closecnum(int cnum)
 			dptr_close(i);
 }
 
-/****************************************************************************
-idle all dptrs for a cnum
-****************************************************************************/
+/* Idle all dptrs for a cnum */
 void dptr_idlecnum(int cnum)
 {
 	int i;
@@ -238,9 +210,7 @@ void dptr_idlecnum(int cnum)
 			dptr_idle(i);
 }
 
-/****************************************************************************
-close a dptr that matches a given path, only if it matches the pid also
-****************************************************************************/
+/* Close a dptr that matches a given path, only if it matches the pid also */
 void dptr_closepath(char *path, int pid)
 {
 	int i;
@@ -250,9 +220,7 @@ void dptr_closepath(char *path, int pid)
 			dptr_close(i);
 }
 
-/****************************************************************************
-  start a directory listing
-****************************************************************************/
+/* Start a directory listing */
 static bool start_dir(int cnum, char *directory)
 {
 	DEBUG("cnum=%d dir=%s\n", cnum, directory);
@@ -273,9 +241,7 @@ static bool start_dir(int cnum, char *directory)
 	return false;
 }
 
-/****************************************************************************
-create a new dir ptr
-****************************************************************************/
+/* Create a new dir ptr */
 int dptr_create(int cnum, char *path, bool expect_close, int pid)
 {
 	int i;
@@ -346,9 +312,7 @@ int dptr_create(int cnum, char *path, bool expect_close, int pid)
 
 #define DPTR_MASK ((uint32_t) (((uint32_t) 1) << 31))
 
-/****************************************************************************
-fill the 5 byte server reserved dptr field
-****************************************************************************/
+/* Fill the 5 byte server reserved dptr field */
 bool dptr_fill(char *buf1, unsigned int key)
 {
 	unsigned char *buf = (unsigned char *) buf1;
@@ -365,17 +329,13 @@ bool dptr_fill(char *buf1, unsigned int key)
 	return true;
 }
 
-/****************************************************************************
-return true is the offset is at zero
-****************************************************************************/
+/* Return true is the offset is at zero */
 bool dptr_zero(char *buf)
 {
 	return (IVAL(buf, 1) & ~DPTR_MASK) == 0;
 }
 
-/****************************************************************************
-fetch the dir ptr and seek it given the 5 byte server field
-****************************************************************************/
+/* Fetch the dir ptr and seek it given the 5 byte server field */
 Dir *dptr_fetch(char *buf, int *num)
 {
 	unsigned int key = *(unsigned char *) buf;
@@ -393,9 +353,7 @@ Dir *dptr_fetch(char *buf, int *num)
 	return p;
 }
 
-/****************************************************************************
-fetch the dir ptr.
-****************************************************************************/
+/* Fetch the dir ptr. */
 Dir *dptr_fetch_lanman2(int dptr_num)
 {
 	Dir *p = dptr_get(dptr_num, dircounter++);
@@ -409,9 +367,7 @@ Dir *dptr_fetch_lanman2(int dptr_num)
 	return p;
 }
 
-/****************************************************************************
-check a filetype for being valid
-****************************************************************************/
+/* Check a filetype for being valid */
 bool dir_check_ftype(int cnum, int mode, struct stat *st, int dirtype)
 {
 	if (((mode & ~dirtype) & (aHIDDEN | aSYSTEM | aDIR)) != 0)
@@ -419,9 +375,6 @@ bool dir_check_ftype(int cnum, int mode, struct stat *st, int dirtype)
 	return true;
 }
 
-/****************************************************************************
-  get a directory entry
-****************************************************************************/
 bool get_dir_entry(int cnum, char *mask, int dirtype, char *fname, int *size,
                    int *mode, time_t *date)
 {
@@ -511,9 +464,6 @@ struct dir_struct {
 	char *current;
 };
 
-/*******************************************************************
-open a directory
-********************************************************************/
 Dir *open_dir(int cnum, char *name)
 {
 	Dir *dirp;
@@ -546,9 +496,6 @@ Dir *open_dir(int cnum, char *name)
 	return dirp;
 }
 
-/*******************************************************************
-close a directory
-********************************************************************/
 void close_dir(Dir *dirp)
 {
 	if (!dirp)
@@ -557,9 +504,6 @@ void close_dir(Dir *dirp)
 	free(dirp);
 }
 
-/*******************************************************************
-read from a directory
-********************************************************************/
 char *read_dir_name(Dir *dirp)
 {
 	char *ret;
@@ -574,9 +518,6 @@ char *read_dir_name(Dir *dirp)
 	return ret;
 }
 
-/*******************************************************************
-seek a dir
-********************************************************************/
 bool seek_dir(Dir *dirp, int pos)
 {
 	if (!dirp)
@@ -593,9 +534,6 @@ bool seek_dir(Dir *dirp, int pos)
 	return dirp->pos == pos;
 }
 
-/*******************************************************************
-tell a dir position
-********************************************************************/
 int tell_dir(Dir *dirp)
 {
 	if (!dirp)

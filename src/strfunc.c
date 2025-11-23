@@ -54,9 +54,6 @@ int isdoschar(int c)
 	return (valid_dos_chars[c / 8] & (1 << bit)) != 0;
 }
 
-/*******************************************************************
-  compare 2 strings
-********************************************************************/
 bool strequal(const char *s1, const char *s2)
 {
 	if (s1 == s2)
@@ -67,9 +64,6 @@ bool strequal(const char *s1, const char *s2)
 	return strcasecmp(s1, s2) == 0;
 }
 
-/*******************************************************************
-  compare 2 strings (case sensitive)
-********************************************************************/
 bool strcsequal(char *s1, char *s2)
 {
 	if (s1 == s2)
@@ -80,9 +74,6 @@ bool strcsequal(char *s1, char *s2)
 	return strcmp(s1, s2) == 0;
 }
 
-/*******************************************************************
-  convert a string to lower case
-********************************************************************/
 void strlower(char *s)
 {
 	while (*s) {
@@ -92,9 +83,6 @@ void strlower(char *s)
 	}
 }
 
-/*******************************************************************
-  convert a string to upper case
-********************************************************************/
 void strupper(char *s)
 {
 	while (*s) {
@@ -104,25 +92,18 @@ void strupper(char *s)
 	}
 }
 
-/*******************************************************************
-  convert a string to "normal" form
-********************************************************************/
+/* Convert a string to "normal" form */
 void strnorm(char *s)
 {
 	strlower(s);
 }
 
-/*******************************************************************
-check if a string is in "normal" case
-********************************************************************/
+/* Check if a string is in "normal" case */
 bool strisnormal(char *s)
 {
 	return !strhasupper(s);
 }
 
-/****************************************************************************
-  string replace
-****************************************************************************/
 static void string_replace(char *s, char oldc, char newc)
 {
 	while (*s) {
@@ -132,9 +113,7 @@ static void string_replace(char *s, char oldc, char newc)
 	}
 }
 
-/****************************************************************************
-  make a file into unix format
-****************************************************************************/
+/* Make a file into unix format */
 void unix_format(char *fname)
 {
 	pstring namecopy;
@@ -147,9 +126,7 @@ void unix_format(char *fname)
 	}
 }
 
-/*******************************************************************
-skip past some strings in a buffer
-********************************************************************/
+/* Skip past some strings in a buffer */
 char *skip_string(char *buf, int n)
 {
 	while (n--)
@@ -157,9 +134,7 @@ char *skip_string(char *buf, int n)
 	return buf;
 }
 
-/*******************************************************************
-trim the specified elements off the front and back of a string
-********************************************************************/
+/* Trim the specified elements off the front and back of a string */
 bool trim_string(char *s, char *front, char *back)
 {
 	bool ret = false;
@@ -180,9 +155,7 @@ bool trim_string(char *s, char *front, char *back)
 	return ret;
 }
 
-/*******************************************************************
-reduce a file name, removing .. elements.
-********************************************************************/
+/* Reduce a file name, removing .. elements. */
 void unix_clean_name(char *s)
 {
 	char *p = NULL;
@@ -215,9 +188,7 @@ void unix_clean_name(char *s)
 	trim_string(s, NULL, "/..");
 }
 
-/****************************************************************************
-does a string have any uppercase chars in it?
-****************************************************************************/
+/* Does a string have any uppercase chars in it? */
 bool strhasupper(char *s)
 {
 	while (*s) {
@@ -228,9 +199,7 @@ bool strhasupper(char *s)
 	return false;
 }
 
-/****************************************************************************
-interpret the weird netbios "name". Return the name type
-****************************************************************************/
+/* Interpret the weird netbios "name". Return the name type */
 static int name_interpret(char *in, char *out)
 {
 	int ret;
@@ -256,9 +225,7 @@ static int name_interpret(char *in, char *out)
 	return ret;
 }
 
-/****************************************************************************
-find a pointer to a netbios name
-****************************************************************************/
+/* Find a pointer to a netbios name */
 static char *name_ptr(char *buf, int ofs)
 {
 	unsigned char c = *(unsigned char *) (buf + ofs);
@@ -275,9 +242,7 @@ static char *name_ptr(char *buf, int ofs)
 		return buf + ofs;
 }
 
-/****************************************************************************
-extract a netbios name from a buf
-****************************************************************************/
+/* Extract a netbios name from a buf */
 int name_extract(char *buf, int ofs, char *name)
 {
 	char *p = name_ptr(buf, ofs);
@@ -288,9 +253,7 @@ int name_extract(char *buf, int ofs, char *name)
 	return name_interpret(p, name);
 }
 
-/****************************************************************************
-return the total storage length of a mangled name
-****************************************************************************/
+/* Return the total storage length of a mangled name */
 int name_len(char *s)
 {
 	int len;
@@ -310,9 +273,7 @@ int name_len(char *s)
 /* this is used to prevent lots of mallocs of size 1 */
 static char *null_string = NULL;
 
-/****************************************************************************
-set a string value, allocing the space for the string
-****************************************************************************/
+/* Set a string value, allocing the space for the string */
 bool string_init(char **dest, char *src)
 {
 	int l;
@@ -335,9 +296,6 @@ bool string_init(char **dest, char *src)
 	return true;
 }
 
-/****************************************************************************
-free a string value
-****************************************************************************/
 void string_free(char **s)
 {
 	if (!s || !*s)
@@ -348,10 +306,8 @@ void string_free(char **s)
 	*s = NULL;
 }
 
-/****************************************************************************
-set a string value, allocing the space for the string, and deallocating any
-existing space
-****************************************************************************/
+/* Set a string value, allocing the space for the string, and deallocating any
+ * existing space */
 bool string_set(char **dest, char *src)
 {
 	string_free(dest);
@@ -359,15 +315,15 @@ bool string_set(char **dest, char *src)
 	return string_init(dest, src);
 }
 
-/****************************************************************************
-substitute a string for a pattern in another string. Make sure there is
+/*
+Substitute a string for a pattern in another string. Make sure there is
 enough room!
 
 This routine looks for pattern in s and replaces it with
 insert. It may do multiple replacements.
 
 return true if a substitution was done.
-****************************************************************************/
+*/
 bool string_sub(char *s, char *pattern, char *insert)
 {
 	bool ret = false;
@@ -394,12 +350,8 @@ bool string_sub(char *s, char *pattern, char *insert)
 	return ret;
 }
 
-/*********************************************************
- * Recursive routine that is called by mask_match.
- * Does the actual matching. Returns true if matched,
- * false if failed.
- *********************************************************/
-
+/* Recursive routine that is called by mask_match. Does the actual matching.
+ * Returns true if matched, false if failed. */
 static bool do_match(char *str, char *regexp)
 {
 	char *p;
@@ -468,9 +420,7 @@ static bool do_match(char *str, char *regexp)
 	return false;
 }
 
-/****************************************************************************
-find the number of chars in a string
-****************************************************************************/
+/* Find the number of chars in a string */
 static int count_chars(char *s, char c)
 {
 	int count = 0;
@@ -483,13 +433,12 @@ static int count_chars(char *s, char c)
 	return count;
 }
 
-/*********************************************************
+/*
  * Routine to match a given string with a regexp - uses
  * simplified regexp that takes * and ? only. Case can be
  * significant or not.
  * The 8.3 handling was rewritten by Ums Harald <Harald.Ums@pro-sieben.de>
- *********************************************************/
-
+ */
 bool mask_match(char *str, char *regexp, bool trans2)
 {
 	char *p;
@@ -700,9 +649,7 @@ bool mask_match(char *str, char *regexp, bool trans2)
 	return matched;
 }
 
-/*******************************************************************
-write a string in unicoode format
-********************************************************************/
+/* Write a string in unicoode format */
 int put_unicode(char *dst, char *src)
 {
 	int ret = 0;
@@ -716,10 +663,8 @@ int put_unicode(char *dst, char *src)
 	return ret;
 }
 
-/*******************************************************************
-safe string copy into a known length string
-dest_size is the size of the destination buffer
-********************************************************************/
+/* Safe string copy into a known length string. dest_size is the size of the
+ * destination buffer */
 char *safe_strcpy(char *dest, const char *src, int dest_size)
 {
 	size_t len;
@@ -738,10 +683,8 @@ char *safe_strcpy(char *dest, const char *src, int dest_size)
 	return dest;
 }
 
-/*******************************************************************
-safe string cat into a string
-dest_size is the size of the destination buffer
-********************************************************************/
+/* Safe string cat into a string. dest_size is the size of the destination
+ * buffer */
 char *safe_strcat(char *dest, const char *src, int dest_size)
 {
 	size_t len;

@@ -65,17 +65,12 @@ static int copy_and_advance(char **dst, char *src, int *n)
 	return l;
 }
 
-/*******************************************************************
-  check a API string for validity when we only need to check the prefix
-  ******************************************************************/
+/* Check a API string for validity when we only need to check the prefix */
 static bool prefix_ok(char *str, char *prefix)
 {
 	return strncmp(str, prefix, strlen(prefix)) == 0;
 }
 
-/****************************************************************************
-  send a trans reply
-  ****************************************************************************/
 static void send_trans_reply(char *outbuf, char *data, char *param,
                              uint16_t *setup, int ldata, int lparam, int lsetup)
 {
@@ -151,9 +146,7 @@ static void send_trans_reply(char *outbuf, char *data, char *param,
 	}
 }
 
-/****************************************************************************
-  get info level for a server list query
-  ****************************************************************************/
+/* Get info level for a server list query */
 static bool check_server_info(int uLevel, char *id)
 {
 	switch (uLevel) {
@@ -171,9 +164,7 @@ static bool check_server_info(int uLevel, char *id)
 	return true;
 }
 
-/****************************************************************************
-  view list of servers available (or possibly domains).
-  ****************************************************************************/
+/* View list of servers available (or possibly domains). */
 static bool api_RNetServerEnum(int cnum, char *param, char *data, int mdrcnt,
                                int mprcnt, char **rdata, char **rparam,
                                int *rdata_len, int *rparam_len)
@@ -201,9 +192,7 @@ static bool api_RNetServerEnum(int cnum, char *param, char *data, int mdrcnt,
 	return true;
 }
 
-/****************************************************************************
-  get info about a share
-  ****************************************************************************/
+/* Get info about a share */
 static bool check_share_info(int uLevel, char *id)
 {
 	switch (uLevel) {
@@ -367,9 +356,7 @@ static bool api_RNetShareGetInfo(int cnum, char *param, char *data, int mdrcnt,
 	return true;
 }
 
-/****************************************************************************
-  view list of shares available
-  ****************************************************************************/
+/* View list of shares available */
 static bool api_RNetShareEnum(int cnum, char *param, char *data, int mdrcnt,
                               int mprcnt, char **rdata, char **rparam,
                               int *rdata_len, int *rparam_len)
@@ -432,9 +419,7 @@ static bool api_RNetShareEnum(int cnum, char *param, char *data, int mdrcnt,
 	return true;
 }
 
-/****************************************************************************
-  get the time of day info
-  ****************************************************************************/
+/* Get the time of day info */
 static bool api_NetRemoteTOD(int cnum, char *param, char *data, int mdrcnt,
                              int mprcnt, char **rdata, char **rparam,
                              int *rdata_len, int *rparam_len)
@@ -478,9 +463,7 @@ static bool api_NetRemoteTOD(int cnum, char *param, char *data, int mdrcnt,
 	return true;
 }
 
-/****************************************************************************
-  get info about the server
-  ****************************************************************************/
+/* Get info about the server */
 static bool api_RNetServerGetInfo(int cnum, char *param, char *data, int mdrcnt,
                                   int mprcnt, char **rdata, char **rparam,
                                   int *rdata_len, int *rparam_len)
@@ -580,9 +563,7 @@ static bool api_RNetServerGetInfo(int cnum, char *param, char *data, int mdrcnt,
 	return true;
 }
 
-/****************************************************************************
-  get info about the server
-  ****************************************************************************/
+/* Get info about the server */
 static bool api_NetWkstaGetInfo(int cnum, char *param, char *data, int mdrcnt,
                                 int mprcnt, char **rdata, char **rparam,
                                 int *rdata_len, int *rparam_len)
@@ -649,9 +630,7 @@ static bool api_NetWkstaGetInfo(int cnum, char *param, char *data, int mdrcnt,
 	return true;
 }
 
-/****************************************************************************
-  the buffer was too small
-  ****************************************************************************/
+/* The buffer was too small */
 static bool api_TooSmall(int cnum, char *param, char *data, int mdrcnt,
                          int mprcnt, char **rdata, char **rparam,
                          int *rdata_len, int *rparam_len)
@@ -668,9 +647,7 @@ static bool api_TooSmall(int cnum, char *param, char *data, int mdrcnt,
 	return true;
 }
 
-/****************************************************************************
-  the request is not supported
-  ****************************************************************************/
+/* The request is not supported */
 static bool api_Unsupported(int cnum, char *param, char *data, int mdrcnt,
                             int mprcnt, char **rdata, char **rparam,
                             int *rdata_len, int *rparam_len)
@@ -702,9 +679,7 @@ struct {
                     {"NetServerEnum", 104, api_RNetServerEnum, 0},
                     {NULL, -1, api_Unsupported, 0}};
 
-/****************************************************************************
-  handle remote api calls
-  ****************************************************************************/
+/* Handle remote api calls */
 static int api_reply(int cnum, char *outbuf, char *data, char *params,
                      int tdscnt, int tpscnt, int mdrcnt, int mprcnt)
 {
@@ -754,9 +729,7 @@ static int api_reply(int cnum, char *outbuf, char *data, char *params,
 	return -1;
 }
 
-/****************************************************************************
-  handle named pipe commands
-  ****************************************************************************/
+/* Handle named pipe commands */
 static int named_pipe(int cnum, char *outbuf, char *name, uint16_t *setup,
                       char *data, char *params, int suwcnt, int tdscnt,
                       int tpscnt, int msrcnt, int mdrcnt, int mprcnt)
@@ -775,9 +748,7 @@ static int named_pipe(int cnum, char *outbuf, char *name, uint16_t *setup,
 	return 0;
 }
 
-/****************************************************************************
-  reply to a SMBtrans
-  ****************************************************************************/
+/* Reply to a SMBtrans */
 int reply_trans(char *inbuf, char *outbuf, int size, int bufsize)
 {
 	fstring name;

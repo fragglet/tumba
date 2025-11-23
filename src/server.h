@@ -13,9 +13,13 @@
 #include <stdint.h>
 #include <sys/stat.h>
 #include <sys/time.h>
+#include <sys/types.h>
 #include <time.h>
 
 #include "strfunc.h"
+
+struct service_connection;
+struct stat;
 
 #define NMB_PORT   137
 #define DGRAM_PORT 138

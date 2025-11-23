@@ -97,11 +97,7 @@ static bool fcntl_lock(int fd, int op, uint32_t offset, uint32_t count,
 	return true;
 }
 
-/****************************************************************************
- Utility function to map a lock type correctly depending on the real open
- mode of a file.
-****************************************************************************/
-
+/* Map a lock type depending on the real open mode of a file. */
 static int map_lock_type(struct open_file *fsp, int lock_type)
 {
 	if (lock_type == F_WRLCK && fsp->fd_ptr->real_open_flags == O_RDONLY) {
@@ -131,10 +127,7 @@ static int map_lock_type(struct open_file *fsp, int lock_type)
 	return lock_type;
 }
 
-/****************************************************************************
- Utility function called by locking requests.
-****************************************************************************/
-
+/* Utility function called by locking requests. */
 bool do_lock(int fnum, int cnum, uint32_t count, uint32_t offset, int lock_type,
              int *eclass, uint32_t *ecode)
 {
@@ -159,10 +152,7 @@ bool do_lock(int fnum, int cnum, uint32_t count, uint32_t offset, int lock_type,
 	return true; /* Got lock */
 }
 
-/****************************************************************************
- Utility function called by unlocking requests.
-****************************************************************************/
-
+/* Utility function called by unlocking requests. */
 bool do_unlock(int fnum, int cnum, uint32_t count, uint32_t offset, int *eclass,
                uint32_t *ecode)
 {

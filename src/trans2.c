@@ -46,12 +46,12 @@
 
 #define DIR_ENTRY_SAFETY_MARGIN 4096
 
-/****************************************************************************
+/*
   Send the required number of replies back.
   We assume all fields other than the data fields are
   set correctly for the type of call.
   HACK ! Always assumes smb_setup field is zero.
-****************************************************************************/
+*/
 static int send_trans2_replies(char *outbuf, int bufsize, char *params,
                                int paramsize, char *pdata, int datasize)
 {
@@ -190,9 +190,7 @@ static int send_trans2_replies(char *outbuf, int bufsize, char *params,
 	return 0;
 }
 
-/****************************************************************************
-  reply to a TRANSACT2_OPEN
-****************************************************************************/
+/* Reply to a TRANSACT2_OPEN */
 static int call_trans2open(char *inbuf, char *outbuf, int bufsize, int cnum,
                            char **pparams, char **ppdata)
 {
@@ -278,9 +276,7 @@ static int call_trans2open(char *inbuf, char *outbuf, int bufsize, int cnum,
 	return -1;
 }
 
-/****************************************************************************
-  get a level dependent lanman2 dir entry.
-****************************************************************************/
+/* Get a level dependent lanman2 dir entry. */
 static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
                                  int info_level, int requires_resume_key,
                                  char **ppdata, char *base_data,
@@ -496,7 +492,7 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 		strupper(p + 2);
 		SSVAL(p, 0, strlen(p + 2));
 		p += 2 + 24;
-		/* nameptr = p;  */
+		/* nameptr = p; */
 		pstrcpy(p, fname);
 		p = pdata + len;
 		break;
@@ -589,15 +585,10 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 	return found;
 }
 
-/****************************************************************************
- Convert the directory masks formated for the wire.
-****************************************************************************/
-
+/* Convert the directory masks formated for the wire. */
 void mask_convert(char *mask)
 {
-	/*
-	 * We know mask is a pstring.
-	 */
+	/* We know mask is a pstring. */
 	char *p = mask;
 	while (*p) {
 		if (*p == '<') {
@@ -619,9 +610,7 @@ void mask_convert(char *mask)
 	}
 }
 
-/****************************************************************************
-  reply to a TRANS2_FINDFIRST
-****************************************************************************/
+/* Reply to a TRANS2_FINDFIRST */
 static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
                                 int cnum, char **pparams, char **ppdata)
 {
@@ -787,9 +776,7 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 	return -1;
 }
 
-/****************************************************************************
-  reply to a TRANS2_FINDNEXT
-****************************************************************************/
+/* Reply to a TRANS2_FINDNEXT */
 static int call_trans2findnext(char *inbuf, char *outbuf, int length,
                                int bufsize, int cnum, char **pparams,
                                char **ppdata)
@@ -1004,9 +991,7 @@ static int call_trans2findnext(char *inbuf, char *outbuf, int length,
 	return -1;
 }
 
-/****************************************************************************
-  reply to a TRANS2_QFSINFO (query filesystem info)
-****************************************************************************/
+/* Reply to a TRANS2_QFSINFO (query filesystem info) */
 static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
                               int bufsize, int cnum, char **pparams,
                               char **ppdata)
@@ -1115,9 +1100,7 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
 	return -1;
 }
 
-/****************************************************************************
-  reply to a TRANS2_SETFSINFO (set filesystem info)
-****************************************************************************/
+/* Reply to a TRANS2_SETFSINFO (set filesystem info) */
 static int call_trans2setfsinfo(char *inbuf, char *outbuf, int length,
                                 int bufsize, int cnum, char **pparams,
                                 char **ppdata)
@@ -1134,9 +1117,7 @@ static int call_trans2setfsinfo(char *inbuf, char *outbuf, int length,
 	return outsize;
 }
 
-/****************************************************************************
-  reply to a TRANS2_QFILEINFO (query file info by fileid)
-****************************************************************************/
+/* Reply to a TRANS2_QFILEINFO (query file info by fileid) */
 static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
                                     int bufsize, int cnum, char **pparams,
                                     char **ppdata, int total_data)
@@ -1361,9 +1342,7 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
 	return -1;
 }
 
-/****************************************************************************
-  reply to a TRANS2_SETFILEINFO (set file info by fileid)
-****************************************************************************/
+/* Reply to a TRANS2_SETFILEINFO (set file info by fileid) */
 static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
                                       int bufsize, int cnum, char **pparams,
                                       char **ppdata, int total_data)
@@ -1553,9 +1532,7 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 	return -1;
 }
 
-/****************************************************************************
-  reply to a TRANS2_MKDIR (make directory with extended attributes).
-****************************************************************************/
+/* Reply to a TRANS2_MKDIR (make directory with extended attributes). */
 static int call_trans2mkdir(char *inbuf, char *outbuf, int length, int bufsize,
                             int cnum, char **pparams, char **ppdata)
 {
@@ -1593,10 +1570,8 @@ static int call_trans2mkdir(char *inbuf, char *outbuf, int length, int bufsize,
 	return -1;
 }
 
-/****************************************************************************
-  reply to a TRANS2_FINDNOTIFYFIRST (start monitoring a directory for changes)
-  We don't actually do this - we just send a null response.
-****************************************************************************/
+/* Reply to a TRANS2_FINDNOTIFYFIRST (start monitoring a directory for
+ * changes). We don't actually do this - we just send a null response. */
 static int call_trans2findnotifyfirst(char *inbuf, char *outbuf, int length,
                                       int bufsize, int cnum, char **pparams,
                                       char **ppdata)
@@ -1631,10 +1606,8 @@ static int call_trans2findnotifyfirst(char *inbuf, char *outbuf, int length,
 	return -1;
 }
 
-/****************************************************************************
-  reply to a TRANS2_FINDNOTIFYNEXT (continue monitoring a directory for
-  changes). Currently this does nothing.
-****************************************************************************/
+/* Reply to a TRANS2_FINDNOTIFYNEXT (continue monitoring a directory for
+ * changes). Currently this does nothing. */
 static int call_trans2findnotifynext(char *inbuf, char *outbuf, int length,
                                      int bufsize, int cnum, char **pparams,
                                      char **ppdata)
@@ -1651,9 +1624,7 @@ static int call_trans2findnotifynext(char *inbuf, char *outbuf, int length,
 	return -1;
 }
 
-/****************************************************************************
-  reply to a SMBfindclose (stop trans2 directory search)
-****************************************************************************/
+/* Reply to a SMBfindclose (stop trans2 directory search) */
 int reply_findclose(char *inbuf, char *outbuf, int length, int bufsize)
 {
 	int cnum;
@@ -1673,9 +1644,7 @@ int reply_findclose(char *inbuf, char *outbuf, int length, int bufsize)
 	return outsize;
 }
 
-/****************************************************************************
-  reply to a SMBfindnclose (stop FINDNOTIFYFIRST directory search)
-****************************************************************************/
+/* Reply to a SMBfindnclose (stop FINDNOTIFYFIRST directory search) */
 int reply_findnclose(char *inbuf, char *outbuf, int length, int bufsize)
 {
 	int cnum;
@@ -1698,18 +1667,14 @@ int reply_findnclose(char *inbuf, char *outbuf, int length, int bufsize)
 	return outsize;
 }
 
-/****************************************************************************
-  reply to a SMBtranss2 - just ignore it!
-****************************************************************************/
+/* Reply to a SMBtranss2 - just ignore it! */
 int reply_transs2(char *inbuf, char *outbuf, int length, int bufsize)
 {
 	DEBUG("Ignoring transs2 of length %d\n", length);
 	return -1;
 }
 
-/****************************************************************************
-  reply to a SMBtrans2
-****************************************************************************/
+/* Reply to a SMBtrans2 */
 int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize)
 {
 	int outsize = 0;
