@@ -10,7 +10,7 @@ READONLY_SHARE = $(DESTDIR)$(DATADIR)/readonly
 DEFINES = -D_FORTIFY_SOURCE=1
 
 IWYU = iwyu
-IWYU_FLAGS = --error
+IWYU_FLAGS = --error --mapping_file=.iwyu-overrides.imp
 IWYU_TRANSFORMED_FLAGS = $(patsubst %,-Xiwyu %,$(IWYU_FLAGS))
 
 CFLAGS = -O2 -MMD -Wall $(DEFINES)

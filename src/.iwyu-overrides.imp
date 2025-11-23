@@ -1,0 +1,4 @@
+[
+# Override for bugs at time of writing (0.23):
+{ symbol: [ "HOST_NAME_MAX", private, "<limits.h>", public ] },
+]
