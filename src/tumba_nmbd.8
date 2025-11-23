@@ -34,8 +34,9 @@ Change the logging level. Values here are: 0 (error); 1 (warning); 2 (notice);
 Specify the hostname to announce. If not specified, the system hostname (ie.
 the output of the \fBhostname\fR(1) command) is used.
 .TP
-\fB-l logfile\fR
-Specify path to a log file to write log messages.
+\fB-l filename\fR
+Specify path to a log file to write log messages. If '-' is given as the
+filename, log messages are written to stdout with no timestamp prefixed.
 .TP
 \fB-p port\fR
 Listen on the given UDP port. By default, \fBTumba\fR listens on port 137, the
