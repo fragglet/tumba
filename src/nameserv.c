@@ -752,7 +752,7 @@ static void try_name_registration(void)
 	if (num_registration_attempts >= BCAST_REQ_RETRY_COUNT) {
 		/* success; nobody has objected */
 		registered_name = true;
-		NOTICE("Successfully registered netbios hostname %s\n", myname);
+		NOTICE("Successfully registered NetBIOS hostname %s\n", myname);
 		/* send a name overwrite demand this time */
 		send_all_registrations(true, last_reg_trn_id);
 		return;
@@ -971,7 +971,7 @@ static void init_names(void)
 	strupper(myname);
 	strupper(mygroup);
 
-	NOTICE("Hostname: %s; Workgroup: %s\n", myname, mygroup);
+	INFO("Hostname: %s; Workgroup: %s\n", myname, mygroup);
 
 	/* Something pseudo-random for the registration transaction IDs */
 	last_reg_trn_id = getpid();
