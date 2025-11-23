@@ -91,6 +91,9 @@ static char *last_inbuf = NULL;
 
 static int am_parent = 1;
 
+/* the socket number of the listening TCP server. */
+static int server_socket;
+
 /* the last message the was processed */
 static int last_message = -1;
 
@@ -1451,33 +1454,6 @@ static void drop_privileges(void)
 	}
 }
 
-static int open_server_socket(int type, int port, in_addr_t socket_addr)
-{
-	struct sockaddr_in sock;
-	int one = 1;
-	int res;
-
-	res = socket(AF_INET, SOCK_STREAM, 0);
-	if (res == -1) {
-		STARTUP_ERROR("socket failed: %s\n", strerror(errno));
-	}
-
-	setsockopt(res, SOL_SOCKET, SO_REUSEADDR, (char *) &one, sizeof(one));
-
-	sock.sin_family = AF_INET;
-	sock.sin_port = htons(port);
-	sock.sin_addr.s_addr = socket_addr;
-
-	/* now we've got a socket - we need to bind it */
-	if (bind(res, (struct sockaddr *) &sock, sizeof(sock)) < 0) {
-		STARTUP_ERROR("bind failed on port %d socket_addr=%s (%s)\n",
-		              port, inet_ntoa(sock.sin_addr), strerror(errno));
-	}
-	INFO("bind succeeded on port %d\n", port);
-
-	return res;
-}
-
 /* is_private_peer checks if the connecting client comes either from a
  * localhost address or from one of the RFC 1918 private ranges. */
 static bool is_private_peer(void)
@@ -1569,8 +1545,9 @@ static void set_descriptive_argv(void)
 
 static void open_sockets(int port)
 {
+	struct sockaddr_in sock;
 	struct in_addr addr;
-	int server_socket;
+	int one = 1;
 
 	/* Stop zombies */
 	signal(SIGCHLD, SIGNAL_CAST sigchld_handler);
@@ -1582,26 +1559,44 @@ static void open_sockets(int port)
 		STARTUP_ERROR("failed to parse bind address %s\n", bind_addr);
 	}
 
-	/* open_server_socket only returns if it succeeds: */
-	server_socket = open_server_socket(SOCK_STREAM, port, addr.s_addr);
+	server_socket = socket(AF_INET, SOCK_STREAM, 0);
+	if (server_socket == -1) {
+		STARTUP_ERROR("socket failed: %s\n", strerror(errno));
+	}
 
-	drop_privileges();
+	setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, (char *) &one,
+	           sizeof(one));
+
+	sock.sin_family = AF_INET;
+	sock.sin_port = htons(port);
+	sock.sin_addr = addr;
+
+	/* now we've got a socket - we need to bind it */
+	if (bind(server_socket, (struct sockaddr *) &sock, sizeof(sock)) < 0) {
+		STARTUP_ERROR("bind failed on port %d socket_addr=%s (%s)\n",
+		              port, inet_ntoa(sock.sin_addr), strerror(errno));
+	}
+	INFO("bind succeeded on port %d\n", port);
+}
+
+/* await_connection loops forever, accepting new connections and returning
+   only in a child process that has forked. */
+static void await_connection(void)
+{
+	const char *peer_addr;
+	fd_set listen_set;
+	int num;
+	struct sockaddr addr;
+	socklen_t in_addrlen = sizeof(addr);
 
 	/* ready to listen */
 	if (listen(server_socket, 5) == -1) {
 		STARTUP_ERROR("listen failed: %s\n", strerror(errno));
 	}
 
-	/* now accept incoming connections - forking a new process
-	   for each incoming connection */
 	DEBUG("waiting for a connection\n");
 	while (1) {
-		const char *peer_addr;
-		fd_set listen_set;
-		int num;
-		struct sockaddr addr;
-		socklen_t in_addrlen = sizeof(addr);
-
+		in_addrlen = sizeof(addr);
 		FD_ZERO(&listen_set);
 		FD_SET(server_socket, &listen_set);
 
@@ -1621,7 +1616,8 @@ static void open_sockets(int port)
 			continue;
 
 		if (Client == -1) {
-			ERROR("open_sockets: accept: %s\n", strerror(errno));
+			ERROR("error accepting connection: %s\n",
+			      strerror(errno));
 			continue;
 		}
 
@@ -1633,16 +1629,15 @@ static void open_sockets(int port)
 		   connections from local peers on the same private IP range. */
 		if (!is_private_peer()) {
 			if (!allow_public_connections) {
-				ERROR("open_sockets: rejecting connection from "
-				      "public IP address %s\n",
+				ERROR("rejecting connection from public IP"
+				      "address %s\n",
 				      peer_addr);
 				close(Client);
 				Client = -1;
 				continue;
 			}
 			/* even if allowed, log a warning */
-			ERROR("open_sockets: warning: connection from "
-			      "public IP address %s\n",
+			ERROR("warning: connection from public IP address %s\n",
 			      peer_addr);
 		}
 
@@ -2884,7 +2879,7 @@ int main(int argc, char *argv[])
 
 	open_sockets(port);
 	drop_privileges();
-
+	await_connection();
 	process();
 
 	exit_server("normal exit");
