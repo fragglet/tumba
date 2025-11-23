@@ -15,10 +15,10 @@
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <pwd.h>
 #include <signal.h>
 #include <stdarg.h>
 #include <stdbool.h>
-#include <pwd.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -38,7 +38,7 @@
 #include "timefunc.h"
 
 /* User to run as, after dropping privileges */
-#define RUN_AS_USER    "nobody"
+#define RUN_AS_USER "nobody"
 
 /* To which file do our syslog messages go? */
 #define SYSLOG_FACILITY LOG_DAEMON
