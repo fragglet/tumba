@@ -901,8 +901,7 @@ static void open_server_sock(struct in_addr bind_addr, int port)
 
 	server_sock = socket(AF_INET, SOCK_DGRAM, 0);
 	if (server_sock == -1) {
-		ERROR("failed to create socket: %s\n", strerror(errno));
-		exit(1);
+		STARTUP_ERROR("failed to create socket: %s\n", strerror(errno));
 	}
 
 	if (setsockopt(server_sock, SOL_SOCKET, SO_REUSEADDR, &one,
@@ -921,8 +920,8 @@ static void open_server_sock(struct in_addr bind_addr, int port)
 
 	if (bind(server_sock, (struct sockaddr *) &bind_addr_in,
 	         sizeof(bind_addr_in)) < 0) {
-		ERROR("bind failed on port %d: %s\n", port, strerror(errno));
-		exit(1);
+		STARTUP_ERROR("bind failed on port %d: %s\n", port,
+		              strerror(errno));
 	}
 
 	NOTICE("bind successful for %s port %d\n", inet_ntoa(bind_addr), port);
@@ -939,10 +938,9 @@ static void init_names(void)
 	if (strlen(myname) != 0) {
 		/* User specified the hostname */
 	} else if (!got_hostname) {
-		perror("gethostname");
-		fprintf(stderr, "Failed to get system hostname; you can "
-		                "specify it manually with -n hostname\n");
-		exit(1);
+		STARTUP_ERROR("Failed to get system hostname (%s); you can "
+		              "specify it manually with -n hostname\n",
+		              strerror(errno));
 	} else {
 		strlcpy(myname, hostname, sizeof(myname));
 		p = strchr(myname, '.');
@@ -1004,11 +1002,9 @@ int main(int argc, char *argv[])
 		switch (opt) {
 		case 'b':
 			if (!inet_aton(optarg, &bind_addr)) {
-				fprintf(stderr,
-				        "Failed to parse bind address "
-				        "'%s'\n",
-				        optarg);
-				exit(1);
+				STARTUP_ERROR("Failed to parse bind address "
+				              "'%s'\n",
+				              optarg);
 			}
 			break;
 		case 'C':
