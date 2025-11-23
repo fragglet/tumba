@@ -9,49 +9,38 @@
  * FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include <ctype.h>
+#include "server.h"
+
+#include <arpa/inet.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <limits.h>
+#include <netinet/in.h>
+#include <pwd.h>
 #include <signal.h>
-#include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
-
-#include <arpa/inet.h>
-#include <dirent.h>
-#include <fcntl.h>
-#include <grp.h>
-#include <net/if.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <pwd.h>
 #include <strings.h>
-#include <syslog.h>
-#include <unistd.h>
-#include <utime.h>
-
-#include <sys/file.h>
-#include <sys/ioctl.h>
-#include <sys/param.h>
+#include <sys/select.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <time.h>
+#include <unistd.h>
+#include <utime.h>
 
 #include "byteorder.h"
 #include "dir.h"
 #include "guards.h" /* IWYU pragma: keep */
 #include "ipc.h"
-#include "locking.h"
 #include "mangle.h"
 #include "reply.h"
-#include "server.h"
 #include "shares.h"
 #include "smb.h"
 #include "strfunc.h"
