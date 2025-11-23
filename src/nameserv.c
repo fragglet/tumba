@@ -29,7 +29,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "../src/byteorder.h"
+#include "byteorder.h"
 #include "strfunc.h"
 #include "smb.h"
 #include "util.h"
