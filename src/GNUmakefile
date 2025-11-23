@@ -95,7 +95,7 @@ uninstall:
 	@echo
 
 fixincludes:
-	for d in $(patsubst %.o,%.c,$(OBJECTS)); do \
+	for d in $(patsubst %.o,%.c,$(OBJECTS) $(NMBD_OBJECTS)); do \
 		$(IWYU) $(IWYU_TRANSFORMED_FLAGS) 2>&1 $$d | fix_include; \
 	done
 

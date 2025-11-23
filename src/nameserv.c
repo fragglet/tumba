@@ -13,12 +13,11 @@
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
-#include <limits.h>
 #include <net/if.h>
 #include <netinet/in.h>
-#include <signal.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,8 +29,8 @@
 #include <unistd.h>
 
 #include "byteorder.h"
-#include "strfunc.h"
 #include "smb.h"
+#include "strfunc.h"
 #include "util.h"
 #include "version.h"
 
@@ -245,15 +244,15 @@ static int nmb_resource_records_len(const uint8_t *buf, size_t buf_len,
 		// TODO: name_len() should check buffer length too:
 		ret += name_len((char *) buf + ret) + 8;
 		if (ret + 2 > buf_len) {
-			DEBUG("%s section overflows, #%d, %d > %d\n",
-			      name, i, ret + 2, (int) buf_len);
+			DEBUG("%s section overflows, #%d, %d > %d\n", name, i,
+			      ret + 2, (int) buf_len);
 			return -1;
 		}
 		rdlength = RSVAL(buf, ret);
 		ret += rdlength + 2;
 		if (ret > buf_len) {
-			DEBUG("%s section overflows, #%d, %d > %d\n",
-			      name, i, ret, (int) buf_len);
+			DEBUG("%s section overflows, #%d, %d > %d\n", name, i,
+			      ret, (int) buf_len);
 			return -1;
 		}
 	}
@@ -280,23 +279,23 @@ static int nmb_len(const uint8_t *buf, size_t buf_len)
 	ret = 12;
 	for (i = 0; i < qdcount; i++) {
 		if (ret >= buf_len) {
-			DEBUG("qd name #%d overflows, %d > %d\n",
-			      i, ret, (int) buf_len);
+			DEBUG("qd name #%d overflows, %d > %d\n", i, ret,
+			      (int) buf_len);
 			return 0;
 		}
 		p = buf + ret;
 		ret += name_len((char *) p) + 4;
 	}
 
-	rr_len = nmb_resource_records_len(buf + ret, buf_len - ret,
-	                                  "answer", ancount);
+	rr_len = nmb_resource_records_len(buf + ret, buf_len - ret, "answer",
+	                                  ancount);
 	if (rr_len < 0) {
 		return 0;
 	}
 	ret += rr_len;
 
-	rr_len = nmb_resource_records_len(buf + ret, buf_len - ret,
-	                                  "authority", nscount);
+	rr_len = nmb_resource_records_len(buf + ret, buf_len - ret, "authority",
+	                                  nscount);
 	if (rr_len < 0) {
 		return 0;
 	}
