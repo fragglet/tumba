@@ -18,6 +18,7 @@
 #include <signal.h>
 #include <stdarg.h>
 #include <stdbool.h>
+#include <pwd.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -35,6 +36,9 @@
 #include "guards.h" /* IWYU pragma: keep */
 #include "smb.h"
 #include "timefunc.h"
+
+/* User to run as, after dropping privileges */
+#define RUN_AS_USER    "nobody"
 
 /* To which file do our syslog messages go? */
 #define SYSLOG_FACILITY LOG_DAEMON
@@ -644,4 +648,34 @@ void block_signals(bool block, int signum)
 	sigemptyset(&set);
 	sigaddset(&set, signum);
 	sigprocmask(block ? SIG_BLOCK : SIG_UNBLOCK, &set, NULL);
+}
+
+/* Detect if we are running as root and if so, drop privileges and run as an
+   unprivileged user instead. We shouldn't ever need to run as root (if
+   someone is trying, they're doing it wrong), but it can make sense to start
+   the service as root so that the privileged sockets can be opened first. */
+void drop_privileges(void)
+{
+	struct passwd *pw;
+
+	/* Only drop privileges if we're running as root */
+	if (getuid() != 0) {
+		return;
+	}
+
+	pw = getpwnam(RUN_AS_USER);
+	if (pw == NULL) {
+		/* TODO: Should there be an option to override? */
+		STARTUP_ERROR("Failed to look up user %s, cowardly refusing "
+		              "to run as root.\n",
+		              RUN_AS_USER);
+	}
+
+	ERROR("Dropping privileges, running as user %s (uid=%d)\n", RUN_AS_USER,
+	      pw->pw_uid);
+	if (setgid(pw->pw_gid) != 0 || setegid(pw->pw_gid) != 0 ||
+	    setuid(pw->pw_uid) != 0 || seteuid(pw->pw_uid) != 0) {
+		STARTUP_ERROR("Failed to drop privileges: %s\n",
+		              strerror(errno));
+	}
 }

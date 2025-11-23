@@ -16,7 +16,6 @@
 #include <fcntl.h>
 #include <limits.h>
 #include <netinet/in.h>
-#include <pwd.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -64,7 +63,6 @@ static const uint8_t smb2_protocol_id[4] = {0xfe, 'S', 'M', 'B'};
 #define DPTR_IDLE_TIMEOUT    (120)
 #define SMBD_SELECT_LOOP     (10)
 
-#define RUN_AS_USER    "nobody"
 #define DOSATTRIB_NAME "user.DOSATTRIB"
 
 #define MAX_MUX 50
@@ -1409,36 +1407,6 @@ static void set_keepalive_option(int fd)
 
 	if (ret != 0) {
 		ERROR("Failed to set keepalive option");
-	}
-}
-
-/* Detect if we are running as root and if so, drop privileges and run as an
-   unprivileged user instead. We shouldn't ever need to run as root (if
-   someone is trying, they're doing it wrong), but it can make sense to start
-   the service as root so that the privileged sockets can be opened first. */
-static void drop_privileges(void)
-{
-	struct passwd *pw;
-
-	/* Only drop privileges if we're running as root */
-	if (getuid() != 0) {
-		return;
-	}
-
-	pw = getpwnam(RUN_AS_USER);
-	if (pw == NULL) {
-		/* TODO: Should there be an option to override? */
-		STARTUP_ERROR("Failed to look up user %s, cowardly refusing "
-		              "to run as root.\n",
-		              RUN_AS_USER);
-	}
-
-	ERROR("Dropping privileges, running as user %s (uid=%d)\n", RUN_AS_USER,
-	      pw->pw_uid);
-	if (setgid(pw->pw_gid) != 0 || setegid(pw->pw_gid) != 0 ||
-	    setuid(pw->pw_uid) != 0 || seteuid(pw->pw_uid) != 0) {
-		STARTUP_ERROR("Failed to drop privileges: %s\n",
-		              strerror(errno));
 	}
 }
 

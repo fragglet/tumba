@@ -1039,6 +1039,7 @@ int main(int argc, char *argv[])
 	init_names();
 
 	open_server_sock(bind_addr, port);
+	drop_privileges();
 	process();
 	close_sockets();
 

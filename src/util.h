@@ -80,3 +80,4 @@ void *checked_realloc(void *p, size_t bytes);
 void *checked_calloc(size_t nmemb, size_t size);
 char *checked_strdup(const char *s);
 void block_signals(bool block, int signum);
+void drop_privileges(void);
