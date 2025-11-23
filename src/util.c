@@ -349,28 +349,31 @@ int smb_offset(char *p, char *buf)
 	return PTR_DIFF(p, buf + 4) + chain_size;
 }
 
-/* Close the low 3 FDs and open dev/null in their place */
+static void close_low_fd(int fd, int flags)
+{
+	int new_fd;
+
+	close(fd);
+	new_fd = open("/dev/null", flags, 0);
+	if (new_fd < 0) {
+		ERROR("Failed to reopen fd %d: %s\n", fd, strerror(errno));
+		return;
+	}
+	if (new_fd != fd) {
+		ERROR("Failed to reopen fd %d; got fd=%d\n", fd, new_fd);
+		close(new_fd);
+	}
+}
+
+/* Close the low 3 FDs and open /dev/null in their place */
 void close_low_fds(void)
 {
-	int fd;
-	int i;
-	close(0);
-	close(1);
-	close(2);
-	/* try and use up these file descriptors, so silly
-	   library routines writing to stdout etc won't cause havoc */
-	for (i = 0; i < 3; i++) {
-		fd = open("/dev/null", O_RDWR, 0);
-		if (fd < 0)
-			fd = open("/dev/null", O_WRONLY, 0);
-		if (fd < 0) {
-			ERROR("Can't open /dev/null\n");
-			return;
-		}
-		if (fd != i) {
-			ERROR("Didn't get file descriptor %d\n", i);
-			return;
-		}
+	close_low_fd(0, 0);
+	close_low_fd(2, O_WRONLY);
+
+	// Don't close stdout if we're using it for the log file output.
+	if (log_file != stdout) {
+		close_low_fd(1, O_WRONLY);
 	}
 }
 
