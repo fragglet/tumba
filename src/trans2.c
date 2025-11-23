@@ -180,9 +180,9 @@ static int send_trans2_replies(char *outbuf, int bufsize, char *params,
 
 		/* Sanity check */
 		if (params_to_send < 0 || data_to_send < 0) {
-			NOTICE("send_trans2_replies failed sanity check pts "
-			       "= %d, dts = %d\n!!!",
-			       params_to_send, data_to_send);
+			INFO("send_trans2_replies failed sanity check pts "
+			     "= %d, dts = %d\n!!!",
+			     params_to_send, data_to_send);
 			return -1;
 		}
 	}
@@ -1009,8 +1009,8 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
 	DEBUG("cnum = %d, level = %d\n", cnum, info_level);
 
 	if (stat(".", &st) != 0) {
-		NOTICE("call_trans2qfsinfo: stat of . failed (%s)\n",
-		       strerror(errno));
+		INFO("call_trans2qfsinfo: stat of . failed (%s)\n",
+		     strerror(errno));
 		return ERROR_CODE(ERRSRV, ERRinvdevice);
 	}
 
@@ -1504,7 +1504,7 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 	/* check the mode isn't different, before changing it */
 	if (mode != dos_mode(cnum, fname, &st) &&
 	    dos_chmod(cnum, fname, mode, NULL)) {
-		NOTICE("chmod of %s failed (%s)\n", fname, strerror(errno));
+		INFO("chmod of %s failed (%s)\n", fname, strerror(errno));
 		return ERROR_CODE(ERRDOS, ERRnoaccess);
 	}
 
@@ -1691,7 +1691,7 @@ int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize)
 	/* All trans2 messages we handle have smb_sucnt == 1 - ensure this
 	   is so as a sanity check */
 	if (suwcnt != 1) {
-		NOTICE("Invalid smb_sucnt in trans2 call\n");
+		INFO("Invalid smb_sucnt in trans2 call\n");
 		return ERROR_CODE(ERRSRV, ERRerror);
 	}
 
@@ -1812,7 +1812,7 @@ int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize)
 		break;
 	default:
 		/* Error in request */
-		NOTICE("Unknown request %d in trans2 call\n", tran_call);
+		INFO("Unknown request %d in trans2 call\n", tran_call);
 		free(params);
 		free(data);
 		return ERROR_CODE(ERRSRV, ERRerror);

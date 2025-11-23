@@ -67,6 +67,7 @@ static const uint8_t smb2_protocol_id[4] = {0xfe, 'S', 'M', 'B'};
 
 #define MAX_MUX 50
 
+static char *original_argv0;
 static char **original_argv;
 static int original_argc;
 static bool allow_public_connections = false;
@@ -1464,7 +1465,6 @@ static void set_descriptive_argv(void)
 #define ARGV_BUF_LEN 128 /* is this defined somewhere? */
 	char *p = original_argv[original_argc - 1];
 	bool appended_services = false;
-	size_t buf_len;
 	int i;
 
 	if (original_argc < 2) {
@@ -1476,9 +1476,8 @@ static void set_descriptive_argv(void)
 	   command syntax, is always the case. */
 	p += strlen(p);
 	memset(original_argv[1], 0, p - original_argv[1]);
-	buf_len = ARGV_BUF_LEN - strlen(original_argv[0]) - 1;
-	snprintf(original_argv[1], buf_len, "[%s]", client_addr);
-	original_argc = 2;
+	snprintf(original_argv[0], ARGV_BUF_LEN, "%s [%s]", original_argv0,
+	         client_addr);
 
 	for (i = 0; i < MAX_CONNECTIONS; ++i) {
 		if (!Connections[i].open ||
@@ -1486,15 +1485,17 @@ static void set_descriptive_argv(void)
 			continue;
 		}
 		if (appended_services) {
-			strlcat(original_argv[1], ", ", buf_len);
+			strlcat(original_argv[0], ", ", ARGV_BUF_LEN);
 		} else {
-			strlcat(original_argv[1], " (using shares: ", buf_len);
+			strlcat(original_argv[0],
+			        " (using shares: ", ARGV_BUF_LEN);
 			appended_services = true;
 		}
-		strlcat(original_argv[1], Connections[i].share->name, buf_len);
+		strlcat(original_argv[0], Connections[i].share->name,
+		        ARGV_BUF_LEN);
 	}
 	if (appended_services) {
-		strlcat(original_argv[1], ")", buf_len);
+		strlcat(original_argv[0], ")", ARGV_BUF_LEN);
 	}
 #endif
 }
@@ -1532,7 +1533,7 @@ static void open_sockets(int port)
 		STARTUP_ERROR("bind failed on port %d socket_addr=%s (%s)\n",
 		              port, inet_ntoa(sock.sin_addr), strerror(errno));
 	}
-	INFO("bind succeeded on port %d\n", port);
+	NOTICE("bind succeeded on port %d\n", port);
 }
 
 /* await_connection loops forever, accepting new connections and returning
@@ -1848,8 +1849,8 @@ int make_connection(char *service, char *dev)
 
 	num_connections_open++;
 
-	WARNING("connect to service %s (pid %d)\n", CONN_SHARE(cnum)->name,
-	        (int) getpid());
+	NOTICE("connect to service %s (pid %d)\n", CONN_SHARE(cnum)->name,
+	       (int) getpid());
 	set_descriptive_argv();
 
 	return cnum;
@@ -2181,7 +2182,7 @@ void close_cnum(int cnum)
 		return;
 	}
 
-	WARNING("closed connection to service %s\n", CONN_SHARE(cnum)->name);
+	NOTICE("closed connection to service %s\n", CONN_SHARE(cnum)->name);
 
 	close_open_files(cnum);
 	dptr_closecnum(cnum);
@@ -2222,7 +2223,7 @@ void exit_server(char *reason)
 		      "===========\n");
 	}
 
-	INFO("Server exit  (%s)\n", reason ? reason : "");
+	NOTICE("Server exit (%s)\n", reason ? reason : "");
 	exit(0);
 }
 
@@ -2777,8 +2778,10 @@ int main(int argc, char *argv[])
 
 	signal(SIGTERM, SIGNAL_CAST dflt_sig);
 
-	original_argv = argv;
+	original_argv0 = checked_strdup(argv[0]);
 	original_argc = argc;
+	original_argv = argv;
+
 	while ((opt = getopt(argc, argv, "b:l:d:p:haW:")) != EOF) {
 		switch (opt) {
 		case 'a':
