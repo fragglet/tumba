@@ -57,7 +57,7 @@ int chain_size = 0;
 fstring local_machine = "";
 
 int smb_read_error = 0;
-static bool log_time_prefix = true;
+
 static bool log_start_of_line = true;
 
 void setup_logging(char *pname)
@@ -102,11 +102,7 @@ static void syslog_output(int level, char *format_str, va_list ap)
 void open_log_file(const char *filename)
 {
 	if (!strcmp(filename, "-")) {
-		// When using stdout for log messages, don't include the
-		// timestamp. This is a special case for systemd, which logs
-		// messages written to stdout with a timestamp already.
 		log_file = stdout;
-		log_time_prefix = false;
 	} else {
 		int oldumask = umask(022);
 		log_file = fopen(filename, "a");
@@ -119,8 +115,6 @@ void open_log_file(const char *filename)
 			STARTUP_ERROR("Failed to open log file '%s': %s\n",
 			              filename, strerror(errno));
 		}
-
-		log_time_prefix = true;
 	}
 
 	// Don't buffer log output.
@@ -160,9 +154,7 @@ int log_output(const char *funcname, int linenum, int level, char *format_str,
 
 	if (log_start_of_line) {
 		log_start_of_line = false;
-		if (log_time_prefix) {
-			fprintf(log_file, "%s ", timestring());
-		}
+		fprintf(log_file, "%s ", timestring());
 
 		if (client_addr[0] != '\0') {
 			fprintf(log_file, "[%s] ", client_addr);
