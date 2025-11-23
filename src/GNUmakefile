@@ -77,7 +77,9 @@ install: $(PUBLIC_SHARE) $(READONLY_SHARE) tumba_smbd
 uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/tumba_smbd
 	rm -f $(DESTDIR)$(PREFIX)/lib/systemd/system/tumba_smbd.service
+	rm -f $(DESTDIR)$(PREFIX)/lib/systemd/system/tumba_nmbd.service
 	rm -f $(DESTDIR)$(MANPATH)/man8/tumba_smbd.8
+	rm -f $(DESTDIR)$(MANPATH)/man8/tumba_nmbd.8
 	@echo
 	@echo "*** NOTE: The $(DESTDIR)$(DATADIR) directory that contains the"
 	@echo "*** default shares has not been deleted. You may want to delete"
