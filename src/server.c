@@ -1565,7 +1565,7 @@ static void open_sockets(int port)
 		STARTUP_ERROR("bind failed on port %d socket_addr=%s (%s)\n",
 		              port, inet_ntoa(sock.sin_addr), strerror(errno));
 	}
-	INFO("bind succeeded on port %d\n", port);
+	NOTICE("bind succeeded on port %d\n", port);
 }
 
 /* await_connection loops forever, accepting new connections and returning
@@ -1881,8 +1881,8 @@ int make_connection(char *service, char *dev)
 
 	num_connections_open++;
 
-	WARNING("connect to service %s (pid %d)\n", CONN_SHARE(cnum)->name,
-	        (int) getpid());
+	NOTICE("connect to service %s (pid %d)\n", CONN_SHARE(cnum)->name,
+	       (int) getpid());
 	set_descriptive_argv();
 
 	return cnum;
@@ -2214,7 +2214,7 @@ void close_cnum(int cnum)
 		return;
 	}
 
-	WARNING("closed connection to service %s\n", CONN_SHARE(cnum)->name);
+	NOTICE("closed connection to service %s\n", CONN_SHARE(cnum)->name);
 
 	close_open_files(cnum);
 	dptr_closecnum(cnum);
@@ -2255,7 +2255,7 @@ void exit_server(char *reason)
 		      "===========\n");
 	}
 
-	INFO("Server exit  (%s)\n", reason ? reason : "");
+	NOTICE("Server exit (%s)\n", reason ? reason : "");
 	exit(0);
 }
 

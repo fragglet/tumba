@@ -41,7 +41,10 @@
 
 char client_addr[32] = "";
 
-int LOGLEVEL = 1;
+/* By default we log NOTICE messages and above ("normal, but significant,
+ * condition"). This should give reasonable logging data without too much
+ * logspam. */
+int LOGLEVEL = 2;
 
 int Protocol = PROTOCOL_COREPLUS;
 
