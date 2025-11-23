@@ -9,6 +9,17 @@
  * FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+/* This is an implementation of the NetBIOS Name Server (NBNS) protocol,
+   as described in RFCs 1001 and 1002. It is a minimal implementation, and
+   deliberately does not include many of the "bells and whistles" found in
+   other implementations (such as Samba's nmbd). In particular:
+
+    * It does not act as a master browser server or take part in master
+      elections.
+    * There is no support for NetBIOS-to-DNS mapping or LMHOSTS files.
+    * It only responds to requests from local LAN segments.
+ */
+
 #include <arpa/inet.h>
 #include <assert.h>
 #include <ctype.h>
