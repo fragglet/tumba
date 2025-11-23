@@ -30,7 +30,9 @@
 #include <unistd.h>
 
 #include "../src/byteorder.h"
+#include "strfunc.h"
 #include "smb.h"
+#include "util.h"
 #include "version.h"
 
 #define SIGNAL_CAST     (void (*)(int))
@@ -61,9 +63,6 @@ struct network_address {
 	struct in_addr netmask;
 	struct in_addr bcast_ip;
 };
-
-extern pstring debugf;
-extern int LOGLEVEL;
 
 static uint8_t in_buffer[BUFFER_SIZE];
 
@@ -193,7 +192,7 @@ static const struct network_address *caching_get_addresses(int sock_fd,
 static bool name_equal(const char *s1, const char *s2)
 {
 	const char *p1, *p2;
-	while (*s1 && *s2 && (*s1 != ' ') && (*s2 != ' ')) {
+	while (*s1 && *s2 && *s1 != ' ' && *s2 != ' ') {
 		p1 = s1;
 		p2 = s2; /* toupper has side effects as a macro */
 		if (toupper(*p1) != toupper(*p2))
@@ -999,10 +998,7 @@ int main(int argc, char *argv[])
 	struct in_addr bind_addr = {INADDR_ANY};
 	int port = 137;
 	int opt;
-	extern FILE *dbf;
 	extern char *optarg;
-
-	snprintf(debugf, sizeof(debugf), "%s.nmb.debug", DEBUGFILE);
 
 	while ((opt = getopt(argc, argv, "b:C:n:l:d:p:hSW:")) != EOF)
 		switch (opt) {
@@ -1025,7 +1021,7 @@ int main(int argc, char *argv[])
 			fstrcpy(myname, optarg);
 			break;
 		case 'l':
-			pstrcpy(debugf, optarg);
+			open_log_file(optarg);
 			break;
 		case 'd':
 			LOGLEVEL = atoi(optarg);
@@ -1050,7 +1046,5 @@ int main(int argc, char *argv[])
 	process();
 	close_sockets();
 
-	if (dbf)
-		fclose(dbf);
 	return 0;
 }

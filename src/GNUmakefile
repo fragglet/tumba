@@ -37,18 +37,27 @@ OBJECTS = \
 	trans2.o             \
 	util.o
 
-DEPS = $(patsubst %.o,%.d,$(OBJECTS))
+NMBD_OBJECTS = \
+	nameserv.o           \
+	strfunc.o            \
+	timefunc.o           \
+	util.o
 
-all: tumba_smbd
+DEPS = $(patsubst %.o,%.d,$(OBJECTS) $(NMBD_OBJECTS))
+
+all: tumba_smbd tumba_nmbd
 
 tumba_smbd: $(OBJECTS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJECTS) -o $@
+
+tumba_nmbd: $(NMBD_OBJECTS)
+	$(CC) $(CFLAGS) $(LDFLAGS) $(NMBD_OBJECTS) -o $@
 
 .c.o:
 	$(CC) $(CFLAGS) -c $<
 
 clean:
-	rm -f $(OBJECTS) tumba_smbd $(DEPS)
+	rm -f $(OBJECTS) $(NMBD_OBJECTS) tumba_smbd tumba_nmbd $(DEPS)
 
 format:
 	clang-format -i *.[ch]
@@ -61,9 +70,10 @@ $(READONLY_SHARE):
 	mkdir -m 755 -p $@
 	install -m 644 doc-readonly.txt $@/README.txt
 
-install: $(PUBLIC_SHARE) $(READONLY_SHARE) tumba_smbd
+install: $(PUBLIC_SHARE) $(READONLY_SHARE) tumba_smbd tumba_nmbd
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	install -m 755 tumba_smbd $(DESTDIR)$(PREFIX)/bin/tumba_smbd
+	install -m 755 tumba_nmbd $(DESTDIR)$(PREFIX)/bin/tumba_nmbd
 	mkdir -p $(DESTDIR)$(PREFIX)/lib/systemd/system
 	install -m 644 tumba_smbd.service $(DESTDIR)$(PREFIX)/lib/systemd/system/tumba_smbd.service
 	install -m 644 tumba_nmbd.service $(DESTDIR)$(PREFIX)/lib/systemd/system/tumba_nmbd.service
@@ -73,6 +83,7 @@ install: $(PUBLIC_SHARE) $(READONLY_SHARE) tumba_smbd
 
 uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/tumba_smbd
+	rm -f $(DESTDIR)$(PREFIX)/bin/tumba_nmbd
 	rm -f $(DESTDIR)$(PREFIX)/lib/systemd/system/tumba_smbd.service
 	rm -f $(DESTDIR)$(PREFIX)/lib/systemd/system/tumba_nmbd.service
 	rm -f $(DESTDIR)$(MANPATH)/man8/tumba_smbd.8
