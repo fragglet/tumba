@@ -1437,18 +1437,17 @@ static void drop_privileges(void)
 	pw = getpwnam(RUN_AS_USER);
 	if (pw == NULL) {
 		/* TODO: Should there be an option to override? */
-		ERROR("Failed to look up user %s, cowardly refusing "
-		      "to run as root.\n",
-		      RUN_AS_USER);
-		exit(1);
+		STARTUP_ERROR("Failed to look up user %s, cowardly refusing "
+		              "to run as root.\n",
+		              RUN_AS_USER);
 	}
 
 	ERROR("Dropping privileges, running as user %s (uid=%d)\n", RUN_AS_USER,
 	      pw->pw_uid);
 	if (setgid(pw->pw_gid) != 0 || setegid(pw->pw_gid) != 0 ||
 	    setuid(pw->pw_uid) != 0 || seteuid(pw->pw_uid) != 0) {
-		ERROR("Failed to drop privileges: %s\n", strerror(errno));
-		exit(1);
+		STARTUP_ERROR("Failed to drop privileges: %s\n",
+		              strerror(errno));
 	}
 }
 
@@ -1460,8 +1459,7 @@ static int open_server_socket(int type, int port, in_addr_t socket_addr)
 
 	res = socket(AF_INET, SOCK_STREAM, 0);
 	if (res == -1) {
-		ERROR("socket failed\n");
-		return -1;
+		STARTUP_ERROR("socket failed: %s\n", strerror(errno));
 	}
 
 	setsockopt(res, SOL_SOCKET, SO_REUSEADDR, (char *) &one, sizeof(one));
@@ -1472,11 +1470,8 @@ static int open_server_socket(int type, int port, in_addr_t socket_addr)
 
 	/* now we've got a socket - we need to bind it */
 	if (bind(res, (struct sockaddr *) &sock, sizeof(sock)) < 0) {
-		ERROR("bind failed on port %d socket_addr=%s (%s)\n", port,
-		      inet_ntoa(sock.sin_addr), strerror(errno));
-		close(res);
-
-		return -1;
+		STARTUP_ERROR("bind failed on port %d socket_addr=%s (%s)\n",
+		              port, inet_ntoa(sock.sin_addr), strerror(errno));
 	}
 	INFO("bind succeeded on port %d\n", port);
 
@@ -1572,7 +1567,7 @@ static void set_descriptive_argv(void)
 #endif
 }
 
-static bool open_sockets(int port)
+static void open_sockets(int port)
 {
 	struct in_addr addr;
 	int server_socket;
@@ -1584,22 +1579,17 @@ static bool open_sockets(int port)
 
 	/* open an incoming socket */
 	if (inet_aton(bind_addr, &addr) == 0) {
-		ERROR("open_sockets: failed to parse bind address %s\n",
-		      bind_addr);
-		return false;
+		STARTUP_ERROR("failed to parse bind address %s\n", bind_addr);
 	}
+
+	/* open_server_socket only returns if it succeeds: */
 	server_socket = open_server_socket(SOCK_STREAM, port, addr.s_addr);
-	if (server_socket == -1) {
-		return false;
-	}
 
 	drop_privileges();
 
 	/* ready to listen */
 	if (listen(server_socket, 5) == -1) {
-		ERROR("open_sockets: listen: %s\n", strerror(errno));
-		close(server_socket);
-		return false;
+		STARTUP_ERROR("listen failed: %s\n", strerror(errno));
 	}
 
 	/* now accept incoming connections - forking a new process
@@ -1676,12 +1666,10 @@ static bool open_sockets(int port)
 
 			set_keepalive_option(Client);
 
-			return true;
+			return;
 		}
 		close(Client); /* The parent doesn't need this socket */
 	}
-
-	return true;
 }
 
 /*
@@ -2894,9 +2882,7 @@ int main(int argc, char *argv[])
 	   to by dynamically changed. */
 	DEBUG("loaded services\n");
 
-	if (!open_sockets(port))
-		exit(1);
-
+	open_sockets(port);
 	drop_privileges();
 
 	process();

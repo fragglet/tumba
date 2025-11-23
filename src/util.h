@@ -21,6 +21,8 @@
 #define PRINTF_ATTRIBUTE(x, y)
 #endif
 
+#define STARTUP_ERROR(msg, ...) startup_error(__func__, msg, __VA_ARGS__)
+
 /* logging interface */
 #define LOG(funcname, linenum, level, ...)                                     \
 	do {                                                                   \
@@ -54,6 +56,8 @@ extern char client_addr[32];
 
 void setup_logging(char *pname);
 void open_log_file(const char *filename);
+void startup_error(const char *funcname, char *format_str, ...)
+    PRINTF_ATTRIBUTE(2, 3);
 int log_output(const char *funcname, int linenum, int level, char *format_str,
                ...) PRINTF_ATTRIBUTE(4, 5);
 bool file_exist(char *fname, struct stat *sbuf);

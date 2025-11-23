@@ -116,9 +116,8 @@ void open_log_file(const char *filename)
 		// to stderr (rather than using the ERROR macro) so that the
 		// user gets to see the message.
 		if (log_file == NULL) {
-			fprintf(stderr, "Failed to open log file '%s': %s\n",
-			        filename, strerror(errno));
-			exit(1);
+			STARTUP_ERROR("Failed to open log file '%s': %s\n",
+			              filename, strerror(errno));
 		}
 
 		log_time_prefix = true;
@@ -126,6 +125,18 @@ void open_log_file(const char *filename)
 
 	// Don't buffer log output.
 	setbuf(log_file, NULL);
+}
+
+/* Used for errors that occur during startup. Does not return. */
+void startup_error(const char *funcname, char *format_str, ...)
+{
+	va_list ap;
+
+	va_start(ap, format_str);
+	fprintf(stderr, "[%s] ", funcname);
+	vfprintf(stderr, format_str, ap);
+	va_end(ap);
+	exit(1);
 }
 
 /* Write a message to the log file. This is called by the LOG macro. */
