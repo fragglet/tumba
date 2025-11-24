@@ -1061,9 +1061,7 @@ void close_file(int fnum, bool normal_close)
 	DEBUG("closed file %s (numopen=%d)\n", fs_p->name,
 	      Connections[cnum].num_files_open);
 
-	if (fs_p->name) {
-		string_free(&fs_p->name);
-	}
+	free(fs_p->name);
 
 	/* we will catch bugs faster by zeroing this structure */
 	memset(fs_p, 0, sizeof(*fs_p));
@@ -2753,13 +2751,13 @@ static void init_structs(void)
 		Connections[i].num_files_open = 0;
 		Connections[i].lastused = 0;
 		Connections[i].used = false;
-		string_init(&Connections[i].dirpath, "");
-		string_init(&Connections[i].connectpath, "");
+		Connections[i].dirpath = checked_strdup("");
+		Connections[i].connectpath = checked_strdup("");
 	}
 
 	for (i = 0; i < MAX_OPEN_FILES; i++) {
 		Files[i].open = false;
-		string_init(&Files[i].name, "");
+		Files[i].name = checked_strdup("");
 	}
 
 	for (i = 0; i < MAX_OPEN_FILES; i++) {
