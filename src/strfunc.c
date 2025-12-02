@@ -76,19 +76,15 @@ bool strcsequal(char *s1, char *s2)
 
 void strlower(char *s)
 {
-	while (*s) {
-		if (isupper(*s))
-			*s = tolower(*s);
-		s++;
+	for (; *s != '\0'; ++s) {
+		*s = tolower(*s);
 	}
 }
 
 void strupper(char *s)
 {
-	while (*s) {
-		if (islower(*s))
-			*s = toupper(*s);
-		s++;
+	for (; *s != '\0'; ++s) {
+		*s = toupper(*s);
 	}
 }
 
