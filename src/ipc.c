@@ -774,6 +774,7 @@ int reply_trans(char *inbuf, char *outbuf, int size, int bufsize)
 	int dscnt = SVAL(inbuf, smb_vwv11);
 	int dsoff = SVAL(inbuf, smb_vwv12);
 	int suwcnt = CVAL(inbuf, smb_vwv13);
+	int i;
 
 	bzero(name, sizeof(name));
 	fstrcpy(name, smb_buf(inbuf));
@@ -782,21 +783,14 @@ int reply_trans(char *inbuf, char *outbuf, int size, int bufsize)
 		exit_server("invalid trans parameters\n");
 	}
 
-	if (tdscnt) {
-		data = checked_malloc(tdscnt);
-		memcpy(data, smb_base(inbuf) + dsoff, dscnt);
-	}
-	if (tpscnt) {
-		params = checked_malloc(tpscnt);
-		memcpy(params, smb_base(inbuf) + psoff, pscnt);
-	}
+	data = checked_malloc(tdscnt);
+	memcpy(data, smb_base(inbuf) + dsoff, dscnt);
+	params = checked_malloc(tpscnt);
+	memcpy(params, smb_base(inbuf) + psoff, pscnt);
 
-	if (suwcnt) {
-		int i;
-		setup = checked_calloc(suwcnt, sizeof(*setup));
-		for (i = 0; i < suwcnt; i++)
-			setup[i] =
-			    SVAL(inbuf, smb_vwv14 + i * sizeof(uint16_t));
+	setup = checked_calloc(suwcnt, sizeof(*setup));
+	for (i = 0; i < suwcnt; i++) {
+		setup[i] = SVAL(inbuf, smb_vwv14 + i * sizeof(uint16_t));
 	}
 
 	if (pscnt < tpscnt || dscnt < tdscnt) {
