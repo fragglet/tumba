@@ -76,19 +76,15 @@ bool strcsequal(char *s1, char *s2)
 
 void strlower(char *s)
 {
-	while (*s) {
-		if (isupper(*s))
-			*s = tolower(*s);
-		s++;
+	for (; *s != '\0'; ++s) {
+		*s = tolower(*s);
 	}
 }
 
 void strupper(char *s)
 {
-	while (*s) {
-		if (islower(*s))
-			*s = toupper(*s);
-		s++;
+	for (; *s != '\0'; ++s) {
+		*s = toupper(*s);
 	}
 }
 
@@ -126,12 +122,10 @@ void unix_format(char *fname)
 	}
 }
 
-/* Skip past some strings in a buffer */
-char *skip_string(char *buf, int n)
+/* Skip past a string in a buffer */
+char *skip_string(char *buf)
 {
-	while (n--)
-		buf += strlen(buf) + 1;
-	return buf;
+	return buf + strlen(buf) + 1;
 }
 
 /* Trim the specified elements off the front and back of a string */
@@ -270,49 +264,11 @@ int name_len(char *s)
 	return len;
 }
 
-/* this is used to prevent lots of mallocs of size 1 */
-static char *null_string = NULL;
-
-/* Set a string value, allocing the space for the string */
-bool string_init(char **dest, char *src)
+/* Set a string value, deallocating any existing value */
+void string_set(char **dest, char *src)
 {
-	int l;
-	if (!src)
-		src = "";
-
-	l = strlen(src);
-
-	if (l == 0) {
-		if (!null_string)
-			null_string = checked_malloc(1);
-
-		*null_string = 0;
-		*dest = null_string;
-	} else {
-		*dest = checked_malloc(l + 1);
-
-		pstrcpy(*dest, src);
-	}
-	return true;
-}
-
-void string_free(char **s)
-{
-	if (!s || !*s)
-		return;
-	if (*s == null_string)
-		*s = NULL;
-	free(*s);
-	*s = NULL;
-}
-
-/* Set a string value, allocing the space for the string, and deallocating any
- * existing space */
-bool string_set(char **dest, char *src)
-{
-	string_free(dest);
-
-	return string_init(dest, src);
+	free(*dest);
+	*dest = checked_strdup(src);
 }
 
 /*

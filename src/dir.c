@@ -66,7 +66,7 @@ void init_dptrs(void)
 		dirptrs[i].valid = false;
 		dirptrs[i].wcard = NULL;
 		dirptrs[i].ptr = NULL;
-		string_init(&dirptrs[i].path, "");
+		dirptrs[i].path = checked_strdup("");
 	}
 	dptrs_init = true;
 }
@@ -512,7 +512,7 @@ char *read_dir_name(Dir *dirp)
 		return NULL;
 
 	ret = dirp->current;
-	dirp->current = skip_string(dirp->current, 1);
+	dirp->current = skip_string(dirp->current);
 	dirp->pos++;
 
 	return ret;
