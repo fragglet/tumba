@@ -512,7 +512,7 @@ char *read_dir_name(Dir *dirp)
 		return NULL;
 
 	ret = dirp->current;
-	dirp->current = skip_string(dirp->current, 1);
+	dirp->current = skip_string(dirp->current);
 	dirp->pos++;
 
 	return ret;

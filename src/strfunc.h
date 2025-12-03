@@ -29,7 +29,7 @@ void strupper(char *s);
 void strnorm(char *s);
 bool strisnormal(char *s);
 void unix_format(char *fname);
-char *skip_string(char *buf, int n);
+char *skip_string(char *buf);
 bool trim_string(char *s, char *front, char *back);
 void unix_clean_name(char *s);
 bool strhasupper(char *s);

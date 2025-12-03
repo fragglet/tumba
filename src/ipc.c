@@ -170,8 +170,8 @@ static bool api_RNetServerEnum(int cnum, char *param, char *data, int mdrcnt,
                                int *rdata_len, int *rparam_len)
 {
 	char *str1 = param + 2;
-	char *str2 = skip_string(str1, 1);
-	char *p = skip_string(str2, 1);
+	char *str2 = skip_string(str1);
+	char *p = skip_string(str2);
 	int uLevel = SVAL(p, 0);
 
 	if (!prefix_ok(str1, "WrLehD"))
@@ -325,9 +325,9 @@ static bool api_RNetShareGetInfo(int cnum, char *param, char *data, int mdrcnt,
                                  int *rdata_len, int *rparam_len)
 {
 	char *str1 = param + 2;
-	char *str2 = skip_string(str1, 1);
-	char *netname = skip_string(str2, 1);
-	char *p = skip_string(netname, 1);
+	char *str2 = skip_string(str1);
+	char *netname = skip_string(str2);
+	char *p = skip_string(netname);
 	int uLevel = SVAL(p, 0);
 	const struct share *share = lookup_share(netname);
 
@@ -362,8 +362,8 @@ static bool api_RNetShareEnum(int cnum, char *param, char *data, int mdrcnt,
                               int *rdata_len, int *rparam_len)
 {
 	char *str1 = param + 2;
-	char *str2 = skip_string(str1, 1);
-	char *p = skip_string(str2, 1);
+	char *str2 = skip_string(str1);
+	char *p = skip_string(str2);
 	int uLevel = SVAL(p, 0);
 	int buf_len = SVAL(p, 2);
 	char *p2;
@@ -469,8 +469,8 @@ static bool api_RNetServerGetInfo(int cnum, char *param, char *data, int mdrcnt,
                                   int *rdata_len, int *rparam_len)
 {
 	char *str1 = param + 2;
-	char *str2 = skip_string(str1, 1);
-	char *p = skip_string(str2, 1);
+	char *str2 = skip_string(str1);
+	char *p = skip_string(str2);
 	int uLevel = SVAL(p, 0);
 	char *p2;
 	int struct_len;
@@ -545,7 +545,7 @@ static bool api_RNetServerGetInfo(int cnum, char *param, char *data, int mdrcnt,
 			pstrcpy(comment, "");
 			SIVAL(p, 6, PTR_DIFF(p2, *rdata));
 			strlcpy(p2, comment, MAX(mdrcnt - struct_len, 0) + 1);
-			p2 = skip_string(p2, 1);
+			p2 = skip_string(p2);
 		}
 	}
 	if (uLevel > 1) {
@@ -569,8 +569,8 @@ static bool api_NetWkstaGetInfo(int cnum, char *param, char *data, int mdrcnt,
                                 int *rdata_len, int *rparam_len)
 {
 	char *str1 = param + 2;
-	char *str2 = skip_string(str1, 1);
-	char *p = skip_string(str2, 1);
+	char *str2 = skip_string(str1);
+	char *p = skip_string(str2);
 	char *p2;
 	int level = SVAL(p, 0);
 
@@ -596,18 +596,18 @@ static bool api_NetWkstaGetInfo(int cnum, char *param, char *data, int mdrcnt,
 	SIVAL(p, 0, PTR_DIFF(p2, *rdata)); /* host name */
 	pstrcpy(p2, local_machine);
 	strupper(p2);
-	p2 = skip_string(p2, 1);
+	p2 = skip_string(p2);
 	p += 4;
 
 	SIVAL(p, 0, PTR_DIFF(p2, *rdata)); /* logged in user (none) */
 	pstrcpy(p2, "");
-	p2 = skip_string(p2, 1);
+	p2 = skip_string(p2);
 	p += 4;
 
 	SIVAL(p, 0, PTR_DIFF(p2, *rdata)); /* workgroup/domain we belong to*/
 	pstrcpy(p2, workgroup);
 	strupper(p2);
-	p2 = skip_string(p2, 1);
+	p2 = skip_string(p2);
 	p += 4;
 
 	SCVAL(p, 0, DEFAULT_MAJOR_VERSION); /* system version - e.g 4 in 4.1 */
@@ -616,12 +616,12 @@ static bool api_NetWkstaGetInfo(int cnum, char *param, char *data, int mdrcnt,
 
 	SIVAL(p, 0, PTR_DIFF(p2, *rdata));
 	pstrcpy(p2, ""); /* login domain; we're not logged on */
-	p2 = skip_string(p2, 1);
+	p2 = skip_string(p2);
 	p += 4;
 
 	SIVAL(p, 0, PTR_DIFF(p2, *rdata)); /* other domains (none) */
 	pstrcpy(p2, "");
-	p2 = skip_string(p2, 1);
+	p2 = skip_string(p2);
 
 	*rdata_len = PTR_DIFF(p2, *rdata);
 
@@ -693,7 +693,7 @@ static int api_reply(int cnum, char *outbuf, char *data, char *params,
 
 	DEBUG("Got API command %d of form <%s> <%s> "
 	      "(tdscnt=%d,tpscnt=%d,mdrcnt=%d,mprcnt=%d)\n",
-	      api_command, params + 2, skip_string(params + 2, 1), tdscnt,
+	      api_command, params + 2, skip_string(params + 2), tdscnt,
 	      tpscnt, mdrcnt, mprcnt);
 
 	for (i = 0; api_commands[i].name; i++)

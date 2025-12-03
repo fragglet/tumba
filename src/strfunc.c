@@ -122,12 +122,10 @@ void unix_format(char *fname)
 	}
 }
 
-/* Skip past some strings in a buffer */
-char *skip_string(char *buf, int n)
+/* Skip past a string in a buffer */
+char *skip_string(char *buf)
 {
-	while (n--)
-		buf += strlen(buf) + 1;
-	return buf;
+	return buf + strlen(buf) + 1;
 }
 
 /* Trim the specified elements off the front and back of a string */

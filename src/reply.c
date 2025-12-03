@@ -234,9 +234,9 @@ int reply_tcon_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 
 		p = smb_buf(outbuf);
 		pstrcpy(p, devicename);
-		p = skip_string(p, 1); /* device name */
+		p = skip_string(p); /* device name */
 		pstrcpy(p, fsname);
-		p = skip_string(p, 1); /* filesystem type e.g NTFS */
+		p = skip_string(p); /* filesystem type e.g NTFS */
 
 		set_message(outbuf, 3, PTR_DIFF(p, smb_buf(outbuf)), false);
 
@@ -295,12 +295,11 @@ int reply_sesssetup_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 		set_message(outbuf, 3, 3, true);
 		p = smb_buf(outbuf);
 		pstrcpy(p, "Unix");
-		p = skip_string(p, 1);
-		pstrcpy(p, "Tumba ");
-		pstrcat(p, VERSION);
-		p = skip_string(p, 1);
+		p = skip_string(p);
+		pstrcpy(p, "Tumba " VERSION);
+		p = skip_string(p);
 		pstrcpy(p, workgroup);
-		p = skip_string(p, 1);
+		p = skip_string(p);
 		set_message(outbuf, 3, PTR_DIFF(p, smb_buf(outbuf)), false);
 		/* perhaps grab OS version here?? */
 	}
