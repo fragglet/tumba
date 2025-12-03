@@ -693,8 +693,8 @@ static int api_reply(int cnum, char *outbuf, char *data, char *params,
 
 	DEBUG("Got API command %d of form <%s> <%s> "
 	      "(tdscnt=%d,tpscnt=%d,mdrcnt=%d,mprcnt=%d)\n",
-	      api_command, params + 2, skip_string(params + 2), tdscnt,
-	      tpscnt, mdrcnt, mprcnt);
+	      api_command, params + 2, skip_string(params + 2), tdscnt, tpscnt,
+	      mdrcnt, mprcnt);
 
 	for (i = 0; api_commands[i].name; i++)
 		if (api_commands[i].id == api_command && api_commands[i].fn) {

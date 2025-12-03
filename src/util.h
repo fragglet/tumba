@@ -17,7 +17,7 @@
 
 #ifdef __GNUC__
 #define PRINTF_ATTRIBUTE(x, y) __attribute__((format(printf, x, y)))
-#define NORETURN_ATTRIBUTE __attribute__((noreturn))
+#define NORETURN_ATTRIBUTE     __attribute__((noreturn))
 #else
 #define PRINTF_ATTRIBUTE(x, y)
 #define NORETURN_ATTRIBUTE
