@@ -17,8 +17,10 @@
 
 #ifdef __GNUC__
 #define PRINTF_ATTRIBUTE(x, y) __attribute__((format(printf, x, y)))
+#define NORETURN_ATTRIBUTE __attribute__((noreturn))
 #else
 #define PRINTF_ATTRIBUTE(x, y)
+#define NORETURN_ATTRIBUTE
 #endif
 
 #define STARTUP_ERROR(msg, ...) startup_error(__func__, msg, __VA_ARGS__)
@@ -57,7 +59,7 @@ extern char client_addr[32];
 void setup_logging(char *pname);
 void open_log_file(const char *filename);
 void startup_error(const char *funcname, char *format_str, ...)
-    PRINTF_ATTRIBUTE(2, 3);
+    PRINTF_ATTRIBUTE(2, 3) NORETURN_ATTRIBUTE;
 int log_output(const char *funcname, int linenum, int level, char *format_str,
                ...) PRINTF_ATTRIBUTE(4, 5);
 bool file_exist(char *fname, struct stat *sbuf);
