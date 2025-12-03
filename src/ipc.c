@@ -736,6 +736,10 @@ static int named_pipe(int cnum, char *outbuf, char *name, uint16_t *setup,
 {
 	DEBUG("command on <%s> name\n", name);
 
+	if (params == NULL) {
+		DEBUG("named_pipe with no parameters (tdscnt=%d)\n", tdscnt);
+		return 0;
+	}
 	if (strequal(name, "LANMAN")) {
 		return api_reply(cnum, outbuf, data, params, tdscnt, tpscnt,
 		                 mdrcnt, mprcnt);
