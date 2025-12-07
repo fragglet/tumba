@@ -51,6 +51,22 @@ ssize_t sys_setxattr(const char *path, const char *name, void *value,
 	return setxattr(path, name, value, size, 0);
 }
 
+#elif defined(__APPLE__)
+
+#include <sys/xattr.h>
+
+ssize_t sys_getxattr(const char *path, const char *name, void *value,
+                     size_t size)
+{
+	return getxattr(path, name, value, size, 0, 0);
+}
+
+ssize_t sys_setxattr(const char *path, const char *name, void *value,
+                     size_t size)
+{
+	return setxattr(path, name, value, size, 0, 0);
+}
+
 #elif defined(__FreeBSD__) || defined(__NetBSD__)
 
 #include <sys/extattr.h>
