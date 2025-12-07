@@ -29,6 +29,7 @@
  * Returns strlen(src) + MIN(siz, strlen(initial dst)).
  * If retval >= siz, truncation occurred.
  */
+#undef strlcat
 size_t strlcat(char *dst, const char *src, size_t siz)
 {
 	char *d = dst;
