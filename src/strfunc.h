@@ -43,5 +43,7 @@ char *safe_strcpy(char *dest, const char *src, int dest_size);
 char *safe_strcat(char *dest, const char *src, int dest_size);
 
 /* TODO: Remove these once their addition to glibc is less recent */
+#undef strlcat
+#undef strlcpy
 size_t strlcat(char *, const char *, size_t);
 size_t strlcpy(char *, const char *, size_t);

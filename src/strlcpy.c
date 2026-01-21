@@ -27,6 +27,7 @@
  * will be copied.  Always NUL terminates (unless siz == 0).
  * Returns strlen(src); if retval >= siz, truncation occurred.
  */
+#undef strlcpy
 size_t strlcpy(char *dst, const char *src, size_t siz)
 {
 	char *d = dst;
