@@ -2355,7 +2355,7 @@ static bool copy_file(char *src, char *dest1, int cnum, int ofun, int count,
 	fnum1 = find_free_file();
 	if (fnum1 < 0)
 		return false;
-	open_file_shared(fnum1, cnum, src, (DENY_NONE << 4), 1, 0, &Access,
+	open_file_shared(fnum1, cnum, src, DENY_NONE << 4, 1, 0, &Access,
 	                 &action);
 
 	if (!Files[fnum1].open) {
