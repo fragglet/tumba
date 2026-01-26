@@ -47,7 +47,27 @@
 a packet to ensure chaining works correctly */
 #define GETFNUM(buf, where) (chain_fnum != -1 ? chain_fnum : SVAL(buf, where))
 
-int reply_special(char *inbuf, char *outbuf)
+static bool decode_names(uint8_t *inbuf, size_t inbuf_len, fstring name1,
+                         fstring name2)
+{
+	size_t len;
+
+	if (!decode_name(inbuf, inbuf_len, name1, sizeof(fstring))) {
+		ERROR("Failed to decode name1 in session request\n");
+		return false;
+	}
+	len = name_len((char *) inbuf);
+	inbuf += len;
+	inbuf_len -= len;
+	if (!decode_name(inbuf, inbuf_len, name2, sizeof(fstring))) {
+		ERROR("Failed to decode name2 in session request\n");
+		return false;
+	}
+	return true;
+}
+
+int reply_special(char *inbuf, char *outbuf, size_t inbuf_len,
+                  size_t outbuf_len)
 {
 	int outsize = 4;
 	int msg_type = CVAL(inbuf, 0);
@@ -64,15 +84,10 @@ int reply_special(char *inbuf, char *outbuf)
 	case 0x81: /* session request */
 		CVAL(outbuf, 0) = 0x82;
 		CVAL(outbuf, 3) = 0;
-		if (name_len(inbuf + 4) > 50 ||
-		    name_len(inbuf + 4 + name_len(inbuf + 4)) > 50) {
-			ERROR("Invalid name length in session request\n");
+		if (!decode_names((uint8_t *) inbuf + 4, inbuf_len - 4, name1,
+		                  name2)) {
 			return 0;
 		}
-		// TODO: Replace with the rewritten decode_name() function from
-		// nameserv.c; this has no bounds checks.
-		name_extract(inbuf, 4, name1);
-		name_extract(inbuf, 4 + name_len(inbuf + 4), name2);
 		DEBUG("netbios connect: name1=%s name2=%s\n", name1, name2);
 
 		fstrcpy(local_machine, name1);

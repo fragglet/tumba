@@ -2576,7 +2576,7 @@ static int construct_reply(char *inbuf, char *outbuf, size_t inbuf_len,
 	bzero(outbuf, smb_size);
 
 	if (msg_type != 0)
-		return reply_special(inbuf, outbuf);
+		return reply_special(inbuf, outbuf, inbuf_len, outbuf_len);
 
 	CVAL(outbuf, smb_com) = CVAL(inbuf, smb_com);
 	set_message(outbuf, 0, 0, true);

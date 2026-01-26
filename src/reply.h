@@ -11,7 +11,8 @@
 
 #include <stddef.h>
 
-int reply_special(char *inbuf, char *outbuf);
+int reply_special(char *inbuf, char *outbuf, size_t inbuf_len,
+                  size_t outbuf_len);
 int reply_tcon(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len);
 int reply_tcon_and_X(char *inbuf, char *outbuf, size_t inbuf_len,
                      size_t outbuf_len);

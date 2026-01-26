@@ -349,43 +349,6 @@ static void send_reply(void *buf, size_t buf_len)
 	}
 }
 
-// Decode the encoded NetBIOS name as described in RFC1001 section 14
-// ("Representation of NetBIOS names").
-static bool decode_name(const uint8_t *inbuf, size_t inbuf_len, char *namebuf,
-                        size_t namebuf_len)
-{
-	size_t len, name_len;
-	int i;
-
-	if (inbuf_len < 1) {
-		return false;
-	}
-	// RFC: "The high order two bits of the length field must be zero"
-	// TODO: scope names are not currently supported.
-	len = inbuf[0];
-	if ((len & 0xc0) != 0 || (len % 2) != 0 || len + 2 > inbuf_len ||
-	    inbuf[len + 1] != 0) {
-		return false;
-	}
-	// Each NetBIOS name character is split into two nybbles, with one
-	// alphabetic character representing each nybble.
-	name_len = len / 2;
-	if (name_len + 1 > namebuf_len) {
-		return false;
-	}
-	for (i = 0; i < name_len; ++i) {
-		uint8_t c1 = inbuf[i * 2 + 1];
-		uint8_t c2 = inbuf[i * 2 + 2];
-
-		if (c1 < 'A' || c1 >= 'Q' || c2 < 'A' || c2 >= 'Q') {
-			return false;
-		}
-		namebuf[i] = ((c1 - 'A') << 4) | (c2 - 'A');
-	}
-	namebuf[name_len] = '\0';
-	return true;
-}
-
 static void reply_reg_request(const uint8_t *inbuf, size_t inbuf_len,
                               const struct network_address *src_iface)
 {

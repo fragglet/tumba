@@ -11,6 +11,7 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #define pstrcpy(d, s) safe_strcpy((d), (s), sizeof(pstring))
 #define pstrcat(d, s) safe_strcat((d), (s), sizeof(pstring))
@@ -33,7 +34,8 @@ char *skip_string(char *buf);
 bool trim_string(char *s, char *front, char *back);
 void unix_clean_name(char *s);
 bool strhasupper(char *s);
-int name_extract(char *buf, int ofs, char *name);
+bool decode_name(const uint8_t *inbuf, size_t inbuf_len, char *namebuf,
+                 size_t namebuf_len);
 int name_len(char *s);
 void string_set(char **dest, char *src);
 bool string_sub(char *s, char *pattern, char *insert);

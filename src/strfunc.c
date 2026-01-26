@@ -19,7 +19,6 @@
 #include <string.h>
 #include <strings.h>
 
-#include "byteorder.h"
 #include "guards.h" /* IWYU pragma: keep */
 #include "smb.h"
 #include "util.h"
@@ -193,58 +192,41 @@ bool strhasupper(char *s)
 	return false;
 }
 
-/* Interpret the weird netbios "name". Return the name type */
-static int name_interpret(char *in, char *out)
+// Decode the encoded NetBIOS name as described in RFC1001 section 14
+// ("Representation of NetBIOS names").
+bool decode_name(const uint8_t *inbuf, size_t inbuf_len, char *namebuf,
+                 size_t namebuf_len)
 {
-	int ret;
-	int len = (*in++) / 2;
+	size_t len, name_len;
+	int i;
 
-	*out = 0;
-
-	if (len > 30 || len < 1)
-		return 0;
-
-	while (len--) {
-		if (in[0] < 'A' || in[0] > 'P' || in[1] < 'A' || in[1] > 'P') {
-			*out = 0;
-			return 0;
-		}
-		*out = ((in[0] - 'A') << 4) + (in[1] - 'A');
-		in += 2;
-		out++;
+	if (inbuf_len < 1) {
+		return false;
 	}
-	*out = 0;
-	ret = out[-1];
+	// RFC: "The high order two bits of the length field must be zero"
+	// TODO: scope names are not currently supported.
+	len = inbuf[0];
+	if ((len & 0xc0) != 0 || (len % 2) != 0 || len + 2 > inbuf_len ||
+	    inbuf[len + 1] != 0) {
+		return false;
+	}
+	// Each NetBIOS name character is split into two nybbles, with one
+	// alphabetic character representing each nybble.
+	name_len = len / 2;
+	if (name_len + 1 > namebuf_len) {
+		return false;
+	}
+	for (i = 0; i < name_len; ++i) {
+		uint8_t c1 = inbuf[i * 2 + 1];
+		uint8_t c2 = inbuf[i * 2 + 2];
 
-	return ret;
-}
-
-/* Find a pointer to a netbios name */
-static char *name_ptr(char *buf, int ofs)
-{
-	unsigned char c = *(unsigned char *) (buf + ofs);
-
-	if ((c & 0xC0) == 0xC0) {
-		uint16_t l;
-		char p[2];
-		memcpy(p, buf + ofs, 2);
-		p[0] &= ~0xC0;
-		l = RSVAL(p, 0);
-		DEBUG("to pos %d from %d is %s\n", l, ofs, buf + l);
-		return buf + l;
-	} else
-		return buf + ofs;
-}
-
-/* Extract a netbios name from a buf */
-int name_extract(char *buf, int ofs, char *name)
-{
-	char *p = name_ptr(buf, ofs);
-	int d = PTR_DIFF(p, buf + ofs);
-	pstrcpy(name, "");
-	if (d < -50 || d > 50)
-		return 0;
-	return name_interpret(p, name);
+		if (c1 < 'A' || c1 >= 'Q' || c2 < 'A' || c2 >= 'Q') {
+			return false;
+		}
+		namebuf[i] = ((c1 - 'A') << 4) | (c2 - 'A');
+	}
+	namebuf[name_len] = '\0';
+	return true;
 }
 
 /* Return the total storage length of a mangled name */
