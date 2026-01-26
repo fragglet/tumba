@@ -170,7 +170,7 @@ static void parse_connect(char *p, char *service, char *dev)
 }
 
 /* Reply to an SMBtcon */
-int reply_tcon(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
+int reply_tcon(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 {
 	pstring service;
 	pstring dev;
@@ -197,7 +197,8 @@ int reply_tcon(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 }
 
 /* Reply to an SMBtconX */
-int reply_tcon_and_X(char *inbuf, char *outbuf, int length, int bufsize)
+int reply_tcon_and_X(char *inbuf, char *outbuf, size_t inbuf_len,
+                     size_t outbuf_len)
 {
 	pstring service;
 	pstring devicename;
@@ -257,7 +258,7 @@ int reply_tcon_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 	SSVAL(inbuf, smb_tid, connection_num);
 	SSVAL(outbuf, smb_tid, connection_num);
 
-	return chain_reply(inbuf, outbuf, length, bufsize);
+	return chain_reply(inbuf, outbuf, inbuf_len, outbuf_len);
 }
 
 /* Reply to an unknown type */
@@ -275,14 +276,15 @@ int reply_unknown(char *inbuf, char *outbuf)
 }
 
 /* Reply to an SMBioctl */
-int reply_ioctl(char *inbuf, char *outbuf, int size, int bufsize)
+int reply_ioctl(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 {
 	DEBUG("ignoring ioctl\n");
 	return ERROR_CODE(ERRSRV, ERRnosupport);
 }
 
 /* Reply to an SMBsesssetupX */
-int reply_sesssetup_and_X(char *inbuf, char *outbuf, int length, int bufsize)
+int reply_sesssetup_and_X(char *inbuf, char *outbuf, size_t inbuf_len,
+                          size_t outbuf_len)
 {
 	int smb_bufsize;
 	pstring smb_apasswd;
@@ -325,11 +327,11 @@ int reply_sesssetup_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 
 	done_sesssetup = true;
 
-	return chain_reply(inbuf, outbuf, length, bufsize);
+	return chain_reply(inbuf, outbuf, inbuf_len, outbuf_len);
 }
 
 /* Reply to an SMBchkpth */
-int reply_chkpth(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
+int reply_chkpth(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 {
 	int outsize = 0;
 	int cnum, mode;
@@ -369,7 +371,7 @@ int reply_chkpth(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 }
 
 /* Reply to an SMBgetatr */
-int reply_getatr(char *inbuf, char *outbuf, int in_size, int buffsize)
+int reply_getatr(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 {
 	pstring fname;
 	int cnum;
@@ -435,7 +437,7 @@ int reply_getatr(char *inbuf, char *outbuf, int in_size, int buffsize)
 }
 
 /* Reply to an SMBsetatr */
-int reply_setatr(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
+int reply_setatr(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 {
 	pstring fname;
 	int cnum;
@@ -477,7 +479,8 @@ int reply_setatr(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 }
 
 /* Reply to an SMBdskattr */
-int reply_dskattr(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
+int reply_dskattr(char *inbuf, char *outbuf, size_t inbuf_len,
+                  size_t outbuf_len)
 {
 	int cnum;
 	int outsize = 0;
@@ -530,7 +533,7 @@ static void make_dir_struct(char *buf, char *mask, char *fname,
 }
 
 /* Reply to a search: SMBsearch, SMBffirst or SMBfunique. */
-int reply_search(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
+int reply_search(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 {
 	pstring mask;
 	pstring directory;
@@ -754,7 +757,7 @@ search_empty:
 }
 
 /* Reply to an SMBfclose (stop directory search) */
-int reply_fclose(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
+int reply_fclose(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 {
 	int cnum;
 	int outsize = 0;
@@ -787,7 +790,7 @@ int reply_fclose(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 }
 
 /* Reply to an SMBopen */
-int reply_open(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
+int reply_open(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 {
 	pstring fname;
 	int cnum;
@@ -862,7 +865,8 @@ int reply_open(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 }
 
 /* Reply to an SMBopenX */
-int reply_open_and_X(char *inbuf, char *outbuf, int length, int bufsize)
+int reply_open_and_X(char *inbuf, char *outbuf, size_t inbuf_len,
+                     size_t outbuf_len)
 {
 	pstring fname;
 	int cnum = SVAL(inbuf, smb_tid);
@@ -954,21 +958,22 @@ int reply_open_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 
 	chain_fnum = fnum;
 
-	return chain_reply(inbuf, outbuf, length, bufsize);
+	return chain_reply(inbuf, outbuf, inbuf_len, outbuf_len);
 }
 
 /* Reply to an SMBulogoffX */
-int reply_ulogoffX(char *inbuf, char *outbuf, int length, int bufsize)
+int reply_ulogoffX(char *inbuf, char *outbuf, size_t inbuf_len,
+                   size_t outbuf_len)
 {
 	set_message(outbuf, 2, 0, true);
 
 	DEBUG("\n");
 
-	return chain_reply(inbuf, outbuf, length, bufsize);
+	return chain_reply(inbuf, outbuf, inbuf_len, outbuf_len);
 }
 
 /* Reply to an SMBmknew or an SMBcreate */
-int reply_mknew(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
+int reply_mknew(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 {
 	pstring fname;
 	int cnum, com;
@@ -1041,7 +1046,7 @@ int reply_mknew(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 }
 
 /* Reply to an SMBctemp */
-int reply_ctemp(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
+int reply_ctemp(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 {
 	pstring fname;
 	pstring fname2;
@@ -1123,7 +1128,7 @@ static bool can_delete(char *fname, int cnum, int dirtype)
 }
 
 /* Reply to an SMBunlink */
-int reply_unlink(char *inbuf, char *outbuf, int dum_size, int dum_bufsize)
+int reply_unlink(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 {
 	int outsize = 0;
 	pstring name;
@@ -1301,7 +1306,8 @@ static int transfer_file(int infd, int outfd, int n, char *header, int headlen,
 }
 
 /* Reply to an SMBreadbraw (core+ protocol) */
-int reply_readbraw(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
+int reply_readbraw(char *inbuf, char *outbuf, size_t inbuf_len,
+                   size_t outbuf_len)
 {
 	int cnum, maxcount, mincount, fnum;
 	int nread = 0, size, sizeneeded;
@@ -1358,7 +1364,8 @@ int reply_readbraw(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 }
 
 /* Reply to an SMBlockread (core+ protocol) */
-int reply_lockread(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
+int reply_lockread(char *inbuf, char *outbuf, size_t inbuf_len,
+                   size_t outbuf_len)
 {
 	int cnum, fnum;
 	int nread = -1;
@@ -1402,7 +1409,7 @@ int reply_lockread(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 }
 
 /* Reply to an SMBread */
-int reply_read(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
+int reply_read(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 {
 	int cnum, numtoread, fnum;
 	int nread = 0;
@@ -1443,7 +1450,8 @@ int reply_read(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 }
 
 /* Reply to an SMBreadX */
-int reply_read_and_X(char *inbuf, char *outbuf, int length, int bufsize)
+int reply_read_and_X(char *inbuf, char *outbuf, size_t inbuf_len,
+                     size_t outbuf_len)
 {
 	int fnum = GETFNUM(inbuf, smb_vwv2);
 	uint32_t smb_offs = IVAL(inbuf, smb_vwv3);
@@ -1476,11 +1484,12 @@ int reply_read_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 
 	chain_fnum = fnum;
 
-	return chain_reply(inbuf, outbuf, length, bufsize);
+	return chain_reply(inbuf, outbuf, inbuf_len, outbuf_len);
 }
 
 /* Reply to an SMBwritebraw (core+ or LANMAN1.0 protocol) */
-int reply_writebraw(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
+int reply_writebraw(char *inbuf, char *outbuf, size_t inbuf_len,
+                    size_t outbuf_len)
 {
 	int nwritten = 0;
 	int total_written = 0;
@@ -1579,7 +1588,8 @@ int reply_writebraw(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 }
 
 /* Reply to an SMBwriteunlock (core+) */
-int reply_writeunlock(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
+int reply_writeunlock(char *inbuf, char *outbuf, size_t inbuf_len,
+                      size_t outbuf_len)
 {
 	int cnum, fnum;
 	int nwritten = -1;
@@ -1627,7 +1637,7 @@ int reply_writeunlock(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 }
 
 /* Reply to an SMBwrite */
-int reply_write(char *inbuf, char *outbuf, int dum1, int dum2)
+int reply_write(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 {
 	int cnum, numtowrite, fnum;
 	int nwritten = -1;
@@ -1676,7 +1686,8 @@ int reply_write(char *inbuf, char *outbuf, int dum1, int dum2)
 }
 
 /* Reply to an SMBwriteX */
-int reply_write_and_X(char *inbuf, char *outbuf, int length, int bufsize)
+int reply_write_and_X(char *inbuf, char *outbuf, size_t inbuf_len,
+                      size_t outbuf_len)
 {
 	int fnum = GETFNUM(inbuf, smb_vwv2);
 	uint32_t smb_offs = IVAL(inbuf, smb_vwv3);
@@ -1722,11 +1733,11 @@ int reply_write_and_X(char *inbuf, char *outbuf, int length, int bufsize)
 
 	chain_fnum = fnum;
 
-	return chain_reply(inbuf, outbuf, length, bufsize);
+	return chain_reply(inbuf, outbuf, inbuf_len, outbuf_len);
 }
 
 /* Reply to an SMBlseek */
-int reply_lseek(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
+int reply_lseek(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 {
 	int cnum, fnum;
 	uint32_t startpos;
@@ -1770,7 +1781,7 @@ int reply_lseek(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 }
 
 /* Reply to an SMBflush */
-int reply_flush(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
+int reply_flush(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 {
 	int cnum, fnum;
 	int outsize = set_message(outbuf, 0, 0, true);
@@ -1788,7 +1799,7 @@ int reply_flush(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 }
 
 /* Reply to an SMBexit */
-int reply_exit(char *inbuf, char *outbuf, int size, int bufsize)
+int reply_exit(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 {
 	int outsize = set_message(outbuf, 0, 0, true);
 	DEBUG("\n");
@@ -1797,7 +1808,7 @@ int reply_exit(char *inbuf, char *outbuf, int size, int bufsize)
 }
 
 /* Reply to an SMBclose */
-int reply_close(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
+int reply_close(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 {
 	int fnum, cnum;
 	int outsize = 0;
@@ -1835,7 +1846,8 @@ int reply_close(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 }
 
 /* Reply to an SMBwriteclose (Core+ protocol) */
-int reply_writeclose(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
+int reply_writeclose(char *inbuf, char *outbuf, size_t inbuf_len,
+                     size_t outbuf_len)
 {
 	int cnum, numtowrite, fnum;
 	int nwritten = -1;
@@ -1877,7 +1889,7 @@ int reply_writeclose(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 }
 
 /* Reply to an SMBlock */
-int reply_lock(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
+int reply_lock(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 {
 	int fnum, cnum;
 	int outsize = set_message(outbuf, 0, 0, true);
@@ -1904,7 +1916,7 @@ int reply_lock(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 }
 
 /* Reply to an SMBunlock */
-int reply_unlock(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
+int reply_unlock(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 {
 	int fnum, cnum;
 	int outsize = set_message(outbuf, 0, 0, true);
@@ -1931,7 +1943,7 @@ int reply_unlock(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 }
 
 /* Reply to an SMBtdis */
-int reply_tdis(char *inbuf, char *outbuf, int size, int bufsize)
+int reply_tdis(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 {
 	int cnum;
 	int outsize = set_message(outbuf, 0, 0, true);
@@ -1953,7 +1965,7 @@ int reply_tdis(char *inbuf, char *outbuf, int size, int bufsize)
 }
 
 /* Reply to an SMBecho */
-int reply_echo(char *inbuf, char *outbuf, int size, int bufsize)
+int reply_echo(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 {
 	int cnum;
 	int smb_reverb = SVAL(inbuf, smb_vwv0);
@@ -1990,13 +2002,14 @@ int reply_echo(char *inbuf, char *outbuf, int size, int bufsize)
 }
 
 /* Reply to an SMBsplopen, SMBsplclose, SMBsplretq or SMBsplwr */
-int reply_printfn(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
+int reply_printfn(char *inbuf, char *outbuf, size_t inbuf_len,
+                  size_t outbuf_len)
 {
 	return ERROR_CODE(ERRDOS, ERRnoaccess);
 }
 
 /* Reply to an SMBmkdir */
-int reply_mkdir(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
+int reply_mkdir(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 {
 	pstring directory;
 	int cnum;
@@ -2026,7 +2039,7 @@ int reply_mkdir(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 }
 
 /* Reply to an SMBrmdir */
-int reply_rmdir(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
+int reply_rmdir(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 {
 	pstring directory;
 	int cnum;
@@ -2142,7 +2155,7 @@ static bool can_rename(char *fname, int cnum)
 }
 
 /* Reply to an SMBmv */
-int reply_mv(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
+int reply_mv(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 {
 	int outsize = 0;
 	pstring name;
@@ -2396,7 +2409,7 @@ static bool copy_file(char *src, char *dest1, int cnum, int ofun, int count,
 }
 
 /* Reply to an SMBcopy */
-int reply_copy(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
+int reply_copy(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 {
 	int outsize = 0;
 	pstring name;
@@ -2526,7 +2539,7 @@ int reply_copy(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 }
 
 /* Reply to a pSETDIR */
-int reply_setdir(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
+int reply_setdir(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 {
 	int cnum = SVAL(inbuf, smb_tid);
 
@@ -2536,7 +2549,8 @@ int reply_setdir(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 }
 
 /* Reply to an SMBlockingX */
-int reply_lockingX(char *inbuf, char *outbuf, int length, int bufsize)
+int reply_lockingX(char *inbuf, char *outbuf, size_t inbuf_len,
+                   size_t outbuf_len)
 {
 	int fnum = GETFNUM(inbuf, smb_vwv2);
 	unsigned char locktype = CVAL(inbuf, smb_vwv3);
@@ -2607,17 +2621,19 @@ int reply_lockingX(char *inbuf, char *outbuf, int length, int bufsize)
 
 	chain_fnum = fnum;
 
-	return chain_reply(inbuf, outbuf, length, bufsize);
+	return chain_reply(inbuf, outbuf, inbuf_len, outbuf_len);
 }
 
 /* Reply to an SMBreadbmpx (read block multiplex) request */
-int reply_readbmpx(char *inbuf, char *outbuf, int length, int bufsize)
+int reply_readbmpx(char *inbuf, char *outbuf, size_t inbuf_len,
+                   size_t outbuf_len)
 {
 	return ERROR_CODE(ERRSRV, ERRuseSTD);
 }
 
 /* Reply to an SMBwritebmpx (write block multiplex primary) request */
-int reply_writebmpx(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
+int reply_writebmpx(char *inbuf, char *outbuf, size_t inbuf_len,
+                    size_t outbuf_len)
 {
 	int cnum, numtowrite, fnum;
 	int nwritten = -1;
@@ -2696,7 +2712,8 @@ int reply_writebmpx(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 }
 
 /* Reply to an SMBwritebs (write block multiplex secondary) request */
-int reply_writebs(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
+int reply_writebs(char *inbuf, char *outbuf, size_t inbuf_len,
+                  size_t outbuf_len)
 {
 	int cnum, numtowrite, fnum;
 	int nwritten = -1;
@@ -2771,7 +2788,8 @@ int reply_writebs(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 }
 
 /* Reply to an SMBsetattrE */
-int reply_setattrE(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
+int reply_setattrE(char *inbuf, char *outbuf, size_t inbuf_len,
+                   size_t outbuf_len)
 {
 	int cnum, fnum;
 	struct utimbuf unix_times;
@@ -2818,7 +2836,8 @@ int reply_setattrE(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
 }
 
 /* Reply to an SMBgetattrE */
-int reply_getattrE(char *inbuf, char *outbuf, int dum_size, int dum_buffsize)
+int reply_getattrE(char *inbuf, char *outbuf, size_t inbuf_len,
+                   size_t outbuf_len)
 {
 	int cnum, fnum;
 	struct stat sbuf;

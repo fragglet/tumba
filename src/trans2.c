@@ -52,7 +52,7 @@
   set correctly for the type of call.
   HACK ! Always assumes smb_setup field is zero.
 */
-static int send_trans2_replies(char *outbuf, int bufsize, char *params,
+static int send_trans2_replies(char *outbuf, size_t outbuf_len, char *params,
                                int paramsize, char *pdata, int datasize)
 {
 	/* As we are using a protocol > LANMAN1 then the max_send
@@ -90,8 +90,8 @@ static int send_trans2_replies(char *outbuf, int bufsize, char *params,
 	/* Space is bufsize minus Netbios over TCP header minus SMB header */
 	/* The alignment_offset is to align the param bytes on an even byte
 	   boundary. NT 4.0 Beta needs this to work correctly. */
-	useable_space = bufsize - (smb_buf(outbuf) + alignment_offset +
-	                           data_alignment_offset - outbuf);
+	useable_space = outbuf_len - (smb_buf(outbuf) + alignment_offset +
+	                              data_alignment_offset - outbuf);
 
 	/* useable_space can never be more than max_send minus the
 	   alignment offset. */
@@ -191,8 +191,8 @@ static int send_trans2_replies(char *outbuf, int bufsize, char *params,
 }
 
 /* Reply to a TRANSACT2_OPEN */
-static int call_trans2open(char *inbuf, char *outbuf, int bufsize, int cnum,
-                           char **pparams, char **ppdata)
+static int call_trans2open(char *inbuf, char *outbuf, size_t outbuf_len,
+                           int cnum, char **pparams, char **ppdata)
 {
 	char *params = *pparams;
 	int16_t open_mode = SVAL(params, 2);
@@ -271,7 +271,7 @@ static int call_trans2open(char *inbuf, char *outbuf, int bufsize, int cnum,
 	SIVAL(params, 20, inode);
 
 	/* Send the required number of replies */
-	send_trans2_replies(outbuf, bufsize, params, 28, *ppdata, 0);
+	send_trans2_replies(outbuf, outbuf_len, params, 28, *ppdata, 0);
 
 	return -1;
 }
@@ -611,7 +611,7 @@ void mask_convert(char *mask)
 }
 
 /* Reply to a TRANS2_FINDFIRST */
-static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
+static int call_trans2findfirst(char *inbuf, char *outbuf, size_t outbuf_len,
                                 int cnum, char **pparams, char **ppdata)
 {
 	/* We must be careful here that we don't return more than the
@@ -762,7 +762,7 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 	SSVAL(params, 6, 0); /* Never an EA error */
 	SSVAL(params, 8, last_name_off);
 
-	send_trans2_replies(outbuf, bufsize, params, 10, pdata,
+	send_trans2_replies(outbuf, outbuf_len, params, 10, pdata,
 	                    PTR_DIFF(p, pdata));
 
 	if (!*directory && dptr_path(dptr_num))
@@ -777,8 +777,8 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, int bufsize,
 }
 
 /* Reply to a TRANS2_FINDNEXT */
-static int call_trans2findnext(char *inbuf, char *outbuf, int length,
-                               int bufsize, int cnum, char **pparams,
+static int call_trans2findnext(char *inbuf, char *outbuf, size_t inbuf_len,
+                               size_t outbuf_len, int cnum, char **pparams,
                                char **ppdata)
 {
 	/* We must be careful here that we don't return more than the
@@ -977,7 +977,7 @@ static int call_trans2findnext(char *inbuf, char *outbuf, int length,
 	SSVAL(params, 4, 0); /* Never an EA error */
 	SSVAL(params, 6, last_name_off);
 
-	send_trans2_replies(outbuf, bufsize, params, 8, pdata,
+	send_trans2_replies(outbuf, outbuf_len, params, 8, pdata,
 	                    PTR_DIFF(p, pdata));
 
 	if (!*directory && dptr_path(dptr_num))
@@ -992,8 +992,8 @@ static int call_trans2findnext(char *inbuf, char *outbuf, int length,
 }
 
 /* Reply to a TRANS2_QFSINFO (query filesystem info) */
-static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
-                              int bufsize, int cnum, char **pparams,
+static int call_trans2qfsinfo(char *inbuf, char *outbuf, size_t inbuf_len,
+                              size_t outbuf_len, int cnum, char **pparams,
                               char **ppdata)
 {
 	int max_data_bytes = SVAL(inbuf, smb_mdrcnt);
@@ -1092,7 +1092,7 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
 		return ERROR_CODE(ERRDOS, ERRunknownlevel);
 	}
 
-	send_trans2_replies(outbuf, bufsize, params, 0, pdata, data_len);
+	send_trans2_replies(outbuf, outbuf_len, params, 0, pdata, data_len);
 
 	DEBUG("%s info_level =%d\n", smb_fn_name(CVAL(inbuf, smb_com)),
 	      info_level);
@@ -1101,8 +1101,8 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, int length,
 }
 
 /* Reply to a TRANS2_SETFSINFO (set filesystem info) */
-static int call_trans2setfsinfo(char *inbuf, char *outbuf, int length,
-                                int bufsize, int cnum, char **pparams,
+static int call_trans2setfsinfo(char *inbuf, char *outbuf, size_t inbuf_len,
+                                size_t outbuf_len, int cnum, char **pparams,
                                 char **ppdata)
 {
 	/* Just say yes we did it - there is nothing that
@@ -1118,8 +1118,8 @@ static int call_trans2setfsinfo(char *inbuf, char *outbuf, int length,
 }
 
 /* Reply to a TRANS2_QFILEINFO (query file info by fileid) */
-static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
-                                    int bufsize, int cnum, char **pparams,
+static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, size_t inbuf_len,
+                                    size_t outbuf_len, int cnum, char **pparams,
                                     char **ppdata, int total_data)
 {
 	int max_data_bytes = SVAL(inbuf, smb_mdrcnt);
@@ -1337,15 +1337,16 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, int length,
 		return ERROR_CODE(ERRDOS, ERRunknownlevel);
 	}
 
-	send_trans2_replies(outbuf, bufsize, params, 2, *ppdata, data_size);
+	send_trans2_replies(outbuf, outbuf_len, params, 2, *ppdata, data_size);
 
 	return -1;
 }
 
 /* Reply to a TRANS2_SETFILEINFO (set file info by fileid) */
-static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
-                                      int bufsize, int cnum, char **pparams,
-                                      char **ppdata, int total_data)
+static int call_trans2setfilepathinfo(char *inbuf, char *outbuf,
+                                      size_t inbuf_len, size_t outbuf_len,
+                                      int cnum, char **pparams, char **ppdata,
+                                      int total_data)
 {
 	char *params = *pparams;
 	char *pdata = *ppdata;
@@ -1527,14 +1528,15 @@ static int call_trans2setfilepathinfo(char *inbuf, char *outbuf, int length,
 
 	SSVAL(params, 0, 0);
 
-	send_trans2_replies(outbuf, bufsize, params, 2, *ppdata, 0);
+	send_trans2_replies(outbuf, outbuf_len, params, 2, *ppdata, 0);
 
 	return -1;
 }
 
 /* Reply to a TRANS2_MKDIR (make directory with extended attributes). */
-static int call_trans2mkdir(char *inbuf, char *outbuf, int length, int bufsize,
-                            int cnum, char **pparams, char **ppdata)
+static int call_trans2mkdir(char *inbuf, char *outbuf, size_t inbuf_len,
+                            size_t outbuf_len, int cnum, char **pparams,
+                            char **ppdata)
 {
 	char *params = *pparams;
 	pstring directory;
@@ -1565,16 +1567,16 @@ static int call_trans2mkdir(char *inbuf, char *outbuf, int length, int bufsize,
 
 	SSVAL(params, 0, 0);
 
-	send_trans2_replies(outbuf, bufsize, params, 2, *ppdata, 0);
+	send_trans2_replies(outbuf, outbuf_len, params, 2, *ppdata, 0);
 
 	return -1;
 }
 
 /* Reply to a TRANS2_FINDNOTIFYFIRST (start monitoring a directory for
  * changes). We don't actually do this - we just send a null response. */
-static int call_trans2findnotifyfirst(char *inbuf, char *outbuf, int length,
-                                      int bufsize, int cnum, char **pparams,
-                                      char **ppdata)
+static int call_trans2findnotifyfirst(char *inbuf, char *outbuf,
+                                      size_t inbuf_len, size_t outbuf_len,
+                                      int cnum, char **pparams, char **ppdata)
 {
 	static uint16_t fnf_handle = 257;
 	char *params = *pparams;
@@ -1601,16 +1603,16 @@ static int call_trans2findnotifyfirst(char *inbuf, char *outbuf, int length,
 	if (fnf_handle == 0)
 		fnf_handle = 257;
 
-	send_trans2_replies(outbuf, bufsize, params, 6, *ppdata, 0);
+	send_trans2_replies(outbuf, outbuf_len, params, 6, *ppdata, 0);
 
 	return -1;
 }
 
 /* Reply to a TRANS2_FINDNOTIFYNEXT (continue monitoring a directory for
  * changes). Currently this does nothing. */
-static int call_trans2findnotifynext(char *inbuf, char *outbuf, int length,
-                                     int bufsize, int cnum, char **pparams,
-                                     char **ppdata)
+static int call_trans2findnotifynext(char *inbuf, char *outbuf,
+                                     size_t inbuf_len, size_t outbuf_len,
+                                     int cnum, char **pparams, char **ppdata)
 {
 	char *params;
 
@@ -1619,13 +1621,14 @@ static int call_trans2findnotifynext(char *inbuf, char *outbuf, int length,
 	SSVAL(params, 0, 0); /* No changes */
 	SSVAL(params, 2, 0); /* No EA errors */
 
-	send_trans2_replies(outbuf, bufsize, params, 4, *ppdata, 0);
+	send_trans2_replies(outbuf, outbuf_len, params, 4, *ppdata, 0);
 
 	return -1;
 }
 
 /* Reply to a SMBfindclose (stop trans2 directory search) */
-int reply_findclose(char *inbuf, char *outbuf, int length, int bufsize)
+int reply_findclose(char *inbuf, char *outbuf, size_t inbuf_len,
+                    size_t outbuf_len)
 {
 	int cnum;
 	int outsize = 0;
@@ -1645,7 +1648,8 @@ int reply_findclose(char *inbuf, char *outbuf, int length, int bufsize)
 }
 
 /* Reply to a SMBfindnclose (stop FINDNOTIFYFIRST directory search) */
-int reply_findnclose(char *inbuf, char *outbuf, int length, int bufsize)
+int reply_findnclose(char *inbuf, char *outbuf, size_t inbuf_len,
+                     size_t outbuf_len)
 {
 	int cnum;
 	int outsize = 0;
@@ -1668,14 +1672,15 @@ int reply_findnclose(char *inbuf, char *outbuf, int length, int bufsize)
 }
 
 /* Reply to a SMBtranss2 - just ignore it! */
-int reply_transs2(char *inbuf, char *outbuf, int length, int bufsize)
+int reply_transs2(char *inbuf, char *outbuf, size_t inbuf_len,
+                  size_t outbuf_len)
 {
-	DEBUG("Ignoring transs2 of length %d\n", length);
+	DEBUG("Ignoring transs2 of length %d\n", (int) inbuf_len);
 	return -1;
 }
 
 /* Reply to a SMBtrans2 */
-int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize)
+int reply_trans2(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 {
 	int outsize = 0;
 	int cnum = SVAL(inbuf, smb_tid);
@@ -1720,7 +1725,7 @@ int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize)
 		       num_params_sofar < total_params) {
 			bool ret;
 
-			ret = receive_next_smb(Client, inbuf, bufsize,
+			ret = receive_next_smb(Client, inbuf, outbuf_len,
 			                       SMB_SECONDARY_WAIT);
 
 			if (!ret || CVAL(inbuf, smb_com) != SMBtranss2) {
@@ -1767,48 +1772,48 @@ int reply_trans2(char *inbuf, char *outbuf, int length, int bufsize)
 	/* Now we must call the relevant TRANS2 function */
 	switch (tran_call) {
 	case TRANSACT2_OPEN:
-		outsize = call_trans2open(inbuf, outbuf, bufsize, cnum, &params,
-		                          &data);
+		outsize = call_trans2open(inbuf, outbuf, outbuf_len, cnum,
+		                          &params, &data);
 		break;
 	case TRANSACT2_FINDFIRST:
-		outsize = call_trans2findfirst(inbuf, outbuf, bufsize, cnum,
+		outsize = call_trans2findfirst(inbuf, outbuf, outbuf_len, cnum,
 		                               &params, &data);
 		break;
 	case TRANSACT2_FINDNEXT:
-		outsize = call_trans2findnext(inbuf, outbuf, length, bufsize,
-		                              cnum, &params, &data);
+		outsize = call_trans2findnext(inbuf, outbuf, inbuf_len,
+		                              outbuf_len, cnum, &params, &data);
 		break;
 	case TRANSACT2_QFSINFO:
-		outsize = call_trans2qfsinfo(inbuf, outbuf, length, bufsize,
-		                             cnum, &params, &data);
+		outsize = call_trans2qfsinfo(inbuf, outbuf, inbuf_len,
+		                             outbuf_len, cnum, &params, &data);
 		break;
 	case TRANSACT2_SETFSINFO:
-		outsize = call_trans2setfsinfo(inbuf, outbuf, length, bufsize,
-		                               cnum, &params, &data);
+		outsize = call_trans2setfsinfo(
+		    inbuf, outbuf, inbuf_len, outbuf_len, cnum, &params, &data);
 		break;
 	case TRANSACT2_QPATHINFO:
 	case TRANSACT2_QFILEINFO:
-		outsize =
-		    call_trans2qfilepathinfo(inbuf, outbuf, length, bufsize,
-		                             cnum, &params, &data, total_data);
+		outsize = call_trans2qfilepathinfo(inbuf, outbuf, inbuf_len,
+		                                   outbuf_len, cnum, &params,
+		                                   &data, total_data);
 		break;
 	case TRANSACT2_SETPATHINFO:
 	case TRANSACT2_SETFILEINFO:
-		outsize = call_trans2setfilepathinfo(inbuf, outbuf, length,
-		                                     bufsize, cnum, &params,
+		outsize = call_trans2setfilepathinfo(inbuf, outbuf, inbuf_len,
+		                                     outbuf_len, cnum, &params,
 		                                     &data, total_data);
 		break;
 	case TRANSACT2_FINDNOTIFYFIRST:
 		outsize = call_trans2findnotifyfirst(
-		    inbuf, outbuf, length, bufsize, cnum, &params, &data);
+		    inbuf, outbuf, inbuf_len, outbuf_len, cnum, &params, &data);
 		break;
 	case TRANSACT2_FINDNOTIFYNEXT:
 		outsize = call_trans2findnotifynext(
-		    inbuf, outbuf, length, bufsize, cnum, &params, &data);
+		    inbuf, outbuf, inbuf_len, outbuf_len, cnum, &params, &data);
 		break;
 	case TRANSACT2_MKDIR:
-		outsize = call_trans2mkdir(inbuf, outbuf, length, bufsize, cnum,
-		                           &params, &data);
+		outsize = call_trans2mkdir(inbuf, outbuf, inbuf_len, outbuf_len,
+		                           cnum, &params, &data);
 		break;
 	default:
 		/* Error in request */

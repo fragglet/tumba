@@ -62,21 +62,6 @@ static bool fcntl_lock(int fd, int op, uint32_t offset, uint32_t count,
 
 	ret = fcntl(fd, op, &lock);
 
-	if (errno != 0)
-		INFO("fcntl lock gave errno %d (%s)\n", errno, strerror(errno));
-
-	/* a lock query */
-	if (op == F_GETLK) {
-		if (ret != -1 && lock.l_type != F_UNLCK && lock.l_pid != 0 &&
-		    lock.l_pid != getpid()) {
-			DEBUG("fd %d is locked by pid %d\n", fd, lock.l_pid);
-			return true;
-		}
-
-		/* it must be not locked or locked by me */
-		return false;
-	}
-
 	/* a lock set or unset */
 	if (ret == -1) {
 		DEBUG("lock failed at offset %d count %d op %d type %d (%s)\n",

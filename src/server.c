@@ -2116,7 +2116,8 @@ struct {
 };
 
 /* Reply to an SMBnegprot */
-static int reply_negprot(char *inbuf, char *outbuf, int size, int bufsize)
+static int reply_negprot(char *inbuf, char *outbuf, size_t inbuf_len,
+                         size_t outbuf_len)
 {
 	int outsize = set_message(outbuf, 1, 0, true);
 	int Index = 0;
@@ -2246,7 +2247,7 @@ force write permissions on print services.
 struct smb_message_struct {
 	int code;
 	char *name;
-	int (*fn)(char *, char *, int, int);
+	int (*fn)(char *, char *, size_t, size_t);
 	int flags;
 #if PROFILING
 	unsigned long time;
@@ -2362,8 +2363,8 @@ char *smb_fn_name(int type)
 }
 
 /* Do a switch on the message type, and return the response size */
-static int switch_message(int type, char *inbuf, char *outbuf, int size,
-                          int bufsize)
+static int switch_message(int type, char *inbuf, char *outbuf, size_t inbuf_len,
+                          size_t outbuf_len)
 {
 	const char *hdr;
 	static int pid = -1;
@@ -2436,8 +2437,8 @@ static int switch_message(int type, char *inbuf, char *outbuf, int size,
 
 			last_inbuf = inbuf;
 
-			outsize = smb_messages[match].fn(inbuf, outbuf, size,
-			                                 bufsize);
+			outsize = smb_messages[match].fn(inbuf, outbuf,
+			                                 inbuf_len, outbuf_len);
 		} else {
 			outsize = reply_unknown(inbuf, outbuf);
 		}
@@ -2465,7 +2466,7 @@ static int switch_message(int type, char *inbuf, char *outbuf, int size,
 }
 
 /* Construct a chained reply and add it to the already made reply */
-int chain_reply(char *inbuf, char *outbuf, int size, int bufsize)
+int chain_reply(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 {
 	static char *orig_inbuf;
 	static char *orig_outbuf;
@@ -2539,8 +2540,9 @@ int chain_reply(char *inbuf, char *outbuf, int size, int bufsize)
 	show_msg(inbuf2);
 
 	/* process the request */
-	outsize2 = switch_message(smb_com2, inbuf2, outbuf2, size - chain_size,
-	                          bufsize - chain_size);
+	outsize2 =
+	    switch_message(smb_com2, inbuf2, outbuf2, inbuf_len - chain_size,
+	                   outbuf_len - chain_size);
 
 	/* copy the new reply and request headers over the old ones, but
 	   preserve the smb_com field */
@@ -2559,7 +2561,8 @@ int chain_reply(char *inbuf, char *outbuf, int size, int bufsize)
 }
 
 /* Construct a reply to the incoming packet */
-static int construct_reply(char *inbuf, char *outbuf, int size, int bufsize)
+static int construct_reply(char *inbuf, char *outbuf, size_t inbuf_len,
+                           size_t outbuf_len)
 {
 	int type = CVAL(inbuf, smb_com);
 	int outsize = 0;
@@ -2591,7 +2594,7 @@ static int construct_reply(char *inbuf, char *outbuf, int size, int bufsize)
 	SSVAL(outbuf, smb_uid, SVAL(inbuf, smb_uid));
 	SSVAL(outbuf, smb_mid, SVAL(inbuf, smb_mid));
 
-	outsize = switch_message(type, inbuf, outbuf, size, bufsize);
+	outsize = switch_message(type, inbuf, outbuf, inbuf_len, outbuf_len);
 
 	outsize += chain_size;
 
