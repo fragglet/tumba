@@ -13,6 +13,7 @@
 #ifndef _TRANS2_H_
 #define _TRANS2_H_
 
+#include <stddef.h>
 #include <sys/param.h>
 
 /* Define the structures needed for the trans2 calls. */
