@@ -753,7 +753,7 @@ static int named_pipe(int cnum, char *outbuf, char *name, uint16_t *setup,
 }
 
 /* Reply to a SMBtrans */
-int reply_trans(char *inbuf, char *outbuf, int size, int bufsize)
+int reply_trans(char *inbuf, char *outbuf, int inbuf_len, int outbuf_len)
 {
 	fstring name;
 
@@ -806,7 +806,7 @@ int reply_trans(char *inbuf, char *outbuf, int size, int bufsize)
 		bool ret;
 		int pcnt, poff, dcnt, doff, pdisp, ddisp;
 
-		ret = receive_next_smb(Client, inbuf, bufsize,
+		ret = receive_next_smb(Client, inbuf, outbuf_len,
 		                       SMB_SECONDARY_WAIT);
 
 		if (!ret || CVAL(inbuf, smb_com) != SMBtrans) {

@@ -9,4 +9,4 @@
  * FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-int reply_trans(char *inbuf, char *outbuf, int size, int bufsize);
+int reply_trans(char *inbuf, char *outbuf, int inbuf_len, int outbuf_len);

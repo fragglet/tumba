@@ -163,4 +163,4 @@ int find_free_file(void);
 void close_cnum(int cnum);
 void exit_server(char *reason);
 char *smb_fn_name(int type);
-int chain_reply(char *inbuf, char *outbuf, int size, int bufsize);
+int chain_reply(char *inbuf, char *outbuf, int inbuf_len, int outbuf_len);
