@@ -753,7 +753,7 @@ static int named_pipe(int cnum, char *outbuf, char *name, uint16_t *setup,
 }
 
 /* Reply to a SMBtrans */
-int reply_trans(char *inbuf, char *outbuf, int inbuf_len, int outbuf_len)
+int reply_trans(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 {
 	fstring name;
 

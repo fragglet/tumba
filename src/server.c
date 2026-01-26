@@ -2148,8 +2148,8 @@ struct {
 };
 
 /* Reply to an SMBnegprot */
-static int reply_negprot(char *inbuf, char *outbuf, int inbuf_len,
-                         int outbuf_len)
+static int reply_negprot(char *inbuf, char *outbuf, size_t inbuf_len,
+                         size_t outbuf_len)
 {
 	int outsize = set_message(outbuf, 1, 0, true);
 	int Index = 0;
@@ -2279,7 +2279,7 @@ force write permissions on print services.
 struct smb_message_struct {
 	int code;
 	char *name;
-	int (*fn)(char *, char *, int, int);
+	int (*fn)(char *, char *, size_t, size_t);
 	int flags;
 #if PROFILING
 	unsigned long time;
@@ -2395,8 +2395,8 @@ char *smb_fn_name(int type)
 }
 
 /* Do a switch on the message type, and return the response size */
-static int switch_message(int type, char *inbuf, char *outbuf, int inbuf_len,
-                          int outbuf_len)
+static int switch_message(int type, char *inbuf, char *outbuf, size_t inbuf_len,
+                          size_t outbuf_len)
 {
 	const char *hdr;
 	static int pid = -1;
@@ -2498,7 +2498,7 @@ static int switch_message(int type, char *inbuf, char *outbuf, int inbuf_len,
 }
 
 /* Construct a chained reply and add it to the already made reply */
-int chain_reply(char *inbuf, char *outbuf, int inbuf_len, int outbuf_len)
+int chain_reply(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 {
 	static char *orig_inbuf;
 	static char *orig_outbuf;
@@ -2593,8 +2593,8 @@ int chain_reply(char *inbuf, char *outbuf, int inbuf_len, int outbuf_len)
 }
 
 /* Construct a reply to the incoming packet */
-static int construct_reply(char *inbuf, char *outbuf, int inbuf_len,
-                           int outbuf_len)
+static int construct_reply(char *inbuf, char *outbuf, size_t inbuf_len,
+                           size_t outbuf_len)
 {
 	int type = CVAL(inbuf, smb_com);
 	int outsize = 0;
