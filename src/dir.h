@@ -15,7 +15,6 @@
 
 typedef struct dir_struct Dir;
 
-struct share;
 struct stat;
 
 void init_dptrs(void);
