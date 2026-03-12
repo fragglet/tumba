@@ -141,9 +141,9 @@ static void send_trans_reply(char *outbuf, char *data, char *param,
 }
 
 /* Get info level for a server list query */
-static bool check_server_info(int uLevel, char *id)
+static bool check_server_info(int info_level, char *id)
 {
-	switch (uLevel) {
+	switch (info_level) {
 	case 0:
 		if (strcmp(id, "B16") != 0)
 			return false;
@@ -166,11 +166,11 @@ static bool api_RNetServerEnum(int cnum, char *param, char *data, int mdrcnt,
 	char *str1 = param + 2;
 	char *str2 = skip_string(str1);
 	char *p = skip_string(str2);
-	int uLevel = SVAL(p, 0);
+	int info_level = SVAL(p, 0);
 
 	if (!string_has_prefix(str1, "WrLehD"))
 		return false;
-	if (!check_server_info(uLevel, str2))
+	if (!check_server_info(info_level, str2))
 		return false;
 
 	*rdata_len = 0;
@@ -187,9 +187,9 @@ static bool api_RNetServerEnum(int cnum, char *param, char *data, int mdrcnt,
 }
 
 /* Get info about a share */
-static bool check_share_info(int uLevel, char *id)
+static bool check_share_info(int info_level, char *id)
 {
-	switch (uLevel) {
+	switch (info_level) {
 	case 0:
 		if (strcmp(id, "B13") != 0)
 			return false;
@@ -212,7 +212,7 @@ static bool check_share_info(int uLevel, char *id)
 	return true;
 }
 
-static int fill_share_info(int cnum, const struct share *share, int uLevel,
+static int fill_share_info(int cnum, const struct share *share, int info_level,
                            char **buf, int *buflen, char **stringbuf,
                            int *stringspace, char *baseaddr)
 {
@@ -222,7 +222,7 @@ static int fill_share_info(int cnum, const struct share *share, int uLevel,
 	int l2;
 	int len;
 
-	switch (uLevel) {
+	switch (info_level) {
 	case 0:
 		struct_len = 13;
 		break;
@@ -241,9 +241,9 @@ static int fill_share_info(int cnum, const struct share *share, int uLevel,
 
 	if (!buf) {
 		len = 0;
-		if (uLevel > 0)
+		if (info_level > 0)
 			len += strlen(share->description) + 1;
-		if (uLevel > 1)
+		if (info_level > 1)
 			len += strlen(share->path) + 1;
 		if (buflen)
 			*buflen = struct_len;
@@ -268,7 +268,7 @@ static int fill_share_info(int cnum, const struct share *share, int uLevel,
 
 	strlcpy(p, share->name, 14);
 
-	if (uLevel > 0) {
+	if (info_level > 0) {
 		int type;
 		CVAL(p, 13) = 0;
 		type = STYPE_DISKTREE;
@@ -279,7 +279,7 @@ static int fill_share_info(int cnum, const struct share *share, int uLevel,
 		len += copy_and_advance(&p2, share->description, &l2);
 	}
 
-	if (uLevel > 1) {
+	if (info_level > 1) {
 		SSVAL(p, 20,
 		      ACCESS_READ | ACCESS_WRITE |
 		          ACCESS_CREATE);             /* permissions */
@@ -291,7 +291,7 @@ static int fill_share_info(int cnum, const struct share *share, int uLevel,
 		       SHPWLEN + 2); /* passwd (reserved), pad field */
 	}
 
-	if (uLevel > 2) {
+	if (info_level > 2) {
 		memset(p + 40, 0, SHPWLEN + 2);
 		SSVAL(p, 50, 0);
 		SIVAL(p, 52, 0);
@@ -322,7 +322,7 @@ static bool api_RNetShareGetInfo(int cnum, char *param, char *data, int mdrcnt,
 	char *str2 = skip_string(str1);
 	char *netname = skip_string(str2);
 	char *p = skip_string(netname);
-	int uLevel = SVAL(p, 0);
+	int info_level = SVAL(p, 0);
 	const struct share *share = lookup_share(netname);
 
 	if (share == NULL) {
@@ -332,12 +332,13 @@ static bool api_RNetShareGetInfo(int cnum, char *param, char *data, int mdrcnt,
 	/* check it's a supported varient */
 	if (!string_has_prefix(str1, "zWrLh"))
 		return false;
-	if (!check_share_info(uLevel, str2))
+	if (!check_share_info(info_level, str2))
 		return false;
 
 	*rdata = REALLOC(*rdata, mdrcnt);
 	p = *rdata;
-	*rdata_len = fill_share_info(cnum, share, uLevel, &p, &mdrcnt, 0, 0, 0);
+	*rdata_len =
+	    fill_share_info(cnum, share, info_level, &p, &mdrcnt, 0, 0, 0);
 	if (*rdata_len < 0)
 		return false;
 
@@ -358,7 +359,7 @@ static bool api_RNetShareEnum(int cnum, char *param, char *data, int mdrcnt,
 	char *str1 = param + 2;
 	char *str2 = skip_string(str1);
 	char *p = skip_string(str2);
-	int uLevel = SVAL(p, 0);
+	int info_level = SVAL(p, 0);
 	int buf_len = SVAL(p, 2);
 	char *p2;
 	int total = 0;
@@ -369,15 +370,15 @@ static bool api_RNetShareEnum(int cnum, char *param, char *data, int mdrcnt,
 
 	if (!string_has_prefix(str1, "WrLeh"))
 		return false;
-	if (!check_share_info(uLevel, str2))
+	if (!check_share_info(info_level, str2))
 		return false;
 
 	data_len = fixed_len = string_len = 0;
 	for (i = 0; i < shares_count(); i++) {
 		const struct share *s = get_share(i);
 		total++;
-		data_len +=
-		    fill_share_info(cnum, s, uLevel, 0, &f_len, 0, &s_len, 0);
+		data_len += fill_share_info(cnum, s, info_level, 0, &f_len, 0,
+		                            &s_len, 0);
 		if (data_len <= buf_len) {
 			fixed_len += f_len;
 			string_len += s_len;
@@ -395,8 +396,8 @@ static bool api_RNetShareEnum(int cnum, char *param, char *data, int mdrcnt,
 	s_len = string_len;
 	for (i = 0; i < shares_count(); i++) {
 		const struct share *s = get_share(i);
-		if (fill_share_info(cnum, s, uLevel, &p, &f_len, &p2, &s_len,
-		                    *rdata) < 0) {
+		if (fill_share_info(cnum, s, info_level, &p, &f_len, &p2,
+		                    &s_len, *rdata) < 0) {
 			break;
 		}
 	}
@@ -409,7 +410,7 @@ static bool api_RNetShareEnum(int cnum, char *param, char *data, int mdrcnt,
 	SSVAL(*rparam, 6, total);
 
 	DEBUG("gave %d entries of %d (%d %d %d %d)\n", shares_count(), total,
-	      uLevel, buf_len, *rdata_len, mdrcnt);
+	      info_level, buf_len, *rdata_len, mdrcnt);
 	return true;
 }
 
@@ -465,16 +466,16 @@ static bool api_RNetServerGetInfo(int cnum, char *param, char *data, int mdrcnt,
 	char *str1 = param + 2;
 	char *str2 = skip_string(str1);
 	char *p = skip_string(str2);
-	int uLevel = SVAL(p, 0);
+	int info_level = SVAL(p, 0);
 	char *p2;
 	int struct_len;
 
-	DEBUG("level %d\n", uLevel);
+	DEBUG("level %d\n", info_level);
 
 	/* check it's a supported varient */
 	if (!string_has_prefix(str1, "WrLh"))
 		return false;
-	switch (uLevel) {
+	switch (info_level) {
 	case 0:
 		if (strcmp(str2, "B16") != 0)
 			return false;
@@ -518,12 +519,12 @@ static bool api_RNetServerGetInfo(int cnum, char *param, char *data, int mdrcnt,
 
 	p = *rdata;
 	p2 = p + struct_len;
-	if (uLevel != 20) {
+	if (info_level != 20) {
 		strlcpy(p, local_machine, 17);
 		strupper(p);
 	}
 	p += 16;
-	if (uLevel > 0) {
+	if (info_level > 0) {
 		SCVAL(p, 0, DEFAULT_MAJOR_VERSION);
 		SCVAL(p, 1, DEFAULT_MINOR_VERSION);
 		SIVAL(p, 2, SV_TYPE_WIN95_PLUS);
@@ -542,7 +543,7 @@ static bool api_RNetServerGetInfo(int cnum, char *param, char *data, int mdrcnt,
 			p2 = skip_string(p2);
 		}
 	}
-	if (uLevel > 1) {
+	if (info_level > 1) {
 		return false; /* not yet implemented */
 	}
 
