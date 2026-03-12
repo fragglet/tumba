@@ -122,6 +122,19 @@ void unix_format(char *fname)
 	}
 }
 
+bool string_has_prefix(const char *s, const char *prefix)
+{
+	return strncmp(s, prefix, strlen(prefix)) == 0;
+}
+
+bool string_has_suffix(const char *s, const char *suffix)
+{
+	size_t s_len = strlen(s);
+	size_t suffix_len = strlen(suffix);
+	return s_len >= suffix_len &&
+	       strcmp(s + s_len - suffix_len, suffix) == 0;
+}
+
 /* Skip past a string in a buffer */
 char *skip_string(char *buf)
 {
@@ -132,7 +145,7 @@ char *skip_string(char *buf)
 bool trim_string(char *s, char *front, char *back)
 {
 	bool ret = false;
-	while (front && *front && strncmp(s, front, strlen(front)) == 0) {
+	while (front && *front && string_has_prefix(s, front)) {
 		char *p = s;
 		ret = true;
 		while (1) {
@@ -141,8 +154,7 @@ bool trim_string(char *s, char *front, char *back)
 			p++;
 		}
 	}
-	while (back && *back && strlen(s) >= strlen(back) &&
-	       strncmp(s + strlen(s) - strlen(back), back, strlen(back)) == 0) {
+	while (back && *back && string_has_suffix(s, back)) {
 		ret = true;
 		s[strlen(s) - strlen(back)] = 0;
 	}
@@ -160,7 +172,7 @@ void unix_clean_name(char *s)
 	string_sub(s, "//", "/");
 
 	/* Remove leading ./ characters */
-	if (strncmp(s, "./", 2) == 0) {
+	if (string_has_prefix(s, "./")) {
 		trim_string(s, "./", NULL);
 		if (*s == 0)
 			pstrcpy(s, "./");
@@ -449,10 +461,8 @@ bool mask_match(char *str, char *regexp, bool trans2)
 				if (rp)
 					*rp = '\0';
 
-				if (cp1[strlen(cp1) - 1] == '*')
-					last_wcard_was_star = true;
-				else
-					last_wcard_was_star = false;
+				last_wcard_was_star =
+				    string_has_suffix(cp1, "*");
 
 				if (!do_match(cp2, cp1)) {
 					break;

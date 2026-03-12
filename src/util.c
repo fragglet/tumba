@@ -173,7 +173,7 @@ int log_output(const char *funcname, int linenum, int level, char *format_str,
 	fflush(log_file);
 
 	n = strlen(format_str);
-	if (n > 0 && format_str[strlen(format_str) - 1] == '\n') {
+	if (n > 0 && string_has_suffix(format_str, "\n")) {
 		log_start_of_line = true;
 	}
 

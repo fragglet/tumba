@@ -182,7 +182,7 @@ static int read_dosattrib(const char *path)
 	}
 	buf[nbytes] = '\0';
 
-	if (strncmp(buf, "0x", 2) != 0) {
+	if (string_has_prefix(buf, "0x")) {
 		/* TODO: Maybe support newer versions */
 		return 0;
 	}
@@ -479,7 +479,7 @@ bool unix_convert(char *name, int cnum, pstring saved_last_component,
 	   directory structure */
 
 	start = name;
-	while (strncmp(start, "./", 2) == 0)
+	while (string_has_prefix(start, "./"))
 		start += 2;
 
 	/* now match each part of the path name separately, trying the names
@@ -586,9 +586,8 @@ int sys_disk_free(char *path, int *bsize, int *dfree, int *dsize)
 
 static bool path_within(const char *path, const char *top)
 {
-	size_t top_len = strlen(top);
-	return strlen(path) >= top_len && strncmp(top, path, top_len) == 0 &&
-	       (path[top_len] == '/' || path[top_len] == '\0');
+	return strcmp(path, top) == 0 ||
+	       (string_has_prefix(path, top) && path[strlen(top)] == '/');
 }
 
 /* Returns true only if the path specified by `name` is contained entirely
@@ -1826,7 +1825,7 @@ int make_connection(char *service, char *dev)
 
 	/* if the request is as a printer and you can't print then refuse */
 	strupper(dev);
-	if (strncmp(dev, "LPT", 3) == 0) {
+	if (string_has_prefix(dev, "LPT")) {
 		WARNING("Attempt to connect to non-printer as a printer\n");
 		return -6;
 	}

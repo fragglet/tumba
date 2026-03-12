@@ -65,12 +65,6 @@ static int copy_and_advance(char **dst, char *src, int *n)
 	return l;
 }
 
-/* Check a API string for validity when we only need to check the prefix */
-static bool prefix_ok(char *str, char *prefix)
-{
-	return strncmp(str, prefix, strlen(prefix)) == 0;
-}
-
 static void send_trans_reply(char *outbuf, char *data, char *param,
                              uint16_t *setup, int ldata, int lparam, int lsetup)
 {
@@ -174,7 +168,7 @@ static bool api_RNetServerEnum(int cnum, char *param, char *data, int mdrcnt,
 	char *p = skip_string(str2);
 	int uLevel = SVAL(p, 0);
 
-	if (!prefix_ok(str1, "WrLehD"))
+	if (!string_has_prefix(str1, "WrLehD"))
 		return false;
 	if (!check_server_info(uLevel, str2))
 		return false;
@@ -336,7 +330,7 @@ static bool api_RNetShareGetInfo(int cnum, char *param, char *data, int mdrcnt,
 	}
 
 	/* check it's a supported varient */
-	if (!prefix_ok(str1, "zWrLh"))
+	if (!string_has_prefix(str1, "zWrLh"))
 		return false;
 	if (!check_share_info(uLevel, str2))
 		return false;
@@ -373,7 +367,7 @@ static bool api_RNetShareEnum(int cnum, char *param, char *data, int mdrcnt,
 	int data_len, fixed_len, string_len;
 	int f_len = 0, s_len = 0;
 
-	if (!prefix_ok(str1, "WrLeh"))
+	if (!string_has_prefix(str1, "WrLeh"))
 		return false;
 	if (!check_share_info(uLevel, str2))
 		return false;
@@ -478,7 +472,7 @@ static bool api_RNetServerGetInfo(int cnum, char *param, char *data, int mdrcnt,
 	DEBUG("level %d\n", uLevel);
 
 	/* check it's a supported varient */
-	if (!prefix_ok(str1, "WrLh"))
+	if (!string_has_prefix(str1, "WrLh"))
 		return false;
 	switch (uLevel) {
 	case 0:
@@ -854,7 +848,7 @@ int reply_trans(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 	DEBUG("trans <%s> data=%d params=%d setup=%d\n", name, tdscnt, tpscnt,
 	      suwcnt);
 
-	if (strncmp(name, "\\PIPE\\", strlen("\\PIPE\\")) == 0) {
+	if (string_has_prefix(name, "\\PIPE\\")) {
 		outsize = named_pipe(cnum, outbuf, name + strlen("\\PIPE\\"),
 		                     setup, data, params, suwcnt, tdscnt,
 		                     tpscnt, msrcnt, mdrcnt, mprcnt);
