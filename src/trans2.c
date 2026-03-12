@@ -77,7 +77,7 @@ static int send_trans2_replies(char *outbuf, size_t outbuf_len, char *params,
 	/* If there genuinely are no parameters or data to send just send
 	   the empty packet */
 	if (params_to_send == 0 && data_to_send == 0) {
-		send_smb(Client, outbuf);
+		send_smb(client_fd, outbuf);
 		return 0;
 	}
 
@@ -170,7 +170,7 @@ static int send_trans2_replies(char *outbuf, size_t outbuf_len, char *params,
 		      params_to_send, data_to_send, paramsize, datasize);
 
 		/* Send the packet */
-		send_smb(Client, outbuf);
+		send_smb(client_fd, outbuf);
 
 		pp += params_sent_thistime;
 		pd += data_sent_thistime;
@@ -1717,13 +1717,13 @@ int reply_trans2(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 		/* We need to send an interim response then receive the rest
 		   of the parameter/data bytes */
 		outsize = set_message(outbuf, 0, 0, true);
-		send_smb(Client, outbuf);
+		send_smb(client_fd, outbuf);
 
 		while (num_data_sofar < total_data ||
 		       num_params_sofar < total_params) {
 			bool ret;
 
-			ret = receive_next_smb(Client, inbuf, outbuf_len,
+			ret = receive_next_smb(client_fd, inbuf, outbuf_len,
 			                       SMB_SECONDARY_WAIT);
 
 			if (!ret || CVAL(inbuf, smb_com) != SMBtranss2) {

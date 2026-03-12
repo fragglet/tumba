@@ -101,7 +101,7 @@ static void send_trans_reply(char *outbuf, char *data, char *param,
 		SSVAL(outbuf, smb_vwv10 + i * sizeof(uint16_t), setup[i]);
 
 	show_msg(outbuf);
-	send_smb(Client, outbuf);
+	send_smb(client_fd, outbuf);
 
 	tot_data = this_ldata;
 	tot_param = this_lparam;
@@ -133,7 +133,7 @@ static void send_trans_reply(char *outbuf, char *data, char *param,
 		SSVAL(outbuf, smb_vwv9, 0);
 
 		show_msg(outbuf);
-		send_smb(Client, outbuf);
+		send_smb(client_fd, outbuf);
 
 		tot_data += this_ldata;
 		tot_param += this_lparam;
@@ -792,7 +792,7 @@ int reply_trans(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 		   of the parameter/data bytes */
 		outsize = set_message(outbuf, 0, 0, true);
 		show_msg(outbuf);
-		send_smb(Client, outbuf);
+		send_smb(client_fd, outbuf);
 	}
 
 	/* receive the rest of the trans packet */
@@ -800,7 +800,7 @@ int reply_trans(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 		bool ret;
 		int pcnt, poff, dcnt, doff, pdisp, ddisp;
 
-		ret = receive_next_smb(Client, inbuf, outbuf_len,
+		ret = receive_next_smb(client_fd, inbuf, outbuf_len,
 		                       SMB_SECONDARY_WAIT);
 
 		if (!ret || CVAL(inbuf, smb_com) != SMBtrans) {

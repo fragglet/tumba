@@ -52,7 +52,7 @@ int Protocol = PROTOCOL_COREPLUS;
 FILE *log_file = NULL;
 
 /* the client file descriptor */
-int Client = -1;
+int client_fd = -1;
 
 /* this is used by the chaining code */
 int chain_size = 0;

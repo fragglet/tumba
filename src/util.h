@@ -48,7 +48,7 @@
 
 struct stat;
 
-extern int Client;
+extern int client_fd;
 extern int smb_read_error;
 extern fstring local_machine;
 extern int LOGLEVEL;

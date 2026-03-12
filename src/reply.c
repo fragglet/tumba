@@ -1321,7 +1321,7 @@ int reply_readbraw(char *inbuf, char *outbuf, size_t inbuf_len,
 	if (!FNUM_OK(fnum, cnum) || !Files[fnum].can_read) {
 		DEBUG("fnum %d not open in readbraw - cache prime?\n", fnum);
 		_smb_setlen(header, 0);
-		transfer_file(0, Client, 0, header, 4, 0);
+		transfer_file(0, client_fd, 0, header, 4, 0);
 		return -1;
 	}
 
@@ -1349,7 +1349,7 @@ int reply_readbraw(char *inbuf, char *outbuf, size_t inbuf_len,
 		ret = 0;
 
 	_smb_setlen(header, ret);
-	transfer_file(0, Client, 0, header, 4 + ret, 0);
+	transfer_file(0, client_fd, 0, header, 4 + ret, 0);
 
 	DEBUG("finished\n");
 	return -1;
@@ -1538,10 +1538,10 @@ int reply_writebraw(char *inbuf, char *outbuf, size_t inbuf_len,
 	SSVALS(outbuf, smb_vwv0, -1);
 	outsize =
 	    set_message(outbuf, Protocol > PROTOCOL_COREPLUS ? 1 : 0, 0, true);
-	send_smb(Client, outbuf);
+	send_smb(client_fd, outbuf);
 
 	/* Now read the raw data into the buffer and write it */
-	if (read_smb_length(Client, inbuf, SMB_SECONDARY_WAIT) == -1) {
+	if (read_smb_length(client_fd, inbuf, SMB_SECONDARY_WAIT) == -1) {
 		exit_server("secondary writebraw failed");
 	}
 
@@ -1554,7 +1554,7 @@ int reply_writebraw(char *inbuf, char *outbuf, size_t inbuf_len,
 		      nwritten, numtowrite);
 	}
 
-	nwritten = transfer_file(Client, Files[fnum].fd_ptr->fd, numtowrite,
+	nwritten = transfer_file(client_fd, Files[fnum].fd_ptr->fd, numtowrite,
 	                         NULL, 0, startpos + nwritten);
 	total_written += nwritten;
 
@@ -1985,7 +1985,7 @@ int reply_echo(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 
 		smb_setlen(outbuf, outsize - 4);
 
-		send_smb(Client, outbuf);
+		send_smb(client_fd, outbuf);
 	}
 
 	DEBUG("reverb=%d cnum=%d\n", smb_reverb, cnum);
@@ -2692,7 +2692,7 @@ int reply_writebmpx(char *inbuf, char *outbuf, size_t inbuf_len,
 	if (write_through && tcount == nwritten) {
 		/* we need to send both a primary and a secondary response */
 		smb_setlen(outbuf, outsize - 4);
-		send_smb(Client, outbuf);
+		send_smb(client_fd, outbuf);
 
 		/* now the secondary */
 		outsize = set_message(outbuf, 1, 0, true);

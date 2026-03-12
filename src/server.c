@@ -1457,7 +1457,7 @@ static bool is_private_peer(void)
 	    {inet_addr("127.0.0.1"), 8},
 	};
 
-	if (getpeername(Client, (struct sockaddr *) &sockin, &length) < 0) {
+	if (getpeername(client_fd, (struct sockaddr *) &sockin, &length) < 0) {
 		ERROR("is_private_peer: getpeername failed\n");
 		return false;
 	}
@@ -1596,18 +1596,18 @@ static void await_connection(void)
 			continue;
 		}
 
-		Client = accept(server_socket, &addr, &in_addrlen);
+		client_fd = accept(server_socket, &addr, &in_addrlen);
 
-		if (Client == -1 && errno == EINTR)
+		if (client_fd == -1 && errno == EINTR)
 			continue;
 
-		if (Client == -1) {
+		if (client_fd == -1) {
 			ERROR("error accepting connection: %s\n",
 			      strerror(errno));
 			continue;
 		}
 
-		peer_addr = get_peer_addr(Client);
+		peer_addr = get_peer_addr(client_fd);
 
 		/* The BSD sockets API does not provide any way to reject TCP
 		   connections, the best we can do is to accept the connection
@@ -1618,8 +1618,8 @@ static void await_connection(void)
 				ERROR("rejecting connection from public IP"
 				      "address %s\n",
 				      peer_addr);
-				close(Client);
-				Client = -1;
+				close(client_fd);
+				client_fd = -1;
 				continue;
 			}
 			/* even if allowed, log a warning */
@@ -1645,11 +1645,11 @@ static void await_connection(void)
 			close_low_fds();
 			am_parent = 0;
 
-			set_keepalive_option(Client);
+			set_keepalive_option(client_fd);
 
 			return;
 		}
-		close(Client); /* The parent doesn't need this socket */
+		close(client_fd); /* The parent doesn't need this socket */
 	}
 }
 
@@ -2238,9 +2238,9 @@ void exit_server(char *reason)
 	for (i = 0; i < MAX_CONNECTIONS; i++)
 		if (Connections[i].open)
 			close_cnum(i);
-	if (Client != -1) {
-		close(Client);
-		Client = -1;
+	if (client_fd != -1) {
+		close(client_fd);
+		client_fd = -1;
 	}
 	if (!reason) {
 		int oldlevel = LOGLEVEL;
@@ -2661,7 +2661,7 @@ static void process_smb(char *inbuf, char *outbuf)
 			ERROR("ERROR: Invalid message response size! %d %d\n",
 			      nread, smb_len(outbuf));
 		} else
-			send_smb(Client, outbuf);
+			send_smb(client_fd, outbuf);
 	}
 	trans_num++;
 }
@@ -2685,7 +2685,7 @@ static void process(void)
 		errno = 0;
 
 		for (counter = SMBD_SELECT_LOOP;
-		     !receive_message_or_smb(Client, in_buffer, BUFFER_SIZE,
+		     !receive_message_or_smb(client_fd, in_buffer, BUFFER_SIZE,
 		                             SMBD_SELECT_LOOP * 1000, &got_smb);
 		     counter += SMBD_SELECT_LOOP) {
 			int i;
