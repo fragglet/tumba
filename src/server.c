@@ -74,8 +74,8 @@ static char **original_argv;
 static int original_argc;
 static bool allow_public_connections = false;
 
-static char *InBuffer = NULL;
-static char *OutBuffer = NULL;
+static char *in_buffer = NULL;
+static char *out_buffer = NULL;
 static char *last_inbuf = NULL;
 
 static int am_parent = 1;
@@ -1067,7 +1067,7 @@ void close_file(int fnum, bool normal_close)
 }
 
 void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
-                      int dosmode, int *Access, int *action)
+                      int dosmode, int *access, int *action)
 {
 	struct open_file *fs_p = &Files[fnum];
 	int flags = 0;
@@ -1170,8 +1170,8 @@ void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
 
 		fs_p->share_mode = (deny_mode << 4) | open_mode;
 
-		if (Access)
-			*Access = open_mode;
+		if (access)
+			*access = open_mode;
 
 		if (action) {
 			if (file_existed && !(flags2 & O_TRUNC))
@@ -2669,11 +2669,11 @@ static void process_smb(char *inbuf, char *outbuf)
 /* Process commands from the client */
 static void process(void)
 {
-	InBuffer = checked_malloc(BUFFER_SIZE + SAFETY_MARGIN);
-	OutBuffer = checked_malloc(BUFFER_SIZE + SAFETY_MARGIN);
+	in_buffer = checked_malloc(BUFFER_SIZE + SAFETY_MARGIN);
+	out_buffer = checked_malloc(BUFFER_SIZE + SAFETY_MARGIN);
 
-	InBuffer += SMB_ALIGNMENT;
-	OutBuffer += SMB_ALIGNMENT;
+	in_buffer += SMB_ALIGNMENT;
+	out_buffer += SMB_ALIGNMENT;
 
 	/* re-initialise the timezone */
 	time_init();
@@ -2685,7 +2685,7 @@ static void process(void)
 		errno = 0;
 
 		for (counter = SMBD_SELECT_LOOP;
-		     !receive_message_or_smb(Client, InBuffer, BUFFER_SIZE,
+		     !receive_message_or_smb(Client, in_buffer, BUFFER_SIZE,
 		                             SMBD_SELECT_LOOP * 1000, &got_smb);
 		     counter += SMBD_SELECT_LOOP) {
 			int i;
@@ -2739,7 +2739,7 @@ static void process(void)
 		}
 
 		if (got_smb)
-			process_smb(InBuffer, OutBuffer);
+			process_smb(in_buffer, out_buffer);
 	}
 }
 

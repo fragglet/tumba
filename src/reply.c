@@ -2337,7 +2337,7 @@ int reply_mv(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 static bool copy_file(char *src, char *dest1, int cnum, int ofun, int count,
                       bool target_is_directory)
 {
-	int Access, action;
+	int access, action;
 	struct stat st;
 	int ret = 0;
 	int fnum1, fnum2;
@@ -2360,7 +2360,7 @@ static bool copy_file(char *src, char *dest1, int cnum, int ofun, int count,
 	fnum1 = find_free_file();
 	if (fnum1 < 0)
 		return false;
-	open_file_shared(fnum1, cnum, src, DENY_NONE << 4, 1, 0, &Access,
+	open_file_shared(fnum1, cnum, src, DENY_NONE << 4, 1, 0, &access,
 	                 &action);
 
 	if (!Files[fnum1].open) {
@@ -2377,7 +2377,7 @@ static bool copy_file(char *src, char *dest1, int cnum, int ofun, int count,
 		return false;
 	}
 	open_file_shared(fnum2, cnum, dest, (DENY_NONE << 4) | 1, ofun,
-	                 st.st_mode, &Access, &action);
+	                 st.st_mode, &access, &action);
 
 	if (!Files[fnum2].open) {
 		close_file(fnum1, false);

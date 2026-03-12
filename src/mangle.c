@@ -244,14 +244,14 @@ static bool illegal_name(char *name)
 }
 
 /* Convert a filename to DOS format. return true if successful. */
-void name_map_mangle(char *OutName, bool need83, const struct share *share)
+void name_map_mangle(char *out_name, bool need83, const struct share *share)
 {
-	if (!need83 && illegal_name(OutName))
+	if (!need83 && illegal_name(out_name))
 		need83 = true;
 
 	/* check if it's already in 8.3 format */
-	if (need83 && !is_8_3(OutName, true)) {
+	if (need83 && !is_8_3(out_name, true)) {
 		/* mangle it into 8.3 */
-		mangle_name_83(OutName, sizeof(pstring) - 1);
+		mangle_name_83(out_name, sizeof(pstring) - 1);
 	}
 }
