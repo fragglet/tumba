@@ -1509,7 +1509,7 @@ static void set_descriptive_argv(void)
 	         client_addr);
 
 	for (i = 0; i < MAX_CONNECTIONS; ++i) {
-		if (!Connections[i].open ||
+		if (!OPEN_CNUM(i) ||
 		    strequal(Connections[i].share->name, IPC_SHARE_NAME)) {
 			continue;
 		}
@@ -1939,7 +1939,7 @@ static int find_free_connection(int hash)
 again:
 
 	for (i = hash + 1; i != hash;) {
-		if (!Connections[i].open && Connections[i].used == used) {
+		if (!OPEN_CNUM(i) && Connections[i].used == used) {
 			DEBUG("found free connection number %d\n", i);
 			return i;
 		}
@@ -2236,7 +2236,7 @@ void exit_server(char *reason)
 
 	DEBUG("Closing connections\n");
 	for (i = 0; i < MAX_CONNECTIONS; i++)
-		if (Connections[i].open)
+		if (OPEN_CNUM(i))
 			close_cnum(i);
 	if (client_fd != -1) {
 		close(client_fd);
@@ -2719,7 +2719,7 @@ static void process(void)
 
 			/* check for connection timeouts */
 			for (i = 0; i < MAX_CONNECTIONS; i++)
-				if (Connections[i].open) {
+				if (OPEN_CNUM(i)) {
 					/* close dirptrs on connections that are
 					 * idle */
 					if (t - Connections[i].lastused >
