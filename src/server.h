@@ -20,6 +20,7 @@
 
 struct service_connection;
 struct stat;
+struct open_file;
 
 #define NMB_PORT   137
 #define DGRAM_PORT 138
