@@ -4,10 +4,14 @@ on: [push, pull_request, workflow_dispatch]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         submodules: true
     - name: make
@@ -16,7 +20,7 @@ jobs:
   code_health_checks:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: Install tools
       run: |
         sudo apt update
@@ -35,7 +39,7 @@ jobs:
            echo) >> $GITHUB_STEP_SUMMARY
           false
         fi
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v6
       if: '!cancelled()'
       with:
         if-no-files-found: ignore

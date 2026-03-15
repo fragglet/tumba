@@ -1344,7 +1344,7 @@ int reply_readbraw(char *inbuf, char *outbuf, size_t inbuf_len,
 	if (!FNUM_OK(fnum, cnum) || !Files[fnum].can_read) {
 		DEBUG("fnum %d not open in readbraw - cache prime?\n", fnum);
 		_smb_setlen(header, 0);
-		transfer_file(0, Client, 0, header, 4, 0);
+		transfer_file(0, client_fd, 0, header, 4, 0);
 		return -1;
 	}
 
@@ -1372,7 +1372,7 @@ int reply_readbraw(char *inbuf, char *outbuf, size_t inbuf_len,
 		ret = 0;
 
 	_smb_setlen(header, ret);
-	transfer_file(0, Client, 0, header, 4 + ret, 0);
+	transfer_file(0, client_fd, 0, header, 4 + ret, 0);
 
 	DEBUG("finished\n");
 	return -1;
@@ -1561,10 +1561,10 @@ int reply_writebraw(char *inbuf, char *outbuf, size_t inbuf_len,
 	SSVALS(outbuf, smb_vwv0, -1);
 	outsize =
 	    set_message(outbuf, Protocol > PROTOCOL_COREPLUS ? 1 : 0, 0, true);
-	send_smb(Client, outbuf);
+	send_smb(client_fd, outbuf);
 
 	/* Now read the raw data into the buffer and write it */
-	if (read_smb_length(Client, inbuf, SMB_SECONDARY_WAIT) == -1) {
+	if (read_smb_length(client_fd, inbuf, SMB_SECONDARY_WAIT) == -1) {
 		exit_server("secondary writebraw failed");
 	}
 
@@ -1577,7 +1577,7 @@ int reply_writebraw(char *inbuf, char *outbuf, size_t inbuf_len,
 		      nwritten, numtowrite);
 	}
 
-	nwritten = transfer_file(Client, Files[fnum].fd_ptr->fd, numtowrite,
+	nwritten = transfer_file(client_fd, Files[fnum].fd_ptr->fd, numtowrite,
 	                         NULL, 0, startpos + nwritten);
 	total_written += nwritten;
 
@@ -2008,7 +2008,7 @@ int reply_echo(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 
 		smb_setlen(outbuf, outsize - 4);
 
-		send_smb(Client, outbuf);
+		send_smb(client_fd, outbuf);
 	}
 
 	DEBUG("reverb=%d cnum=%d\n", smb_reverb, cnum);
@@ -2360,7 +2360,7 @@ int reply_mv(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 static bool copy_file(char *src, char *dest1, int cnum, int ofun, int count,
                       bool target_is_directory)
 {
-	int Access, action;
+	int access, action;
 	struct stat st;
 	int ret = 0;
 	int fnum1, fnum2;
@@ -2383,10 +2383,10 @@ static bool copy_file(char *src, char *dest1, int cnum, int ofun, int count,
 	fnum1 = find_free_file();
 	if (fnum1 < 0)
 		return false;
-	open_file_shared(fnum1, cnum, src, DENY_NONE << 4, 1, 0, &Access,
+	open_file_shared(fnum1, cnum, src, DENY_NONE << 4, 1, 0, &access,
 	                 &action);
 
-	if (!Files[fnum1].open) {
+	if (!OPEN_FNUM(fnum1)) {
 		Files[fnum1].reserved = false;
 		return false;
 	}
@@ -2400,9 +2400,9 @@ static bool copy_file(char *src, char *dest1, int cnum, int ofun, int count,
 		return false;
 	}
 	open_file_shared(fnum2, cnum, dest, (DENY_NONE << 4) | 1, ofun,
-	                 st.st_mode, &Access, &action);
+	                 st.st_mode, &access, &action);
 
-	if (!Files[fnum2].open) {
+	if (!OPEN_FNUM(fnum2)) {
 		close_file(fnum1, false);
 		Files[fnum2].reserved = false;
 		return false;
@@ -2715,7 +2715,7 @@ int reply_writebmpx(char *inbuf, char *outbuf, size_t inbuf_len,
 	if (write_through && tcount == nwritten) {
 		/* we need to send both a primary and a secondary response */
 		smb_setlen(outbuf, outsize - 4);
-		send_smb(Client, outbuf);
+		send_smb(client_fd, outbuf);
 
 		/* now the secondary */
 		outsize = set_message(outbuf, 1, 0, true);

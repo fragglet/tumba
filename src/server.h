@@ -19,6 +19,7 @@
 
 struct service_connection;
 struct stat;
+struct open_file;
 
 #define NMB_PORT   137
 #define DGRAM_PORT 138
@@ -147,7 +148,7 @@ int sys_disk_free(char *path, int *bsize, int *dfree, int *dsize);
 bool check_name(char *name, int cnum);
 void close_file(int fnum, bool normal_close);
 void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
-                      int mode, int *Access, int *action);
+                      int mode, int *access, int *action);
 int seek_file(int fnum, uint32_t pos);
 int read_file(int fnum, char *data, uint32_t pos, int n);
 int write_file(int fnum, char *data, int n);

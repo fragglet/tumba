@@ -336,7 +336,7 @@ char *timestring(void)
 		snprintf(time_buf, sizeof(time_buf),
 		         "%ld seconds since the Epoch", (long) t);
 	else
-		strftime(time_buf, 100, "%Y/%m/%d %r", tm);
+		strftime(time_buf, sizeof(time_buf), "%Y-%m-%dT%H:%M:%S%z", tm);
 	return time_buf;
 }
 

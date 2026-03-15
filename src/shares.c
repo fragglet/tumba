@@ -10,7 +10,6 @@
 
 #include "shares.h"
 
-#include <assert.h>
 #include <ctype.h>
 #include <libgen.h>
 #include <stdbool.h>
@@ -101,6 +100,10 @@ const struct share *add_share(const char *path)
 	char *share_name = share_name_for_path(path);
 	struct share *result;
 
+	if (strequal(path, "")) {
+		STARTUP_ERROR("Invalid path for share: '%s'\n", path);
+	}
+
 	result = _add_share();
 	result->name = share_name;
 	result->path = checked_strdup(path);
@@ -114,7 +117,8 @@ void add_ipc_service(void)
 {
 	struct share *ipc;
 
-	assert(lookup_share(IPC_SHARE_NAME) == NULL);
+	CHECK_OR_FATAL(lookup_share(IPC_SHARE_NAME) == NULL,
+	               "IPC share already present\n");
 
 	ipc = _add_share();
 	ipc->name = IPC_SHARE_NAME;

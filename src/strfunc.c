@@ -121,6 +121,19 @@ void unix_format(char *fname)
 	}
 }
 
+bool string_has_prefix(const char *s, const char *prefix)
+{
+	return strncmp(s, prefix, strlen(prefix)) == 0;
+}
+
+bool string_has_suffix(const char *s, const char *suffix)
+{
+	size_t s_len = strlen(s);
+	size_t suffix_len = strlen(suffix);
+	return s_len >= suffix_len &&
+	       strcmp(s + s_len - suffix_len, suffix) == 0;
+}
+
 /* Skip past a string in a buffer */
 char *skip_string(char *buf)
 {
@@ -131,7 +144,7 @@ char *skip_string(char *buf)
 bool trim_string(char *s, char *front, char *back)
 {
 	bool ret = false;
-	while (front && *front && strncmp(s, front, strlen(front)) == 0) {
+	while (front && *front && string_has_prefix(s, front)) {
 		char *p = s;
 		ret = true;
 		while (1) {
@@ -140,8 +153,7 @@ bool trim_string(char *s, char *front, char *back)
 			p++;
 		}
 	}
-	while (back && *back && strlen(s) >= strlen(back) &&
-	       strncmp(s + strlen(s) - strlen(back), back, strlen(back)) == 0) {
+	while (back && *back && string_has_suffix(s, back)) {
 		ret = true;
 		s[strlen(s) - strlen(back)] = 0;
 	}
@@ -159,7 +171,7 @@ void unix_clean_name(char *s)
 	string_sub(s, "//", "/");
 
 	/* Remove leading ./ characters */
-	if (strncmp(s, "./", 2) == 0) {
+	if (string_has_prefix(s, "./")) {
 		trim_string(s, "./", NULL);
 		if (*s == 0)
 			pstrcpy(s, "./");
@@ -383,8 +395,6 @@ bool mask_match(char *str, char *regexp, bool trans2)
 	pstring t_pattern, t_filename, te_pattern, te_filename;
 	fstring ebase, eext, sbase, sext;
 
-	bool matched = false;
-
 	/* Make local copies of str and regexp */
 	pstrcpy(t_pattern, regexp);
 	pstrcpy(t_filename, str);
@@ -399,192 +409,146 @@ bool mask_match(char *str, char *regexp, bool trans2)
 	DEBUG("str=<%s> regexp=<%s>\n", t_filename, t_pattern);
 
 	if (trans2) {
-		/*
-		 * Match each component of the regexp, split up by '.'
-		 * characters.
-		 */
+		/* Match each component of the regexp, split up by '.'
+		 * characters.  */
 		char *fp, *rp, *cp2, *cp1;
 		bool last_wcard_was_star = false;
 		int num_path_components, num_regexp_components;
 
 		pstrcpy(te_pattern, t_pattern);
 		pstrcpy(te_filename, t_filename);
-		/*
-		 * Remove multiple "*." patterns.
-		 */
+
+		/* Remove multiple "*." patterns.  */
 		string_sub(te_pattern, "*.*.", "*.");
 		num_regexp_components = count_chars(te_pattern, '.');
 		num_path_components = count_chars(te_filename, '.');
 
-		/*
-		 * Check for special 'hack' case of "DIR a*z". - needs to match
-		 * a.b.c...z
-		 */
+		/* Check for special 'hack' case of "DIR a*z". - needs to match
+		 * a.b.c...z */
 		if (num_regexp_components == 0)
-			matched = do_match(te_filename, te_pattern);
-		else {
-			for (cp1 = te_pattern, cp2 = te_filename; cp1;) {
-				fp = strchr(cp2, '.');
-				if (fp)
-					*fp = '\0';
-				rp = strchr(cp1, '.');
-				if (rp)
-					*rp = '\0';
+			return do_match(te_filename, te_pattern);
 
-				if (cp1[strlen(cp1) - 1] == '*')
-					last_wcard_was_star = true;
-				else
-					last_wcard_was_star = false;
+		for (cp1 = te_pattern, cp2 = te_filename; cp1;) {
+			fp = strchr(cp2, '.');
+			if (fp)
+				*fp = '\0';
+			rp = strchr(cp1, '.');
+			if (rp)
+				*rp = '\0';
 
-				if (!do_match(cp2, cp1)) {
-					break;
-				}
+			last_wcard_was_star = string_has_suffix(cp1, "*");
 
-				cp1 = rp ? rp + 1 : NULL;
-				cp2 = fp ? fp + 1 : "";
-
-				if (last_wcard_was_star ||
-				    (cp1 != NULL && *cp1 == '*')) {
-					/* Eat the extra path components. */
-					int i;
-
-					for (i = 0;
-					     i < num_path_components -
-					             num_regexp_components;
-					     i++) {
-						fp = strchr(cp2, '.');
-						if (fp)
-							*fp = '\0';
-
-						if (cp1 != NULL &&
-						    do_match(cp2, cp1)) {
-							cp2 = fp ? fp + 1 : "";
-							break;
-						}
-						cp2 = fp ? fp + 1 : "";
-					}
-					num_path_components -= i;
-				}
+			if (!do_match(cp2, cp1)) {
+				break;
 			}
-			if (cp1 == NULL &&
-			    (*cp2 == '\0' || last_wcard_was_star))
-				matched = true;
+
+			cp1 = rp ? rp + 1 : NULL;
+			cp2 = fp ? fp + 1 : "";
+
+			if (last_wcard_was_star ||
+			    (cp1 != NULL && *cp1 == '*')) {
+				/* Eat the extra path components. */
+				int i;
+
+				for (i = 0; i < num_path_components -
+				                    num_regexp_components;
+				     i++) {
+					fp = strchr(cp2, '.');
+					if (fp)
+						*fp = '\0';
+
+					if (cp1 != NULL && do_match(cp2, cp1)) {
+						cp2 = fp ? fp + 1 : "";
+						break;
+					}
+					cp2 = fp ? fp + 1 : "";
+				}
+				num_path_components -= i;
+			}
+		}
+
+		return cp1 == NULL && (*cp2 == '\0' || last_wcard_was_star);
+	}
+
+	/* Behaviour of Win95 for 8.3 filenames and 8.3 Wildcards */
+
+	if (strequal(t_filename, ".")) {
+		/* Patterns:  *.*  *. ?. ?  are valid */
+		return strequal(t_pattern, "*.*") ||
+		       strequal(t_pattern, "*.") || strequal(t_pattern, "?.") ||
+		       strequal(t_pattern, "?");
+	}
+	if (strequal(t_filename, "..")) {
+		/* Patterns:  *.*  *. ?. ? *.? are valid */
+		return strequal(t_pattern, "*.*") ||
+		       strequal(t_pattern, "*.") || strequal(t_pattern, "?.") ||
+		       strequal(t_pattern, "?") || strequal(t_pattern, "*.?") ||
+		       strequal(t_pattern, "?.*");
+	}
+
+	if ((p = strrchr(t_pattern, '.'))) {
+		/* Wildcard has a suffix. */
+		*p = 0;
+		fstrcpy(ebase, t_pattern);
+		if (p[1]) {
+			fstrcpy(eext, p + 1);
+		} else {
+			/* pattern ends in DOT: treat as if
+			 * there is no DOT */
+			*eext = 0;
+			if (strequal(ebase, "*"))
+				return true;
 		}
 	} else {
+		/* No suffix for wildcard. */
+		fstrcpy(ebase, t_pattern);
+		eext[0] = 0;
+	}
 
-		/* -------------------------------------------------
-		 * Behaviour of Win95
-		 * for 8.3 filenames and 8.3 Wildcards
-		 * -------------------------------------------------
-		 */
-		if (strequal(t_filename, ".")) {
-			/*
-			 *  Patterns:  *.*  *. ?. ?  are valid
-			 *
-			 */
-			if (strequal(t_pattern, "*.*") ||
-			    strequal(t_pattern, "*.") ||
-			    strequal(t_pattern, "?.") ||
-			    strequal(t_pattern, "?"))
-				matched = true;
-		} else if (strequal(t_filename, "..")) {
-			/*
-			 *  Patterns:  *.*  *. ?. ? *.? are valid
-			 *
-			 */
-			if (strequal(t_pattern, "*.*") ||
-			    strequal(t_pattern, "*.") ||
-			    strequal(t_pattern, "?.") ||
-			    strequal(t_pattern, "?") ||
-			    strequal(t_pattern, "*.?") ||
-			    strequal(t_pattern, "?.*"))
-				matched = true;
+	p = strrchr(t_filename, '.');
+	if (p && p[1] == 0) {
+		/* Filename has an extension of '.' only. */
+		*p = 0; /* nuke dot at end of string */
+		p = 0;  /* and treat it as if there is no
+		           extension */
+	}
+
+	if (p) {
+		/* Filename has an extension. */
+		*p = 0;
+		fstrcpy(sbase, t_filename);
+		fstrcpy(sext, p + 1);
+		if (*eext) {
+			return do_match(sbase, ebase) && do_match(sext, eext);
 		} else {
-
-			if ((p = strrchr(t_pattern, '.'))) {
-				/*
-				 * Wildcard has a suffix.
-				 */
-				*p = 0;
-				fstrcpy(ebase, t_pattern);
-				if (p[1]) {
-					fstrcpy(eext, p + 1);
-				} else {
-					/* pattern ends in DOT: treat as if
-					 * there is no DOT */
-					*eext = 0;
-					if (strequal(ebase, "*"))
-						return true;
-				}
-			} else {
-				/*
-				 * No suffix for wildcard.
-				 */
-				fstrcpy(ebase, t_pattern);
-				eext[0] = 0;
-			}
-
-			p = strrchr(t_filename, '.');
-			if (p && p[1] == 0) {
-				/*
-				 * Filename has an extension of '.' only.
-				 */
-				*p = 0; /* nuke dot at end of string */
-				p = 0;  /* and treat it as if there is no
-				           extension */
-			}
-
-			if (p) {
-				/*
-				 * Filename has an extension.
-				 */
-				*p = 0;
-				fstrcpy(sbase, t_filename);
-				fstrcpy(sext, p + 1);
-				if (*eext) {
-					matched = do_match(sbase, ebase) &&
-					          do_match(sext, eext);
-				} else {
-					/* pattern has no extension */
-					/* Really: match complete filename with
-					 * pattern ??? means exactly 3 chars */
-					matched = do_match(str, ebase);
-				}
-			} else {
-				/*
-				 * Filename has no extension.
-				 */
-				fstrcpy(sbase, t_filename);
-				fstrcpy(sext, "");
-				if (*eext) {
-					/* pattern has extension */
-					matched = do_match(sbase, ebase) &&
-					          do_match(sext, eext);
-				} else {
-					matched = do_match(sbase, ebase);
-#ifdef EMULATE_WEIRD_W95_MATCHING
-					/*
-					 * Even Microsoft has some problems
-					 * Behaviour Win95 -> local disk
-					 * is different from Win95 -> smb drive
-					 * from Nt 4.0 This branch would reflect
-					 * the Win95 local disk behaviour
-					 */
-					if (!matched) {
-						/* a? matches aa and a in w95 */
-						fstrcat(sbase, ".");
-						matched =
-						    do_match(sbase, ebase);
-					}
-#endif
-				}
-			}
+			/* pattern has no extension */
+			/* Really: match complete filename with
+			 * pattern ??? means exactly 3 chars */
+			return do_match(str, ebase);
 		}
 	}
 
-	DEBUG("returning %d\n", matched);
+	/* Filename has no extension. */
+	fstrcpy(sbase, t_filename);
+	fstrcpy(sext, "");
+	if (*eext) {
+		/* pattern has extension */
+		return do_match(sbase, ebase) && do_match(sext, eext);
+	}
 
-	return matched;
+	if (do_match(sbase, ebase)) {
+		return true;
+	}
+#ifdef EMULATE_WEIRD_W95_MATCHING
+	/* Even Microsoft has some problems: behavior Win95 -> local disk is
+	 * different from Win95 -> smb drive from Nt 4.0. This branch would
+	 * reflect the Win95 local disk behavior */
+	/* a? matches aa and a in w95 */
+	fstrcat(sbase, ".");
+	return do_match(sbase, ebase);
+#else
+	return false;
+#endif
 }
 
 /* Write a string in unicoode format */

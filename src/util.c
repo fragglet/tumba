@@ -11,7 +11,6 @@
 
 #include "util.h"
 
-#include <assert.h>
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -56,7 +55,7 @@ int Protocol = PROTOCOL_COREPLUS;
 FILE *log_file = NULL;
 
 /* the client file descriptor */
-int Client = -1;
+int client_fd = -1;
 
 /* this is used by the chaining code */
 int chain_size = 0;
@@ -177,7 +176,7 @@ int log_output(const char *funcname, int linenum, int level, char *format_str,
 	fflush(log_file);
 
 	n = strlen(format_str);
-	if (n > 0 && format_str[strlen(format_str) - 1] == '\n') {
+	if (n > 0 && string_has_suffix(format_str, "\n")) {
 		log_start_of_line = true;
 	}
 
@@ -622,16 +621,18 @@ void *checked_realloc(void *p, size_t bytes)
 {
 	void *result = (realloc) (p, bytes);
 
-	assert(result != NULL || bytes == 0);
+	CHECK_OR_FATAL(result != NULL || bytes == 0,
+	               "Failure allocating %ld bytes\n", (long) bytes);
 
 	return result;
 }
 
-void *checked_calloc(size_t nmemb, size_t size)
+void *checked_calloc(size_t nmemb, size_t bytes)
 {
-	void *result = (calloc) (nmemb, size);
+	void *result = (calloc) (nmemb, bytes);
 
-	assert(result != NULL || nmemb == 0 || size == 0);
+	CHECK_OR_FATAL(result != NULL || nmemb == 0 || bytes == 0,
+	               "Failure allocating %ld bytes\n", (long) bytes);
 
 	return result;
 }
@@ -640,7 +641,8 @@ char *checked_strdup(const char *s)
 {
 	char *result = (strdup) (s);
 
-	assert(result != NULL);
+	CHECK_OR_FATAL(result != NULL, "Failure allocating %ld bytes\n",
+	               (long) strlen(s));
 
 	return result;
 }

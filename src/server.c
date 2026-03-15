@@ -56,6 +56,8 @@
 static const uint8_t smb1_protocol_id[4] = {0xff, 'S', 'M', 'B'};
 static const uint8_t smb2_protocol_id[4] = {0xfe, 'S', 'M', 'B'};
 
+static void process(void);
+
 /* the following control timings of various actions. Don't change
    them unless you know what you are doing. These are all in seconds */
 #define DEFAULT_SMBD_TIMEOUT (60 * 60 * 24 * 7)
@@ -72,11 +74,11 @@ static char **original_argv;
 static int original_argc;
 static bool allow_public_connections = false;
 
-static char *InBuffer = NULL;
-static char *OutBuffer = NULL;
+static char *in_buffer = NULL;
+static char *out_buffer = NULL;
 static char *last_inbuf = NULL;
 
-static int am_parent = 1;
+static bool am_parent = true;
 
 /* the socket number of the listening TCP server. */
 static int server_socket;
@@ -180,7 +182,7 @@ static int read_dosattrib(const char *path)
 	}
 	buf[nbytes] = '\0';
 
-	if (strncmp(buf, "0x", 2) != 0) {
+	if (string_has_prefix(buf, "0x")) {
 		/* TODO: Maybe support newer versions */
 		return 0;
 	}
@@ -477,7 +479,7 @@ bool unix_convert(char *name, int cnum, pstring saved_last_component,
 	   directory structure */
 
 	start = name;
-	while (strncmp(start, "./", 2) == 0)
+	while (string_has_prefix(start, "./"))
 		start += 2;
 
 	/* now match each part of the path name separately, trying the names
@@ -584,9 +586,8 @@ int sys_disk_free(char *path, int *bsize, int *dfree, int *dsize)
 
 static bool path_within(const char *path, const char *top)
 {
-	size_t top_len = strlen(top);
-	return strlen(path) >= top_len && strncmp(top, path, top_len) == 0 &&
-	       (path[top_len] == '/' || path[top_len] == '\0');
+	return strcmp(path, top) == 0 ||
+	       (string_has_prefix(path, top) && path[strlen(top)] == '/');
 }
 
 /* Returns true only if the path specified by `name` is contained entirely
@@ -1066,7 +1067,7 @@ void close_file(int fnum, bool normal_close)
 }
 
 void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
-                      int dosmode, int *Access, int *action)
+                      int dosmode, int *access, int *action)
 {
 	struct open_file *fs_p = &Files[fnum];
 	int flags = 0;
@@ -1169,8 +1170,8 @@ void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
 
 		fs_p->share_mode = (deny_mode << 4) | open_mode;
 
-		if (Access)
-			*Access = open_mode;
+		if (access)
+			*access = open_mode;
 
 		if (action) {
 			if (file_existed && !(flags2 & O_TRUNC))
@@ -1426,7 +1427,7 @@ static bool is_private_peer(void)
 	    {inet_addr("127.0.0.1"), 8},
 	};
 
-	if (getpeername(Client, (struct sockaddr *) &sockin, &length) < 0) {
+	if (getpeername(client_fd, (struct sockaddr *) &sockin, &length) < 0) {
 		ERROR("is_private_peer: getpeername failed\n");
 		return false;
 	}
@@ -1478,7 +1479,7 @@ static void set_descriptive_argv(void)
 	         client_addr);
 
 	for (i = 0; i < MAX_CONNECTIONS; ++i) {
-		if (!Connections[i].open ||
+		if (!OPEN_CNUM(i) ||
 		    strequal(Connections[i].share->name, IPC_SHARE_NAME)) {
 			continue;
 		}
@@ -1534,15 +1535,83 @@ static void open_sockets(int port)
 	NOTICE("bind succeeded on port %d\n", port);
 }
 
-/* await_connection loops forever, accepting new connections and returning
-   only in a child process that has forked. */
+/* accept_connection() is called by await_connection() when a new client
+ * connects to the server, and calls process() in a child process. */
+static void accept_connection(void)
+{
+	struct sockaddr addr;
+	const char *peer_addr;
+	socklen_t in_addrlen = sizeof(addr);
+
+	client_fd = accept(server_socket, &addr, &in_addrlen);
+
+	if (client_fd == -1) {
+		if (errno != EINTR) {
+			ERROR("error accepting connection: %s\n",
+			      strerror(errno));
+		}
+		return;
+	}
+
+	peer_addr = get_peer_addr(client_fd);
+
+	/* The BSD sockets API does not provide any way to reject TCP
+	   connections, the best we can do is to accept the connection and then
+	   immediately close it. By default we only allow connections from
+	   local peers on the same private IP range. */
+	if (!is_private_peer()) {
+		if (!allow_public_connections) {
+			ERROR("rejecting connection from public IP"
+			      "address %s\n",
+			      peer_addr);
+			close(client_fd);
+			client_fd = -1;
+			return;
+		}
+		/* even if allowed, log a warning */
+		ERROR("warning: connection from public IP address %s\n",
+		      peer_addr);
+	}
+
+	if (fork() != 0) {
+		close(client_fd); /* The parent doesn't need this socket */
+		return;
+	}
+
+	/* At this point onwards, we are in the child process */
+
+	/* save a copy of the client's address to include log
+	 * messages */
+	strlcpy(client_addr, peer_addr, sizeof(client_addr));
+
+	set_descriptive_argv();
+
+	/* only the parent catches SIGCHLD */
+	signal(SIGPIPE, SIGNAL_CAST sig_pipe);
+	signal(SIGCHLD, SIGNAL_CAST SIG_DFL);
+
+	/* close the listening socket */
+	close(server_socket);
+
+	/* close our standard file descriptors */
+	close_low_fds();
+	am_parent = false;
+
+	set_keepalive_option(client_fd);
+
+	/* Handle the connection. */
+	process();
+
+	/* Normal child process termination. */
+	exit_server("normal exit");
+}
+
+/* await_connection loops forever, accepting new connections and calling
+   process() in a child process. It does not return. */
 static void await_connection(void)
 {
-	const char *peer_addr;
 	fd_set listen_set;
 	int num;
-	struct sockaddr addr;
-	socklen_t in_addrlen = sizeof(addr);
 
 	/* ready to listen */
 	if (listen(server_socket, 5) == -1) {
@@ -1551,7 +1620,6 @@ static void await_connection(void)
 
 	DEBUG("waiting for a connection\n");
 	while (1) {
-		in_addrlen = sizeof(addr);
 		FD_ZERO(&listen_set);
 		FD_SET(server_socket, &listen_set);
 
@@ -1561,64 +1629,9 @@ static void await_connection(void)
 			continue;
 		}
 
-		if (!FD_ISSET(server_socket, &listen_set)) {
-			continue;
+		if (FD_ISSET(server_socket, &listen_set)) {
+			accept_connection();
 		}
-
-		Client = accept(server_socket, &addr, &in_addrlen);
-
-		if (Client == -1 && errno == EINTR)
-			continue;
-
-		if (Client == -1) {
-			ERROR("error accepting connection: %s\n",
-			      strerror(errno));
-			continue;
-		}
-
-		peer_addr = get_peer_addr(Client);
-
-		/* The BSD sockets API does not provide any way to reject TCP
-		   connections, the best we can do is to accept the connection
-		   and then immediately close it. By default we only allow
-		   connections from local peers on the same private IP range. */
-		if (!is_private_peer()) {
-			if (!allow_public_connections) {
-				ERROR("rejecting connection from public IP"
-				      "address %s\n",
-				      peer_addr);
-				close(Client);
-				Client = -1;
-				continue;
-			}
-			/* even if allowed, log a warning */
-			ERROR("warning: connection from public IP address %s\n",
-			      peer_addr);
-		}
-
-		if (fork() == 0) {
-			/* save a copy of the client's address to include log
-			 * messages */
-			strlcpy(client_addr, peer_addr, sizeof(client_addr));
-
-			set_descriptive_argv();
-
-			/* only the parent catches SIGCHLD */
-			signal(SIGPIPE, SIGNAL_CAST sig_pipe);
-			signal(SIGCHLD, SIGNAL_CAST SIG_DFL);
-
-			/* close the listening socket */
-			close(server_socket);
-
-			/* close our standard file descriptors */
-			close_low_fds();
-			am_parent = 0;
-
-			set_keepalive_option(Client);
-
-			return;
-		}
-		close(Client); /* The parent doesn't need this socket */
 	}
 }
 
@@ -1794,7 +1807,7 @@ int make_connection(char *service, char *dev)
 
 	/* if the request is as a printer and you can't print then refuse */
 	strupper(dev);
-	if (strncmp(dev, "LPT", 3) == 0) {
+	if (string_has_prefix(dev, "LPT")) {
 		WARNING("Attempt to connect to non-printer as a printer\n");
 		return -6;
 	}
@@ -1875,7 +1888,7 @@ int find_free_file(void)
 		first_file = 1;
 
 	for (i = first_file; i < MAX_OPEN_FILES; i++)
-		if (!Files[i].open && !Files[i].reserved) {
+		if (!OPEN_FNUM(i) && !Files[i].reserved) {
 			memset(&Files[i], 0, sizeof(Files[i]));
 			first_file = i + 1;
 			Files[i].reserved = true;
@@ -1884,7 +1897,7 @@ int find_free_file(void)
 
 	/* returning a file handle of 0 is a bad idea - so we start at 1 */
 	for (i = 1; i < first_file; i++)
-		if (!Files[i].open && !Files[i].reserved) {
+		if (!OPEN_FNUM(i) && !Files[i].reserved) {
 			memset(&Files[i], 0, sizeof(Files[i]));
 			first_file = i + 1;
 			Files[i].reserved = true;
@@ -1908,7 +1921,7 @@ static int find_free_connection(int hash)
 again:
 
 	for (i = hash + 1; i != hash;) {
-		if (!Connections[i].open && Connections[i].used == used) {
+		if (!OPEN_CNUM(i) && Connections[i].used == used) {
 			DEBUG("found free connection number %d\n", i);
 			return i;
 		}
@@ -2120,7 +2133,7 @@ static int reply_negprot(char *inbuf, char *outbuf, size_t inbuf_len,
                          size_t outbuf_len)
 {
 	int outsize = set_message(outbuf, 1, 0, true);
-	int Index = 0;
+	int index = 0;
 	int choice = -1;
 	int protocol;
 	char *p;
@@ -2128,7 +2141,7 @@ static int reply_negprot(char *inbuf, char *outbuf, size_t inbuf_len,
 
 	p = smb_buf(inbuf) + 1;
 	while (p < smb_buf(inbuf) + bcc) {
-		Index++;
+		index++;
 		DEBUG("Requested protocol [%s]\n", p);
 		p += strlen(p) + 2;
 	}
@@ -2137,12 +2150,12 @@ static int reply_negprot(char *inbuf, char *outbuf, size_t inbuf_len,
 	for (protocol = 0; supported_protocols[protocol].proto_name;
 	     protocol++) {
 		p = smb_buf(inbuf) + 1;
-		Index = 0;
+		index = 0;
 		while (p < smb_buf(inbuf) + bcc) {
 			if (strequal(p,
 			             supported_protocols[protocol].proto_name))
-				choice = Index;
-			Index++;
+				choice = index;
+			index++;
 			p += strlen(p) + 2;
 		}
 		if (choice != -1)
@@ -2169,7 +2182,7 @@ static void close_open_files(int cnum)
 {
 	int i;
 	for (i = 0; i < MAX_OPEN_FILES; i++)
-		if (Files[i].cnum == cnum && Files[i].open) {
+		if (Files[i].cnum == cnum && OPEN_FNUM(i)) {
 			close_file(i, false);
 		}
 }
@@ -2196,20 +2209,20 @@ void close_cnum(int cnum)
 
 void exit_server(char *reason)
 {
-	static int firsttime = 1;
+	static bool firsttime = true;
 	int i;
 
 	if (!firsttime)
 		exit(0);
-	firsttime = 0;
+	firsttime = false;
 
 	DEBUG("Closing connections\n");
 	for (i = 0; i < MAX_CONNECTIONS; i++)
-		if (Connections[i].open)
+		if (OPEN_CNUM(i))
 			close_cnum(i);
-	if (Client != -1) {
-		close(Client);
-		Client = -1;
+	if (client_fd != -1) {
+		close(client_fd);
+		client_fd = -1;
 	}
 	if (!reason) {
 		int oldlevel = LOGLEVEL;
@@ -2630,7 +2643,7 @@ static void process_smb(char *inbuf, char *outbuf)
 			ERROR("ERROR: Invalid message response size! %d %d\n",
 			      nread, smb_len(outbuf));
 		} else
-			send_smb(Client, outbuf);
+			send_smb(client_fd, outbuf);
 	}
 	trans_num++;
 }
@@ -2638,11 +2651,11 @@ static void process_smb(char *inbuf, char *outbuf)
 /* Process commands from the client */
 static void process(void)
 {
-	InBuffer = checked_malloc(BUFFER_SIZE + SAFETY_MARGIN);
-	OutBuffer = checked_malloc(BUFFER_SIZE + SAFETY_MARGIN);
+	in_buffer = checked_malloc(BUFFER_SIZE + SAFETY_MARGIN);
+	out_buffer = checked_malloc(BUFFER_SIZE + SAFETY_MARGIN);
 
-	InBuffer += SMB_ALIGNMENT;
-	OutBuffer += SMB_ALIGNMENT;
+	in_buffer += SMB_ALIGNMENT;
+	out_buffer += SMB_ALIGNMENT;
 
 	/* re-initialise the timezone */
 	time_init();
@@ -2654,7 +2667,7 @@ static void process(void)
 		errno = 0;
 
 		for (counter = SMBD_SELECT_LOOP;
-		     !receive_message_or_smb(Client, InBuffer, BUFFER_SIZE,
+		     !receive_message_or_smb(client_fd, in_buffer, BUFFER_SIZE,
 		                             SMBD_SELECT_LOOP * 1000, &got_smb);
 		     counter += SMBD_SELECT_LOOP) {
 			int i;
@@ -2688,7 +2701,7 @@ static void process(void)
 
 			/* check for connection timeouts */
 			for (i = 0; i < MAX_CONNECTIONS; i++)
-				if (Connections[i].open) {
+				if (OPEN_CNUM(i)) {
 					/* close dirptrs on connections that are
 					 * idle */
 					if (t - Connections[i].lastused >
@@ -2708,7 +2721,7 @@ static void process(void)
 		}
 
 		if (got_smb)
-			process_smb(InBuffer, OutBuffer);
+			process_smb(in_buffer, out_buffer);
 	}
 }
 
@@ -2840,8 +2853,6 @@ int main(int argc, char *argv[])
 	open_sockets(port);
 	drop_privileges();
 	await_connection();
-	process();
 
-	exit_server("normal exit");
 	return 0;
 }
