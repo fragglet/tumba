@@ -413,8 +413,6 @@ bool mask_match(char *str, char *regexp, bool trans2)
 	pstring t_pattern, t_filename, te_pattern, te_filename;
 	fstring ebase, eext, sbase, sext;
 
-	bool matched = false;
-
 	/* Make local copies of str and regexp */
 	pstrcpy(t_pattern, regexp);
 	pstrcpy(t_filename, str);
@@ -451,7 +449,7 @@ bool mask_match(char *str, char *regexp, bool trans2)
 		 * a.b.c...z
 		 */
 		if (num_regexp_components == 0)
-			matched = do_match(te_filename, te_pattern);
+			return do_match(te_filename, te_pattern);
 		else {
 			for (cp1 = te_pattern, cp2 = te_filename; cp1;) {
 				fp = strchr(cp2, '.');
@@ -496,7 +494,8 @@ bool mask_match(char *str, char *regexp, bool trans2)
 			}
 			if (cp1 == NULL &&
 			    (*cp2 == '\0' || last_wcard_was_star))
-				matched = true;
+				return true;
+			return false;
 		}
 	} else {
 
@@ -514,7 +513,8 @@ bool mask_match(char *str, char *regexp, bool trans2)
 			    strequal(t_pattern, "*.") ||
 			    strequal(t_pattern, "?.") ||
 			    strequal(t_pattern, "?"))
-				matched = true;
+				return true;
+			return false;
 		} else if (strequal(t_filename, "..")) {
 			/*
 			 *  Patterns:  *.*  *. ?. ? *.? are valid
@@ -526,7 +526,8 @@ bool mask_match(char *str, char *regexp, bool trans2)
 			    strequal(t_pattern, "?") ||
 			    strequal(t_pattern, "*.?") ||
 			    strequal(t_pattern, "?.*"))
-				matched = true;
+				return true;
+			return false;
 		} else {
 
 			if ((p = strrchr(t_pattern, '.'))) {
@@ -570,13 +571,13 @@ bool mask_match(char *str, char *regexp, bool trans2)
 				fstrcpy(sbase, t_filename);
 				fstrcpy(sext, p + 1);
 				if (*eext) {
-					matched = do_match(sbase, ebase) &&
-					          do_match(sext, eext);
+					return do_match(sbase, ebase) &&
+					       do_match(sext, eext);
 				} else {
 					/* pattern has no extension */
 					/* Really: match complete filename with
 					 * pattern ??? means exactly 3 chars */
-					matched = do_match(str, ebase);
+					return do_match(str, ebase);
 				}
 			} else {
 				/*
@@ -586,10 +587,12 @@ bool mask_match(char *str, char *regexp, bool trans2)
 				fstrcpy(sext, "");
 				if (*eext) {
 					/* pattern has extension */
-					matched = do_match(sbase, ebase) &&
-					          do_match(sext, eext);
+					return do_match(sbase, ebase) &&
+					       do_match(sext, eext);
 				} else {
-					matched = do_match(sbase, ebase);
+					if (do_match(sbase, ebase)) {
+						return true;
+					}
 #ifdef EMULATE_WEIRD_W95_MATCHING
 					/*
 					 * Even Microsoft has some problems
@@ -598,21 +601,16 @@ bool mask_match(char *str, char *regexp, bool trans2)
 					 * from Nt 4.0 This branch would reflect
 					 * the Win95 local disk behaviour
 					 */
-					if (!matched) {
-						/* a? matches aa and a in w95 */
-						fstrcat(sbase, ".");
-						matched =
-						    do_match(sbase, ebase);
-					}
+					/* a? matches aa and a in w95 */
+					fstrcat(sbase, ".");
+					return do_match(sbase, ebase);
+#else
+					return false;
 #endif
 				}
 			}
 		}
 	}
-
-	DEBUG("returning %d\n", matched);
-
-	return matched;
 }
 
 /* Write a string in unicoode format */
