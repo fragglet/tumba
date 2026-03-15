@@ -565,25 +565,23 @@ bool mask_match(char *str, char *regexp, bool trans2)
 	if (*eext) {
 		/* pattern has extension */
 		return do_match(sbase, ebase) && do_match(sext, eext);
-	} else {
-		if (do_match(sbase, ebase)) {
-			return true;
-		}
-#ifdef EMULATE_WEIRD_W95_MATCHING
-		/*
-		 * Even Microsoft has some problems
-		 * Behaviour Win95 -> local disk
-		 * is different from Win95 -> smb drive
-		 * from Nt 4.0 This branch would reflect
-		 * the Win95 local disk behaviour
-		 */
-		/* a? matches aa and a in w95 */
-		fstrcat(sbase, ".");
-		return do_match(sbase, ebase);
-#else
-		return false;
-#endif
 	}
+
+	if (do_match(sbase, ebase)) {
+		return true;
+	}
+#ifdef EMULATE_WEIRD_W95_MATCHING
+	/*
+	 * Even Microsoft has some problems: behavior Win95 -> local disk is
+	 * different from Win95 -> smb drive from Nt 4.0. This branch would
+	 * reflect the Win95 local disk behavior
+	 */
+	/* a? matches aa and a in w95 */
+	fstrcat(sbase, ".");
+	return do_match(sbase, ebase);
+#else
+	return false;
+#endif
 }
 
 /* Write a string in unicoode format */
