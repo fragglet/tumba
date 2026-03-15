@@ -21,7 +21,6 @@
  */
 
 #include <arpa/inet.h>
-#include <assert.h>
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
@@ -334,7 +333,10 @@ static size_t strcpy_into(uint8_t *buf, size_t buf_len, void *to,
                           const void *from)
 {
 	size_t result;
-	assert((uint8_t *) to >= buf && (uint8_t *) to <= (buf + buf_len));
+	CHECK_OR_FATAL((uint8_t *) to >= buf &&
+	                   (uint8_t *) to <= (buf + buf_len),
+	               "Attempt to copy outside range of %ld-byte buffer\n",
+	               (long) buf_len);
 	buf_len -= ((uint8_t *) to) - buf;
 	result = strlcpy(to, from, buf_len) + 1;
 	return MIN(result, buf_len);
