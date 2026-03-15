@@ -13,8 +13,8 @@ IWYU = iwyu
 IWYU_FLAGS = --error
 IWYU_TRANSFORMED_FLAGS = $(patsubst %,-Xiwyu %,$(IWYU_FLAGS))
 
-CFLAGS = -O2 -MMD -Wall $(DEFINES)
-LDFLAGS =
+CFLAGS ?= -O2 -MMD -Wall $(DEFINES)
+LDFLAGS ?=
 
 ifdef FIND_UNUSED_CODE
 CFLAGS += -ffunction-sections -fdata-sections
