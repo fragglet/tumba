@@ -450,53 +450,46 @@ bool mask_match(char *str, char *regexp, bool trans2)
 		 */
 		if (num_regexp_components == 0)
 			return do_match(te_filename, te_pattern);
-		else {
-			for (cp1 = te_pattern, cp2 = te_filename; cp1;) {
-				fp = strchr(cp2, '.');
-				if (fp)
-					*fp = '\0';
-				rp = strchr(cp1, '.');
-				if (rp)
-					*rp = '\0';
 
-				last_wcard_was_star =
-				    string_has_suffix(cp1, "*");
+		for (cp1 = te_pattern, cp2 = te_filename; cp1;) {
+			fp = strchr(cp2, '.');
+			if (fp)
+				*fp = '\0';
+			rp = strchr(cp1, '.');
+			if (rp)
+				*rp = '\0';
 
-				if (!do_match(cp2, cp1)) {
-					break;
-				}
+			last_wcard_was_star = string_has_suffix(cp1, "*");
 
-				cp1 = rp ? rp + 1 : NULL;
-				cp2 = fp ? fp + 1 : "";
-
-				if (last_wcard_was_star ||
-				    (cp1 != NULL && *cp1 == '*')) {
-					/* Eat the extra path components. */
-					int i;
-
-					for (i = 0;
-					     i < num_path_components -
-					             num_regexp_components;
-					     i++) {
-						fp = strchr(cp2, '.');
-						if (fp)
-							*fp = '\0';
-
-						if (cp1 != NULL &&
-						    do_match(cp2, cp1)) {
-							cp2 = fp ? fp + 1 : "";
-							break;
-						}
-						cp2 = fp ? fp + 1 : "";
-					}
-					num_path_components -= i;
-				}
+			if (!do_match(cp2, cp1)) {
+				break;
 			}
-			if (cp1 == NULL &&
-			    (*cp2 == '\0' || last_wcard_was_star))
-				return true;
-			return false;
+
+			cp1 = rp ? rp + 1 : NULL;
+			cp2 = fp ? fp + 1 : "";
+
+			if (last_wcard_was_star ||
+			    (cp1 != NULL && *cp1 == '*')) {
+				/* Eat the extra path components. */
+				int i;
+
+				for (i = 0; i < num_path_components -
+				                    num_regexp_components;
+				     i++) {
+					fp = strchr(cp2, '.');
+					if (fp)
+						*fp = '\0';
+
+					if (cp1 != NULL && do_match(cp2, cp1)) {
+						cp2 = fp ? fp + 1 : "";
+						break;
+					}
+					cp2 = fp ? fp + 1 : "";
+				}
+				num_path_components -= i;
+			}
 		}
+		return cp1 == NULL && (*cp2 == '\0' || last_wcard_was_star);
 	} else {
 
 		/* -------------------------------------------------
