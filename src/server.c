@@ -78,7 +78,7 @@ static char *in_buffer = NULL;
 static char *out_buffer = NULL;
 static char *last_inbuf = NULL;
 
-static int am_parent = 1;
+static bool am_parent = true;
 
 /* the socket number of the listening TCP server. */
 static int server_socket;
@@ -2227,12 +2227,12 @@ void close_cnum(int cnum)
 
 void exit_server(char *reason)
 {
-	static int firsttime = 1;
+	static bool firsttime = true;
 	int i;
 
 	if (!firsttime)
 		exit(0);
-	firsttime = 0;
+	firsttime = false;
 
 	DEBUG("Closing connections\n");
 	for (i = 0; i < MAX_CONNECTIONS; i++)
