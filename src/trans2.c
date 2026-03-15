@@ -234,7 +234,7 @@ static int call_trans2open(char *inbuf, char *outbuf, size_t outbuf_len,
 	open_file_shared(fnum, cnum, fname, open_mode, open_ofun,
 	                 open_attr | aARCH, &rmode, &smb_action);
 
-	if (!Files[fnum].open) {
+	if (!OPEN_FNUM(fnum)) {
 		if (errno == ENOENT && bad_path) {
 			unix_ERR_class = ERRDOS;
 			unix_ERR_code = ERRbadpath;

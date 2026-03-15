@@ -2363,7 +2363,7 @@ static bool copy_file(char *src, char *dest1, int cnum, int ofun, int count,
 	open_file_shared(fnum1, cnum, src, DENY_NONE << 4, 1, 0, &access,
 	                 &action);
 
-	if (!Files[fnum1].open) {
+	if (!OPEN_FNUM(fnum1)) {
 		Files[fnum1].reserved = false;
 		return false;
 	}
@@ -2379,7 +2379,7 @@ static bool copy_file(char *src, char *dest1, int cnum, int ofun, int count,
 	open_file_shared(fnum2, cnum, dest, (DENY_NONE << 4) | 1, ofun,
 	                 st.st_mode, &access, &action);
 
-	if (!Files[fnum2].open) {
+	if (!OPEN_FNUM(fnum2)) {
 		close_file(fnum1, false);
 		Files[fnum2].reserved = false;
 		return false;

@@ -1906,7 +1906,7 @@ int find_free_file(void)
 		first_file = 1;
 
 	for (i = first_file; i < MAX_OPEN_FILES; i++)
-		if (!Files[i].open && !Files[i].reserved) {
+		if (!OPEN_FNUM(i) && !Files[i].reserved) {
 			memset(&Files[i], 0, sizeof(Files[i]));
 			first_file = i + 1;
 			Files[i].reserved = true;
@@ -1915,7 +1915,7 @@ int find_free_file(void)
 
 	/* returning a file handle of 0 is a bad idea - so we start at 1 */
 	for (i = 1; i < first_file; i++)
-		if (!Files[i].open && !Files[i].reserved) {
+		if (!OPEN_FNUM(i) && !Files[i].reserved) {
 			memset(&Files[i], 0, sizeof(Files[i]));
 			first_file = i + 1;
 			Files[i].reserved = true;
@@ -2200,7 +2200,7 @@ static void close_open_files(int cnum)
 {
 	int i;
 	for (i = 0; i < MAX_OPEN_FILES; i++)
-		if (Files[i].cnum == cnum && Files[i].open) {
+		if (Files[i].cnum == cnum && OPEN_FNUM(i)) {
 			close_file(i, false);
 		}
 }
