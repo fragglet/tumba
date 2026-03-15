@@ -40,6 +40,19 @@
 #define DEBUG(...)   LOG(__func__, __LINE__, 4, __VA_ARGS__)
 #define DEBUG_(...)  LOG(0, 0, 4, __VA_ARGS__)
 
+/* FATAL() is a wrapper around ERROR() that also exits the program. */
+#define FATAL(...)                                                             \
+	do {                                                                   \
+		ERROR(__VA_ARGS__);                                            \
+		exit(1);                                                       \
+	} while (0)
+#define CHECK_OR_FATAL(cond, ...)                                              \
+	do {                                                                   \
+		if (!(cond)) {                                                 \
+			FATAL(__VA_ARGS__);                                    \
+		}                                                              \
+	} while (0)
+
 /* limiting size of ipc replies */
 #define REALLOC(ptr, size) checked_realloc(ptr, MAX((size), 4 * 1024))
 

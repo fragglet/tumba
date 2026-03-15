@@ -10,7 +10,6 @@
 
 #include "shares.h"
 
-#include <assert.h>
 #include <ctype.h>
 #include <libgen.h>
 #include <stdbool.h>
@@ -118,7 +117,8 @@ void add_ipc_service(void)
 {
 	struct share *ipc;
 
-	assert(lookup_share(IPC_SHARE_NAME) == NULL);
+	CHECK_OR_FATAL(lookup_share(IPC_SHARE_NAME) == NULL,
+	               "IPC share already present\n");
 
 	ipc = _add_share();
 	ipc->name = IPC_SHARE_NAME;

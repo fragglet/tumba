@@ -11,7 +11,6 @@
 
 #include "util.h"
 
-#include <assert.h>
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -618,16 +617,18 @@ void *checked_realloc(void *p, size_t bytes)
 {
 	void *result = (realloc) (p, bytes);
 
-	assert(result != NULL || bytes == 0);
+	CHECK_OR_FATAL(result != NULL || bytes == 0,
+	               "Failure allocating %ld bytes\n", (long) bytes);
 
 	return result;
 }
 
-void *checked_calloc(size_t nmemb, size_t size)
+void *checked_calloc(size_t nmemb, size_t bytes)
 {
-	void *result = (calloc) (nmemb, size);
+	void *result = (calloc) (nmemb, bytes);
 
-	assert(result != NULL || nmemb == 0 || size == 0);
+	CHECK_OR_FATAL(result != NULL || nmemb == 0 || bytes == 0,
+	               "Failure allocating %ld bytes\n", (long) bytes);
 
 	return result;
 }
@@ -636,7 +637,8 @@ char *checked_strdup(const char *s)
 {
 	char *result = (strdup) (s);
 
-	assert(result != NULL);
+	CHECK_OR_FATAL(result != NULL, "Failure allocating %ld bytes\n",
+	               (long) strlen(s));
 
 	return result;
 }
