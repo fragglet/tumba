@@ -427,27 +427,22 @@ bool mask_match(char *str, char *regexp, bool trans2)
 	DEBUG("str=<%s> regexp=<%s>\n", t_filename, t_pattern);
 
 	if (trans2) {
-		/*
-		 * Match each component of the regexp, split up by '.'
-		 * characters.
-		 */
+		/* Match each component of the regexp, split up by '.'
+		 * characters.  */
 		char *fp, *rp, *cp2, *cp1;
 		bool last_wcard_was_star = false;
 		int num_path_components, num_regexp_components;
 
 		pstrcpy(te_pattern, t_pattern);
 		pstrcpy(te_filename, t_filename);
-		/*
-		 * Remove multiple "*." patterns.
-		 */
+
+		/* Remove multiple "*." patterns.  */
 		string_sub(te_pattern, "*.*.", "*.");
 		num_regexp_components = count_chars(te_pattern, '.');
 		num_path_components = count_chars(te_filename, '.');
 
-		/*
-		 * Check for special 'hack' case of "DIR a*z". - needs to match
-		 * a.b.c...z
-		 */
+		/* Check for special 'hack' case of "DIR a*z". - needs to match
+		 * a.b.c...z */
 		if (num_regexp_components == 0)
 			return do_match(te_filename, te_pattern);
 
@@ -510,9 +505,7 @@ bool mask_match(char *str, char *regexp, bool trans2)
 	}
 
 	if ((p = strrchr(t_pattern, '.'))) {
-		/*
-		 * Wildcard has a suffix.
-		 */
+		/* Wildcard has a suffix. */
 		*p = 0;
 		fstrcpy(ebase, t_pattern);
 		if (p[1]) {
@@ -525,27 +518,21 @@ bool mask_match(char *str, char *regexp, bool trans2)
 				return true;
 		}
 	} else {
-		/*
-		 * No suffix for wildcard.
-		 */
+		/* No suffix for wildcard. */
 		fstrcpy(ebase, t_pattern);
 		eext[0] = 0;
 	}
 
 	p = strrchr(t_filename, '.');
 	if (p && p[1] == 0) {
-		/*
-		 * Filename has an extension of '.' only.
-		 */
+		/* Filename has an extension of '.' only. */
 		*p = 0; /* nuke dot at end of string */
 		p = 0;  /* and treat it as if there is no
 		           extension */
 	}
 
 	if (p) {
-		/*
-		 * Filename has an extension.
-		 */
+		/* Filename has an extension. */
 		*p = 0;
 		fstrcpy(sbase, t_filename);
 		fstrcpy(sext, p + 1);
@@ -571,11 +558,9 @@ bool mask_match(char *str, char *regexp, bool trans2)
 		return true;
 	}
 #ifdef EMULATE_WEIRD_W95_MATCHING
-	/*
-	 * Even Microsoft has some problems: behavior Win95 -> local disk is
+	/* Even Microsoft has some problems: behavior Win95 -> local disk is
 	 * different from Win95 -> smb drive from Nt 4.0. This branch would
-	 * reflect the Win95 local disk behavior
-	 */
+	 * reflect the Win95 local disk behavior */
 	/* a? matches aa and a in w95 */
 	fstrcat(sbase, ".");
 	return do_match(sbase, ebase);
