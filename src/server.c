@@ -57,6 +57,8 @@
 static const uint8_t smb1_protocol_id[4] = {0xff, 'S', 'M', 'B'};
 static const uint8_t smb2_protocol_id[4] = {0xfe, 'S', 'M', 'B'};
 
+static void process(void);
+
 /* the following control timings of various actions. Don't change
    them unless you know what you are doing. These are all in seconds */
 #define DEFAULT_SMBD_TIMEOUT (60 * 60 * 24 * 7)
@@ -1565,15 +1567,83 @@ static void open_sockets(int port)
 	NOTICE("bind succeeded on port %d\n", port);
 }
 
-/* await_connection loops forever, accepting new connections and returning
-   only in a child process that has forked. */
+/* accept_connection() is called by await_connection() when a new client
+ * connects to the server, and calls process() in a child process. */
+static void accept_connection(void)
+{
+	struct sockaddr addr;
+	const char *peer_addr;
+	socklen_t in_addrlen = sizeof(addr);
+
+	client_fd = accept(server_socket, &addr, &in_addrlen);
+
+	if (client_fd == -1) {
+		if (errno != EINTR) {
+			ERROR("error accepting connection: %s\n",
+			      strerror(errno));
+		}
+		return;
+	}
+
+	peer_addr = get_peer_addr(client_fd);
+
+	/* The BSD sockets API does not provide any way to reject TCP
+	   connections, the best we can do is to accept the connection and then
+	   immediately close it. By default we only allow connections from
+	   local peers on the same private IP range. */
+	if (!is_private_peer()) {
+		if (!allow_public_connections) {
+			ERROR("rejecting connection from public IP"
+			      "address %s\n",
+			      peer_addr);
+			close(client_fd);
+			client_fd = -1;
+			return;
+		}
+		/* even if allowed, log a warning */
+		ERROR("warning: connection from public IP address %s\n",
+		      peer_addr);
+	}
+
+	if (fork() != 0) {
+		close(client_fd); /* The parent doesn't need this socket */
+		return;
+	}
+
+	/* At this point onwards, we are in the child process */
+
+	/* save a copy of the client's address to include log
+	 * messages */
+	strlcpy(client_addr, peer_addr, sizeof(client_addr));
+
+	set_descriptive_argv();
+
+	/* only the parent catches SIGCHLD */
+	signal(SIGPIPE, SIGNAL_CAST sig_pipe);
+	signal(SIGCHLD, SIGNAL_CAST SIG_DFL);
+
+	/* close the listening socket */
+	close(server_socket);
+
+	/* close our standard file descriptors */
+	close_low_fds();
+	am_parent = false;
+
+	set_keepalive_option(client_fd);
+
+	/* Handle the connection. */
+	process();
+
+	/* Normal child process termination. */
+	exit_server("normal exit");
+}
+
+/* await_connection loops forever, accepting new connections and calling
+   process() in a child process. It does not return. */
 static void await_connection(void)
 {
-	const char *peer_addr;
 	fd_set listen_set;
 	int num;
-	struct sockaddr addr;
-	socklen_t in_addrlen = sizeof(addr);
 
 	/* ready to listen */
 	if (listen(server_socket, 5) == -1) {
@@ -1582,7 +1652,6 @@ static void await_connection(void)
 
 	DEBUG("waiting for a connection\n");
 	while (1) {
-		in_addrlen = sizeof(addr);
 		FD_ZERO(&listen_set);
 		FD_SET(server_socket, &listen_set);
 
@@ -1592,64 +1661,9 @@ static void await_connection(void)
 			continue;
 		}
 
-		if (!FD_ISSET(server_socket, &listen_set)) {
-			continue;
+		if (FD_ISSET(server_socket, &listen_set)) {
+			accept_connection();
 		}
-
-		client_fd = accept(server_socket, &addr, &in_addrlen);
-
-		if (client_fd == -1 && errno == EINTR)
-			continue;
-
-		if (client_fd == -1) {
-			ERROR("error accepting connection: %s\n",
-			      strerror(errno));
-			continue;
-		}
-
-		peer_addr = get_peer_addr(client_fd);
-
-		/* The BSD sockets API does not provide any way to reject TCP
-		   connections, the best we can do is to accept the connection
-		   and then immediately close it. By default we only allow
-		   connections from local peers on the same private IP range. */
-		if (!is_private_peer()) {
-			if (!allow_public_connections) {
-				ERROR("rejecting connection from public IP"
-				      "address %s\n",
-				      peer_addr);
-				close(client_fd);
-				client_fd = -1;
-				continue;
-			}
-			/* even if allowed, log a warning */
-			ERROR("warning: connection from public IP address %s\n",
-			      peer_addr);
-		}
-
-		if (fork() == 0) {
-			/* save a copy of the client's address to include log
-			 * messages */
-			strlcpy(client_addr, peer_addr, sizeof(client_addr));
-
-			set_descriptive_argv();
-
-			/* only the parent catches SIGCHLD */
-			signal(SIGPIPE, SIGNAL_CAST sig_pipe);
-			signal(SIGCHLD, SIGNAL_CAST SIG_DFL);
-
-			/* close the listening socket */
-			close(server_socket);
-
-			/* close our standard file descriptors */
-			close_low_fds();
-			am_parent = 0;
-
-			set_keepalive_option(client_fd);
-
-			return;
-		}
-		close(client_fd); /* The parent doesn't need this socket */
 	}
 }
 
@@ -2871,8 +2885,6 @@ int main(int argc, char *argv[])
 	open_sockets(port);
 	drop_privileges();
 	await_connection();
-	process();
 
-	exit_server("normal exit");
 	return 0;
 }
