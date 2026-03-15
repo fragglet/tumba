@@ -2151,7 +2151,7 @@ static int reply_negprot(char *inbuf, char *outbuf, size_t inbuf_len,
                          size_t outbuf_len)
 {
 	int outsize = set_message(outbuf, 1, 0, true);
-	int Index = 0;
+	int index = 0;
 	int choice = -1;
 	int protocol;
 	char *p;
@@ -2159,7 +2159,7 @@ static int reply_negprot(char *inbuf, char *outbuf, size_t inbuf_len,
 
 	p = smb_buf(inbuf) + 1;
 	while (p < smb_buf(inbuf) + bcc) {
-		Index++;
+		index++;
 		DEBUG("Requested protocol [%s]\n", p);
 		p += strlen(p) + 2;
 	}
@@ -2168,12 +2168,12 @@ static int reply_negprot(char *inbuf, char *outbuf, size_t inbuf_len,
 	for (protocol = 0; supported_protocols[protocol].proto_name;
 	     protocol++) {
 		p = smb_buf(inbuf) + 1;
-		Index = 0;
+		index = 0;
 		while (p < smb_buf(inbuf) + bcc) {
 			if (strequal(p,
 			             supported_protocols[protocol].proto_name))
-				choice = Index;
-			Index++;
+				choice = index;
+			index++;
 			p += strlen(p) + 2;
 		}
 		if (choice != -1)
