@@ -903,17 +903,35 @@ static void open_server_sock(struct in_addr bind_addr, int port)
 	NOTICE("bind successful for %s port %d\n", inet_ntoa(bind_addr), port);
 }
 
+static char *get_hostname(void)
+{
+	char *hostname;
+	long hostname_max = sysconf(_SC_HOST_NAME_MAX);
+
+	if (hostname_max < 0) {
+		ERROR("Failed to get maximum hostname length: %s\n",
+		      strerror(errno));
+		return NULL;
+	}
+
+	hostname = checked_malloc((size_t) hostname_max + 1);
+	if (gethostname(hostname, hostname_max) != 0) {
+		ERROR("Failed to get system hostname: %s\n", strerror(errno));
+		free(hostname);
+		return NULL;
+	}
+
+	return hostname;
+}
+
 static void init_names(void)
 {
-	char hostname[HOST_NAME_MAX + 1];
+	char *hostname = get_hostname();
 	char *p;
-	bool got_hostname;
-
-	got_hostname = gethostname(hostname, sizeof(hostname)) == 0;
 
 	if (strlen(myname) != 0) {
 		/* User specified the hostname */
-	} else if (!got_hostname) {
+	} else if (hostname == NULL) {
 		STARTUP_ERROR("Failed to get system hostname (%s); you can "
 		              "specify it manually with -n hostname\n",
 		              strerror(errno));
@@ -926,12 +944,14 @@ static void init_names(void)
 	}
 
 	if (strlen(comment) == 0) {
-		if (got_hostname) {
+		if (hostname != NULL) {
 			strlcpy(comment, hostname, sizeof(comment));
 			strlcat(comment, " ", sizeof(comment));
 		}
 		strlcat(comment, "(Tumba " VERSION ")", sizeof(comment));
 	}
+
+	free(hostname);
 
 	strupper(myname);
 	strupper(mygroup);
