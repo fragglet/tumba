@@ -158,7 +158,7 @@ static struct network_address *get_addresses(int sock_fd, int *num_addrs)
 			ERROR("Failed getting netmask for %s\n", req->ifr_name);
 			continue;
 		}
-		result[*num_addrs].netmask = addr(&req->ifr_netmask);
+		result[*num_addrs].netmask = addr(&req->ifr_addr);
 
 		if (ioctl(sock_fd, SIOCGIFBRDADDR, req) < 0) {
 			ERROR("Failed getting broadcast address for %s\n",
