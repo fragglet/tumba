@@ -39,6 +39,7 @@
 #include <unistd.h>
 
 #include "byteorder.h"
+#include "guards.h"
 #include "smb.h"
 #include "strfunc.h"
 #include "util.h"
@@ -123,7 +124,7 @@ static struct ifconf get_interfaces(int sock_fd)
 
 		ifc.ifc_len *= 2;
 		ifc.ifc_ifcu.ifcu_req =
-		    realloc(ifc.ifc_ifcu.ifcu_req, ifc.ifc_len);
+		    checked_realloc(ifc.ifc_ifcu.ifcu_req, ifc.ifc_len);
 	}
 }
 
@@ -140,7 +141,8 @@ static struct network_address *get_addresses(int sock_fd, int *num_addrs)
 		return NULL;
 	}
 
-	result = calloc(ifc.ifc_len / sizeof(struct ifreq), sizeof(*result));
+	result =
+	    checked_calloc(ifc.ifc_len / sizeof(struct ifreq), sizeof(*result));
 
 	*num_addrs = 0;
 	for (i = 0; i * sizeof(struct ifreq) < ifc.ifc_len; ++i) {
