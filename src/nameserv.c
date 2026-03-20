@@ -23,7 +23,6 @@
 #include <arpa/inet.h>
 #include <ctype.h>
 #include <errno.h>
-#include <limits.h>
 #include <net/if.h>
 #include <netinet/in.h>
 #include <stdbool.h>
@@ -39,7 +38,7 @@
 #include <unistd.h>
 
 #include "byteorder.h"
-#include "guards.h"
+#include "guards.h" /* IWYU pragma: keep */
 #include "smb.h"
 #include "strfunc.h"
 #include "util.h"

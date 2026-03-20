@@ -15,8 +15,8 @@
 #include <fcntl.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 
 #include "guards.h" /* IWYU pragma: keep */
 #include "server.h"
