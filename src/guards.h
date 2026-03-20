@@ -15,6 +15,12 @@
 /* This file defines guard #define macros to prevent use of dangerous
    functions. */
 
+/* We include the system headers where the forbidden functions are declared
+   first, so that the macros below do not interfere. */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 /* Do not use; use pstrcpy, fstrcpy, strlcpy instead */
 #ifdef strcpy
 #undef strcpy
