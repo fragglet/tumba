@@ -2763,7 +2763,7 @@ static void usage(void)
 	ERROR("Incorrect program usage - are you sure the command line is "
 	      "correct?\n");
 
-	printf("Tumba version " VERSION "\n"
+	printf("Tumba " VERSION "\n"
 	       "Usage: tumba_smbd"
 	       " [-a]"
 	       " [-b address]"
@@ -2784,6 +2784,12 @@ int main(int argc, char *argv[])
 {
 	int port = SMB_PORT;
 	int opt;
+
+	if (argc == 2 &&
+	    (!strcmp(argv[1], "-V") || !strcmp(argv[1], "--version"))) {
+		printf("Tumba " VERSION "\n");
+		exit(0);
+	}
 
 	time_init();
 	setup_logging(argv[0]);

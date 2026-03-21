@@ -1,6 +1,6 @@
 ## Windows for Workgroups
 
-<img src="wfw311.png" width="800">
+<img src="wfw311.png" width="640">
 
 ## Windows 95
 

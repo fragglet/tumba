@@ -1,6 +1,11 @@
 name: Continuous Integration
 
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:  # Nightly build
+    - cron: "15 1 * * *"
 
 jobs:
   build:
@@ -16,6 +21,21 @@ jobs:
         submodules: true
     - name: make
       run: make -j -C src
+
+    - name: Check version output
+      id: version
+      run: |
+        if git describe --exact-match --tags; then
+          VERSION=$(git describe --exact-match --tags)
+          VERSION=${VERSION/#tumba-/}
+          VERSION_OUTPUT=$(./src/tumba_smbd --version)
+          if [ "$VERSION_OUTPUT" != "Tumba $VERSION" ]; then
+            echo "Wrong version number output:"
+            echo " for tag '$(git describe --exact-match --tags)',"
+            echo " --version output gave '$VERSION_OUTPUT'"
+            false
+          fi
+        fi
 
   code_health_checks:
     runs-on: ubuntu-latest
