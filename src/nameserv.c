@@ -949,7 +949,7 @@ static void init_names(void)
 			strlcpy(comment, hostname, sizeof(comment));
 			strlcat(comment, " ", sizeof(comment));
 		}
-		strlcat(comment, "(Tumba " VERSION ")", sizeof(comment));
+		strlcat(comment, "(" PACKAGE_STRING ")", sizeof(comment));
 	}
 
 	free(hostname);
@@ -967,7 +967,8 @@ static void usage(const char *pname)
 {
 	ERROR("Incorrect program usage - is the command line correct?\n");
 
-	printf("Tumba " VERSION "\n"
+	printf(PACKAGE_STRING
+	       "\n"
 	       "Usage: %s"
 	       " [-b address]"
 	       " [-C comment]"
@@ -997,7 +998,7 @@ int main(int argc, char *argv[])
 
 	if (argc == 2 &&
 	    (!strcmp(argv[1], "-V") || !strcmp(argv[1], "--version"))) {
-		printf("Tumba " VERSION "\n");
+		printf(PACKAGE_STRING "\n");
 		exit(0);
 	}
 
@@ -1037,7 +1038,8 @@ int main(int argc, char *argv[])
 			exit(1);
 		}
 
-	NOTICE("Tumba nameserver version %s started\n", VERSION);
+	NOTICE("%s nameserver version %s started\n", PACKAGE_NAME,
+	       PACKAGE_VERSION);
 
 	init_names();
 
