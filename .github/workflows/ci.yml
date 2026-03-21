@@ -32,7 +32,14 @@ jobs:
           if [ "$VERSION_OUTPUT" != "Tumba $VERSION" ]; then
             echo "Wrong version number output:"
             echo " for tag '$(git describe --exact-match --tags)',"
-            echo " --version output gave '$VERSION_OUTPUT'"
+            echo " tumba_smbd --version output gave '$VERSION_OUTPUT'"
+            false
+          fi
+          VERSION_OUTPUT=$(./src/tumba_nmbd --version)
+          if [ "$VERSION_OUTPUT" != "Tumba $VERSION" ]; then
+            echo "Wrong version number output:"
+            echo " for tag '$(git describe --exact-match --tags)',"
+            echo " tumba_nmbd --version output gave '$VERSION_OUTPUT'"
             false
           fi
         fi
