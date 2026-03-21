@@ -321,7 +321,7 @@ int reply_sesssetup_and_X(char *inbuf, char *outbuf, size_t inbuf_len,
 		p = smb_buf(outbuf);
 		pstrcpy(p, "Unix");
 		p = skip_string(p);
-		pstrcpy(p, "Tumba " VERSION);
+		pstrcpy(p, PACKAGE_STRING);
 		p = skip_string(p);
 		pstrcpy(p, workgroup);
 		p = skip_string(p);
