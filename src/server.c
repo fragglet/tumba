@@ -2795,7 +2795,8 @@ static void usage(void)
 	ERROR("Incorrect program usage - are you sure the command line is "
 	      "correct?\n");
 
-	printf("Tumba " VERSION "\n"
+	printf(PACKAGE_STRING
+	       "\n"
 	       "Usage: tumba_smbd"
 	       " [-a]"
 	       " [-b address]"
@@ -2819,7 +2820,7 @@ int main(int argc, char *argv[])
 
 	if (argc == 2 &&
 	    (!strcmp(argv[1], "-V") || !strcmp(argv[1], "--version"))) {
-		printf("Tumba " VERSION "\n");
+		printf(PACKAGE_STRING "\n");
 		exit(0);
 	}
 
@@ -2878,7 +2879,7 @@ int main(int argc, char *argv[])
 
 	add_ipc_service();
 
-	NOTICE("Tumba smbd version %s started\n", VERSION);
+	NOTICE("%s smbd version %s started\n", PACKAGE_NAME, PACKAGE_VERSION);
 
 	init_structs();
 
