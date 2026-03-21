@@ -967,7 +967,7 @@ static void usage(const char *pname)
 {
 	ERROR("Incorrect program usage - is the command line correct?\n");
 
-	printf("Tumba version " VERSION "\n"
+	printf("Tumba " VERSION "\n"
 	       "Usage: %s"
 	       " [-b address]"
 	       " [-C comment]"
@@ -994,6 +994,12 @@ int main(int argc, char *argv[])
 	int port = 137;
 	int opt;
 	extern char *optarg;
+
+	if (argc == 2 &&
+	    (!strcmp(argv[1], "-V") || !strcmp(argv[1], "--version"))) {
+		printf("Tumba " VERSION "\n");
+		exit(0);
+	}
 
 	while ((opt = getopt(argc, argv, "b:C:n:l:d:p:hSW:")) != EOF)
 		switch (opt) {
