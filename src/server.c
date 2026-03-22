@@ -2144,20 +2144,18 @@ protocol [LANMAN2.1]
 /* List of supported protocols, most desired first */
 struct {
 	char *proto_name;
-	char *short_name;
 	int (*proto_reply_fn)(char *);
-	int protocol_level;
 } supported_protocols[] = {
-    {"NT LANMAN 1.0", "NT1", reply_nt1, PROTOCOL_NT1},
-    {"NT LM 0.12", "NT1", reply_nt1, PROTOCOL_NT1},
-    {"LM1.2X002", "LANMAN2", reply_lanman2, PROTOCOL_LANMAN2},
-    {"Samba", "LANMAN2", reply_lanman2, PROTOCOL_LANMAN2},
-    {"DOS LM1.2X002", "LANMAN2", reply_lanman2, PROTOCOL_LANMAN2},
-    {"LANMAN1.0", "LANMAN1", reply_lanman1, PROTOCOL_LANMAN1},
-    {"MICROSOFT NETWORKS 3.0", "LANMAN1", reply_lanman1, PROTOCOL_LANMAN1},
-    {"MICROSOFT NETWORKS 1.03", "COREPLUS", reply_coreplus, PROTOCOL_COREPLUS},
-    {"PC NETWORK PROGRAM 1.0", "CORE", reply_corep, PROTOCOL_CORE},
-    {NULL, NULL},
+    {"NT LANMAN 1.0", reply_nt1},
+    {"NT LM 0.12", reply_nt1},
+    {"LM1.2X002", reply_lanman2},
+    {"Samba", reply_lanman2},
+    {"DOS LM1.2X002", reply_lanman2},
+    {"LANMAN1.0", reply_lanman1},
+    {"MICROSOFT NETWORKS 3.0", reply_lanman1},
+    {"MICROSOFT NETWORKS 1.03", reply_coreplus},
+    {"PC NETWORK PROGRAM 1.0", reply_corep},
+    {NULL},
 };
 
 /* Reply to an SMBnegprot */
