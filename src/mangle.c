@@ -22,7 +22,7 @@
 #include "strfunc.h"
 #include "util.h"
 
-static const char * const reserved_devices[] = {
+static const char *const reserved_devices[] = {
     "CLOCK$", "CON",  "AUX",  "COM1", "COM2", "COM3",
     "COM4",   "LPT1", "LPT2", "LPT3", "NUL",  "PRN",
 };
