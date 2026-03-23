@@ -105,7 +105,6 @@ struct open_file {
 	uint32_t size;
 	int mode;
 	struct bmpx_data *wbmpx_ptr;
-	struct timeval open_time;
 	bool open;
 	bool can_lock;
 	bool can_read;

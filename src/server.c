@@ -1017,7 +1017,6 @@ static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
 		fsp->fd_ptr = fd_ptr;
 		Connections[cnum].num_files_open++;
 		fsp->mode = sbuf->st_mode;
-		gettimeofday(&fsp->open_time, NULL);
 		fsp->size = 0;
 		fsp->pos = -1;
 		fsp->open = true;
