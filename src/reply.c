@@ -63,8 +63,9 @@ int reply_special(char *inbuf, char *outbuf)
 	smb_setlen(outbuf, 0);
 
 	switch (msg_type) {
-	case 0x81: /* session request */
-		CVAL(outbuf, 0) = 0x82;
+
+	case NETBIOS_SESSION_REQUEST:
+		CVAL(outbuf, 0) = NETBIOS_POSITIVE_SESSION_RESPONSE;
 		CVAL(outbuf, 3) = 0;
 		if (name_len(inbuf + 4) > 50 ||
 		    name_len(inbuf + 4 + name_len(inbuf + 4)) > 50) {
@@ -87,25 +88,25 @@ int reply_special(char *inbuf, char *outbuf)
 		if (name_type == 'R') {
 			/* We are being asked for a pathworks session ---
 			   no thanks! */
-			CVAL(outbuf, 0) = 0x83;
+			CVAL(outbuf, 0) = NETBIOS_NEGATIVE_SESSION_RESPONSE;
 			break;
 		}
 
 		break;
 
-	case 0x89: /* session keepalive request
-	              (some old clients produce this?) */
-		CVAL(outbuf, 0) = 0x85;
+	/* some old clients produce this? */
+	case NETBIOS_SESSION_KEEP_ALIVE_OLD:
+		CVAL(outbuf, 0) = NETBIOS_SESSION_KEEP_ALIVE;
 		CVAL(outbuf, 3) = 0;
 		break;
 
-	case 0x82: /* positive session response */
-	case 0x83: /* negative session response */
-	case 0x84: /* retarget session response */
+	case NETBIOS_POSITIVE_SESSION_RESPONSE:
+	case NETBIOS_NEGATIVE_SESSION_RESPONSE:
+	case NETBIOS_RETARGET_SESSION_RESPONSE:
 		ERROR("Unexpected session response\n");
 		break;
 
-	case 0x85: /* session keepalive */
+	case NETBIOS_SESSION_KEEP_ALIVE:
 	default:
 		return 0;
 	}

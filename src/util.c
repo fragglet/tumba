@@ -561,7 +561,7 @@ int read_smb_length_return_keepalive(int fd, char *inbuf, int timeout)
 		len = smb_len(inbuf);
 		msg_type = CVAL(inbuf, 0);
 
-		if (msg_type == 0x85)
+		if (msg_type == NETBIOS_SESSION_KEEP_ALIVE)
 			DEBUG("Got keepalive packet\n");
 	}
 
@@ -586,7 +586,7 @@ int read_smb_length(int fd, char *inbuf, int timeout)
 			return len;
 
 		/* Ignore session keepalives. */
-		if (CVAL(inbuf, 0) != 0x85)
+		if (CVAL(inbuf, 0) != NETBIOS_SESSION_KEEP_ALIVE)
 			break;
 	}
 

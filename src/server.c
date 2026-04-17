@@ -1774,7 +1774,7 @@ bool receive_next_smb(int smbfd, char *inbuf, int bufsize, int timeout)
 		ret = receive_message_or_smb(smbfd, inbuf, bufsize, timeout,
 		                             &got_smb);
 
-		if (ret && CVAL(inbuf, 0) == 0x85) {
+		if (ret && CVAL(inbuf, 0) == NETBIOS_SESSION_KEEP_ALIVE) {
 			/* Keepalive packet. */
 			got_smb = false;
 		}
@@ -2659,7 +2659,7 @@ static void process_smb(char *inbuf, char *outbuf)
 
 	if (msg_type == 0)
 		show_msg(inbuf);
-	else if (msg_type == 0x85)
+	else if (msg_type == NETBIOS_SESSION_KEEP_ALIVE)
 		return; /* Keepalive packet. */
 
 	nread = construct_reply(inbuf, outbuf, nread, max_send);

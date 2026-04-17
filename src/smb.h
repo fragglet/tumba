@@ -376,6 +376,14 @@ implemented */
 #define SV_TYPE_DOMAIN_ENUM       0x80000000
 #define SV_TYPE_ALL               0xFFFFFFFF
 
+/* NetBIOS packet types; see RFC1002 */
+#define NETBIOS_SESSION_REQUEST           0x81
+#define NETBIOS_POSITIVE_SESSION_RESPONSE 0x82
+#define NETBIOS_NEGATIVE_SESSION_RESPONSE 0x83
+#define NETBIOS_RETARGET_SESSION_RESPONSE 0x84
+#define NETBIOS_SESSION_KEEP_ALIVE        0x85
+#define NETBIOS_SESSION_KEEP_ALIVE_OLD    0x89
+
 /* what server type are we currently  - JHT Says we ARE 4.20 */
 /* this was set by JHT in liaison with Jeremy Allison early 1997 */
 /* setting to 4.20 at same time as announcing ourselves as NT Server */
