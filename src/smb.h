@@ -15,6 +15,8 @@
 #ifndef _SMB_H
 #define _SMB_H
 
+#include "version.h"
+
 #define BUFFER_SIZE (0xFFFF)
 
 #define PTR_DIFF(p1, p2) ((ptrdiff_t) (((char *) (p1)) - (char *) (p2)))

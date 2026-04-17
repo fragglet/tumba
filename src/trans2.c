@@ -39,7 +39,6 @@
 #include "system.h"
 #include "timefunc.h"
 #include "util.h"
-#include "version.h"
 
 #define DIR_ENTRY_SAFETY_MARGIN 4096
 
