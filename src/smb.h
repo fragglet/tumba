@@ -22,6 +22,10 @@
 /* how long to wait for secondary SMB packets (milli-seconds) */
 #define SMB_SECONDARY_WAIT (60 * 1000)
 
+/* what type of filesystem do we want this to show up as in a NT file
+   manager window? */
+#define FSTYPE_STRING PACKAGE_NAME
+
 /* this defines the error codes that receive_smb can put in smb_read_error */
 #define READ_TIMEOUT 1
 #define READ_EOF     2

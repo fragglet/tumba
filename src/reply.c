@@ -228,7 +228,6 @@ int reply_tcon_and_X(char *inbuf, char *outbuf, size_t inbuf_len,
 		set_message(outbuf, 2, strlen(devicename) + 1, true);
 		pstrcpy(smb_buf(outbuf), devicename);
 	} else {
-		char *fsname = "SAMBA";
 		char *p;
 
 		set_message(outbuf, 3, 3, true);
@@ -236,7 +235,7 @@ int reply_tcon_and_X(char *inbuf, char *outbuf, size_t inbuf_len,
 		p = smb_buf(outbuf);
 		pstrcpy(p, devicename);
 		p = skip_string(p); /* device name */
-		pstrcpy(p, fsname);
+		pstrcpy(p, FSTYPE_STRING);
 		p = skip_string(p); /* filesystem type e.g NTFS */
 
 		set_message(outbuf, 3, PTR_DIFF(p, smb_buf(outbuf)), false);

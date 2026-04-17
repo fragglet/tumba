@@ -41,10 +41,6 @@
 #include "util.h"
 #include "version.h"
 
-/* what type of filesystem do we want this to show up as in a NT file
-   manager window? */
-#define FSTYPE_STRING PACKAGE_NAME
-
 #define DIR_ENTRY_SAFETY_MARGIN 4096
 
 /*
