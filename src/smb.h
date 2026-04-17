@@ -429,11 +429,8 @@ enum protocol_types {
 
 #define ROUNDUP(x, g) (((x) + ((g) - 1)) & ~((g) - 1))
 
-/*
- * Global value meaing that the smb_uid field should be
- * ingored (in share level security and protocol level == CORE)
- */
-
+/* Global value meaing that the smb_uid field should be ignored
+   (in share level security and protocol level == CORE) */
 #define UID_FIELD_INVALID 0
 
 /***************************************************************
