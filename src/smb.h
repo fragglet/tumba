@@ -273,12 +273,6 @@ implemented */
 #define SMBfindnclose 0x35 /* Terminate a TRANSACT2_FINDNOTIFYFIRST */
 #define SMBulogoffX   0x74 /* user logoff */
 
-/* NT SMB extensions. */
-#define SMBnttrans   0xA0 /* NT transact */
-#define SMBnttranss  0xA1 /* NT transact secondary */
-#define SMBntcreateX 0xA2 /* NT create and X */
-#define SMBntcancel  0xA4 /* NT cancel */
-
 /* These are the TRANS2 sub commands */
 #define TRANSACT2_OPEN                     0
 #define TRANSACT2_FINDFIRST                1
@@ -432,20 +426,5 @@ enum protocol_types {
 /* Global value meaing that the smb_uid field should be ignored
    (in share level security and protocol level == CORE) */
 #define UID_FIELD_INVALID 0
-
-/***************************************************************
- OPLOCK section.
-****************************************************************/
-
-/* Lock types. */
-#define LOCKING_ANDX_SHARED_LOCK     0x1
-#define LOCKING_ANDX_OPLOCK_RELEASE  0x2
-#define LOCKING_ANDX_CHANGE_LOCKTYPE 0x4
-#define LOCKING_ANDX_CANCEL_LOCK     0x8
-#define LOCKING_ANDX_LARGE_FILES     0x10
-
-/***************************************************************
- End of OPLOCK section.
-****************************************************************/
 
 #endif /* _SMB_H */

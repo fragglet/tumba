@@ -47,6 +47,8 @@
 a packet to ensure chaining works correctly */
 #define GETFNUM(buf, where) (chain_fnum != -1 ? chain_fnum : SVAL(buf, where))
 
+#define LOCKING_ANDX_OPLOCK_RELEASE 0x2
+
 int reply_special(char *inbuf, char *outbuf)
 {
 	int outsize = 4;
