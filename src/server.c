@@ -184,7 +184,7 @@ static int read_dosattrib(const char *path)
 	}
 	buf[nbytes] = '\0';
 
-	if (string_has_prefix(buf, "0x")) {
+	if (!string_has_prefix(buf, "0x")) {
 		/* TODO: Maybe support newer versions */
 		return 0;
 	}

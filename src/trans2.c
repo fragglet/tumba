@@ -297,7 +297,7 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 	                 strequal(Connections[cnum].dirpath, "/");
 	bool was_8_3;
 	int nt_extmode; /* Used for NT connections instead of mode */
-	bool needslash = string_has_suffix(Connections[cnum].dirpath, "/");
+	bool needslash = !string_has_suffix(Connections[cnum].dirpath, "/");
 
 	*fname = 0;
 	*out_of_space = false;
