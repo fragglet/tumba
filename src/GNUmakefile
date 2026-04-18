@@ -39,6 +39,8 @@ OBJECTS = \
 
 NMBD_OBJECTS = \
 	nameserv.o           \
+	strlcat.o            \
+	strlcpy.o            \
 	strfunc.o            \
 	timefunc.o           \
 	util.o
