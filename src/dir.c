@@ -393,7 +393,7 @@ bool get_dir_entry(int cnum, char *mask, int dirtype, char *fname, int *size,
 	             strequal(Connections[cnum].dirpath, ".") ||
 	             strequal(Connections[cnum].dirpath, "/"));
 
-	needslash = string_has_suffix(Connections[cnum].dirpath, "/");
+	needslash = !string_has_suffix(Connections[cnum].dirpath, "/");
 
 	if (!Connections[cnum].dirptr)
 		return false;
