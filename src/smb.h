@@ -15,12 +15,18 @@
 #ifndef _SMB_H
 #define _SMB_H
 
+#include "version.h"
+
 #define BUFFER_SIZE (0xFFFF)
 
 #define PTR_DIFF(p1, p2) ((ptrdiff_t) (((char *) (p1)) - (char *) (p2)))
 
 /* how long to wait for secondary SMB packets (milli-seconds) */
 #define SMB_SECONDARY_WAIT (60 * 1000)
+
+/* what type of filesystem do we want this to show up as in a NT file
+   manager window? */
+#define FSTYPE_STRING PACKAGE_NAME
 
 /* this defines the error codes that receive_smb can put in smb_read_error */
 #define READ_TIMEOUT 1
@@ -267,12 +273,6 @@ implemented */
 #define SMBfindnclose 0x35 /* Terminate a TRANSACT2_FINDNOTIFYFIRST */
 #define SMBulogoffX   0x74 /* user logoff */
 
-/* NT SMB extensions. */
-#define SMBnttrans   0xA0 /* NT transact */
-#define SMBnttranss  0xA1 /* NT transact secondary */
-#define SMBntcreateX 0xA2 /* NT create and X */
-#define SMBntcancel  0xA4 /* NT cancel */
-
 /* These are the TRANS2 sub commands */
 #define TRANSACT2_OPEN                     0
 #define TRANSACT2_FINDFIRST                1
@@ -376,6 +376,14 @@ implemented */
 #define SV_TYPE_DOMAIN_ENUM       0x80000000
 #define SV_TYPE_ALL               0xFFFFFFFF
 
+/* NetBIOS packet types; see RFC1002 */
+#define NETBIOS_SESSION_REQUEST           0x81
+#define NETBIOS_POSITIVE_SESSION_RESPONSE 0x82
+#define NETBIOS_NEGATIVE_SESSION_RESPONSE 0x83
+#define NETBIOS_RETARGET_SESSION_RESPONSE 0x84
+#define NETBIOS_SESSION_KEEP_ALIVE        0x85
+#define NETBIOS_SESSION_KEEP_ALIVE_OLD    0x89
+
 /* what server type are we currently  - JHT Says we ARE 4.20 */
 /* this was set by JHT in liaison with Jeremy Allison early 1997 */
 /* setting to 4.20 at same time as announcing ourselves as NT Server */
@@ -423,26 +431,8 @@ enum protocol_types {
 
 #define ROUNDUP(x, g) (((x) + ((g) - 1)) & ~((g) - 1))
 
-/*
- * Global value meaing that the smb_uid field should be
- * ingored (in share level security and protocol level == CORE)
- */
-
+/* Global value meaing that the smb_uid field should be ignored
+   (in share level security and protocol level == CORE) */
 #define UID_FIELD_INVALID 0
-
-/***************************************************************
- OPLOCK section.
-****************************************************************/
-
-/* Lock types. */
-#define LOCKING_ANDX_SHARED_LOCK     0x1
-#define LOCKING_ANDX_OPLOCK_RELEASE  0x2
-#define LOCKING_ANDX_CHANGE_LOCKTYPE 0x4
-#define LOCKING_ANDX_CANCEL_LOCK     0x8
-#define LOCKING_ANDX_LARGE_FILES     0x10
-
-/***************************************************************
- End of OPLOCK section.
-****************************************************************/
 
 #endif /* _SMB_H */

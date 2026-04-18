@@ -39,11 +39,6 @@
 #include "system.h"
 #include "timefunc.h"
 #include "util.h"
-#include "version.h"
-
-/* what type of filesystem do we want this to show up as in a NT file
-   manager window? */
-#define FSTYPE_STRING PACKAGE_NAME
 
 #define DIR_ENTRY_SAFETY_MARGIN 4096
 
@@ -388,7 +383,7 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 	nt_extmode = mode ? mode : NT_FILE_ATTRIBUTE_NORMAL;
 
 	switch (info_level) {
-	case 1:
+	case SMB_INFO_STANDARD:
 		if (requires_resume_key) {
 			SIVAL(p, 0, reskey);
 			p += 4;
@@ -405,7 +400,7 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 		p += l1_achName + strlen(fname) + 1;
 		break;
 
-	case 2:
+	case SMB_INFO_QUERY_EA_SIZE:
 		/* info_level 2 */
 		if (requires_resume_key) {
 			SIVAL(p, 0, reskey);
@@ -424,7 +419,7 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 		p += l2_achName + strlen(fname) + 1;
 		break;
 
-	case 3:
+	case SMB_INFO_QUERY_EAS_FROM_LIST:
 		SIVAL(p, 0, reskey);
 		put_dos_date2(p, 4, cdate);
 		put_dos_date2(p, 8, adate);
@@ -439,7 +434,7 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 		p += 31 + strlen(fname) + 1;
 		break;
 
-	case 4:
+	case SMB_INFO_QUERY_ALL_EAS:
 		if (requires_resume_key) {
 			SIVAL(p, 0, reskey);
 			p += 4;
@@ -648,10 +643,10 @@ static int call_trans2findfirst(char *inbuf, char *outbuf, size_t outbuf_len,
 	      requires_resume_key, info_level, max_data_bytes);
 
 	switch (info_level) {
-	case 1:
-	case 2:
-	case 3:
-	case 4:
+	case SMB_INFO_STANDARD:
+	case SMB_INFO_QUERY_EA_SIZE:
+	case SMB_INFO_QUERY_EAS_FROM_LIST:
+	case SMB_INFO_QUERY_ALL_EAS:
 	case SMB_FIND_FILE_DIRECTORY_INFO:
 	case SMB_FIND_FILE_FULL_DIRECTORY_INFO:
 	case SMB_FIND_FILE_NAMES_INFO:
@@ -820,10 +815,10 @@ static int call_trans2findnext(char *inbuf, char *outbuf, size_t inbuf_len,
 	      continue_bit, info_level);
 
 	switch (info_level) {
-	case 1:
-	case 2:
-	case 3:
-	case 4:
+	case SMB_INFO_STANDARD:
+	case SMB_INFO_QUERY_EA_SIZE:
+	case SMB_INFO_QUERY_EAS_FROM_LIST:
+	case SMB_INFO_QUERY_ALL_EAS:
 	case SMB_FIND_FILE_DIRECTORY_INFO:
 	case SMB_FIND_FILE_FULL_DIRECTORY_INFO:
 	case SMB_FIND_FILE_NAMES_INFO:
@@ -1018,7 +1013,7 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, size_t inbuf_len,
 	bzero(pdata, max_data_bytes + DIR_ENTRY_SAFETY_MARGIN);
 
 	switch (info_level) {
-	case 1:
+	case SMB_INFO_ALLOCATION:
 		data_len = 18;
 		sys_disk_free(".", &bsize, &dfree, &dsize);
 		SIVAL(pdata, l1_idFileSystem, st.st_dev);
@@ -1030,7 +1025,7 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, size_t inbuf_len,
 		      "cUnit=%d, cUnitAvail=%d, cbSector=%d\n",
 		      bsize, (long) st.st_dev, bsize / 512, dsize, dfree, 512);
 		break;
-	case 2:
+	case SMB_INFO_VOLUME:
 		/* Return volume name */
 		volname_len = MIN(strlen(vname), 11);
 		data_len = l2_vol_szVolLabel + volname_len + 1;
@@ -1232,7 +1227,7 @@ static int call_trans2qfilepathinfo(char *inbuf, char *outbuf, size_t inbuf_len,
 		SIVAL(pdata, 0, data_size);
 		break;
 
-	case 6:
+	case SMB_INFO_IS_NAME_VALID:
 		return ERROR_CODE(ERRDOS, ERRbadfunc); /* os/2 needs this */
 
 	case SMB_QUERY_FILE_BASIC_INFO:

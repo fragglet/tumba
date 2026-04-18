@@ -7,7 +7,7 @@ DATADIR = /var/tumba
 PUBLIC_SHARE = $(DESTDIR)$(DATADIR)/public
 READONLY_SHARE = $(DESTDIR)$(DATADIR)/readonly
 
-DEFINES = -D_FORTIFY_SOURCE=1
+DEFINES = -D_FORTIFY_SOURCE=3
 
 IWYU = iwyu
 IWYU_FLAGS = --error --mapping_file=.iwyu-overrides.imp

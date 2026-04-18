@@ -90,7 +90,6 @@ struct open_fd {
 /* Structure used when SMBwritebmpx is active */
 struct bmpx_data {
 	int wr_total_written; /* So we know when to discard this */
-	int32_t wr_timeout;
 	int32_t wr_errclass;
 	int32_t wr_error; /* Cached errors */
 	bool wr_mode;     /* write through mode) */
@@ -104,7 +103,6 @@ struct open_file {
 	uint32_t size;
 	int mode;
 	struct bmpx_data *wbmpx_ptr;
-	struct timeval open_time;
 	bool open;
 	bool can_lock;
 	bool can_read;

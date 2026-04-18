@@ -47,6 +47,8 @@
 a packet to ensure chaining works correctly */
 #define GETFNUM(buf, where) (chain_fnum != -1 ? chain_fnum : SVAL(buf, where))
 
+#define LOCKING_ANDX_OPLOCK_RELEASE 0x2
+
 static bool decode_names(uint8_t *inbuf, size_t inbuf_len, fstring name1,
                          fstring name2)
 {
@@ -81,8 +83,9 @@ int reply_special(char *inbuf, char *outbuf, size_t inbuf_len,
 	smb_setlen(outbuf, 0);
 
 	switch (msg_type) {
-	case 0x81: /* session request */
-		CVAL(outbuf, 0) = 0x82;
+
+	case NETBIOS_SESSION_REQUEST:
+		CVAL(outbuf, 0) = NETBIOS_POSITIVE_SESSION_RESPONSE;
 		CVAL(outbuf, 3) = 0;
 		if (!decode_names((uint8_t *) inbuf + 4, inbuf_len - 4, name1,
 		                  name2)) {
@@ -108,25 +111,25 @@ int reply_special(char *inbuf, char *outbuf, size_t inbuf_len,
 		 * Windows Explorer to freeze up for two minutes until the
 		 * session would time out. */
 		if (name_type != 0x20) {
-			CVAL(outbuf, 0) = 0x83;
+			CVAL(outbuf, 0) = NETBIOS_NEGATIVE_SESSION_RESPONSE;
 			break;
 		}
 
 		break;
 
-	case 0x89: /* session keepalive request
-	              (some old clients produce this?) */
-		CVAL(outbuf, 0) = 0x85;
+	/* some old clients produce this? */
+	case NETBIOS_SESSION_KEEP_ALIVE_OLD:
+		CVAL(outbuf, 0) = NETBIOS_SESSION_KEEP_ALIVE;
 		CVAL(outbuf, 3) = 0;
 		break;
 
-	case 0x82: /* positive session response */
-	case 0x83: /* negative session response */
-	case 0x84: /* retarget session response */
+	case NETBIOS_POSITIVE_SESSION_RESPONSE:
+	case NETBIOS_NEGATIVE_SESSION_RESPONSE:
+	case NETBIOS_RETARGET_SESSION_RESPONSE:
 		ERROR("Unexpected session response\n");
 		break;
 
-	case 0x85: /* session keepalive */
+	case NETBIOS_SESSION_KEEP_ALIVE:
 	default:
 		return 0;
 	}
@@ -251,7 +254,6 @@ int reply_tcon_and_X(char *inbuf, char *outbuf, size_t inbuf_len,
 		set_message(outbuf, 2, strlen(devicename) + 1, true);
 		pstrcpy(smb_buf(outbuf), devicename);
 	} else {
-		char *fsname = "SAMBA";
 		char *p;
 
 		set_message(outbuf, 3, 3, true);
@@ -259,7 +261,7 @@ int reply_tcon_and_X(char *inbuf, char *outbuf, size_t inbuf_len,
 		p = smb_buf(outbuf);
 		pstrcpy(p, devicename);
 		p = skip_string(p); /* device name */
-		pstrcpy(p, fsname);
+		pstrcpy(p, FSTYPE_STRING);
 		p = skip_string(p); /* filesystem type e.g NTFS */
 
 		set_message(outbuf, 3, PTR_DIFF(p, smb_buf(outbuf)), false);

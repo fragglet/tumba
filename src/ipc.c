@@ -665,14 +665,13 @@ struct {
 	int id;
 	bool (*fn)(int, char *, char *, int, int, char **, char **, int *,
 	           int *);
-	int flags;
-} api_commands[] = {{"RNetShareEnum", 0, api_RNetShareEnum, 0},
-                    {"RNetShareGetInfo", 1, api_RNetShareGetInfo, 0},
-                    {"RNetServerGetInfo", 13, api_RNetServerGetInfo, 0},
-                    {"NetWkstaGetInfo", 63, api_NetWkstaGetInfo, 0},
-                    {"NetRemoteTOD", 91, api_NetRemoteTOD, 0},
-                    {"NetServerEnum", 104, api_RNetServerEnum, 0},
-                    {NULL, -1, api_Unsupported, 0}};
+} api_commands[] = {{"RNetShareEnum", 0, api_RNetShareEnum},
+                    {"RNetShareGetInfo", 1, api_RNetShareGetInfo},
+                    {"RNetServerGetInfo", 13, api_RNetServerGetInfo},
+                    {"NetWkstaGetInfo", 63, api_NetWkstaGetInfo},
+                    {"NetRemoteTOD", 91, api_NetRemoteTOD},
+                    {"NetServerEnum", 104, api_RNetServerEnum},
+                    {NULL, -1, api_Unsupported}};
 
 /* Handle remote api calls */
 static int api_reply(int cnum, char *outbuf, char *data, char *params,
