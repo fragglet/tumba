@@ -34,6 +34,10 @@
 #include <unistd.h>
 #include <utime.h>
 
+#ifdef PROFILING
+#include <sys/time.h>
+#endif
+
 #include "byteorder.h"
 #include "dir.h"
 #include "guards.h" /* IWYU pragma: keep */
@@ -2276,7 +2280,6 @@ are used by some brain-dead clients when printing, and I don't want to
 force write permissions on print services.
 */
 #define NEED_WRITE      (1 << 1)
-#define TIME_INIT       (1 << 2)
 #define ALLOWED_IN_IPC  (1 << 3)
 #define QUEUE_IN_OPLOCK (1 << 6)
 
@@ -2291,9 +2294,6 @@ struct smb_message_struct {
 	char *name;
 	int (*fn)(char *, char *, size_t, size_t);
 	int flags;
-#if PROFILING
-	unsigned long time;
-#endif
 } smb_messages[] = {
 
     /* CORE PROTOCOL */
@@ -2393,17 +2393,8 @@ static int switch_message(int type, char *inbuf, char *outbuf, size_t inbuf_len,
 {
 	const char *hdr;
 	static int pid = -1;
-	int outsize = 0;
 	static int num_smb_messages = arrlen(smb_messages);
-	int match;
-
-#if PROFILING
-	struct timeval msg_start_time;
-	struct timeval msg_end_time;
-	static unsigned long total_time = 0;
-
-	getimeofday(&msg_start_time, NULL);
-#endif
+	int cnum, flags, match;
 
 	if (pid == -1)
 		pid = getpid();
@@ -2431,53 +2422,63 @@ static int switch_message(int type, char *inbuf, char *outbuf, size_t inbuf_len,
 
 	if (match == num_smb_messages) {
 		ERROR("Unknown message type %d!\n", type);
-		outsize = reply_unknown(inbuf, outbuf);
-	} else {
-		DEBUG("switch message %s (pid %d)\n", smb_messages[match].name,
-		      pid);
-
-		int cnum = SVAL(inbuf, smb_tid);
-		int flags = smb_messages[match].flags;
-		/* Ensure value is replaced in the incoming packet. */
-		SSVAL(inbuf, smb_uid, UID_FIELD_INVALID);
-
-		/* does it need write permission? */
-		if ((flags & NEED_WRITE) && !CAN_WRITE(cnum))
-			return ERROR_CODE(ERRSRV, ERRaccess);
-
-		/* load service specific parameters */
-		if (OPEN_CNUM(cnum) && !become_service(cnum)) {
-			return ERROR_CODE(ERRSRV, ERRaccess);
-		}
-
-		/* for the IPC service, only certain messages are allowed */
-		if (OPEN_CNUM(cnum) && CONN_SHARE(cnum) == ipc_service &&
-		    (flags & ALLOWED_IN_IPC) == 0) {
-			return ERROR_CODE(ERRSRV, ERRaccess);
-		}
-
-		last_inbuf = inbuf;
-
-		outsize = smb_messages[match].fn(inbuf, outbuf, inbuf_len,
-		                                 outbuf_len);
+		return reply_unknown(inbuf, outbuf);
 	}
 
-#if PROFILING
+	DEBUG("switch message %s (pid %d)\n", smb_messages[match].name, pid);
+
+	cnum = SVAL(inbuf, smb_tid);
+	flags = smb_messages[match].flags;
+
+	/* Ensure value is replaced in the incoming packet. */
+	SSVAL(inbuf, smb_uid, UID_FIELD_INVALID);
+
+	/* does it need write permission? */
+	if ((flags & NEED_WRITE) && !CAN_WRITE(cnum))
+		return ERROR_CODE(ERRSRV, ERRaccess);
+
+	/* load service specific parameters */
+	if (OPEN_CNUM(cnum) && !become_service(cnum)) {
+		return ERROR_CODE(ERRSRV, ERRaccess);
+	}
+
+	/* for the IPC service, only certain messages are allowed */
+	if (OPEN_CNUM(cnum) && CONN_SHARE(cnum) == ipc_service &&
+	    (flags & ALLOWED_IN_IPC) == 0) {
+		return ERROR_CODE(ERRSRV, ERRaccess);
+	}
+
+	last_inbuf = inbuf;
+
+	return smb_messages[match].fn(inbuf, outbuf, inbuf_len, outbuf_len);
+}
+
+// Wrapper around switch_message() above that does profiling, if compiled in.
+static int profiled_switch_message(int type, char *inbuf, char *outbuf,
+                                   size_t inbuf_len, size_t outbuf_len)
+{
+	int outsize;
+#ifdef PROFILING
+	struct timeval msg_start_time;
+	struct timeval msg_end_time;
+	unsigned long this_time;
+
+	gettimeofday(&msg_start_time, NULL);
+#endif
+
+	outsize = switch_message(type, inbuf, outbuf, inbuf_len, outbuf_len);
+
+#ifdef PROFILING
 	gettimeofday(&msg_end_time, NULL);
-	if (!(smb_messages[match].flags & TIME_INIT)) {
-		smb_messages[match].time = 0;
-		smb_messages[match].flags |= TIME_INIT;
-	}
-	{
-		unsigned long this_time =
-		    (msg_end_time.tv_sec - msg_start_time.tv_sec) * 1e6 +
-		    (msg_end_time.tv_usec - msg_start_time.tv_usec);
-		smb_messages[match].time += this_time;
-		total_time += this_time;
-	}
-	DEBUG("TIME %s  %d usecs   %g pct\n", smb_fn_name(type),
-	      smb_messages[match].time,
-	      (100.0 * smb_messages[match].time) / total_time);
+
+	this_time = (msg_end_time.tv_sec - msg_start_time.tv_sec) * 1e6 +
+	            (msg_end_time.tv_usec - msg_start_time.tv_usec);
+
+	// This kind of message would normally be a DEBUG message, but if
+	// we're compiled with profiling enabled, we possibly want to be able
+	// to evaluate performance without the overhead caused by other DEBUG
+	// log statements being generated.
+	NOTICE("PROFILING: %s took %ld usecs\n", smb_fn_name(type), this_time);
 #endif
 
 	return outsize;
@@ -2558,9 +2559,9 @@ int chain_reply(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 	show_msg(inbuf2);
 
 	/* process the request */
-	outsize2 =
-	    switch_message(smb_com2, inbuf2, outbuf2, inbuf_len - chain_size,
-	                   outbuf_len - chain_size);
+	outsize2 = profiled_switch_message(smb_com2, inbuf2, outbuf2,
+	                                   inbuf_len - chain_size,
+	                                   outbuf_len - chain_size);
 
 	/* copy the new reply and request headers over the old ones, but
 	   preserve the smb_com field */
@@ -2612,7 +2613,8 @@ static int construct_reply(char *inbuf, char *outbuf, size_t inbuf_len,
 	SSVAL(outbuf, smb_uid, SVAL(inbuf, smb_uid));
 	SSVAL(outbuf, smb_mid, SVAL(inbuf, smb_mid));
 
-	outsize = switch_message(type, inbuf, outbuf, inbuf_len, outbuf_len);
+	outsize =
+	    profiled_switch_message(type, inbuf, outbuf, inbuf_len, outbuf_len);
 
 	outsize += chain_size;
 
