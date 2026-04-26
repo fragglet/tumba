@@ -269,8 +269,8 @@ int reply_unknown(char *inbuf, char *outbuf)
 	cnum = SVAL(inbuf, smb_tid);
 	type = CVAL(inbuf, smb_com);
 
-	ERROR("unknown command type (%s): cnum=%d type=%d (0x%X)\n",
-	      smb_fn_name(type), cnum, type, type);
+	ERROR("unknown command type: cnum=%d type=%d (0x%X)\n", cnum, type,
+	      type);
 
 	return ERROR_CODE(ERRSRV, ERRunknownsmb);
 }

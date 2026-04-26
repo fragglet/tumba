@@ -2352,17 +2352,12 @@ struct smb_message_struct {
     /* LANMAN1.0 PROTOCOL FOLLOWS */
 
     {SMBreadBmpx, "SMBreadBmpx", reply_readbmpx, 0},
-    {SMBreadBs, "SMBreadBs", NULL, 0},
     {SMBwriteBmpx, "SMBwriteBmpx", reply_writebmpx, 0},
     {SMBwriteBs, "SMBwriteBs", reply_writebs, 0},
-    {SMBwritec, "SMBwritec", NULL, 0},
     {SMBsetattrE, "SMBsetattrE", reply_setattrE, NEED_WRITE},
     {SMBgetattrE, "SMBgetattrE", reply_getattrE, 0},
     {SMBtrans, "SMBtrans", reply_trans, ALLOWED_IN_IPC},
-    {SMBtranss, "SMBtranss", NULL, ALLOWED_IN_IPC},
-    {SMBioctls, "SMBioctls", NULL, 0},
     {SMBcopy, "SMBcopy", reply_copy, NEED_WRITE | QUEUE_IN_OPLOCK},
-    {SMBmove, "SMBmove", NULL, NEED_WRITE | QUEUE_IN_OPLOCK},
 
     {SMBopenX, "SMBopenX", reply_open_and_X, ALLOWED_IN_IPC | QUEUE_IN_OPLOCK},
     {SMBreadX, "SMBreadX", reply_read_and_X, 0},
@@ -2378,19 +2373,7 @@ struct smb_message_struct {
     {SMBfindclose, "SMBfindclose", reply_findclose, 0},
     {SMBtrans2, "SMBtrans2", reply_trans2, 0},
     {SMBtranss2, "SMBtranss2", reply_transs2, 0},
-
-    /* messaging routines */
-    {SMBsends, "SMBsends", NULL, 0},
-    {SMBsendstrt, "SMBsendstrt", NULL, 0},
-    {SMBsendend, "SMBsendend", NULL, 0},
-    {SMBsendtxt, "SMBsendtxt", NULL, 0},
-
-    /* NON-IMPLEMENTED PARTS OF THE CORE PROTOCOL */
-
-    {SMBsendb, "SMBsendb", NULL, 0},
-    {SMBfwdname, "SMBfwdname", NULL, 0},
-    {SMBcancelf, "SMBcancelf", NULL, 0},
-    {SMBgetmac, "SMBgetmac", NULL, 0}};
+};
 
 /* Returns a string containing the function name of a SMB command */
 char *smb_fn_name(int type)
@@ -2453,37 +2436,30 @@ static int switch_message(int type, char *inbuf, char *outbuf, size_t inbuf_len,
 		DEBUG("switch message %s (pid %d)\n", smb_messages[match].name,
 		      pid);
 
-		if (smb_messages[match].fn) {
-			int cnum = SVAL(inbuf, smb_tid);
-			int flags = smb_messages[match].flags;
-			/* Ensure this value is replaced in the incoming packet.
-			 */
-			SSVAL(inbuf, smb_uid, UID_FIELD_INVALID);
+		int cnum = SVAL(inbuf, smb_tid);
+		int flags = smb_messages[match].flags;
+		/* Ensure value is replaced in the incoming packet. */
+		SSVAL(inbuf, smb_uid, UID_FIELD_INVALID);
 
-			/* does it need write permission? */
-			if ((flags & NEED_WRITE) && !CAN_WRITE(cnum))
-				return ERROR_CODE(ERRSRV, ERRaccess);
+		/* does it need write permission? */
+		if ((flags & NEED_WRITE) && !CAN_WRITE(cnum))
+			return ERROR_CODE(ERRSRV, ERRaccess);
 
-			/* load service specific parameters */
-			if (OPEN_CNUM(cnum) && !become_service(cnum)) {
-				return ERROR_CODE(ERRSRV, ERRaccess);
-			}
-
-			/* for the IPC service, only certain messages are
-			 * allowed */
-			if (OPEN_CNUM(cnum) &&
-			    CONN_SHARE(cnum) == ipc_service &&
-			    (flags & ALLOWED_IN_IPC) == 0) {
-				return ERROR_CODE(ERRSRV, ERRaccess);
-			}
-
-			last_inbuf = inbuf;
-
-			outsize = smb_messages[match].fn(inbuf, outbuf,
-			                                 inbuf_len, outbuf_len);
-		} else {
-			outsize = reply_unknown(inbuf, outbuf);
+		/* load service specific parameters */
+		if (OPEN_CNUM(cnum) && !become_service(cnum)) {
+			return ERROR_CODE(ERRSRV, ERRaccess);
 		}
+
+		/* for the IPC service, only certain messages are allowed */
+		if (OPEN_CNUM(cnum) && CONN_SHARE(cnum) == ipc_service &&
+		    (flags & ALLOWED_IN_IPC) == 0) {
+			return ERROR_CODE(ERRSRV, ERRaccess);
+		}
+
+		last_inbuf = inbuf;
+
+		outsize = smb_messages[match].fn(inbuf, outbuf, inbuf_len,
+		                                 outbuf_len);
 	}
 
 #if PROFILING
