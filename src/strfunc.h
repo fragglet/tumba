@@ -36,7 +36,6 @@ bool strhasupper(char *s);
 int name_extract(char *buf, int ofs, char *name);
 int name_len(char *s);
 void string_set(char **dest, char *src);
-bool string_sub(char *s, char *pattern, char *insert);
 bool mask_match(char *str, char *regexp, bool trans2);
 char *safe_strcpy(char *dest, const char *src, int dest_size);
 char *safe_strcat(char *dest, const char *src, int dest_size);

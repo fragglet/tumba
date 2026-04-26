@@ -161,6 +161,31 @@ bool trim_string(char *s, char *front, char *back)
 	return ret;
 }
 
+/*
+Look for pattern in s and replace it with insert; may do multiple
+replacements. Make sure there is enough room!
+*/
+static void string_sub(char *s, char *pattern, char *insert)
+{
+	char *p;
+	int ls, lp, li;
+
+	if (s == NULL) {
+		return;
+	}
+
+	ls = strlen(s);
+	lp = strlen(pattern);
+	li = strlen(insert);
+
+	while (lp <= ls && (p = strstr(s, pattern))) {
+		memmove(p + li, p + lp, ls + 1 - (PTR_DIFF(p, s) + lp));
+		memcpy(p, insert, li);
+		s = p + li;
+		ls = strlen(s);
+	}
+}
+
 /* Reduce a file name, removing .. elements. */
 void unix_clean_name(char *s)
 {
@@ -281,41 +306,6 @@ void string_set(char **dest, char *src)
 {
 	free(*dest);
 	*dest = checked_strdup(src);
-}
-
-/*
-Substitute a string for a pattern in another string. Make sure there is
-enough room!
-
-This routine looks for pattern in s and replaces it with
-insert. It may do multiple replacements.
-
-return true if a substitution was done.
-*/
-bool string_sub(char *s, char *pattern, char *insert)
-{
-	bool ret = false;
-	char *p;
-	int ls, lp, li;
-
-	if (!insert || !pattern || !s)
-		return false;
-
-	ls = strlen(s);
-	lp = strlen(pattern);
-	li = strlen(insert);
-
-	if (!*pattern)
-		return false;
-
-	while (lp <= ls && (p = strstr(s, pattern))) {
-		ret = true;
-		memmove(p + li, p + lp, ls + 1 - (PTR_DIFF(p, s) + lp));
-		memcpy(p, insert, li);
-		s = p + li;
-		ls = strlen(s);
-	}
-	return ret;
 }
 
 /* Recursive routine that is called by mask_match. Does the actual matching.
