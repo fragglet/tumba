@@ -569,20 +569,6 @@ bool mask_match(char *str, char *regexp, bool trans2)
 #endif
 }
 
-/* Write a string in unicoode format */
-int put_unicode(char *dst, char *src)
-{
-	int ret = 0;
-	while (*src) {
-		dst[ret++] = src[0];
-		dst[ret++] = 0;
-		src++;
-	}
-	dst[ret++] = 0;
-	dst[ret++] = 0;
-	return ret;
-}
-
 /* Safe string copy into a known length string. dest_size is the size of the
  * destination buffer */
 char *safe_strcpy(char *dest, const char *src, int dest_size)

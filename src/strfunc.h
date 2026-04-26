@@ -38,7 +38,6 @@ int name_len(char *s);
 void string_set(char **dest, char *src);
 bool string_sub(char *s, char *pattern, char *insert);
 bool mask_match(char *str, char *regexp, bool trans2);
-int put_unicode(char *dst, char *src);
 char *safe_strcpy(char *dest, const char *src, int dest_size);
 char *safe_strcat(char *dest, const char *src, int dest_size);
 bool string_has_prefix(const char *s, const char *prefix);
