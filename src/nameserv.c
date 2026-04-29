@@ -44,6 +44,7 @@
 #include "util.h"
 #include "version.h"
 
+#define NBNS_PORT       137
 #define SIGNAL_CAST     (void (*)(int))
 #define UPDATE_INTERVAL 60
 
@@ -980,19 +981,19 @@ static void usage(const char *pname)
 	       "\n\n"
 	       "  -b address     address to bind socket (default 0.0.0.0)\n"
 	       "  -C comment     specify comment for host announcements\n"
-	       "  -d level       set the logging level\n"
-	       "  -l filename    path to debug log file\n"
+	       "  -d level       set the logging level (0-4; default 2)\n"
+	       "  -l filename    path to debug log file, or '-' for stdout\n"
 	       "  -n name        the netbios name to advertise for this host\n"
-	       "  -p port        listen on the specified port\n"
+	       "  -p port        listen on the specified port (default %d)\n"
 	       "  -W workgroup   specify workgroup name (default WORKGROUP)\n"
 	       "\n",
-	       pname);
+	       pname, NBNS_PORT);
 }
 
 int main(int argc, char *argv[])
 {
 	struct in_addr bind_addr = {INADDR_ANY};
-	int port = 137;
+	int port = NBNS_PORT;
 	int opt;
 	extern char *optarg;
 
