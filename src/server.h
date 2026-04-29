@@ -142,8 +142,8 @@ int dos_chmod(int cnum, char *fname, int dosmode, struct stat *st);
 bool set_filetime(int cnum, char *fname, time_t mtime);
 bool unix_convert(char *name, int cnum, pstring saved_last_component,
                   bool *bad_path);
-int sys_disk_free(char *path, int *bsize, int *dfree, int *dsize);
-bool check_name(char *name, int cnum);
+int sys_disk_free(const char *path, int *bsize, int *dfree, int *dsize);
+bool check_name(const char *name, int cnum);
 void close_file(int fnum, bool normal_close);
 void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
                       int mode, int *access, int *action);
@@ -159,6 +159,6 @@ bool receive_next_smb(int smbfd, char *inbuf, int bufsize, int timeout);
 int make_connection(char *service, char *dev);
 int find_free_file(void);
 void close_cnum(int cnum);
-void exit_server(char *reason);
+void exit_server(const char *reason);
 char *smb_fn_name(int type);
 int chain_reply(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len);

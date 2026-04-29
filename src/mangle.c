@@ -33,11 +33,11 @@ static const char *const reserved_devices[] = {
  *              will be calculated.
  *  Output: The checksum value calculated for s.
  */
-int str_checksum(char *s)
+unsigned int str_checksum(const char *s)
 {
-	int res = 0;
-	int c;
-	int i = 0;
+	unsigned int res = 0;
+	unsigned int c;
+	unsigned int i = 0;
 
 	while (*s) {
 		c = *s;
@@ -49,7 +49,7 @@ int str_checksum(char *s)
 }
 
 /* Returns true if a name is a special msdos reserved name */
-static bool is_reserved_msdos(char *fname)
+static bool is_reserved_msdos(const char *fname)
 {
 	char fname2[13];
 	char *p;
@@ -71,10 +71,10 @@ static bool is_reserved_msdos(char *fname)
 }
 
 /* Returns true if a name is in 8.3 dos format */
-bool is_8_3(char *fname, bool check_case)
+bool is_8_3(const char *fname, bool check_case)
 {
 	int len;
-	char *dot_pos, *p;
+	const char *dot_pos, *p;
 	char *slash_pos = strrchr(fname, '/');
 	int l;
 
@@ -131,7 +131,7 @@ bool is_8_3(char *fname, bool check_case)
 #define MAGIC_CHAR '~'
 
 /* Returns true if the name could be a mangled name */
-bool is_mangled(char *s)
+bool is_mangled(const char *s)
 {
 	char *m = strchr(s, MAGIC_CHAR);
 
@@ -218,23 +218,23 @@ void mangle_name_83(char *s, int s_len)
 }
 
 /* Work out if a name is illegal, even for long names */
-static bool illegal_name(char *name)
+static bool illegal_name(const char *name)
 {
 	static unsigned char illegal[256];
 	static bool initialised = false;
-	unsigned char *s;
+	const char *s;
 
 	if (!initialised) {
 		char *ill = "*\\/?<>|\":";
 		initialised = true;
 
-		bzero(illegal, 256);
-		for (s = (unsigned char *) ill; *s; s++)
-			illegal[*s] = true;
+		bzero(illegal, sizeof(illegal));
+		for (s = ill; *s; s++)
+			illegal[(unsigned int) *s] = true;
 	}
 
-	for (s = (unsigned char *) name; *s;) {
-		if (illegal[*s])
+	for (s = name; *s;) {
+		if (illegal[(unsigned int) *s])
 			return true;
 		else
 			s++;

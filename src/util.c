@@ -66,7 +66,7 @@ int smb_read_error = 0;
 
 static bool log_start_of_line = true;
 
-void setup_logging(char *pname)
+void setup_logging(const char *pname)
 {
 	char *p = strrchr(pname, '/');
 	if (p) {
@@ -186,7 +186,7 @@ int log_output(const char *funcname, int linenum, int level, char *format_str,
 }
 
 /* Check if a file exists */
-bool file_exist(char *fname, struct stat *sbuf)
+bool file_exist(const char *fname, struct stat *sbuf)
 {
 	struct stat st;
 	if (!sbuf)
@@ -199,7 +199,7 @@ bool file_exist(char *fname, struct stat *sbuf)
 }
 
 /* Check if a directory exists */
-bool directory_exist(char *dname, struct stat *st)
+bool directory_exist(const char *dname, struct stat *st)
 {
 	struct stat st2;
 	bool ret;
@@ -224,7 +224,7 @@ static void print_asc(unsigned char *buf, int len)
 	}
 }
 
-static void dump_data(char *buf1, int len)
+static void dump_data(const char *buf1, int len)
 {
 	unsigned char *buf = (unsigned char *) buf1;
 	int i = 0;
@@ -300,7 +300,7 @@ void show_msg(char *buf)
 }
 
 /* Return the length of an smb packet */
-int smb_len(char *buf)
+int smb_len(const char *buf)
 {
 	return PVAL(buf, 3) | (PVAL(buf, 2) << 8) | ((PVAL(buf, 1) & 1) << 16);
 }
@@ -337,19 +337,19 @@ int set_message(char *buf, int num_words, int num_bytes, bool zero)
 }
 
 /* Return the number of smb words */
-static int smb_numwords(char *buf)
+static int smb_numwords(const char *buf)
 {
 	return CVAL(buf, smb_wct);
 }
 
 /* Return the size of the smb_buf region of a message */
-int smb_buflen(char *buf)
+int smb_buflen(const char *buf)
 {
 	return SVAL(buf, smb_vwv0 + smb_numwords(buf) * 2);
 }
 
 /* Return a pointer to the smb_buf data area */
-static int smb_buf_ofs(char *buf)
+static int smb_buf_ofs(const char *buf)
 {
 	return smb_size + CVAL(buf, smb_wct) * 2;
 }
@@ -361,7 +361,7 @@ char *smb_buf(char *buf)
 }
 
 /* Return the SMB offset into an SMB buffer */
-int smb_offset(char *p, char *buf)
+int smb_offset(const char *p, char *buf)
 {
 	return PTR_DIFF(p, buf + 4) + chain_size;
 }

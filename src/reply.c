@@ -286,8 +286,8 @@ int reply_unknown(char *inbuf, char *outbuf)
 	cnum = SVAL(inbuf, smb_tid);
 	type = CVAL(inbuf, smb_com);
 
-	ERROR("unknown command type (%s): cnum=%d type=%d (0x%X)\n",
-	      smb_fn_name(type), cnum, type, type);
+	ERROR("unknown command type: cnum=%d type=%d (0x%X)\n", cnum, type,
+	      type);
 
 	return ERROR_CODE(ERRSRV, ERRunknownsmb);
 }
@@ -1251,25 +1251,14 @@ static int transfer_file(int infd, int outfd, int n, char *header, int headlen,
                          int align)
 {
 	static char *buf = NULL;
-	static int size = 0;
+	static const int buf_size = 16 * 1024;
 	char *buf1, *abuf;
 	int total = 0;
 
 	DEBUG("n=%d (head=%d)\n", n, headlen);
 
-	if (size == 0) {
-		size = 16 * 1024;
-	}
-
-	while (!buf && size > 0) {
-		buf = (char *) checked_realloc(buf, size + 8);
-		if (!buf)
-			size /= 2;
-	}
-
-	if (!buf) {
-		ERROR("Can't allocate transfer buffer!\n");
-		exit(1);
+	if (buf == NULL) {
+		buf = checked_realloc(buf, buf_size + 8);
 	}
 
 	abuf = buf + (align % 8);
@@ -1278,7 +1267,7 @@ static int transfer_file(int infd, int outfd, int n, char *header, int headlen,
 		n += headlen;
 
 	while (n > 0) {
-		int s = MIN(n, size);
+		int s = MIN(n, buf_size);
 		int ret, ret2 = 0;
 
 		ret = 0;
@@ -1294,7 +1283,7 @@ static int transfer_file(int infd, int outfd, int n, char *header, int headlen,
 		}
 
 		if (header && headlen > 0) {
-			ret = MIN(headlen, size);
+			ret = MIN(headlen, buf_size);
 			memcpy(buf1, header, ret);
 			headlen -= ret;
 			header += ret;
@@ -2158,7 +2147,7 @@ static bool resolve_wildcards(char *name1, char *name2)
 }
 
 /* Check if a user is allowed to rename a file */
-static bool can_rename(char *fname, int cnum)
+static bool can_rename(const char *fname, int cnum)
 {
 	struct stat sbuf;
 

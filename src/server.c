@@ -33,6 +33,10 @@
 #include <unistd.h>
 #include <utime.h>
 
+#ifdef PROFILING
+#include <sys/time.h>
+#endif
+
 #include "byteorder.h"
 #include "dir.h"
 #include "guards.h" /* IWYU pragma: keep */
@@ -123,7 +127,7 @@ static int num_connections_open = 0;
 int unix_ERR_class = SMB_SUCCESS;
 int unix_ERR_code = 0;
 
-static int find_free_connection(int hash);
+static int find_free_connection(unsigned int hash);
 
 /* for readability... */
 #define IS_DOS_READONLY(test_mode) (((test_mode) & aRONLY) != 0)
@@ -182,7 +186,7 @@ static int read_dosattrib(const char *path)
 	}
 	buf[nbytes] = '\0';
 
-	if (string_has_prefix(buf, "0x")) {
+	if (!string_has_prefix(buf, "0x")) {
 		/* TODO: Maybe support newer versions */
 		return 0;
 	}
@@ -347,7 +351,7 @@ bool set_filetime(int cnum, char *fname, time_t mtime)
 }
 
 /* Mangle the 2nd name and check if it is then equal to the first name */
-static bool mangled_equal(char *name1, char *name2)
+static bool mangled_equal(const char *name1, const char *name2)
 {
 	pstring tmpname;
 
@@ -567,7 +571,7 @@ bool unix_convert(char *name, int cnum, pstring saved_last_component,
 }
 
 /* Return number of 1K blocks available on a path and total number */
-static int disk_free(char *path, int *bsize, int *dfree, int *dsize)
+static int disk_free(const char *path, int *bsize, int *dfree, int *dsize)
 {
 	/* Don't bother. We always say it's a 1GiB disk with 512MiB free.
 	   Disks nowadays are so large that it would probably overflow the
@@ -579,7 +583,7 @@ static int disk_free(char *path, int *bsize, int *dfree, int *dsize)
 }
 
 /* Wrap it to get filenames right */
-int sys_disk_free(char *path, int *bsize, int *dfree, int *dsize)
+int sys_disk_free(const char *path, int *bsize, int *dfree, int *dsize)
 {
 	return disk_free(path, bsize, dfree, dsize);
 }
@@ -648,7 +652,7 @@ This is called by every routine before it allows an operation on a filename.
 It does any final confirmation necessary to ensure that the filename is
 a valid one for the user to access.
 */
-bool check_name(char *name, int cnum)
+bool check_name(const char *name, int cnum)
 {
 	const char *top = Connections[cnum].connectpath;
 	char old_wd[PATH_MAX];
@@ -687,7 +691,7 @@ bool check_name(char *name, int cnum)
 }
 
 /* Check a filename - possibly calling reducename */
-static void check_for_pipe(char *fname)
+static void check_for_pipe(const char *fname)
 {
 	/* special case of pipe opens */
 	char s[10];
@@ -1870,7 +1874,7 @@ int make_connection(char *service, char *dev)
 int find_free_file(void)
 {
 	int i;
-	static int first_file;
+	static unsigned int first_file;
 
 	/* we want to give out file handles differently on each new
 	   connection because of a common bug in MS clients where they try to
@@ -1911,7 +1915,7 @@ int find_free_file(void)
 /* Find first available connection slot, starting from a random position.  The
  * randomisation stops problems with the server dieing and clients thinking the
  * server is still available. */
-static int find_free_connection(int hash)
+static int find_free_connection(unsigned int hash)
 {
 	int i;
 	bool used = false;
@@ -2204,7 +2208,7 @@ void close_cnum(int cnum)
 	set_descriptive_argv();
 }
 
-void exit_server(char *reason)
+void exit_server(const char *reason)
 {
 	static bool firsttime = true;
 	int i;
@@ -2244,7 +2248,6 @@ are used by some brain-dead clients when printing, and I don't want to
 force write permissions on print services.
 */
 #define NEED_WRITE      (1 << 1)
-#define TIME_INIT       (1 << 2)
 #define ALLOWED_IN_IPC  (1 << 3)
 #define QUEUE_IN_OPLOCK (1 << 6)
 
@@ -2259,9 +2262,6 @@ struct smb_message_struct {
 	char *name;
 	int (*fn)(char *, char *, size_t, size_t);
 	int flags;
-#if PROFILING
-	unsigned long time;
-#endif
 } smb_messages[] = {
 
     /* CORE PROTOCOL */
@@ -2320,17 +2320,12 @@ struct smb_message_struct {
     /* LANMAN1.0 PROTOCOL FOLLOWS */
 
     {SMBreadBmpx, "SMBreadBmpx", reply_readbmpx, 0},
-    {SMBreadBs, "SMBreadBs", NULL, 0},
     {SMBwriteBmpx, "SMBwriteBmpx", reply_writebmpx, 0},
     {SMBwriteBs, "SMBwriteBs", reply_writebs, 0},
-    {SMBwritec, "SMBwritec", NULL, 0},
     {SMBsetattrE, "SMBsetattrE", reply_setattrE, NEED_WRITE},
     {SMBgetattrE, "SMBgetattrE", reply_getattrE, 0},
     {SMBtrans, "SMBtrans", reply_trans, ALLOWED_IN_IPC},
-    {SMBtranss, "SMBtranss", NULL, ALLOWED_IN_IPC},
-    {SMBioctls, "SMBioctls", NULL, 0},
     {SMBcopy, "SMBcopy", reply_copy, NEED_WRITE | QUEUE_IN_OPLOCK},
-    {SMBmove, "SMBmove", NULL, NEED_WRITE | QUEUE_IN_OPLOCK},
 
     {SMBopenX, "SMBopenX", reply_open_and_X, ALLOWED_IN_IPC | QUEUE_IN_OPLOCK},
     {SMBreadX, "SMBreadX", reply_read_and_X, 0},
@@ -2346,19 +2341,7 @@ struct smb_message_struct {
     {SMBfindclose, "SMBfindclose", reply_findclose, 0},
     {SMBtrans2, "SMBtrans2", reply_trans2, 0},
     {SMBtranss2, "SMBtranss2", reply_transs2, 0},
-
-    /* messaging routines */
-    {SMBsends, "SMBsends", NULL, 0},
-    {SMBsendstrt, "SMBsendstrt", NULL, 0},
-    {SMBsendend, "SMBsendend", NULL, 0},
-    {SMBsendtxt, "SMBsendtxt", NULL, 0},
-
-    /* NON-IMPLEMENTED PARTS OF THE CORE PROTOCOL */
-
-    {SMBsendb, "SMBsendb", NULL, 0},
-    {SMBfwdname, "SMBfwdname", NULL, 0},
-    {SMBcancelf, "SMBcancelf", NULL, 0},
-    {SMBgetmac, "SMBgetmac", NULL, 0}};
+};
 
 /* Returns a string containing the function name of a SMB command */
 char *smb_fn_name(int type)
@@ -2378,17 +2361,8 @@ static int switch_message(int type, char *inbuf, char *outbuf, size_t inbuf_len,
 {
 	const char *hdr;
 	static int pid = -1;
-	int outsize = 0;
 	static int num_smb_messages = arrlen(smb_messages);
-	int match;
-
-#if PROFILING
-	struct timeval msg_start_time;
-	struct timeval msg_end_time;
-	static unsigned long total_time = 0;
-
-	getimeofday(&msg_start_time, NULL);
-#endif
+	int cnum, flags, match;
 
 	if (pid == -1)
 		pid = getpid();
@@ -2416,60 +2390,63 @@ static int switch_message(int type, char *inbuf, char *outbuf, size_t inbuf_len,
 
 	if (match == num_smb_messages) {
 		ERROR("Unknown message type %d!\n", type);
-		outsize = reply_unknown(inbuf, outbuf);
-	} else {
-		DEBUG("switch message %s (pid %d)\n", smb_messages[match].name,
-		      pid);
-
-		if (smb_messages[match].fn) {
-			int cnum = SVAL(inbuf, smb_tid);
-			int flags = smb_messages[match].flags;
-			/* Ensure this value is replaced in the incoming packet.
-			 */
-			SSVAL(inbuf, smb_uid, UID_FIELD_INVALID);
-
-			/* does it need write permission? */
-			if ((flags & NEED_WRITE) && !CAN_WRITE(cnum))
-				return ERROR_CODE(ERRSRV, ERRaccess);
-
-			/* load service specific parameters */
-			if (OPEN_CNUM(cnum) && !become_service(cnum)) {
-				return ERROR_CODE(ERRSRV, ERRaccess);
-			}
-
-			/* for the IPC service, only certain messages are
-			 * allowed */
-			if (OPEN_CNUM(cnum) &&
-			    CONN_SHARE(cnum) == ipc_service &&
-			    (flags & ALLOWED_IN_IPC) == 0) {
-				return ERROR_CODE(ERRSRV, ERRaccess);
-			}
-
-			last_inbuf = inbuf;
-
-			outsize = smb_messages[match].fn(inbuf, outbuf,
-			                                 inbuf_len, outbuf_len);
-		} else {
-			outsize = reply_unknown(inbuf, outbuf);
-		}
+		return reply_unknown(inbuf, outbuf);
 	}
 
-#if PROFILING
+	DEBUG("switch message %s (pid %d)\n", smb_messages[match].name, pid);
+
+	cnum = SVAL(inbuf, smb_tid);
+	flags = smb_messages[match].flags;
+
+	/* Ensure value is replaced in the incoming packet. */
+	SSVAL(inbuf, smb_uid, UID_FIELD_INVALID);
+
+	/* does it need write permission? */
+	if ((flags & NEED_WRITE) && !CAN_WRITE(cnum))
+		return ERROR_CODE(ERRSRV, ERRaccess);
+
+	/* load service specific parameters */
+	if (OPEN_CNUM(cnum) && !become_service(cnum)) {
+		return ERROR_CODE(ERRSRV, ERRaccess);
+	}
+
+	/* for the IPC service, only certain messages are allowed */
+	if (OPEN_CNUM(cnum) && CONN_SHARE(cnum) == ipc_service &&
+	    (flags & ALLOWED_IN_IPC) == 0) {
+		return ERROR_CODE(ERRSRV, ERRaccess);
+	}
+
+	last_inbuf = inbuf;
+
+	return smb_messages[match].fn(inbuf, outbuf, inbuf_len, outbuf_len);
+}
+
+// Wrapper around switch_message() above that does profiling, if compiled in.
+static int profiled_switch_message(int type, char *inbuf, char *outbuf,
+                                   size_t inbuf_len, size_t outbuf_len)
+{
+	int outsize;
+#ifdef PROFILING
+	struct timeval msg_start_time;
+	struct timeval msg_end_time;
+	unsigned long this_time;
+
+	gettimeofday(&msg_start_time, NULL);
+#endif
+
+	outsize = switch_message(type, inbuf, outbuf, inbuf_len, outbuf_len);
+
+#ifdef PROFILING
 	gettimeofday(&msg_end_time, NULL);
-	if (!(smb_messages[match].flags & TIME_INIT)) {
-		smb_messages[match].time = 0;
-		smb_messages[match].flags |= TIME_INIT;
-	}
-	{
-		unsigned long this_time =
-		    (msg_end_time.tv_sec - msg_start_time.tv_sec) * 1e6 +
-		    (msg_end_time.tv_usec - msg_start_time.tv_usec);
-		smb_messages[match].time += this_time;
-		total_time += this_time;
-	}
-	DEBUG("TIME %s  %d usecs   %g pct\n", smb_fn_name(type),
-	      smb_messages[match].time,
-	      (100.0 * smb_messages[match].time) / total_time);
+
+	this_time = (msg_end_time.tv_sec - msg_start_time.tv_sec) * 1e6 +
+	            (msg_end_time.tv_usec - msg_start_time.tv_usec);
+
+	// This kind of message would normally be a DEBUG message, but if
+	// we're compiled with profiling enabled, we possibly want to be able
+	// to evaluate performance without the overhead caused by other DEBUG
+	// log statements being generated.
+	NOTICE("PROFILING: %s took %ld usecs\n", smb_fn_name(type), this_time);
 #endif
 
 	return outsize;
@@ -2550,9 +2527,9 @@ int chain_reply(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 	show_msg(inbuf2);
 
 	/* process the request */
-	outsize2 =
-	    switch_message(smb_com2, inbuf2, outbuf2, inbuf_len - chain_size,
-	                   outbuf_len - chain_size);
+	outsize2 = profiled_switch_message(smb_com2, inbuf2, outbuf2,
+	                                   inbuf_len - chain_size,
+	                                   outbuf_len - chain_size);
 
 	/* copy the new reply and request headers over the old ones, but
 	   preserve the smb_com field */
@@ -2604,7 +2581,8 @@ static int construct_reply(char *inbuf, char *outbuf, size_t inbuf_len,
 	SSVAL(outbuf, smb_uid, SVAL(inbuf, smb_uid));
 	SSVAL(outbuf, smb_mid, SVAL(inbuf, smb_mid));
 
-	outsize = switch_message(type, inbuf, outbuf, inbuf_len, outbuf_len);
+	outsize =
+	    profiled_switch_message(type, inbuf, outbuf, inbuf_len, outbuf_len);
 
 	outsize += chain_size;
 

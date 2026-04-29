@@ -297,7 +297,7 @@ static int get_lanman2_dir_entry(int cnum, char *path_mask, int dirtype,
 	                 strequal(Connections[cnum].dirpath, "/");
 	bool was_8_3;
 	int nt_extmode; /* Used for NT connections instead of mode */
-	bool needslash = string_has_suffix(Connections[cnum].dirpath, "/");
+	bool needslash = !string_has_suffix(Connections[cnum].dirpath, "/");
 
 	*fname = 0;
 	*out_of_space = false;
@@ -985,6 +985,17 @@ static int call_trans2findnext(char *inbuf, char *outbuf, size_t inbuf_len,
 	return -1;
 }
 
+/* Write a string in two-byte (UCS-2) format */
+static void put_ucs2(char *dst, char *src)
+{
+	while (*src) {
+		*dst++ = *src++;
+		*dst++ = 0;
+	}
+	*dst++ = 0;
+	*dst++ = 0;
+}
+
 /* Reply to a TRANS2_QFSINFO (query filesystem info) */
 static int call_trans2qfsinfo(char *inbuf, char *outbuf, size_t inbuf_len,
                               size_t outbuf_len, int cnum, char **pparams,
@@ -1048,7 +1059,7 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, size_t inbuf_len,
 		      0x4006); /* FS ATTRIBUTES == long filenames supported? */
 		SIVAL(pdata, 4, 128); /* Max filename component length */
 		SIVAL(pdata, 8, 2 * strlen(FSTYPE_STRING));
-		put_unicode(pdata + 12, FSTYPE_STRING);
+		put_ucs2(pdata + 12, FSTYPE_STRING);
 		break;
 	case SMB_QUERY_FS_LABEL_INFO:
 		data_len = 4 + strlen(vname);
@@ -1065,7 +1076,7 @@ static int call_trans2qfsinfo(char *inbuf, char *outbuf, size_t inbuf_len,
 		      str_checksum(share->name) ^
 		          (str_checksum(local_machine) << 16));
 		SIVAL(pdata, 12, 2 * strlen(vname));
-		put_unicode(pdata + 18, vname);
+		put_ucs2(pdata + 18, vname);
 		DEBUG("SMB_QUERY_FS_VOLUME_INFO namelen = %d, vol = %s\n",
 		      (int) strlen(vname), vname);
 		break;

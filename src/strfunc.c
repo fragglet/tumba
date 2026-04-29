@@ -63,7 +63,7 @@ bool strequal(const char *s1, const char *s2)
 	return strcasecmp(s1, s2) == 0;
 }
 
-bool strcsequal(char *s1, char *s2)
+bool strcsequal(const char *s1, const char *s2)
 {
 	if (s1 == s2)
 		return true;
@@ -94,7 +94,7 @@ void strnorm(char *s)
 }
 
 /* Check if a string is in "normal" case */
-bool strisnormal(char *s)
+bool strisnormal(const char *s)
 {
 	return !strhasupper(s);
 }
@@ -160,6 +160,31 @@ bool trim_string(char *s, char *front, char *back)
 	return ret;
 }
 
+/*
+Look for pattern in s and replace it with insert; may do multiple
+replacements. Make sure there is enough room!
+*/
+static void string_sub(char *s, char *pattern, char *insert)
+{
+	char *p;
+	int ls, lp, li;
+
+	if (s == NULL) {
+		return;
+	}
+
+	ls = strlen(s);
+	lp = strlen(pattern);
+	li = strlen(insert);
+
+	while (lp <= ls && (p = strstr(s, pattern))) {
+		memmove(p + li, p + lp, ls + 1 - (PTR_DIFF(p, s) + lp));
+		memcpy(p, insert, li);
+		s = p + li;
+		ls = strlen(s);
+	}
+}
+
 /* Reduce a file name, removing .. elements. */
 void unix_clean_name(char *s)
 {
@@ -194,7 +219,7 @@ void unix_clean_name(char *s)
 }
 
 /* Does a string have any uppercase chars in it? */
-bool strhasupper(char *s)
+bool strhasupper(const char *s)
 {
 	while (*s) {
 		if (isupper(*s))
@@ -265,79 +290,26 @@ void string_set(char **dest, char *src)
 	*dest = checked_strdup(src);
 }
 
-/*
-Substitute a string for a pattern in another string. Make sure there is
-enough room!
-
-This routine looks for pattern in s and replaces it with
-insert. It may do multiple replacements.
-
-return true if a substitution was done.
-*/
-bool string_sub(char *s, char *pattern, char *insert)
-{
-	bool ret = false;
-	char *p;
-	int ls, lp, li;
-
-	if (!insert || !pattern || !s)
-		return false;
-
-	ls = strlen(s);
-	lp = strlen(pattern);
-	li = strlen(insert);
-
-	if (!*pattern)
-		return false;
-
-	while (lp <= ls && (p = strstr(s, pattern))) {
-		ret = true;
-		memmove(p + li, p + lp, ls + 1 - (PTR_DIFF(p, s) + lp));
-		memcpy(p, insert, li);
-		s = p + li;
-		ls = strlen(s);
-	}
-	return ret;
-}
-
 /* Recursive routine that is called by mask_match. Does the actual matching.
  * Returns true if matched, false if failed. */
-static bool do_match(char *str, char *regexp)
+static bool do_match(const char *str, const char *regexp)
 {
-	char *p;
+	const char *p;
 
-	for (p = regexp; *p && *str;) {
+	for (p = regexp; *p && *str; str++, p++) {
 		switch (*p) {
 		case '?':
-			str++;
-			p++;
 			break;
 
 		case '*':
-			/* Look for a character matching
-			   the one after the '*' */
 			p++;
 			if (!*p)
 				return true; /* Automatic match */
 			while (*str) {
-				while (*str && toupper(*p) != toupper(*str)) {
-					str++;
-				}
-				/* Now eat all characters that match, as
-				   we want the *last* character to match. */
-				while (*str && toupper(*p) == toupper(*str)) {
-					str++;
-				}
-				str--; /* We've eaten the match char after the
-				          '*' */
 				if (do_match(str, p)) {
 					return true;
 				}
-				if (!*str) {
-					return false;
-				} else {
-					str++;
-				}
+				str++;
 			}
 			return false;
 
@@ -345,7 +317,6 @@ static bool do_match(char *str, char *regexp)
 			if (toupper(*str) != toupper(*p)) {
 				return false;
 			}
-			str++, p++;
 			break;
 		}
 	}
@@ -371,7 +342,7 @@ static bool do_match(char *str, char *regexp)
 }
 
 /* Find the number of chars in a string */
-static int count_chars(char *s, char c)
+static int count_chars(const char *s, char c)
 {
 	int count = 0;
 
@@ -389,7 +360,7 @@ static int count_chars(char *s, char c)
  * significant or not.
  * The 8.3 handling was rewritten by Ums Harald <Harald.Ums@pro-sieben.de>
  */
-bool mask_match(char *str, char *regexp, bool trans2)
+bool mask_match(const char *str, const char *regexp, bool trans2)
 {
 	char *p;
 	pstring t_pattern, t_filename, te_pattern, te_filename;
@@ -549,20 +520,6 @@ bool mask_match(char *str, char *regexp, bool trans2)
 #else
 	return false;
 #endif
-}
-
-/* Write a string in unicoode format */
-int put_unicode(char *dst, char *src)
-{
-	int ret = 0;
-	while (*src) {
-		dst[ret++] = src[0];
-		dst[ret++] = 0;
-		src++;
-	}
-	dst[ret++] = 0;
-	dst[ret++] = 0;
-	return ret;
 }
 
 /* Safe string copy into a known length string. dest_size is the size of the
