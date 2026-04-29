@@ -78,6 +78,24 @@ Change the DOCS share to a read-only share.
 .TP
 chmod o-x /var/tumba/docs
 Disable access to the DOCS share entirely.
+.SH SERVER STATUS
+When \fBtumba_smbd\fR accepts an incoming TCP connection, it forks a subprocess
+to handle that new connection. On supported operating systems, those child
+processes will update their process description so that information about those
+clients can be seen in the process list seen in programs such as \fBps\fR(1)
+and \fBtop\fR(1). You should see a process tree such as this:
+.IP
+.EX
+tumba_smbd /var/tumba/doc /var/tumba/post /var/tumba/public
+ \\_ tumba_smbd [192.168.1.77] (using shares: public, doc)
+ \\_ tumba_smbd [192.168.1.92] (using shares: post)
+.EE
+.PP
+In this example, two connections are being served from different clients which
+are accessing different shares.
+.PP
+If you do not see this information it may be because you are using an operating
+system where this feature is not yet supported.
 .SH SMBCLIENT COMPATIBILITY
 The \fBsmbclient\fR(1) command-line client that ships with \fBsamba\fR(7) can
 be used to connect used to connect to SMB servers including Tumba. However,
