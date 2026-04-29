@@ -70,22 +70,22 @@ extern int Protocol;
 extern int chain_size;
 extern char client_addr[32];
 
-void setup_logging(char *pname);
+void setup_logging(const char *pname);
 void open_log_file(const char *filename);
 void startup_error(const char *funcname, char *format_str, ...)
     PRINTF_ATTRIBUTE(2, 3) NORETURN_ATTRIBUTE;
 int log_output(const char *funcname, int linenum, int level, char *format_str,
                ...) PRINTF_ATTRIBUTE(4, 5);
-bool file_exist(char *fname, struct stat *sbuf);
-bool directory_exist(char *dname, struct stat *st);
+bool file_exist(const char *fname, struct stat *sbuf);
+bool directory_exist(const char *dname, struct stat *st);
 void show_msg(char *buf);
-int smb_len(char *buf);
+int smb_len(const char *buf);
 void _smb_setlen(char *buf, int len);
 void smb_setlen(char *buf, int len);
 int set_message(char *buf, int num_words, int num_bytes, bool zero);
-int smb_buflen(char *buf);
+int smb_buflen(const char *buf);
 char *smb_buf(char *buf);
-int smb_offset(char *p, char *buf);
+int smb_offset(const char *p, char *buf);
 void close_low_fds(void);
 int read_data(int fd, char *buffer, int N);
 int write_data(int fd, char *buffer, int N);

@@ -64,7 +64,7 @@ bool strequal(const char *s1, const char *s2)
 	return strcasecmp(s1, s2) == 0;
 }
 
-bool strcsequal(char *s1, char *s2)
+bool strcsequal(const char *s1, const char *s2)
 {
 	if (s1 == s2)
 		return true;
@@ -95,7 +95,7 @@ void strnorm(char *s)
 }
 
 /* Check if a string is in "normal" case */
-bool strisnormal(char *s)
+bool strisnormal(const char *s)
 {
 	return !strhasupper(s);
 }
@@ -220,7 +220,7 @@ void unix_clean_name(char *s)
 }
 
 /* Does a string have any uppercase chars in it? */
-bool strhasupper(char *s)
+bool strhasupper(const char *s)
 {
 	while (*s) {
 		if (isupper(*s))
@@ -231,7 +231,7 @@ bool strhasupper(char *s)
 }
 
 /* Interpret the weird netbios "name". Return the name type */
-static int name_interpret(char *in, char *out)
+static int name_interpret(const char *in, char *out)
 {
 	int ret;
 	int len = (*in++) / 2;
@@ -310,9 +310,9 @@ void string_set(char **dest, char *src)
 
 /* Recursive routine that is called by mask_match. Does the actual matching.
  * Returns true if matched, false if failed. */
-static bool do_match(char *str, char *regexp)
+static bool do_match(const char *str, const char *regexp)
 {
-	char *p;
+	const char *p;
 
 	for (p = regexp; *p && *str; str++, p++) {
 		switch (*p) {
@@ -360,7 +360,7 @@ static bool do_match(char *str, char *regexp)
 }
 
 /* Find the number of chars in a string */
-static int count_chars(char *s, char c)
+static int count_chars(const char *s, char c)
 {
 	int count = 0;
 
@@ -378,7 +378,7 @@ static int count_chars(char *s, char c)
  * significant or not.
  * The 8.3 handling was rewritten by Ums Harald <Harald.Ums@pro-sieben.de>
  */
-bool mask_match(char *str, char *regexp, bool trans2)
+bool mask_match(const char *str, const char *regexp, bool trans2)
 {
 	char *p;
 	pstring t_pattern, t_filename, te_pattern, te_filename;

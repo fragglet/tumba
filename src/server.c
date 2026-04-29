@@ -353,7 +353,7 @@ bool set_filetime(int cnum, char *fname, time_t mtime)
 }
 
 /* Mangle the 2nd name and check if it is then equal to the first name */
-static bool mangled_equal(char *name1, char *name2)
+static bool mangled_equal(const char *name1, const char *name2)
 {
 	pstring tmpname;
 
@@ -573,7 +573,7 @@ bool unix_convert(char *name, int cnum, pstring saved_last_component,
 }
 
 /* Return number of 1K blocks available on a path and total number */
-static int disk_free(char *path, int *bsize, int *dfree, int *dsize)
+static int disk_free(const char *path, int *bsize, int *dfree, int *dsize)
 {
 	/* Don't bother. We always say it's a 1GiB disk with 512MiB free.
 	   Disks nowadays are so large that it would probably overflow the
@@ -585,7 +585,7 @@ static int disk_free(char *path, int *bsize, int *dfree, int *dsize)
 }
 
 /* Wrap it to get filenames right */
-int sys_disk_free(char *path, int *bsize, int *dfree, int *dsize)
+int sys_disk_free(const char *path, int *bsize, int *dfree, int *dsize)
 {
 	return disk_free(path, bsize, dfree, dsize);
 }
@@ -654,7 +654,7 @@ This is called by every routine before it allows an operation on a filename.
 It does any final confirmation necessary to ensure that the filename is
 a valid one for the user to access.
 */
-bool check_name(char *name, int cnum)
+bool check_name(const char *name, int cnum)
 {
 	const char *top = Connections[cnum].connectpath;
 	char old_wd[PATH_MAX];
@@ -693,7 +693,7 @@ bool check_name(char *name, int cnum)
 }
 
 /* Check a filename - possibly calling reducename */
-static void check_for_pipe(char *fname)
+static void check_for_pipe(const char *fname)
 {
 	/* special case of pipe opens */
 	char s[10];
@@ -2240,7 +2240,7 @@ void close_cnum(int cnum)
 	set_descriptive_argv();
 }
 
-void exit_server(char *reason)
+void exit_server(const char *reason)
 {
 	static bool firsttime = true;
 	int i;

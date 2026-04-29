@@ -2130,7 +2130,7 @@ static bool resolve_wildcards(char *name1, char *name2)
 }
 
 /* Check if a user is allowed to rename a file */
-static bool can_rename(char *fname, int cnum)
+static bool can_rename(const char *fname, int cnum)
 {
 	struct stat sbuf;
 
