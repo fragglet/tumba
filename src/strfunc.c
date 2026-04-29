@@ -314,38 +314,20 @@ static bool do_match(char *str, char *regexp)
 {
 	char *p;
 
-	for (p = regexp; *p && *str;) {
+	for (p = regexp; *p && *str; str++, p++) {
 		switch (*p) {
 		case '?':
-			str++;
-			p++;
 			break;
 
 		case '*':
-			/* Look for a character matching
-			   the one after the '*' */
 			p++;
 			if (!*p)
 				return true; /* Automatic match */
 			while (*str) {
-				while (*str && toupper(*p) != toupper(*str)) {
-					str++;
-				}
-				/* Now eat all characters that match, as
-				   we want the *last* character to match. */
-				while (*str && toupper(*p) == toupper(*str)) {
-					str++;
-				}
-				str--; /* We've eaten the match char after the
-				          '*' */
 				if (do_match(str, p)) {
 					return true;
 				}
-				if (!*str) {
-					return false;
-				} else {
-					str++;
-				}
+				str++;
 			}
 			return false;
 
@@ -353,7 +335,6 @@ static bool do_match(char *str, char *regexp)
 			if (toupper(*str) != toupper(*p)) {
 				return false;
 			}
-			str++, p++;
 			break;
 		}
 	}
