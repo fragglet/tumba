@@ -2782,10 +2782,12 @@ static void usage(void)
 	       "                  <path> [paths...]\n\n"
 	       "  -a            allow connections from any address\n"
 	       "  -b address    address to bind socket (default 0.0.0.0)\n"
-	       "  -d level      set the logging level\n"
-	       "  -l filename   path to debug log file\n"
-	       "  -p port       listen on the specified port\n"
-	       "\n");
+	       "  -d level      set the logging level (0-4; default 2)\n"
+	       "  -l filename   path to debug log file, or '-' for stdout\n"
+	       "  -p port       listen on the specified port (default %d)\n"
+	       "\n"
+	       "You must specify at least one path to a directory to share.\n",
+	       SMB_PORT);
 }
 
 int main(int argc, char *argv[])
