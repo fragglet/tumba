@@ -13,7 +13,7 @@
 
 struct share;
 
-int str_checksum(char *s);
+unsigned int str_checksum(char *s);
 bool is_8_3(char *fname, bool check_case);
 bool is_mangled(char *s);
 void mangle_name_83(char *s, int s_len);

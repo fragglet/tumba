@@ -129,7 +129,7 @@ static int num_connections_open = 0;
 int unix_ERR_class = SMB_SUCCESS;
 int unix_ERR_code = 0;
 
-static int find_free_connection(int hash);
+static int find_free_connection(unsigned int hash);
 
 /* for readability... */
 #define IS_DOS_READONLY(test_mode) (((test_mode) & aRONLY) != 0)
@@ -1906,7 +1906,7 @@ int make_connection(char *service, char *dev)
 int find_free_file(void)
 {
 	int i;
-	static int first_file;
+	static unsigned int first_file;
 
 	/* we want to give out file handles differently on each new
 	   connection because of a common bug in MS clients where they try to
@@ -1947,7 +1947,7 @@ int find_free_file(void)
 /* Find first available connection slot, starting from a random position.  The
  * randomisation stops problems with the server dieing and clients thinking the
  * server is still available. */
-static int find_free_connection(int hash)
+static int find_free_connection(unsigned int hash)
 {
 	int i;
 	bool used = false;

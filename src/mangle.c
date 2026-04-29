@@ -33,11 +33,11 @@ static const char *const reserved_devices[] = {
  *              will be calculated.
  *  Output: The checksum value calculated for s.
  */
-int str_checksum(char *s)
+unsigned int str_checksum(char *s)
 {
-	int res = 0;
-	int c;
-	int i = 0;
+	unsigned int res = 0;
+	unsigned int c;
+	unsigned int i = 0;
 
 	while (*s) {
 		c = *s;
