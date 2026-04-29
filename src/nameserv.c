@@ -47,6 +47,7 @@
 #define NBNS_PORT       137
 #define SIGNAL_CAST     (void (*)(int))
 #define UPDATE_INTERVAL 60
+#define INFINITE_TTL    0
 
 /* How long we wait for a registration response */
 #define BCAST_REQ_RETRY_TIMEOUT       5
@@ -85,7 +86,6 @@ static time_t next_register_time = 0;
 
 fstring myname = "";
 fstring mygroup = "WORKGROUP";
-int myttl = 0;
 
 static int server_sock = 0;
 
@@ -505,7 +505,7 @@ static void reply_name_query(const uint8_t *inbuf, size_t inbuf_len,
 	p += name_len((char *) p);
 	RSSVAL(p, 0, 0x20);
 	RSSVAL(p, 2, 0x1);
-	RSIVAL(p, 4, myttl);
+	RSIVAL(p, 4, INFINITE_TTL);
 	RSSVAL(p, 8, 6);
 	CVAL(p, 10) = 0; /* flags */
 	CVAL(p, 11) = 0;
