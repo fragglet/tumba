@@ -18,7 +18,7 @@
 #include "guards.h" /* IWYU pragma: keep */
 
 /* Now for utime() */
-int sys_utime(char *fname, struct utimbuf *times)
+int sys_utime(const char *fname, struct utimbuf *times)
 {
 	/* if the modtime is 0 or -1 then ignore the call and
 	   return success */

@@ -502,7 +502,7 @@ int reply_dskattr(char *inbuf, char *outbuf, size_t inbuf_len,
 	return outsize;
 }
 
-static void make_dir_struct(char *buf, char *mask, char *fname,
+static void make_dir_struct(char *buf, char *mask, const char *fname,
                             unsigned int size, int mode, time_t date)
 {
 	char *p;
@@ -1109,7 +1109,7 @@ int reply_ctemp(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 }
 
 /* Check if a user is allowed to delete a file */
-static bool can_delete(char *fname, int cnum, int dirtype)
+static bool can_delete(const char *fname, int cnum, int dirtype)
 {
 	struct stat sbuf;
 	int fmode;
@@ -2331,8 +2331,8 @@ int reply_mv(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 }
 
 /* Copy a file as part of a reply_copy */
-static bool copy_file(char *src, char *dest1, int cnum, int ofun, int count,
-                      bool target_is_directory)
+static bool copy_file(const char *src, const char *dest1, int cnum, int ofun,
+                      int count, bool target_is_directory)
 {
 	int access, action;
 	struct stat st;
@@ -2342,7 +2342,7 @@ static bool copy_file(char *src, char *dest1, int cnum, int ofun, int count,
 
 	pstrcpy(dest, dest1);
 	if (target_is_directory) {
-		char *p = strrchr(src, '/');
+		const char *p = strrchr(src, '/');
 		if (p)
 			p++;
 		else

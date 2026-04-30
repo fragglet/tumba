@@ -375,8 +375,8 @@ bool dir_check_ftype(int cnum, int mode, struct stat *st, int dirtype)
 	return true;
 }
 
-bool get_dir_entry(int cnum, char *mask, int dirtype, char *fname, int *size,
-                   int *mode, time_t *date)
+bool get_dir_entry(int cnum, const char *mask, int dirtype, char *fname,
+                   int *size, int *mode, time_t *date)
 {
 	char *dname;
 	bool found = false;

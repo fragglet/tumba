@@ -138,16 +138,16 @@ extern int unix_ERR_class;
 extern int unix_ERR_code;
 
 mode_t unix_mode(int cnum, int dosmode);
-int dos_mode(int cnum, char *path, struct stat *sbuf);
-int dos_chmod(int cnum, char *fname, int dosmode, struct stat *st);
-bool set_filetime(int cnum, char *fname, time_t mtime);
+int dos_mode(int cnum, const char *path, struct stat *sbuf);
+int dos_chmod(int cnum, const char *fname, int dosmode, struct stat *st);
+bool set_filetime(int cnum, const char *fname, time_t mtime);
 bool unix_convert(char *name, int cnum, pstring saved_last_component,
                   bool *bad_path);
 int sys_disk_free(const char *path, int *bsize, int *dfree, int *dsize);
 bool check_name(const char *name, int cnum);
 void close_file(int fnum, bool normal_close);
-void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
-                      int mode, int *access, int *action);
+void open_file_shared(int fnum, int cnum, const char *fname, int share_mode,
+                      int ofun, int mode, int *access, int *action);
 int seek_file(int fnum, uint32_t pos);
 int read_file(int fnum, char *data, uint32_t pos, int n);
 int write_file(int fnum, char *data, int n);

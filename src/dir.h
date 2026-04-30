@@ -34,8 +34,8 @@ bool dptr_zero(char *buf);
 Dir *dptr_fetch(char *buf, int *num);
 Dir *dptr_fetch_lanman2(int dptr_num);
 bool dir_check_ftype(int cnum, int mode, struct stat *st, int dirtype);
-bool get_dir_entry(int cnum, char *mask, int dirtype, char *fname, int *size,
-                   int *mode, time_t *date);
+bool get_dir_entry(int cnum, const char *mask, int dirtype, char *fname,
+                   int *size, int *mode, time_t *date);
 Dir *open_dir(int cnum, char *name);
 void close_dir(Dir *dirp);
 char *read_dir_name(Dir *dirp);

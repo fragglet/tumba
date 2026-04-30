@@ -14,7 +14,7 @@
 
 struct utimbuf;
 
-int sys_utime(char *fname, struct utimbuf *times);
+int sys_utime(const char *fname, struct utimbuf *times);
 ssize_t sys_getxattr(const char *path, const char *name, void *value,
                      size_t size);
 ssize_t sys_setxattr(const char *path, const char *name, void *value,

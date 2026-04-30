@@ -30,7 +30,7 @@ void strnorm(char *s);
 bool strisnormal(const char *s);
 void unix_format(char *fname);
 char *skip_string(char *buf);
-bool trim_string(char *s, char *front, char *back);
+bool trim_string(char *s, const char *front, const char *back);
 void unix_clean_name(char *s);
 bool strhasupper(const char *s);
 int name_extract(char *buf, int ofs, char *name);

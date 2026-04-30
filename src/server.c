@@ -245,7 +245,7 @@ static void write_dosattrib(const char *path, int attrib)
 }
 
 /* Change a unix mode to a dos mode */
-int dos_mode(int cnum, char *path, struct stat *sbuf)
+int dos_mode(int cnum, const char *path, struct stat *sbuf)
 {
 	int result = 0;
 
@@ -285,7 +285,7 @@ int dos_mode(int cnum, char *path, struct stat *sbuf)
 }
 
 /* chmod a file - but preserve some bits */
-int dos_chmod(int cnum, char *fname, int dosmode, struct stat *st)
+int dos_chmod(int cnum, const char *fname, int dosmode, struct stat *st)
 {
 	struct stat st1;
 	int mask = 0;
@@ -336,7 +336,7 @@ int dos_chmod(int cnum, char *fname, int dosmode, struct stat *st)
 	return chmod(fname, unixmode);
 }
 
-bool set_filetime(int cnum, char *fname, time_t mtime)
+bool set_filetime(int cnum, const char *fname, time_t mtime)
 {
 	struct utimbuf times;
 
@@ -803,7 +803,8 @@ static struct open_fd *fd_get_new(void)
 
 /* Attempt to re-open an already open fd as O_RDWR. Save the already open fd
  * (we cannot close due to POSIX file locking brain damage) */
-static void fd_attempt_reopen(char *fname, int mode, struct open_fd *fd_ptr)
+static void fd_attempt_reopen(const char *fname, int mode,
+                              struct open_fd *fd_ptr)
 {
 	int fd = open(fname, O_RDWR, mode);
 
@@ -847,8 +848,8 @@ static int fd_attempt_close(struct open_fd *fd_ptr)
 	return fd_ptr->ref_count;
 }
 
-static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
-                      struct stat *sbuf)
+static void open_file(int fnum, int cnum, const char *fname1, int flags,
+                      int mode, struct stat *sbuf)
 {
 	pstring fname;
 	struct stat statbuf;
@@ -1071,8 +1072,8 @@ void close_file(int fnum, bool normal_close)
 	memset(fs_p, 0, sizeof(*fs_p));
 }
 
-void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
-                      int dosmode, int *access, int *action)
+void open_file_shared(int fnum, int cnum, const char *fname, int share_mode,
+                      int ofun, int dosmode, int *access, int *action)
 {
 	struct open_file *fs_p = &Files[fnum];
 	int flags = 0;

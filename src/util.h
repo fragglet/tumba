@@ -72,10 +72,10 @@ extern char client_addr[32];
 
 void setup_logging(const char *pname);
 void open_log_file(const char *filename);
-void startup_error(const char *funcname, char *format_str, ...)
+void startup_error(const char *funcname, const char *format_str, ...)
     PRINTF_ATTRIBUTE(2, 3) NORETURN_ATTRIBUTE;
-int log_output(const char *funcname, int linenum, int level, char *format_str,
-               ...) PRINTF_ATTRIBUTE(4, 5);
+int log_output(const char *funcname, int linenum, int level,
+               const char *format_str, ...) PRINTF_ATTRIBUTE(4, 5);
 bool file_exist(const char *fname, struct stat *sbuf);
 bool directory_exist(const char *dname, struct stat *st);
 void show_msg(char *buf);
