@@ -96,6 +96,31 @@ are accessing different shares.
 .PP
 If you do not see this information it may be because you are using an operating
 system where this feature is not yet supported.
+.SH DOS ATTRIBUTES
+The DOS read-only attribute is mapped to the Unix write attribute; network
+users will see the +R attribute set if (1) the file is not world writable
+(o-w); and (2) the file is owned by a different user to the one that the server
+is running as, or the file is not owner-writable (u-w).
+.PP
+The other DOS file attributes (archive; system; hidden) are preserved through
+the use of filesystem extended attributes (xattrs). The same
+\fBuser.DOSATTRIB\fR attribute is used that is also supported by Samba,
+although only the original version is understood. Some other free software
+projects such as \fBdosemu2\fR and \fBdosbox-staging\fR also support the same
+attribute.
+.PP
+There is not yet any support for reading and writing the real attributes from
+files on FAT or NTFS volumes, even though the system APIs for doing this exist
+on Linux (\fBdosattr\fR(1)) and FreeBSD (\fBchflags\fR(1)).
+.SH TIME SERVER FUNCTIONALITY
+\fBtumba_smbd\fR can act as a time server that DOS and Windows machines can
+synchronize their clocks against. To do this, use the \fBNET TIME\fR command;
+for example, to synchronize against a machine named \fBTUMBASRV\fR, type:
+.IP
+.EX
+NET TIME \\\\TUMBASRV /SET
+.EE
+.PP
 .SH SMBCLIENT COMPATIBILITY
 The \fBsmbclient\fR(1) command-line client that ships with \fBsamba\fR(7) can
 be used to connect used to connect to SMB servers including Tumba. However,
@@ -135,15 +160,6 @@ be read-only or not. However, because the server runs as an unprivileged user,
 the files it accesses must also have their individual permissions set to
 world-readable (and world-writable for non-readonly shares). Since the files
 will be world-accessible via the network anyway, this is not a security issue.
-.SH TIME SERVER FUNCTIONALITY
-\fBtumba_smbd\fR can act as a time server that DOS and Windows machines can
-synchronize their clocks against. To do this, use the \fBNET TIME\fR command;
-for example, to synchronize against a machine named \fBTUMBASRV\fR, type:
-.IP
-.EX
-NET TIME \\\\TUMBASRV /SET
-.EE
-.PP
 .SH LIMITATIONS
 Shares are always reported as being 1GiB in size with 512MiB free. This is
 because modern disks are much larger than they were when the SMB protocol was
@@ -174,22 +190,6 @@ case-insensitive fashion, no attempt is made to interpret higher range
 characters. So for example, while \fBcliche.txt\fR and \fBCLICHE.TXT\fR will
 both be interpreted as references to the same file, \fBcliché.txt\fR and
 \fBCLICHÉ.TXT\fR will not.
-.SH DOS ATTRIBUTES
-The DOS read-only attribute is mapped to the Unix write attribute; network
-users will see the +R attribute set if (1) the file is not world writable
-(o-w); and (2) the file is owned by a different user to the one that the server
-is running as, or the file is not owner-writable (u-w).
-.PP
-The other DOS file attributes (archive; system; hidden) are preserved through
-the use of filesystem extended attributes (xattrs). The same
-\fBuser.DOSATTRIB\fR attribute is used that is also supported by Samba,
-although only the original version is understood. Some other free software
-projects such as \fBdosemu2\fR and \fBdosbox-staging\fR also support the same
-attribute.
-.PP
-There is not yet any support for reading and writing the real attributes from
-files on FAT or NTFS volumes, even though the system APIs for doing this exist
-on Linux (\fBdosattr\fR(1)) and FreeBSD (\fBchflags\fR(1)).
 .SH BUG REPORTS
 Bugs can be reported to the GitHub issue tracker:
 .UR https://github.com/fragglet/tumba
