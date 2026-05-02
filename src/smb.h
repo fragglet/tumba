@@ -3,7 +3,7 @@
  * Copyright (c) 1996-1998 John H Terpstra
  * Copyright (c) 1996-1998 Luke Kenneth Casson Leighton
  * Copyright (c) 1998 Paul Ashton
- * Copyright (c) 2025 Simon Howard
+ * Copyright (c) 2025-2026 Simon Howard
  *
  * You can redistribute and/or modify this program under the terms of the
  * GNU General Public License version 2 as published by the Free Software
@@ -107,7 +107,7 @@ implemented */
 #define ERRbadpw       2   /* Bad password */
 #define ERRbadtype     3   /* reserved */
 #define ERRaccess      4   /* No permissions to do the requested operation */
-#define ERRinvnid      5   /* tid invalid */
+#define ERRinvtid      5   /* tid invalid */
 #define ERRinvnetname  6   /* Invalid servername */
 #define ERRinvdevice   7   /* Invalid device */
 #define ERRqfull       49  /* Print queue full */

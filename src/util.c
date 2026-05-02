@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 1992-1998 Andrew Tridgell
- * Copyright (c) 2025 Simon Howard
+ * Copyright (c) 2025-2026 Simon Howard
  *
  * You can redistribute and/or modify this program under the terms of the
  * GNU General Public License version 2 as published by the Free Software
@@ -82,7 +82,7 @@ static const int syslog_priority_map[] = {
     LOG_INFO,    /* 3 */
 };
 
-static void syslog_output(int level, char *format_str, va_list ap)
+static void syslog_output(int level, const char *format_str, va_list ap)
 {
 	int priority = syslog_priority_map[level];
 	pstring msgbuf;
@@ -128,7 +128,7 @@ void open_log_file(const char *filename)
 }
 
 /* Used for errors that occur during startup. Does not return. */
-void startup_error(const char *funcname, char *format_str, ...)
+void startup_error(const char *funcname, const char *format_str, ...)
 {
 	va_list ap;
 
@@ -140,8 +140,8 @@ void startup_error(const char *funcname, char *format_str, ...)
 }
 
 /* Write a message to the log file. This is called by the LOG macro. */
-int log_output(const char *funcname, int linenum, int level, char *format_str,
-               ...)
+int log_output(const char *funcname, int linenum, int level,
+               const char *format_str, ...)
 {
 	va_list ap;
 	int old_errno = errno;

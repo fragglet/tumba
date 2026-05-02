@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 1992-1998 Andrew Tridgell
- * Copyright (c) 2025 Simon Howard
+ * Copyright (c) 2025-2026 Simon Howard
  *
  * You can redistribute and/or modify this program under the terms of the
  * GNU General Public License version 2 as published by the Free Software

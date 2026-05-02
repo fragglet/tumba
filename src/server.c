@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 1992-1998 Andrew Tridgell
- * Copyright (c) 2025 Simon Howard
+ * Copyright (c) 2025-2026 Simon Howard
  *
  * You can redistribute and/or modify this program under the terms of the
  * GNU General Public License version 2 as published by the Free Software
@@ -243,7 +243,7 @@ static void write_dosattrib(const char *path, int attrib)
 }
 
 /* Change a unix mode to a dos mode */
-int dos_mode(int cnum, char *path, struct stat *sbuf)
+int dos_mode(int cnum, const char *path, struct stat *sbuf)
 {
 	int result = 0;
 
@@ -283,7 +283,7 @@ int dos_mode(int cnum, char *path, struct stat *sbuf)
 }
 
 /* chmod a file - but preserve some bits */
-int dos_chmod(int cnum, char *fname, int dosmode, struct stat *st)
+int dos_chmod(int cnum, const char *fname, int dosmode, struct stat *st)
 {
 	struct stat st1;
 	int mask = 0;
@@ -334,7 +334,7 @@ int dos_chmod(int cnum, char *fname, int dosmode, struct stat *st)
 	return chmod(fname, unixmode);
 }
 
-bool set_filetime(int cnum, char *fname, time_t mtime)
+bool set_filetime(int cnum, const char *fname, time_t mtime)
 {
 	struct utimbuf times;
 
@@ -801,7 +801,8 @@ static struct open_fd *fd_get_new(void)
 
 /* Attempt to re-open an already open fd as O_RDWR. Save the already open fd
  * (we cannot close due to POSIX file locking brain damage) */
-static void fd_attempt_reopen(char *fname, int mode, struct open_fd *fd_ptr)
+static void fd_attempt_reopen(const char *fname, int mode,
+                              struct open_fd *fd_ptr)
 {
 	int fd = open(fname, O_RDWR, mode);
 
@@ -845,8 +846,8 @@ static int fd_attempt_close(struct open_fd *fd_ptr)
 	return fd_ptr->ref_count;
 }
 
-static void open_file(int fnum, int cnum, char *fname1, int flags, int mode,
-                      struct stat *sbuf)
+static void open_file(int fnum, int cnum, const char *fname1, int flags,
+                      int mode, struct stat *sbuf)
 {
 	pstring fname;
 	struct stat statbuf;
@@ -1069,8 +1070,8 @@ void close_file(int fnum, bool normal_close)
 	memset(fs_p, 0, sizeof(*fs_p));
 }
 
-void open_file_shared(int fnum, int cnum, char *fname, int share_mode, int ofun,
-                      int dosmode, int *access, int *action)
+void open_file_shared(int fnum, int cnum, const char *fname, int share_mode,
+                      int ofun, int dosmode, int *access, int *action)
 {
 	struct open_file *fs_p = &Files[fnum];
 	int flags = 0;
@@ -1253,10 +1254,7 @@ int write_file(int fnum, char *data, int n)
 /* Load parameters specific to a connection/service */
 static bool become_service(int cnum)
 {
-	static int last_cnum = -1;
-
 	if (!OPEN_CNUM(cnum)) {
-		last_cnum = -1;
 		return false;
 	}
 
@@ -1268,11 +1266,6 @@ static bool become_service(int cnum)
 		      Connections[cnum].connectpath, cnum);
 		return false;
 	}
-
-	if (cnum == last_cnum)
-		return true;
-
-	last_cnum = cnum;
 
 	return true;
 }
@@ -2247,6 +2240,7 @@ Note that I don't set NEED_WRITE on some write operations because they
 are used by some brain-dead clients when printing, and I don't want to
 force write permissions on print services.
 */
+#define DONT_CHECK_CNUM (1 << 0)
 #define NEED_WRITE      (1 << 1)
 #define ALLOWED_IN_IPC  (1 << 3)
 #define QUEUE_IN_OPLOCK (1 << 6)
@@ -2266,16 +2260,15 @@ struct smb_message_struct {
 
     /* CORE PROTOCOL */
 
-    {SMBnegprot, "SMBnegprot", reply_negprot, 0},
-    {SMBtcon, "SMBtcon", reply_tcon, 0},
+    {SMBnegprot, "SMBnegprot", reply_negprot, DONT_CHECK_CNUM},
+    {SMBtcon, "SMBtcon", reply_tcon, DONT_CHECK_CNUM},
     {SMBtdis, "SMBtdis", reply_tdis, ALLOWED_IN_IPC},
-    {SMBexit, "SMBexit", reply_exit, 0},
+    {SMBexit, "SMBexit", reply_exit, DONT_CHECK_CNUM},
     {SMBioctl, "SMBioctl", reply_ioctl, 0},
-    {SMBecho, "SMBecho", reply_echo, 0},
-    {SMBsesssetupX, "SMBsesssetupX", reply_sesssetup_and_X, 0},
-    {SMBtconX, "SMBtconX", reply_tcon_and_X, 0},
-    {SMBulogoffX, "SMBulogoffX", reply_ulogoffX,
-     0}, /* ulogoff doesn't give a valid TID */
+    {SMBecho, "SMBecho", reply_echo, DONT_CHECK_CNUM},
+    {SMBsesssetupX, "SMBsesssetupX", reply_sesssetup_and_X, DONT_CHECK_CNUM},
+    {SMBtconX, "SMBtconX", reply_tcon_and_X, DONT_CHECK_CNUM},
+    {SMBulogoffX, "SMBulogoffX", reply_ulogoffX, DONT_CHECK_CNUM},
     {SMBgetatr, "SMBgetatr", reply_getatr, 0},
     {SMBsetatr, "SMBsetatr", reply_setatr, NEED_WRITE},
     {SMBchkpth, "SMBchkpth", reply_chkpth, 0},
@@ -2400,6 +2393,11 @@ static int switch_message(int type, char *inbuf, char *outbuf, size_t inbuf_len,
 
 	/* Ensure value is replaced in the incoming packet. */
 	SSVAL(inbuf, smb_uid, UID_FIELD_INVALID);
+
+	/* For almost all message types we require an open connection */
+	if ((flags & DONT_CHECK_CNUM) == 0 && !OPEN_CNUM(cnum)) {
+		return ERROR_CODE(ERRSRV, ERRinvtid);
+	}
 
 	/* does it need write permission? */
 	if ((flags & NEED_WRITE) && !CAN_WRITE(cnum))

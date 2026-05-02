@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Simon Howard
+ * Copyright (c) 2025-2026 Simon Howard
  *
  * You can redistribute and/or modify this program under the terms of the
  * GNU General Public License version 2 as published by the Free Software
@@ -9,5 +9,5 @@
  */
 
 #define PACKAGE_NAME    "Tumba"
-#define PACKAGE_VERSION "0.3"
+#define PACKAGE_VERSION "0.5"
 #define PACKAGE_STRING  PACKAGE_NAME " " PACKAGE_VERSION

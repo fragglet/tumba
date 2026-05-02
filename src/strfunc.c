@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 1992-1998 Andrew Tridgell
- * Copyright (c) 2025 Simon Howard
+ * Copyright (c) 2025-2026 Simon Howard
  *
  * You can redistribute and/or modify this program under the terms of the
  * GNU General Public License version 2 as published by the Free Software
@@ -141,7 +141,7 @@ char *skip_string(char *buf)
 }
 
 /* Trim the specified elements off the front and back of a string */
-bool trim_string(char *s, char *front, char *back)
+bool trim_string(char *s, const char *front, const char *back)
 {
 	bool ret = false;
 	while (front && *front && string_has_prefix(s, front)) {
@@ -164,7 +164,7 @@ bool trim_string(char *s, char *front, char *back)
 Look for pattern in s and replace it with insert; may do multiple
 replacements. Make sure there is enough room!
 */
-static void string_sub(char *s, char *pattern, char *insert)
+static void string_sub(char *s, const char *pattern, const char *insert)
 {
 	char *p;
 	int ls, lp, li;

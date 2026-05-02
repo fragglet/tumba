@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 1992-1998 Andrew Tridgell
- * Copyright (c) 2025 Simon Howard
+ * Copyright (c) 2025-2026 Simon Howard
  *
  * You can redistribute and/or modify this program under the terms of the
  * GNU General Public License version 2 as published by the Free Software
@@ -375,8 +375,8 @@ bool dir_check_ftype(int cnum, int mode, struct stat *st, int dirtype)
 	return true;
 }
 
-bool get_dir_entry(int cnum, char *mask, int dirtype, char *fname, int *size,
-                   int *mode, time_t *date)
+bool get_dir_entry(int cnum, const char *mask, int dirtype, char *fname,
+                   int *size, int *mode, time_t *date)
 {
 	char *dname;
 	bool found = false;
