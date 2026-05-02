@@ -9,5 +9,5 @@
  */
 
 #define PACKAGE_NAME    "Tumba"
-#define PACKAGE_VERSION "0.3"
+#define PACKAGE_VERSION "0.5"
 #define PACKAGE_STRING  PACKAGE_NAME " " PACKAGE_VERSION
