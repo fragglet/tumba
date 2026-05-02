@@ -1939,11 +1939,6 @@ int reply_tdis(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 
 	cnum = SVAL(inbuf, smb_tid);
 
-	if (!OPEN_CNUM(cnum)) {
-		DEBUG("Invalid cnum in tdis (%d)\n", cnum);
-		return ERROR_CODE(ERRSRV, ERRinvnid);
-	}
-
 	Connections[cnum].used = false;
 
 	close_cnum(cnum);

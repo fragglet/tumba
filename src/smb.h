@@ -107,7 +107,7 @@ implemented */
 #define ERRbadpw       2   /* Bad password */
 #define ERRbadtype     3   /* reserved */
 #define ERRaccess      4   /* No permissions to do the requested operation */
-#define ERRinvnid      5   /* tid invalid */
+#define ERRinvtid      5   /* tid invalid */
 #define ERRinvnetname  6   /* Invalid servername */
 #define ERRinvdevice   7   /* Invalid device */
 #define ERRqfull       49  /* Print queue full */

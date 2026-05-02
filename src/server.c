@@ -2280,6 +2280,7 @@ Note that I don't set NEED_WRITE on some write operations because they
 are used by some brain-dead clients when printing, and I don't want to
 force write permissions on print services.
 */
+#define DONT_CHECK_CNUM (1 << 0)
 #define NEED_WRITE      (1 << 1)
 #define ALLOWED_IN_IPC  (1 << 3)
 #define QUEUE_IN_OPLOCK (1 << 6)
@@ -2299,16 +2300,15 @@ struct smb_message_struct {
 
     /* CORE PROTOCOL */
 
-    {SMBnegprot, "SMBnegprot", reply_negprot, 0},
-    {SMBtcon, "SMBtcon", reply_tcon, 0},
+    {SMBnegprot, "SMBnegprot", reply_negprot, DONT_CHECK_CNUM},
+    {SMBtcon, "SMBtcon", reply_tcon, DONT_CHECK_CNUM},
     {SMBtdis, "SMBtdis", reply_tdis, ALLOWED_IN_IPC},
-    {SMBexit, "SMBexit", reply_exit, 0},
+    {SMBexit, "SMBexit", reply_exit, DONT_CHECK_CNUM},
     {SMBioctl, "SMBioctl", reply_ioctl, 0},
-    {SMBecho, "SMBecho", reply_echo, 0},
-    {SMBsesssetupX, "SMBsesssetupX", reply_sesssetup_and_X, 0},
-    {SMBtconX, "SMBtconX", reply_tcon_and_X, 0},
-    {SMBulogoffX, "SMBulogoffX", reply_ulogoffX,
-     0}, /* ulogoff doesn't give a valid TID */
+    {SMBecho, "SMBecho", reply_echo, DONT_CHECK_CNUM},
+    {SMBsesssetupX, "SMBsesssetupX", reply_sesssetup_and_X, DONT_CHECK_CNUM},
+    {SMBtconX, "SMBtconX", reply_tcon_and_X, DONT_CHECK_CNUM},
+    {SMBulogoffX, "SMBulogoffX", reply_ulogoffX, DONT_CHECK_CNUM},
     {SMBgetatr, "SMBgetatr", reply_getatr, 0},
     {SMBsetatr, "SMBsetatr", reply_setatr, NEED_WRITE},
     {SMBchkpth, "SMBchkpth", reply_chkpth, 0},
@@ -2433,6 +2433,11 @@ static int switch_message(int type, char *inbuf, char *outbuf, size_t inbuf_len,
 
 	/* Ensure value is replaced in the incoming packet. */
 	SSVAL(inbuf, smb_uid, UID_FIELD_INVALID);
+
+	/* For almost all message types we require an open connection */
+	if ((flags & DONT_CHECK_CNUM) == 0 && !OPEN_CNUM(cnum)) {
+		return ERROR_CODE(ERRSRV, ERRinvtid);
+	}
 
 	/* does it need write permission? */
 	if ((flags & NEED_WRITE) && !CAN_WRITE(cnum))
