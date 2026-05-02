@@ -51,6 +51,7 @@ Tumba has been compiled/run successfully on:
 * Debian GNU/Linux
 * FreeBSD
 * NetBSD
+* MacOS
 
 It has also been built on OpenBSD, Haiku and Tribblix (Illumos / OpenSolaris),
 but support is currently incomplete; Tumba uses extended filesystem attributes
