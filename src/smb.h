@@ -3,7 +3,7 @@
  * Copyright (c) 1996-1998 John H Terpstra
  * Copyright (c) 1996-1998 Luke Kenneth Casson Leighton
  * Copyright (c) 1998 Paul Ashton
- * Copyright (c) 2025 Simon Howard
+ * Copyright (c) 2025-2026 Simon Howard
  *
  * You can redistribute and/or modify this program under the terms of the
  * GNU General Public License version 2 as published by the Free Software
