@@ -1256,10 +1256,7 @@ int write_file(int fnum, char *data, int n)
 /* Load parameters specific to a connection/service */
 static bool become_service(int cnum)
 {
-	static int last_cnum = -1;
-
 	if (!OPEN_CNUM(cnum)) {
-		last_cnum = -1;
 		return false;
 	}
 
@@ -1271,11 +1268,6 @@ static bool become_service(int cnum)
 		      Connections[cnum].connectpath, cnum);
 		return false;
 	}
-
-	if (cnum == last_cnum)
-		return true;
-
-	last_cnum = cnum;
 
 	return true;
 }
