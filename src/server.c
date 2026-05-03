@@ -1417,7 +1417,7 @@ static void drop_privileges(void)
 	struct passwd *pw;
 
 	/* Only drop privileges if we're running as root */
-	if (getuid() != 0) {
+	if (geteuid() != 0) {
 		return;
 	}
 
