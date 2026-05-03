@@ -602,9 +602,8 @@ bool send_smb(int fd, char *buffer)
 	while (nwritten < len) {
 		ret = write_socket(fd, buffer + nwritten, len - nwritten);
 		if (ret <= 0) {
-			ERROR("Error writing %d bytes to client. %d. Exiting\n",
+			FATAL("Error writing %d bytes to client. %d. Exiting\n",
 			      len, ret);
-			exit(1);
 		}
 		nwritten += ret;
 	}

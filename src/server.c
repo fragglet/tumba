@@ -1684,8 +1684,7 @@ static bool receive_smb(int fd, char *buffer, size_t buflen, int timeout)
 		return false;
 
 	if (len > buflen) {
-		ERROR("Invalid packet length! (%d bytes).\n", len);
-		exit(1);
+		FATAL("Invalid packet length! (%d bytes).\n", len);
 	}
 
 	if (len > 0) {
@@ -2398,15 +2397,13 @@ static int switch_message(int type, char *inbuf, char *outbuf, size_t inbuf_len,
 	/* make sure this is an SMB packet */
 	hdr = smb_base(inbuf);
 	if (memcmp(hdr, smb2_protocol_id, 4) == 0) {
-		ERROR("Received an SMBv2 message. If the client is Samba, "
+		FATAL("Received an SMBv2 message. If the client is Samba, "
 		      "you might need to enable SMBv1 support by setting "
 		      "'client min protocol = NT1' in smb.conf.\n");
-		exit(1);
 	} else if (memcmp(hdr, smb1_protocol_id, 4) != 0) {
-		ERROR("Non-SMB packet of length %d, protocol ID "
+		FATAL("Non-SMB packet of length %d, protocol ID "
 		      "%02x%02x%02x%02x. Aborting.\n",
 		      smb_len(inbuf), hdr[0], hdr[1], hdr[2], hdr[3]);
-		exit(1);
 	}
 
 	for (match = 0; match < num_smb_messages; match++)
