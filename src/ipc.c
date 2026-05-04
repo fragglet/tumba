@@ -660,18 +660,20 @@ static bool api_Unsupported(int cnum, char *param, char *data, int mdrcnt,
 	return true;
 }
 
-struct {
+static const struct {
 	char *name;
 	int id;
 	bool (*fn)(int, char *, char *, int, int, char **, char **, int *,
 	           int *);
-} api_commands[] = {{"RNetShareEnum", 0, api_RNetShareEnum},
-                    {"RNetShareGetInfo", 1, api_RNetShareGetInfo},
-                    {"RNetServerGetInfo", 13, api_RNetServerGetInfo},
-                    {"NetWkstaGetInfo", 63, api_NetWkstaGetInfo},
-                    {"NetRemoteTOD", 91, api_NetRemoteTOD},
-                    {"NetServerEnum", 104, api_RNetServerEnum},
-                    {NULL, -1, api_Unsupported}};
+} api_commands[] = {
+    {"RNetShareEnum", 0, api_RNetShareEnum},
+    {"RNetShareGetInfo", 1, api_RNetShareGetInfo},
+    {"RNetServerGetInfo", 13, api_RNetServerGetInfo},
+    {"NetWkstaGetInfo", 63, api_NetWkstaGetInfo},
+    {"NetRemoteTOD", 91, api_NetRemoteTOD},
+    {"NetServerEnum", 104, api_RNetServerEnum},
+    {NULL, -1, api_Unsupported},
+};
 
 /* Handle remote api calls */
 static int api_reply(int cnum, char *outbuf, char *data, char *params,

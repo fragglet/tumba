@@ -1286,7 +1286,7 @@ int cached_error_packet(char *inbuf, char *outbuf, int fnum, int line)
 	return error_packet(inbuf, outbuf, eclass, err, line);
 }
 
-struct {
+static const struct {
 	int unixerror;
 	int smbclass;
 	int smbcode;
@@ -1298,7 +1298,8 @@ struct {
     {ENFILE, ERRDOS, ERRnofids},      {EMFILE, ERRDOS, ERRnofids},
     {ENOSPC, ERRHRD, ERRdiskfull},    {EDQUOT, ERRHRD, ERRdiskfull},
     {ENOTEMPTY, ERRDOS, ERRnoaccess}, {EXDEV, ERRDOS, ERRdiffdevice},
-    {EROFS, ERRHRD, ERRnowrite},      {0, 0, 0}};
+    {EROFS, ERRHRD, ERRnowrite},      {0, 0, 0},
+};
 
 /* Create an error packet from errno */
 int unix_error_packet(char *inbuf, char *outbuf, int def_class,
@@ -2137,7 +2138,7 @@ protocol [LANMAN2.1]
   */
 
 /* List of supported protocols, most desired first */
-struct {
+static const struct {
 	char *proto_name;
 	int (*proto_reply_fn)(char *);
 } supported_protocols[] = {
@@ -2274,7 +2275,7 @@ void exit_server(const char *reason)
 /* Only messages with this set can be used on the IPC$ share */
 #define ALLOWED_IN_IPC (1 << 2)
 
-struct smb_message_struct {
+static const struct smb_message_struct {
 	int code;
 	char *name;
 	int (*fn)(char *, char *, size_t, size_t);
