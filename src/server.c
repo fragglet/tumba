@@ -1298,7 +1298,7 @@ static const struct {
     {ENFILE, ERRDOS, ERRnofids},      {EMFILE, ERRDOS, ERRnofids},
     {ENOSPC, ERRHRD, ERRdiskfull},    {EDQUOT, ERRHRD, ERRdiskfull},
     {ENOTEMPTY, ERRDOS, ERRnoaccess}, {EXDEV, ERRDOS, ERRdiffdevice},
-    {EROFS, ERRHRD, ERRnowrite},      {0, 0, 0},
+    {EROFS, ERRHRD, ERRnowrite},
 };
 
 /* Create an error packet from errno */
@@ -1307,7 +1307,6 @@ int unix_error_packet(char *inbuf, char *outbuf, int def_class,
 {
 	int eclass = def_class;
 	int ecode = def_code;
-	int i = 0;
 
 	if (unix_ERR_class != SMB_SUCCESS) {
 		eclass = unix_ERR_class;
@@ -1315,13 +1314,14 @@ int unix_error_packet(char *inbuf, char *outbuf, int def_class,
 		unix_ERR_class = SMB_SUCCESS;
 		unix_ERR_code = 0;
 	} else {
-		while (unix_smb_errmap[i].smbclass != 0) {
+		int i;
+
+		for (i = 0; i < arrlen(unix_smb_errmap); ++i) {
 			if (unix_smb_errmap[i].unixerror == errno) {
 				eclass = unix_smb_errmap[i].smbclass;
 				ecode = unix_smb_errmap[i].smbcode;
 				break;
 			}
-			i++;
 		}
 	}
 
