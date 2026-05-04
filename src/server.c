@@ -2264,23 +2264,15 @@ void exit_server(const char *reason)
 	exit(0);
 }
 
-/*
-These flags determine some of the permissions required to do an operation
-
-Note that I don't set NEED_WRITE on some write operations because they
-are used by some brain-dead clients when printing, and I don't want to
-force write permissions on print services.
-*/
+/* Normally, we check the smb_tid (connection number) field refers to a valid,
+   open connection, but messages with this set do not check it. */
 #define DONT_CHECK_CNUM (1 << 0)
-#define NEED_WRITE      (1 << 1)
-#define ALLOWED_IN_IPC  (1 << 3)
-#define QUEUE_IN_OPLOCK (1 << 6)
 
-/*
-   define a list of possible SMB messages and their corresponding
-   functions. Any message that has a NULL function is unimplemented -
-   please feel free to contribute implementations!
-*/
+/* Messages with this set don't work on read-only connections. */
+#define NEED_WRITE (1 << 1)
+
+/* Only messages with this set can be used on the IPC$ share */
+#define ALLOWED_IN_IPC (1 << 2)
 
 struct smb_message_struct {
 	int code;
@@ -2304,20 +2296,20 @@ struct smb_message_struct {
     {SMBsetatr, "SMBsetatr", reply_setatr, NEED_WRITE},
     {SMBchkpth, "SMBchkpth", reply_chkpth, 0},
     {SMBsearch, "SMBsearch", reply_search, 0},
-    {SMBopen, "SMBopen", reply_open, QUEUE_IN_OPLOCK},
+    {SMBopen, "SMBopen", reply_open, 0},
 
     /* note that SMBmknew and SMBcreate are deliberately overloaded */
     {SMBcreate, "SMBcreate", reply_mknew, 0},
     {SMBmknew, "SMBmknew", reply_mknew, 0},
 
-    {SMBunlink, "SMBunlink", reply_unlink, NEED_WRITE | QUEUE_IN_OPLOCK},
+    {SMBunlink, "SMBunlink", reply_unlink, NEED_WRITE},
     {SMBread, "SMBread", reply_read, 0},
     {SMBwrite, "SMBwrite", reply_write, 0},
     {SMBclose, "SMBclose", reply_close, ALLOWED_IN_IPC},
     {SMBmkdir, "SMBmkdir", reply_mkdir, NEED_WRITE},
     {SMBrmdir, "SMBrmdir", reply_rmdir, NEED_WRITE},
     {SMBdskattr, "SMBdskattr", reply_dskattr, 0},
-    {SMBmv, "SMBmv", reply_mv, NEED_WRITE | QUEUE_IN_OPLOCK},
+    {SMBmv, "SMBmv", reply_mv, NEED_WRITE},
 
     /* this is a Pathworks specific call, allowing the
        changing of the root path */
@@ -2325,8 +2317,8 @@ struct smb_message_struct {
 
     {SMBlseek, "SMBlseek", reply_lseek, 0},
     {SMBflush, "SMBflush", reply_flush, 0},
-    {SMBctemp, "SMBctemp", reply_ctemp, QUEUE_IN_OPLOCK},
-    {SMBsplopen, "SMBsplopen", reply_printfn, QUEUE_IN_OPLOCK},
+    {SMBctemp, "SMBctemp", reply_ctemp, 0},
+    {SMBsplopen, "SMBsplopen", reply_printfn, 0},
     {SMBsplclose, "SMBsplclose", reply_printfn, 0},
     {SMBsplretq, "SMBsplretq", reply_printfn, 0},
     {SMBsplwr, "SMBsplwr", reply_printfn, 0},
@@ -2349,9 +2341,9 @@ struct smb_message_struct {
     {SMBsetattrE, "SMBsetattrE", reply_setattrE, NEED_WRITE},
     {SMBgetattrE, "SMBgetattrE", reply_getattrE, 0},
     {SMBtrans, "SMBtrans", reply_trans, ALLOWED_IN_IPC},
-    {SMBcopy, "SMBcopy", reply_copy, NEED_WRITE | QUEUE_IN_OPLOCK},
+    {SMBcopy, "SMBcopy", reply_copy, NEED_WRITE},
 
-    {SMBopenX, "SMBopenX", reply_open_and_X, ALLOWED_IN_IPC | QUEUE_IN_OPLOCK},
+    {SMBopenX, "SMBopenX", reply_open_and_X, ALLOWED_IN_IPC},
     {SMBreadX, "SMBreadX", reply_read_and_X, 0},
     {SMBwriteX, "SMBwriteX", reply_write_and_X, 0},
     {SMBlockingX, "SMBlockingX", reply_lockingX, 0},
