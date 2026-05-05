@@ -1539,7 +1539,7 @@ int reply_writebraw(char *inbuf, char *outbuf, size_t inbuf_len,
 
 	/* Now read the raw data into the buffer and write it */
 	if (read_smb_length(client_fd, inbuf, SMB_SECONDARY_WAIT) == -1) {
-		exit_server("secondary writebraw failed");
+		FATAL("secondary writebraw failed\n");
 	}
 
 	/* Even though this is not an smb message, smb_len

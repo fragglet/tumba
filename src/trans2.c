@@ -1714,8 +1714,14 @@ int reply_trans2(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 	num_params = num_params_sofar = SVAL(inbuf, smb_pscnt);
 	num_data = num_data_sofar = SVAL(inbuf, smb_dscnt);
 
-	if (num_params > total_params || num_data > total_data)
-		exit_server("invalid params in reply_trans2");
+	if (num_params > total_params) {
+		FATAL("invalid params: num_params=%d > total_params=%d\n",
+		      num_params, total_params);
+	}
+	if (num_data > total_data) {
+		FATAL("invalid params: num_data=%d > total_data=%d\n",
+		      num_data, total_data);
+	}
 
 	memcpy(params, smb_base(inbuf) + SVAL(inbuf, smb_psoff), num_params);
 	memcpy(data, smb_base(inbuf) + SVAL(inbuf, smb_dsoff), num_data);
@@ -1756,9 +1762,17 @@ int reply_trans2(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 			num_params_sofar +=
 			    (num_params = SVAL(inbuf, smb_spscnt));
 			num_data_sofar += (num_data = SVAL(inbuf, smb_sdscnt));
-			if (num_params_sofar > total_params ||
-			    num_data_sofar > total_data)
-				exit_server("data overflow in trans2");
+
+			if (num_params_sofar > total_params) {
+				FATAL("data overflow in trans2: "
+				      "num_params_sofar=%d > total_params=%d\n",
+				      num_params_sofar, total_params);
+			}
+			if (num_data_sofar > total_data) {
+				FATAL("data overflow in trans2: "
+				      "num_data_sofar=%d > total_data=%d\n",
+				      num_data_sofar, total_data);
+			}
 
 			memcpy(&params[SVAL(inbuf, smb_spsdisp)],
 			       smb_base(inbuf) + SVAL(inbuf, smb_spsoff),

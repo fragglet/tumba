@@ -748,6 +748,18 @@ static int named_pipe(int cnum, char *outbuf, char *name, uint16_t *setup,
 	return 0;
 }
 
+static void check_trans_params(int dscnt, int tdscnt, int pscnt, int tpscnt)
+{
+	if (dscnt > tdscnt) {
+		FATAL("invalid trans parameters: dscnt=%d > tdscnt=%d\n",
+		      dscnt, tdscnt);
+	}
+	if (pscnt > tpscnt) {
+		FATAL("invalid trans parameters: pscnt=%d > tpscnt=%d\n",
+		      pscnt, tpscnt);
+	}
+}
+
 /* Reply to a SMBtrans */
 int reply_trans(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 {
@@ -775,9 +787,7 @@ int reply_trans(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 	bzero(name, sizeof(name));
 	fstrcpy(name, smb_buf(inbuf));
 
-	if (dscnt > tdscnt || pscnt > tpscnt) {
-		exit_server("invalid trans parameters\n");
-	}
+	check_trans_params(dscnt, tdscnt, pscnt, tpscnt);
 
 	data = checked_malloc(tdscnt);
 	memcpy(data, smb_base(inbuf) + dsoff, dscnt);
@@ -837,9 +847,7 @@ int reply_trans(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 		pscnt += pcnt;
 		dscnt += dcnt;
 
-		if (dscnt > tdscnt || pscnt > tpscnt) {
-			exit_server("invalid trans parameters\n");
-		}
+		check_trans_params(dscnt, tdscnt, pscnt, tpscnt);
 
 		if (pcnt)
 			memcpy(params + pdisp, smb_base(inbuf) + poff, pcnt);
