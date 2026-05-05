@@ -1394,7 +1394,7 @@ static int sig_pipe(void)
 {
 	block_signals(true, SIGPIPE);
 
-	exit_server("Got sigpipe\n");
+	exit_server("got SIGPIPE");
 	return 0;
 }
 
