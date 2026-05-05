@@ -2250,18 +2250,8 @@ void exit_server(const char *reason)
 		close(client_fd);
 		client_fd = -1;
 	}
-	if (!reason) {
-		int oldlevel = LOGLEVEL;
-		LOGLEVEL = 10;
-		ERROR("Last message was %s\n", smb_fn_name(last_message));
-		if (last_inbuf)
-			show_msg(last_inbuf);
-		LOGLEVEL = oldlevel;
-		ERROR("===================================================="
-		      "===========\n");
-	}
 
-	NOTICE("Server exit (%s)\n", reason ? reason : "");
+	NOTICE("Server exit (%s)\n", reason);
 	exit(0);
 }
 
