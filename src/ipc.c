@@ -751,12 +751,12 @@ static int named_pipe(int cnum, char *outbuf, char *name, uint16_t *setup,
 static void check_trans_params(int dscnt, int tdscnt, int pscnt, int tpscnt)
 {
 	if (dscnt > tdscnt) {
-		FATAL("invalid trans parameters: dscnt=%d > tdscnt=%d\n",
-		      dscnt, tdscnt);
+		FATAL("invalid trans parameters: dscnt=%d > tdscnt=%d\n", dscnt,
+		      tdscnt);
 	}
 	if (pscnt > tpscnt) {
-		FATAL("invalid trans parameters: pscnt=%d > tpscnt=%d\n",
-		      pscnt, tpscnt);
+		FATAL("invalid trans parameters: pscnt=%d > tpscnt=%d\n", pscnt,
+		      tpscnt);
 	}
 }
 
@@ -817,11 +817,9 @@ int reply_trans(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 
 		if (!ret || CVAL(inbuf, smb_com) != SMBtrans) {
 			if (ret)
-				ERROR("reply_trans: Invalid secondary "
-				      "trans packet\n");
+				ERROR("Invalid secondary trans packet\n");
 			else
-				ERROR("reply_trans: %s in getting "
-				      "secondary trans response.\n",
+				ERROR("%s getting secondary trans response.\n",
 				      (smb_read_error == READ_ERROR)
 				          ? "error"
 				          : "timeout");

@@ -399,9 +399,8 @@ static int write_socket(int fd, char *buf, int len)
 
 	DEBUG("wrote %d\n", ret);
 	if (ret <= 0)
-		ERROR("write_socket: Error writing %d bytes to socket %d: "
-		      "ERRNO = %s\n",
-		      len, fd, strerror(errno));
+		ERROR("Error writing %d bytes to socket %d: %s\n", len, fd,
+		      strerror(errno));
 
 	return ret;
 }

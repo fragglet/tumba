@@ -796,7 +796,7 @@ static struct open_fd *fd_get_new(void)
 			return fd_ptr;
 		}
 	}
-	WARNING("ERROR! Out of file_fd structures - perhaps increase "
+	WARNING("Out of file_fd structures - perhaps increase "
 	        "MAX_OPEN_FILES?\n");
 	return 0;
 }
@@ -1354,7 +1354,7 @@ static int sigchld_handler(void)
 	pid_t pid;
 
 	if (depth != 0) {
-		ERROR("ERROR: Recursion in sigchld_handler?");
+		ERROR("recursion in sigchld_handler?\n");
 		depth = 0;
 		return 0;
 	}
@@ -1405,7 +1405,7 @@ static void set_keepalive_option(int fd)
 	    setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &enabled, sizeof(int));
 
 	if (ret != 0) {
-		ERROR("Failed to set keepalive option");
+		ERROR("Failed to set keepalive option\n");
 	}
 }
 
@@ -1457,7 +1457,7 @@ static bool is_private_peer(void)
 	};
 
 	if (getpeername(client_fd, (struct sockaddr *) &sockin, &length) < 0) {
-		ERROR("is_private_peer: getpeername failed\n");
+		ERROR("getpeername failed: %s\n", strerror(errno));
 		return false;
 	}
 
@@ -1598,8 +1598,7 @@ static void accept_connection(void)
 			return;
 		}
 		/* even if allowed, log a warning */
-		ERROR("warning: connection from public IP address %s\n",
-		      peer_addr);
+		WARNING("connection from public IP address %s\n", peer_addr);
 	}
 
 	if (fork() != 0) {
@@ -1932,8 +1931,7 @@ int find_free_file(void)
 			return i;
 		}
 
-	WARNING("ERROR! Out of file structures - perhaps increase "
-	        "MAX_OPEN_FILES?\n");
+	WARNING("Out of file structures - perhaps increase MAX_OPEN_FILES?\n");
 	return -1;
 }
 
@@ -1963,7 +1961,7 @@ again:
 		goto again;
 	}
 
-	WARNING("ERROR! Out of connection structures\n");
+	WARNING("Out of connection structures\n");
 	return -1;
 }
 
@@ -2625,8 +2623,8 @@ static void process_smb(char *inbuf, char *outbuf)
 			show_msg(outbuf);
 
 		if (nread != smb_len(outbuf) + 4) {
-			ERROR("ERROR: Invalid message response size! %d %d\n",
-			      nread, smb_len(outbuf));
+			ERROR("Invalid message response size! %d %d\n", nread,
+			      smb_len(outbuf));
 		} else
 			send_smb(client_fd, outbuf);
 	}

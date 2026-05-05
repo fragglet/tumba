@@ -176,8 +176,7 @@ static int send_trans2_replies(char *outbuf, size_t outbuf_len, char *params,
 
 		/* Sanity check */
 		if (params_to_send < 0 || data_to_send < 0) {
-			INFO("send_trans2_replies failed sanity check pts "
-			     "= %d, dts = %d\n!!!",
+			INFO("failed sanity check pts = %d, dts = %d\n!",
 			     params_to_send, data_to_send);
 			return -1;
 		}
@@ -1719,8 +1718,8 @@ int reply_trans2(char *inbuf, char *outbuf, size_t inbuf_len, size_t outbuf_len)
 		      num_params, total_params);
 	}
 	if (num_data > total_data) {
-		FATAL("invalid params: num_data=%d > total_data=%d\n",
-		      num_data, total_data);
+		FATAL("invalid params: num_data=%d > total_data=%d\n", num_data,
+		      total_data);
 	}
 
 	memcpy(params, smb_base(inbuf) + SVAL(inbuf, smb_psoff), num_params);
