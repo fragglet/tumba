@@ -794,7 +794,7 @@ static struct open_fd *fd_get_new(void)
 			return fd_ptr;
 		}
 	}
-	WARNING("ERROR! Out of file_fd structures - perhaps increase "
+	WARNING("Out of file_fd structures - perhaps increase "
 	        "MAX_OPEN_FILES?\n");
 	return 0;
 }
@@ -1284,7 +1284,7 @@ int cached_error_packet(char *inbuf, char *outbuf, int fnum, int line)
 	return error_packet(inbuf, outbuf, eclass, err, line);
 }
 
-struct {
+static const struct {
 	int unixerror;
 	int smbclass;
 	int smbcode;
@@ -1296,7 +1296,8 @@ struct {
     {ENFILE, ERRDOS, ERRnofids},      {EMFILE, ERRDOS, ERRnofids},
     {ENOSPC, ERRHRD, ERRdiskfull},    {EDQUOT, ERRHRD, ERRdiskfull},
     {ENOTEMPTY, ERRDOS, ERRnoaccess}, {EXDEV, ERRDOS, ERRdiffdevice},
-    {EROFS, ERRHRD, ERRnowrite},      {0, 0, 0}};
+    {EROFS, ERRHRD, ERRnowrite},
+};
 
 /* Create an error packet from errno */
 int unix_error_packet(char *inbuf, char *outbuf, int def_class,
@@ -1304,7 +1305,6 @@ int unix_error_packet(char *inbuf, char *outbuf, int def_class,
 {
 	int eclass = def_class;
 	int ecode = def_code;
-	int i = 0;
 
 	if (unix_ERR_class != SMB_SUCCESS) {
 		eclass = unix_ERR_class;
@@ -1312,13 +1312,14 @@ int unix_error_packet(char *inbuf, char *outbuf, int def_class,
 		unix_ERR_class = SMB_SUCCESS;
 		unix_ERR_code = 0;
 	} else {
-		while (unix_smb_errmap[i].smbclass != 0) {
+		int i;
+
+		for (i = 0; i < arrlen(unix_smb_errmap); ++i) {
 			if (unix_smb_errmap[i].unixerror == errno) {
 				eclass = unix_smb_errmap[i].smbclass;
 				ecode = unix_smb_errmap[i].smbcode;
 				break;
 			}
-			i++;
 		}
 	}
 
@@ -1351,7 +1352,7 @@ static int sigchld_handler(void)
 	pid_t pid;
 
 	if (depth != 0) {
-		ERROR("ERROR: Recursion in sigchld_handler?");
+		ERROR("recursion in sigchld_handler?\n");
 		depth = 0;
 		return 0;
 	}
@@ -1391,7 +1392,7 @@ static int sig_pipe(void)
 {
 	block_signals(true, SIGPIPE);
 
-	exit_server("Got sigpipe\n");
+	exit_server("got SIGPIPE");
 	return 0;
 }
 
@@ -1402,7 +1403,7 @@ static void set_keepalive_option(int fd)
 	    setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &enabled, sizeof(int));
 
 	if (ret != 0) {
-		ERROR("Failed to set keepalive option");
+		ERROR("Failed to set keepalive option\n");
 	}
 }
 
@@ -1424,7 +1425,7 @@ static bool is_private_peer(void)
 	};
 
 	if (getpeername(client_fd, (struct sockaddr *) &sockin, &length) < 0) {
-		ERROR("is_private_peer: getpeername failed\n");
+		ERROR("getpeername failed: %s\n", strerror(errno));
 		return false;
 	}
 
@@ -1565,8 +1566,7 @@ static void accept_connection(void)
 			return;
 		}
 		/* even if allowed, log a warning */
-		ERROR("warning: connection from public IP address %s\n",
-		      peer_addr);
+		WARNING("connection from public IP address %s\n", peer_addr);
 	}
 
 	if (fork() != 0) {
@@ -1652,8 +1652,7 @@ static bool receive_smb(int fd, char *buffer, size_t buflen, int timeout)
 		return false;
 
 	if (len > buflen) {
-		ERROR("Invalid packet length! (%d bytes).\n", len);
-		exit(1);
+		FATAL("Invalid packet length! (%d bytes).\n", len);
 	}
 
 	if (len > 0) {
@@ -1900,8 +1899,7 @@ int find_free_file(void)
 			return i;
 		}
 
-	WARNING("ERROR! Out of file structures - perhaps increase "
-	        "MAX_OPEN_FILES?\n");
+	WARNING("Out of file structures - perhaps increase MAX_OPEN_FILES?\n");
 	return -1;
 }
 
@@ -1931,7 +1929,7 @@ again:
 		goto again;
 	}
 
-	WARNING("ERROR! Out of connection structures\n");
+	WARNING("Out of connection structures\n");
 	return -1;
 }
 
@@ -2106,7 +2104,7 @@ protocol [LANMAN2.1]
   */
 
 /* List of supported protocols, most desired first */
-struct {
+static const struct {
 	char *proto_name;
 	int (*proto_reply_fn)(char *);
 } supported_protocols[] = {
@@ -2218,40 +2216,22 @@ void exit_server(const char *reason)
 		close(client_fd);
 		client_fd = -1;
 	}
-	if (!reason) {
-		int oldlevel = LOGLEVEL;
-		LOGLEVEL = 10;
-		ERROR("Last message was %s\n", smb_fn_name(last_message));
-		if (last_inbuf)
-			show_msg(last_inbuf);
-		LOGLEVEL = oldlevel;
-		ERROR("===================================================="
-		      "===========\n");
-	}
 
-	NOTICE("Server exit (%s)\n", reason ? reason : "");
+	NOTICE("Server exit (%s)\n", reason);
 	exit(0);
 }
 
-/*
-These flags determine some of the permissions required to do an operation
-
-Note that I don't set NEED_WRITE on some write operations because they
-are used by some brain-dead clients when printing, and I don't want to
-force write permissions on print services.
-*/
+/* Normally, we check the smb_tid (connection number) field refers to a valid,
+   open connection, but messages with this set do not check it. */
 #define DONT_CHECK_CNUM (1 << 0)
-#define NEED_WRITE      (1 << 1)
-#define ALLOWED_IN_IPC  (1 << 3)
-#define QUEUE_IN_OPLOCK (1 << 6)
 
-/*
-   define a list of possible SMB messages and their corresponding
-   functions. Any message that has a NULL function is unimplemented -
-   please feel free to contribute implementations!
-*/
+/* Messages with this set don't work on read-only connections. */
+#define NEED_WRITE (1 << 1)
 
-struct smb_message_struct {
+/* Only messages with this set can be used on the IPC$ share */
+#define ALLOWED_IN_IPC (1 << 2)
+
+static const struct smb_message_struct {
 	int code;
 	char *name;
 	int (*fn)(char *, char *, size_t, size_t);
@@ -2273,20 +2253,20 @@ struct smb_message_struct {
     {SMBsetatr, "SMBsetatr", reply_setatr, NEED_WRITE},
     {SMBchkpth, "SMBchkpth", reply_chkpth, 0},
     {SMBsearch, "SMBsearch", reply_search, 0},
-    {SMBopen, "SMBopen", reply_open, QUEUE_IN_OPLOCK},
+    {SMBopen, "SMBopen", reply_open, 0},
 
     /* note that SMBmknew and SMBcreate are deliberately overloaded */
     {SMBcreate, "SMBcreate", reply_mknew, 0},
     {SMBmknew, "SMBmknew", reply_mknew, 0},
 
-    {SMBunlink, "SMBunlink", reply_unlink, NEED_WRITE | QUEUE_IN_OPLOCK},
+    {SMBunlink, "SMBunlink", reply_unlink, NEED_WRITE},
     {SMBread, "SMBread", reply_read, 0},
     {SMBwrite, "SMBwrite", reply_write, 0},
     {SMBclose, "SMBclose", reply_close, ALLOWED_IN_IPC},
     {SMBmkdir, "SMBmkdir", reply_mkdir, NEED_WRITE},
     {SMBrmdir, "SMBrmdir", reply_rmdir, NEED_WRITE},
     {SMBdskattr, "SMBdskattr", reply_dskattr, 0},
-    {SMBmv, "SMBmv", reply_mv, NEED_WRITE | QUEUE_IN_OPLOCK},
+    {SMBmv, "SMBmv", reply_mv, NEED_WRITE},
 
     /* this is a Pathworks specific call, allowing the
        changing of the root path */
@@ -2294,8 +2274,8 @@ struct smb_message_struct {
 
     {SMBlseek, "SMBlseek", reply_lseek, 0},
     {SMBflush, "SMBflush", reply_flush, 0},
-    {SMBctemp, "SMBctemp", reply_ctemp, QUEUE_IN_OPLOCK},
-    {SMBsplopen, "SMBsplopen", reply_printfn, QUEUE_IN_OPLOCK},
+    {SMBctemp, "SMBctemp", reply_ctemp, 0},
+    {SMBsplopen, "SMBsplopen", reply_printfn, 0},
     {SMBsplclose, "SMBsplclose", reply_printfn, 0},
     {SMBsplretq, "SMBsplretq", reply_printfn, 0},
     {SMBsplwr, "SMBsplwr", reply_printfn, 0},
@@ -2318,9 +2298,9 @@ struct smb_message_struct {
     {SMBsetattrE, "SMBsetattrE", reply_setattrE, NEED_WRITE},
     {SMBgetattrE, "SMBgetattrE", reply_getattrE, 0},
     {SMBtrans, "SMBtrans", reply_trans, ALLOWED_IN_IPC},
-    {SMBcopy, "SMBcopy", reply_copy, NEED_WRITE | QUEUE_IN_OPLOCK},
+    {SMBcopy, "SMBcopy", reply_copy, NEED_WRITE},
 
-    {SMBopenX, "SMBopenX", reply_open_and_X, ALLOWED_IN_IPC | QUEUE_IN_OPLOCK},
+    {SMBopenX, "SMBopenX", reply_open_and_X, ALLOWED_IN_IPC},
     {SMBreadX, "SMBreadX", reply_read_and_X, 0},
     {SMBwriteX, "SMBwriteX", reply_write_and_X, 0},
     {SMBlockingX, "SMBlockingX", reply_lockingX, 0},
@@ -2366,15 +2346,13 @@ static int switch_message(int type, char *inbuf, char *outbuf, size_t inbuf_len,
 	/* make sure this is an SMB packet */
 	hdr = smb_base(inbuf);
 	if (memcmp(hdr, smb2_protocol_id, 4) == 0) {
-		ERROR("Received an SMBv2 message. If the client is Samba, "
+		FATAL("Received an SMBv2 message. If the client is Samba, "
 		      "you might need to enable SMBv1 support by setting "
 		      "'client min protocol = NT1' in smb.conf.\n");
-		exit(1);
 	} else if (memcmp(hdr, smb1_protocol_id, 4) != 0) {
-		ERROR("Non-SMB packet of length %d, protocol ID "
+		FATAL("Non-SMB packet of length %d, protocol ID "
 		      "%02x%02x%02x%02x. Aborting.\n",
 		      smb_len(inbuf), hdr[0], hdr[1], hdr[2], hdr[3]);
-		exit(1);
 	}
 
 	for (match = 0; match < num_smb_messages; match++)
@@ -2613,8 +2591,8 @@ static void process_smb(char *inbuf, char *outbuf)
 			show_msg(outbuf);
 
 		if (nread != smb_len(outbuf) + 4) {
-			ERROR("ERROR: Invalid message response size! %d %d\n",
-			      nread, smb_len(outbuf));
+			ERROR("Invalid message response size! %d %d\n", nread,
+			      smb_len(outbuf));
 		} else
 			send_smb(client_fd, outbuf);
 	}

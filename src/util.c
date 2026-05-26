@@ -403,9 +403,8 @@ static int write_socket(int fd, char *buf, int len)
 
 	DEBUG("wrote %d\n", ret);
 	if (ret <= 0)
-		ERROR("write_socket: Error writing %d bytes to socket %d: "
-		      "ERRNO = %s\n",
-		      len, fd, strerror(errno));
+		ERROR("Error writing %d bytes to socket %d: %s\n", len, fd,
+		      strerror(errno));
 
 	return ret;
 }
@@ -606,9 +605,8 @@ bool send_smb(int fd, char *buffer)
 	while (nwritten < len) {
 		ret = write_socket(fd, buffer + nwritten, len - nwritten);
 		if (ret <= 0) {
-			ERROR("Error writing %d bytes to client. %d. Exiting\n",
+			FATAL("Error writing %d bytes to client. %d. Exiting\n",
 			      len, ret);
-			exit(1);
 		}
 		nwritten += ret;
 	}
@@ -664,7 +662,7 @@ void drop_privileges(void)
 	struct passwd *pw;
 
 	/* Only drop privileges if we're running as root */
-	if (getuid() != 0) {
+	if (geteuid() != 0) {
 		return;
 	}
 

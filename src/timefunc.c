@@ -81,8 +81,7 @@ void time_init(void)
 	serverzone = time_zone(time(NULL));
 
 	if ((serverzone % 60) != 0) {
-		WARNING("WARNING: Your timezone is not a multiple of 1 "
-		        "minute.\n");
+		WARNING("Your timezone is not a multiple of 1 minute.\n");
 	}
 
 	DEBUG("Serverzone is %d\n", serverzone);
