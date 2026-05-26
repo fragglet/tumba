@@ -84,13 +84,13 @@ static int num_registration_attempts = 0;
 static uint16_t last_reg_trn_id;
 static time_t next_register_time = 0;
 
-fstring myname = "";
-fstring mygroup = "WORKGROUP";
+static fstring myname = "";
+static fstring mygroup = "WORKGROUP";
 
 static int server_sock = 0;
 
 /* machine comment */
-fstring comment = "";
+static fstring comment = "";
 
 static struct ifconf get_interfaces(int sock_fd)
 {
