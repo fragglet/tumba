@@ -132,12 +132,6 @@ sudo systemctl enable tumba_smbd tumba_nmbd
   directories found in `/var/tumba`, so you just need to create a subdirectory
   there and restart the server.
 
-* **I can't find the server, what's wrong?** You also need to run a NetBIOS
-  name server (`nmbd`). Tumba doesn't have one of its own yet, but you can use
-  the Samba one. Install the Samba suite and then disable its SMB server, eg.
-  `sudo systemctl disable --now smbd` and the server should appear (it will be
-  mistakenly labeled as a Samba server in the server description).
-
 * **My share is read-only, how do I make it read/write?** You can do this using
   the `chmod` command, eg. `chmod o+w /var/tumba/myshare`
 
