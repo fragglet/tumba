@@ -58,6 +58,28 @@ but support is currently incomplete; Tumba uses extended filesystem attributes
 to preserve DOS file attributes, and system-specific code to support these
 systems has not yet been written.
 
+## Build / install instructions
+
+On a typical Linux system, the following should suffice to build and install
+Tumba:
+```shell
+git clone https://github.com/fragglet/tumba
+cd tumba
+make
+sudo make install
+```
+On distros that use systemd (most Linux distros nowadays), you can then start
+the server using the `systemctl` command, eg.
+```shell
+sudo systemctl stop smbd  # Stop the Samba SMB server first
+sudo systemctl start tumba_smbd
+```
+And to enable it automatically on reboot:
+```shell
+sudo systemctl disable smbd  # Disable Samba SMB autostart
+sudo systemctl enable tumba_smbd
+```
+
 ## FAQ
 
 * **Why is there no support for password protected shares?** The old SMBv1
