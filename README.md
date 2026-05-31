@@ -69,15 +69,15 @@ make
 sudo make install
 ```
 On distros that use systemd (most Linux distros nowadays), you can then start
-the server using the `systemctl` command, eg.
+the Tumba services using the `systemctl` command, eg.
 ```shell
-sudo systemctl stop smbd  # Stop the Samba SMB server first
-sudo systemctl start tumba_smbd
+sudo systemctl stop smbd nmbd  # Stop the Samba services, if running
+sudo systemctl start tumba_smbd tumba_nmbd
 ```
-And to enable it automatically on reboot:
+And to enable them automatically on reboot:
 ```shell
-sudo systemctl disable smbd  # Disable Samba SMB autostart
-sudo systemctl enable tumba_smbd
+sudo systemctl disable smbd nmbd  # Disable autostart of Samba services
+sudo systemctl enable tumba_smbd tumba_nmbd
 ```
 
 ## FAQ
