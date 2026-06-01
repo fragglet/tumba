@@ -10,11 +10,12 @@ if ! pidof systemd >/dev/null 2>&1; then
 fi
 
 echo "*** Service file for systemd has been installed; to start Tumba, run:"
-echo "***     systemctl start tumba_smbd"
+echo "***     systemctl start tumba_smbd tumba_nmbd"
 echo "***"
 
-if pidof smbd >/dev/null 2>&1; then
-	echo "*** However, Samba is running; you should probably stop it first:"
-	echo "***     systemctl stop smbd"
+if pidof smbd nmbd >/dev/null 2>&1; then
+	echo "*** However, Samba services are running; you should probably" \
+	     "stop them first:"
+	echo "***     systemctl stop smbd nmbd"
 	echo "***"
 fi

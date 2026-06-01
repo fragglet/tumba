@@ -85,7 +85,7 @@ install: $(PUBLIC_SHARE) $(READONLY_SHARE) tumba_smbd tumba_nmbd
 	@echo "***"
 	@echo "*** Default SMB shares named PUBLIC and READONLY have been created."
 	@echo "*** To add more, create new directories in $(DESTDIR)$(DATADIR)."
-	@echo "*** For more documentation, type 'man tumba_smbd'."
+	@echo "*** For more documentation, type 'man tumba_smbd' or 'man tumba_nmbd'."
 	@echo "***"
 	@./post_install.sh
 
