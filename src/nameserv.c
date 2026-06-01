@@ -157,14 +157,15 @@ static struct network_address *get_addresses(int sock_fd, int *num_addrs)
 		   are contained in a union, so you can only "see" one field
 		   at a time, but you can switch between them using ioctls: */
 		if (ioctl(sock_fd, SIOCGIFNETMASK, req) < 0) {
-			ERROR("Failed getting netmask for %s\n", req->ifr_name);
+			ERROR("Failed getting netmask for %s: %s\n",
+			      req->ifr_name, strerror(errno));
 			continue;
 		}
 		result[*num_addrs].netmask = addr(&req->ifr_addr);
 
 		if (ioctl(sock_fd, SIOCGIFBRDADDR, req) < 0) {
-			ERROR("Failed getting broadcast address for %s\n",
-			      req->ifr_name);
+			ERROR("Failed getting broadcast address for %s: %s\n",
+			      req->ifr_name, strerror(errno));
 			continue;
 		}
 		result[*num_addrs].bcast_ip = addr(&req->ifr_broadaddr);
@@ -884,12 +885,14 @@ static void open_server_sock(struct in_addr bind_addr, int port)
 
 	if (setsockopt(server_sock, SOL_SOCKET, SO_REUSEADDR, &one,
 	               sizeof(one)) == -1) {
-		WARNING("setsockopt(REUSEADDR) failed - ignored\n");
+		WARNING("setsockopt(REUSEADDR) failed (%s) - ignored\n",
+		        strerror(errno));
 	}
 
 	if (setsockopt(server_sock, SOL_SOCKET, SO_BROADCAST, &one,
 	               sizeof(one)) == -1) {
-		WARNING("setsockopt(BROADCAST) failed - ignored\n");
+		WARNING("setsockopt(BROADCAST) failed (%s) - ignored\n",
+		        strerror(errno));
 	}
 
 	bind_addr_in.sin_family = AF_INET;
