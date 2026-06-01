@@ -20,7 +20,9 @@ jobs:
       with:
         submodules: true
     - name: make
-      run: make -j -C src
+      run: make -j
+    - name: make install
+      run: sudo make install
 
     - name: Check version output
       id: version
