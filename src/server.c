@@ -205,8 +205,7 @@ static void write_dosattrib(const char *path, int attrib)
 	snprintf(buf, sizeof(buf), "0x%02x", attrib);
 	result = sys_setxattr(path, DOSATTRIB_NAME, buf, strlen(buf));
 	if (result != 0) {
-		DEBUG("setxattr on %s returned %d (errno=%d)\n", path, result,
-		      errno);
+		DEBUG("setxattr on %s failed: %s\n", path, strerror(errno));
 	}
 	if (result == 0 || errno != EACCES) {
 		return;
@@ -633,7 +632,8 @@ static bool check_path_contained(const char *name, const char *top)
 			/* It's okay if the file/dir doesn't exist;
 			   eg. directory listings will specify "*.*" as a path.
 			   However, we don't tolerate other error types. */
-			DEBUG("realpath(%s) failed; errno=%d\n", path, errno);
+			DEBUG("realpath(%s) failed: %s\n", path,
+			      strerror(errno));
 			return false;
 		}
 
@@ -669,11 +669,11 @@ bool check_name(const char *name, int cnum)
 		return true;
 	}
 	if (getcwd(old_wd, sizeof(old_wd)) == NULL) {
-		DEBUG("denied: getcwd() errno=%d\n", errno);
+		DEBUG("denied: getcwd(): %s\n", strerror(errno));
 		return false;
 	}
 	if (chdir(top) != 0) {
-		DEBUG("denied: chdir(%s) errno=%d\n", top, errno);
+		DEBUG("denied: chdir(%s): %s\n", top, strerror(errno));
 		return false;
 	}
 
@@ -686,7 +686,7 @@ bool check_name(const char *name, int cnum)
 	}
 
 	if (chdir(old_wd) != 0) {
-		DEBUG("ending chdir(%s) errno=%d\n", old_wd, errno);
+		DEBUG("ending chdir(%s): %s\n", old_wd, strerror(errno));
 	}
 
 	return success;
@@ -1405,7 +1405,7 @@ static void set_keepalive_option(int fd)
 	    setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &enabled, sizeof(int));
 
 	if (ret != 0) {
-		ERROR("Failed to set keepalive option\n");
+		ERROR("Failed to set keepalive option: %s\n", strerror(errno));
 	}
 }
 
@@ -1425,9 +1425,9 @@ static void drop_privileges(void)
 	pw = getpwnam(RUN_AS_USER);
 	if (pw == NULL) {
 		/* TODO: Should there be an option to override? */
-		STARTUP_ERROR("Failed to look up user %s, cowardly refusing "
-		              "to run as root.\n",
-		              RUN_AS_USER);
+		STARTUP_ERROR("Failed to look up user %s (%s), cowardly "
+		              "refusing to run as root.\n",
+		              RUN_AS_USER, strerror(errno));
 	}
 
 	ERROR("Dropping privileges, running as user %s (uid=%d)\n", RUN_AS_USER,
@@ -1795,7 +1795,8 @@ static bool dir_world_writeable(const char *path)
 	struct stat st;
 
 	if (stat(path, &st) != 0) {
-		DEBUG("failed to stat %s, assuming read-only share\n", path);
+		DEBUG("failed to stat %s (%s), assuming read-only share\n",
+		      path, strerror(errno));
 		return false;
 	}
 
@@ -1867,7 +1868,7 @@ int make_connection(char *service, char *dev)
 		   thing and expects all files to be subpaths. */
 		canon_path = realpath(s, NULL);
 		if (canon_path == NULL) {
-			INFO("realpath(%s) failed, errno=%d\n", s, errno);
+			INFO("realpath(%s) failed (%s)\n", s, strerror(errno));
 			pcon->open = false;
 			return -1;
 		}
