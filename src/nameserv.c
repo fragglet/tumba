@@ -548,27 +548,52 @@ static void registration_response(const uint8_t *inbuf, size_t inbuf_len)
 	}
 }
 
+/* Returns count of number of bits set in the given integer. */
+unsigned int count_bits(unsigned int val)
+{
+	unsigned int result = 0;
+	for (result = 0; val != 0; ++result) {
+		val &= val - 1;
+	}
+	return result;
+}
+
 /* Choose which IP address to return to clients requesting our hostname. This
    may be different, depending on the interface on which it is received. */
 static const struct network_address *
 get_iface_addr(const struct network_address *addrs, int num_addrs,
                const struct in_addr *src)
 {
+	const struct network_address *best = NULL;
+	unsigned int bits, best_bits = 0;
 	int i;
 
 	DEBUG("Finding matching interface for src=%s: ", inet_ntoa(*src));
 
 	for (i = 0; i < num_addrs; ++i) {
-		if ((addrs[i].ip.s_addr & addrs[i].netmask.s_addr) ==
+		if ((addrs[i].ip.s_addr & addrs[i].netmask.s_addr) !=
 		    (src->s_addr & addrs[i].netmask.s_addr)) {
-			DEBUG("match for %s ", inet_ntoa(addrs[i].ip));
-			DEBUG("netmask %s\n", inet_ntoa(addrs[i].netmask));
-			return &addrs[i];
+			continue;
+		}
+		/* Source address may match address/netmask ranges for multiple
+		 * interfaces. This probably indicates a misconfiguration, but
+		 * just for convenience we return the most specific range that
+		 * matches (ie. most bits set in the netmask). */
+		bits = count_bits(addrs[i].netmask.s_addr);
+		if (bits > best_bits) {
+			best = &addrs[i];
+			best_bits = bits;
 		}
 	}
-	DEBUG("none found.\n");
 
-	return NULL;
+	if (best != NULL) {
+		DEBUG("match for %s netmask %s\n", inet_ntoa(best->ip),
+		      inet_ntoa(best->netmask));
+	} else {
+		DEBUG("none found.\n");
+	}
+
+	return best;
 }
 
 static void construct_reply(const uint8_t *inbuf, size_t inbuf_len)
