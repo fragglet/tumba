@@ -519,8 +519,7 @@ static void reply_name_query(const uint8_t *inbuf, size_t inbuf_len,
 
 static const char *rcode_description(int rcode)
 {
-	if (rcode <
-	    (sizeof(rcode_descriptions) / sizeof(*rcode_descriptions))) {
+	if (rcode < arrlen(rcode_descriptions)) {
 		return rcode_descriptions[rcode];
 	} else {
 		return "Unknown";
