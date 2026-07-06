@@ -9,7 +9,7 @@ if ! pidof systemd >/dev/null 2>&1; then
 	exit 0
 fi
 
-echo "*** Service file for systemd has been installed; to start Tumba, run:"
+echo "*** Service files for systemd have been installed; to start Tumba, run:"
 echo "***     systemctl start tumba_smbd tumba_nmbd"
 echo "***"
 
